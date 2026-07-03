@@ -58,7 +58,7 @@ export default function SelfieCamera({
   }, [auto, visible, permission?.granted, busy, capturing, autoDelayMs]);
 
   return (
-    <Modal visible={visible} animationType="slide"onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.container}>
         {!permission ? (
           <View style={styles.center}>
