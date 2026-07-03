@@ -79,7 +79,7 @@ function ZoomableImage({ uri }) {
 export default function ChatImagePreview({ uri, onClose }) {
   if (!uri) return null;
   return (
-    <Modal visible animationType="fade"transparent onRequestClose={onClose}>
+    <Modal visible animationType="fade" transparent onRequestClose={onClose}>
       <StatusBar barStyle="light-content" />
       <View style={styles.backdrop}>
         <SafeAreaView style={styles.safeTop}>

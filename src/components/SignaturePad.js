@@ -11,7 +11,7 @@ export function pathsToSvg(paths, width = VIEW_W, height = VIEW_H) {
     .filter((p) => p.length > 1)
     .map(
       (p) =>
-        `<path d="${p.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ')}" fill="none" stroke="#111827"stroke-width="2.8"stroke-linecap="round"stroke-linejoin="round"/>`
+        `<path d="${p.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ')}" fill="none" stroke="#111827" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>`
     )
     .join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">${lines}</svg>`;

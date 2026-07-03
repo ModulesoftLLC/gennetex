@@ -33,7 +33,7 @@ export default function BarcodeScanner({ visible, onClose, onScanned, title, hin
   };
 
   return (
-    <Modal visible={visible} animationType="slide"onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.container}>
         {!permission ? (
           <View style={styles.center}>

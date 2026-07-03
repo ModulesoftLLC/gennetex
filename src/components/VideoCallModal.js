@@ -68,7 +68,7 @@ function buildHtml(room, name) {
 
 export default function VideoCallModal({ visible, room, name, onClose }) {
   return (
-    <Modal visible={visible} animationType="slide"onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.topBar}>
           <Text style={styles.topTitle}> Видео дуудлага</Text>

@@ -14,20 +14,35 @@ python3 -m http.server 5500
 
 > `file://`-ээр шууд нээхэд зарим хөтөч Supabase хүсэлтийг блоклодог тул серверээр нээх нь найдвартай.
 
-### Арга 2 — GitHub Pages (энэ төсөл)
+### Арга 2 — Vercel (production)
+
+> **Чухал:** Vercel дээр зөвхөн `admin-web/` (админ самбар) байршуулна.  
+> Утасны апп (`index.js`, Expo) Vercel дээр ажиллахгүй — Expo Go эсвэл EAS build ашиглана.
 
 Репозитори: https://github.com/ModulesoftLLC/gennetex
 
-`admin-web/` хавтсыг GitHub Pages эсвэл Netlify, Vercel, Cloudflare Pages дээр байршуулбол интернэтээс хандах боломжтой.
+Төслийн root дээр `vercel.json` байгаа — `admin-web` хавтсыг static гэж serve хийнэ.
 
-```bash
-# Локал туршилт
-cd admin-web
-python3 -m http.server 5500
-# http://localhost:5500
-```
+**Vercel тохиргоо (Import project):**
 
-### Арга 3 — Бусад hosting
+| Талбар | Утга |
+|--------|------|
+| Root Directory | *(хоосон — repo root)* эсвэл `admin-web` |
+| Framework Preset | Other |
+| Build Command | *(хоосон)* |
+| Output Directory | `admin-web` *(root-оос deploy хийвэл `vercel.json` автоматаар)* |
+
+`registerRootComponent` алдаа гарвал: Vercel буруу Expo аппыг build хийж байна. Дээрх тохиргоогоор **зөвхөн admin-web** deploy хийнэ.
+
+Deploy дууссаны дараа:
+
+1. **Supabase** → Authentication → URL Configuration:
+   - **Site URL:** `https://ТАНЫ-АПП.vercel.app`
+   - **Redirect URLs:** `https://ТАНЫ-АПП.vercel.app/**`
+2. Хөтчөөр Vercel URL нээгээд админаар нэвтэрнэ (`admin@gennetex.mn` эсвэл `superadmin@gennetex.mn`).
+3. Зураг/лого харагдахгүй бол Root Directory `admin-web` гэж зөв сонгосон эсэхээ шалгана.
+
+### Арга 3 — GitHub Pages / бусад hosting
 
 ## Нэвтрэх
 - Зөвхөн **admin эрхтэй** хэрэглэгч нэвтэрнэ (ж: `admin@gennetex.mn`).

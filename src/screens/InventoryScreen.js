@@ -407,7 +407,7 @@ export default function InventoryScreen() {
         </View>
       </Modal>
 
-      <Modal visible={takeItem !== null} animationType="slide"transparent>
+      <Modal visible={takeItem !== null} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHandle} />

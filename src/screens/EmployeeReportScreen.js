@@ -196,7 +196,7 @@ export default function EmployeeReportScreen() {
         )}
       </ScrollView>
 
-      <Modal visible={modalOpen} animationType="slide"transparent>
+      <Modal visible={modalOpen} animationType="slide" transparent>
         <View style={styles.overlay}>
           <View style={styles.sheet}>
             <View style={styles.previewHead}>

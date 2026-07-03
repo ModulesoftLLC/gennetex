@@ -163,7 +163,7 @@ export default function MyStockScreen() {
         />
       )}
 
-      <Modal visible={consumeTarget !== null} animationType="slide"transparent>
+      <Modal visible={consumeTarget !== null} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Хэрэглэх</Text>
