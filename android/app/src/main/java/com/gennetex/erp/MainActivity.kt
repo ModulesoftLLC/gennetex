@@ -2,7 +2,10 @@ package com.gennetex.erp
 
 import android.os.Build
 import android.os.Bundle
+<<<<<<< HEAD
 import androidx.core.view.WindowCompat
+=======
+>>>>>>> c08b25b (first commit)
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
@@ -17,10 +20,13 @@ class MainActivity : ReactActivity() {
     // coloring the background, status bar, and navigation bar.
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
+<<<<<<< HEAD
     // Edge-to-edge: контентыг систем баарын ард зурж, safe-area-context-ийг
     // inset-ийн цорын ганц эх сурвалж болгоно (SDK 54). Ингэснээр статус баарын
     // өндөр давхар тооцогдож контент доошоо унах алдаа арилна.
     WindowCompat.setDecorFitsSystemWindows(window, false)
+=======
+>>>>>>> c08b25b (first commit)
     super.onCreate(null)
   }
 

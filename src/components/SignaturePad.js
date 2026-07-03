@@ -1,8 +1,12 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { View, PanResponder, StyleSheet, Text } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing, radius } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 const VIEW_W = 600;
 const VIEW_H = 220;
@@ -12,7 +16,11 @@ export function pathsToSvg(paths, width = VIEW_W, height = VIEW_H) {
     .filter((p) => p.length > 1)
     .map(
       (p) =>
+<<<<<<< HEAD
         `<path d="${p.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ')}" fill="none" stroke="#111827" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>`
+=======
+        `<path d="${p.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`).join(' ')}" fill="none" stroke="#111827"stroke-width="2.8"stroke-linecap="round"stroke-linejoin="round"/>`
+>>>>>>> c08b25b (first commit)
     )
     .join('');
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">${lines}</svg>`;
@@ -23,8 +31,11 @@ export default function SignaturePad({ onChange }) {
   const current = useRef([]);
   const pathsRef = useRef([]);
   const layout = useRef({ width: 300, height: 220 });
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
 
   const scalePoint = useCallback((x, y) => {
     const { width, height } = layout.current;
@@ -109,7 +120,11 @@ export default function SignaturePad({ onChange }) {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   label: { color: colors.textMuted, fontSize: 13, fontWeight: '600', marginBottom: spacing.sm },
   pad: {
     height: VIEW_H,

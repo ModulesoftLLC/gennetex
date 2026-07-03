@@ -10,7 +10,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Video, ResizeMode } from 'expo-av';
+<<<<<<< HEAD
 import { spacing } from '../theme';
+=======
+import { colors, spacing } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 export default function ChatVideoPreview({ uri, onClose }) {
   const videoRef = useRef(null);
@@ -19,7 +23,11 @@ export default function ChatVideoPreview({ uri, onClose }) {
   if (!uri) return null;
 
   return (
+<<<<<<< HEAD
     <Modal visible animationType="fade" transparent onRequestClose={onClose}>
+=======
+    <Modal visible animationType="fade"transparent onRequestClose={onClose}>
+>>>>>>> c08b25b (first commit)
       <StatusBar barStyle="light-content"/>
       <View style={styles.backdrop}>
         <SafeAreaView style={styles.safeTop}>

@@ -1,5 +1,9 @@
 import React from 'react';
+<<<<<<< HEAD
 import { View, Image } from 'react-native';
+=======
+import { View } from 'react-native';
+>>>>>>> c08b25b (first commit)
 import Svg, { Rect, Circle, Line, Path, Ellipse, Text as SvgText } from 'react-native-svg';
 import { getInventoryImageKey } from '../data/inventoryImages';
 
@@ -209,6 +213,7 @@ function Shape({ shape, stroke }) {
   }
 }
 
+<<<<<<< HEAD
 export default function InventoryThumb({ name, category = 'material', size = 46, imageUrl }) {
   if (imageUrl) {
     return (
@@ -217,6 +222,9 @@ export default function InventoryThumb({ name, category = 'material', size = 46,
       </View>
     );
   }
+=======
+export default function InventoryThumb({ name, category = 'material', size = 46 }) {
+>>>>>>> c08b25b (first commit)
   const key = getInventoryImageKey(name, category);
   const item = META[key] || META['default-material'];
   return (

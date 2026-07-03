@@ -14,7 +14,11 @@ import * as fuelApi from '../services/fuelService';
 import * as serviceCallApi from '../services/serviceCallService';
 import { calculateFuel } from '../lib/fuelCalc';
 import { withoutSampleByName, withoutSampleCalls } from '../lib/sampleNames';
+<<<<<<< HEAD
 import { isAdminRole, isSuperAdmin, canTakeServiceCalls } from '../lib/roles';
+=======
+import { isAdminRole, isSuperAdmin } from '../lib/roles';
+>>>>>>> c08b25b (first commit)
 
 const AppContext = createContext(null);
 
@@ -280,7 +284,11 @@ export function AppProvider({ children }) {
   };
 
   // Бараа олгох (ажилтан авах) — тоо хасаж, лог үүсгэнэ
+<<<<<<< HEAD
   const withdrawItem = async (item, qty, photoUrl) => {
+=======
+  const withdrawItem = async (item, qty) => {
+>>>>>>> c08b25b (first commit)
     const q = Math.max(1, Number(qty) || 0);
     const newQty = Math.max(0, item.quantity - q);
     setInventory((prev) => prev.map((it) => (it.id === item.id ? { ...it, quantity: newQty } : it)));
@@ -291,7 +299,10 @@ export function AppProvider({ children }) {
           userId: currentUser?.id,
           userName: currentUser?.name,
           qty: q,
+<<<<<<< HEAD
           photoUrl,
+=======
+>>>>>>> c08b25b (first commit)
         });
       } catch (e) {
         setSyncError(e.message);
@@ -300,6 +311,7 @@ export function AppProvider({ children }) {
     return newQty;
   };
 
+<<<<<<< HEAD
   const giveItemToEmployee = async (item, employee, qty, photoUrl) => {
     const q = Math.max(1, Number(qty) || 0);
     const newQty = Math.max(0, item.quantity - q);
@@ -321,6 +333,8 @@ export function AppProvider({ children }) {
     return newQty;
   };
 
+=======
+>>>>>>> c08b25b (first commit)
   const fetchStockMovements = async (mineOnly) => {
     if (!isSupabaseConfigured) return [];
     return mineOnly
@@ -402,7 +416,11 @@ export function AppProvider({ children }) {
   // ---- Дуудлага (Supabase эсвэл локал) ----
   const refreshCalls = useCallback(async (profile = authProfile) => {
     if (!isSupabaseConfigured) return;
+<<<<<<< HEAD
     if (!profile || !canTakeServiceCalls(profile)) {
+=======
+    if (!profile || isAdminRole(profile.role)) {
+>>>>>>> c08b25b (first commit)
       setCalls([]);
       return;
     }
@@ -415,11 +433,16 @@ export function AppProvider({ children }) {
     } catch (e) {
       setSyncError(e.message);
     }
+<<<<<<< HEAD
   }, [authProfile?.id, authProfile?.name, authProfile?.role, authProfile?.can_take_calls]);
+=======
+  }, [authProfile?.id, authProfile?.name, authProfile?.role]);
+>>>>>>> c08b25b (first commit)
 
   useEffect(() => {
     if (!loaded || !isSupabaseConfigured || !authProfile) return;
     refreshCalls(authProfile);
+<<<<<<< HEAD
   }, [loaded, authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
 
   useEffect(() => {
@@ -427,6 +450,15 @@ export function AppProvider({ children }) {
     const unsub = serviceCallApi.subscribeServiceCalls(() => refreshCalls(authProfile));
     return unsub;
   }, [authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
+=======
+  }, [loaded, authProfile?.id, authProfile?.role]);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !authProfile || isAdminRole(authProfile.role)) return;
+    const unsub = serviceCallApi.subscribeServiceCalls(() => refreshCalls(authProfile));
+    return unsub;
+  }, [authProfile?.id, authProfile?.role]);
+>>>>>>> c08b25b (first commit)
 
   const addCall = async (call) => {
     if (isSupabaseConfigured) {
@@ -454,6 +486,7 @@ export function AppProvider({ children }) {
     setCalls((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
   };
 
+<<<<<<< HEAD
   const closeCall = async (id, meta) => {
     const by = authProfile?.name || currentUser?.name || 'Инженер';
     const existing = calls.find((c) => c.id === id)?.close_meta || {};
@@ -493,6 +526,8 @@ export function AppProvider({ children }) {
     return patch;
   };
 
+=======
+>>>>>>> c08b25b (first commit)
   // ---- Бензиний тооцоо (локал) ----
   const updateFuelSettings = async (patch) => {
     const next = { ...fuelSettings, ...patch };
@@ -562,7 +597,10 @@ export function AppProvider({ children }) {
     adjustQuantity,
     removeInventoryItem,
     withdrawItem,
+<<<<<<< HEAD
     giveItemToEmployee,
+=======
+>>>>>>> c08b25b (first commit)
     consumeItem,
     fetchMyStock,
     fetchStockMovements,
@@ -574,8 +612,11 @@ export function AppProvider({ children }) {
     calls,
     addCall,
     updateCallStatus,
+<<<<<<< HEAD
     closeCall,
     transferCall,
+=======
+>>>>>>> c08b25b (first commit)
     refreshCalls,
     fuelSettings,
     updateFuelSettings,

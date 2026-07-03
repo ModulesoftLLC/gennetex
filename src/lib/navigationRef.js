@@ -12,13 +12,19 @@ export function navigateFromNotification(data) {
         title: 'Чат',
       });
       break;
+<<<<<<< HEAD
     case 'call':
       // Дуудлагын мэдэгдэл дарсан — чат руу (IncomingCallManager pending шалгана)
       navigationRef.navigate('MainTabs', { screen: 'Chat' });
+=======
+    case 'call' :
+      navigationRef.navigate('Chat');
+>>>>>>> c08b25b (first commit)
       break;
     case 'attendance_pending' :
       navigationRef.navigate('Attendance');
       break;
+<<<<<<< HEAD
     case 'service_call':
     case 'service_call_sla':
       navigationRef.navigate('Calls');
@@ -66,6 +72,12 @@ export function navigateFromNotification(data) {
       break;
     case 'telegram_broadcast':
       navigationRef.navigate('MainTabs', { screen: 'Chat' });
+=======
+    case 'service_call' :
+      navigationRef.navigate('Calls');
+      break;
+    default:
+>>>>>>> c08b25b (first commit)
       break;
   }
 }

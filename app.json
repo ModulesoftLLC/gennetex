@@ -2,8 +2,12 @@
   "expo": {
     "name": "Gennetex ERP",
     "slug": "gennetex-erp",
+<<<<<<< HEAD
     "scheme": "gennetex-erp",
     "version": "1.0.4",
+=======
+    "version": "1.0.0",
+>>>>>>> c08b25b (first commit)
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/logo.png",
@@ -40,6 +44,7 @@
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECORD_AUDIO",
+<<<<<<< HEAD
         "android.permission.VIBRATE",
         "android.permission.WAKE_LOCK",
         "android.permission.USE_FULL_SCREEN_INTENT",
@@ -48,6 +53,9 @@
         "android.permission.DISABLE_KEYGUARD",
         "android.permission.MANAGE_OWN_CALLS",
         "android.permission.MODIFY_AUDIO_SETTINGS"
+=======
+        "android.permission.VIBRATE"
+>>>>>>> c08b25b (first commit)
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
@@ -89,10 +97,14 @@
         {
           "icon": "./assets/logo.png",
           "color": "#3b82f6",
+<<<<<<< HEAD
           "defaultChannel": "chat",
           "sounds": [
             "./assets/sounds/incoming-call.wav"
           ]
+=======
+          "sounds": []
+>>>>>>> c08b25b (first commit)
         }
       ],
       [
@@ -100,6 +112,7 @@
         {
           "microphonePermission": "Дуу хоолойгоор чат бичихэд микрофон ашиглана.",
           "speechRecognitionPermission": "Монгол дуу хоолой танихад яриа таних зөвшөөрөл шаардлагатай.",
+<<<<<<< HEAD
           "androidSpeechServicePackages": [
             "com.google.android.googlequicksearchbox"
           ]
@@ -112,6 +125,12 @@
           "statusBarColor": "#0b1220"
         }
       ]
+=======
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ],
+      "expo-dev-client"
+>>>>>>> c08b25b (first commit)
     ],
     "extra": {
       "eas": {

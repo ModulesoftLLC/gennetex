@@ -1,22 +1,34 @@
+<<<<<<< HEAD
 import React, { useEffect, useState, useRef } from 'react';
+=======
+import React, { useEffect, useState } from 'react';
+>>>>>>> c08b25b (first commit)
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+<<<<<<< HEAD
 import { View, Text, ActivityIndicator, Image } from 'react-native';
 import { APP_VERSION_LABEL } from './src/version';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AppProvider, useApp } from './src/context/AppContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+=======
+import { View, ActivityIndicator, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { AppProvider, useApp } from './src/context/AppContext';
+>>>>>>> c08b25b (first commit)
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import OnboardingPermissionsScreen from './src/screens/OnboardingPermissionsScreen';
 import InventoryScreen from './src/screens/InventoryScreen';
 import FuelScreen from './src/screens/FuelScreen';
+<<<<<<< HEAD
 import FleetFuelScreen from './src/screens/FleetFuelScreen';
 import LiveLocationScreen from './src/screens/LiveLocationScreen';
 import CallsMapScreen from './src/screens/CallsMapScreen';
@@ -34,16 +46,28 @@ import ConversationScreen from './src/screens/ConversationScreen';
 import TelegramChatScreen from './src/screens/TelegramChatScreen';
 import MyTelegramScreen from './src/screens/MyTelegramScreen';
 import TelegramDialogScreen from './src/screens/TelegramDialogScreen';
+=======
+import LiveLocationScreen from './src/screens/LiveLocationScreen';
+import CallsMapScreen from './src/screens/CallsMapScreen';
+import AttendanceScreen from './src/screens/AttendanceScreen';
+import MyShiftScreen from './src/screens/MyShiftScreen';
+import ChatScreen from './src/screens/ChatScreen';
+import ConversationScreen from './src/screens/ConversationScreen';
+>>>>>>> c08b25b (first commit)
 import NewGroupScreen from './src/screens/NewGroupScreen';
 import EmployeesScreen from './src/screens/EmployeesScreen';
 import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
 import VehicleScreen from './src/screens/VehicleScreen';
 import VehiclesAdminScreen from './src/screens/VehiclesAdminScreen';
+<<<<<<< HEAD
 import VehicleSpecsScreen from './src/screens/VehicleSpecsScreen';
+=======
+>>>>>>> c08b25b (first commit)
 import StockLogScreen from './src/screens/StockLogScreen';
 import MyStockScreen from './src/screens/MyStockScreen';
 import ToolAllocationScreen from './src/screens/ToolAllocationScreen';
 import EmployeeReportScreen from './src/screens/EmployeeReportScreen';
+<<<<<<< HEAD
 import RequisitionScreen from './src/screens/RequisitionScreen';
 import AdminReportsScreen from './src/screens/AdminReportsScreen';
 import AdminPerformanceScreen from './src/screens/AdminPerformanceScreen';
@@ -110,10 +134,26 @@ import * as deviceApi from './src/services/deviceAuthService';
 import { loadFeatureFlagOverrides } from './src/lib/featureFlags';
 import { installGlobalCrashHandlers } from './src/services/crashReportService';
 import { startOfflineSyncWatcher } from './src/services/offlineQueueService';
+=======
+import AdminReportsScreen from './src/screens/AdminReportsScreen';
+import SiteWorkScreen from './src/screens/SiteWorkScreen';
+import EmployeeDirectoryScreen from './src/screens/EmployeeDirectoryScreen';
+import ChatArchiveScreen from './src/screens/ChatArchiveScreen';
+import AddGroupMembersScreen from './src/screens/AddGroupMembersScreen';
+import LocationTracker from './src/components/LocationTracker';
+import SiteVisitVerifier from './src/components/SiteVisitVerifier';
+import IncomingCallManager from './src/components/IncomingCallManager';
+import PushNotificationManager from './src/components/PushNotificationManager';
+import TabBar from './src/components/TabBar';
+import { colors } from './src/theme';
+import { navigationRef } from './src/lib/navigationRef';
+import { ONBOARDING_KEY } from './src/services/permissionsService';
+>>>>>>> c08b25b (first commit)
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+<<<<<<< HEAD
 function buildNavTheme(colors) {
   return {
     ...DefaultTheme,
@@ -134,6 +174,28 @@ function MainTabs() {
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Нүүр' }} />
       <Tab.Screen name="Attendance" component={AttendanceScreen} options={{ title: 'Ирц' }} />
       <Tab.Screen name="Feed" component={FeedScreen} options={{ title: 'Пост' }} />
+=======
+const navTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: colors.bg,
+    card: colors.surface,
+    text: colors.text,
+    border: colors.border,
+    primary: colors.primary,
+  },
+};
+
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{ headerShown: false }}
+      tabBar={(props) => <TabBar {...props} />}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Нүүр' }} />
+      <Tab.Screen name="Attendance" component={AttendanceScreen} options={{ title: 'Ирц' }} />
+>>>>>>> c08b25b (first commit)
       <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Чат' }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Профайл' }} />
     </Tab.Navigator>
@@ -141,6 +203,7 @@ function MainTabs() {
 }
 
 function AppStack() {
+<<<<<<< HEAD
   const { colors } = useTheme();
   return (
     <Stack.Navigator
@@ -168,6 +231,19 @@ function AppStack() {
       <Stack.Screen name="TelegramChat" component={TelegramChatScreen} options={{ title: 'Telegram чат' }} />
       <Stack.Screen name="MyTelegram" component={MyTelegramScreen} options={{ title: 'Миний Telegram' }} />
       <Stack.Screen name="TelegramDialog" component={TelegramDialogScreen} options={{ title: 'Telegram чат' }} />
+=======
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+      <Stack.Screen name="MainTabs" component={MainTabs} />
+      <Stack.Screen name="Inventory" component={InventoryScreen} initialParams={{ category: 'material' }} />
+      <Stack.Screen name="Tools" component={InventoryScreen} initialParams={{ category: 'tool' }} />
+      <Stack.Screen name="Fuel" component={FuelScreen} />
+      <Stack.Screen name="Live" component={LiveLocationScreen} />
+      <Stack.Screen name="Calls" component={CallsMapScreen} />
+      <Stack.Screen name="Vehicle" component={VehicleScreen} />
+      <Stack.Screen name="VehiclesAdmin" component={VehiclesAdminScreen} />
+      <Stack.Screen name="Conversation" component={ConversationScreen} />
+>>>>>>> c08b25b (first commit)
       <Stack.Screen name="NewGroup" component={NewGroupScreen} />
       <Stack.Screen name="Employees" component={EmployeesScreen} />
       <Stack.Screen name="StockLog" component={StockLogScreen} />
@@ -175,6 +251,7 @@ function AppStack() {
       <Stack.Screen name="MyStock" component={MyStockScreen} initialParams={{ category: 'material' }} />
       <Stack.Screen name="MyTools" component={MyStockScreen} initialParams={{ category: 'tool' }} />
       <Stack.Screen name="EmployeeReport" component={EmployeeReportScreen} />
+<<<<<<< HEAD
       <Stack.Screen name="Requisition" component={RequisitionScreen} />
       <Stack.Screen name="MyShift" component={MyShiftScreen} />
       <Stack.Screen name="AdminReports" component={AdminReportsScreen} />
@@ -225,11 +302,20 @@ function AppStack() {
       <Stack.Screen name="FeatureFlags" component={FeatureFlagsScreen} />
       <Stack.Screen name="BarcodeMode" component={BarcodeModeScreen} />
       <Stack.Screen name="PublicTickets" component={PublicTicketsScreen} />
+=======
+      <Stack.Screen name="MyShift" component={MyShiftScreen} />
+      <Stack.Screen name="AdminReports" component={AdminReportsScreen} />
+      <Stack.Screen name="SiteWork" component={SiteWorkScreen} />
+      <Stack.Screen name="EmployeeDirectory" component={EmployeeDirectoryScreen} />
+      <Stack.Screen name="ChatArchive" component={ChatArchiveScreen} />
+      <Stack.Screen name="AddGroupMembers" component={AddGroupMembersScreen} />
+>>>>>>> c08b25b (first commit)
     </Stack.Navigator>
   );
 }
 
 function Splash() {
+<<<<<<< HEAD
   const { colors } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
@@ -238,16 +324,28 @@ function Splash() {
       <Text style={{ marginTop: 20, color: colors.textMuted, fontSize: 12, letterSpacing: 0.3 }}>
         {APP_VERSION_LABEL}
       </Text>
+=======
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
+      <Image source={require('./assets/logo.png')} style={{ width: 180, height: 150, marginBottom: 24 }} resizeMode="contain" />
+      <ActivityIndicator size="large" color={colors.primary} />
+>>>>>>> c08b25b (first commit)
     </View>
   );
 }
 
+<<<<<<< HEAD
 function Root({ shareRef }) {
   const { isCloud, authLoading, session, mustChangePassword, currentUser, authProfile, isSuperAdmin } = useApp();
   const [onboarded, setOnboarded] = useState(null);
   const [ohaabOk, setOhaabOk] = useState(null);
   const [deviceOk, setDeviceOk] = useState(null);
   const [deviceInfo, setDeviceInfo] = useState(null);
+=======
+function Root() {
+  const { isCloud, authLoading, session, mustChangePassword } = useApp();
+  const [onboarded, setOnboarded] = useState(null);
+>>>>>>> c08b25b (first commit)
 
   useEffect(() => {
     if (!isCloud || !session) {
@@ -263,6 +361,7 @@ function Root({ shareRef }) {
     };
   }, [isCloud, session?.user?.id]);
 
+<<<<<<< HEAD
   // Апп руу орохын өмнө: шинэ төхөөрөмж бол системийн админы зөвшөөрөл шаардлагатай.
   // Системийн админыг (superadmin) шалгахгүй.
   useEffect(() => {
@@ -320,6 +419,9 @@ function Root({ shareRef }) {
     };
   }, [isCloud, session?.user?.id, currentUser?.id]);
 
+=======
+  // Supabase холбогдоогүй бол шууд апп (локал горим)
+>>>>>>> c08b25b (first commit)
   if (isCloud) {
     if (authLoading) return <Splash />;
     if (!session) return <LoginScreen />;
@@ -328,6 +430,7 @@ function Root({ shareRef }) {
     if (!onboarded) {
       return <OnboardingPermissionsScreen onComplete={() => setOnboarded(true)} />;
     }
+<<<<<<< HEAD
     if (deviceOk === null) return <Splash />;
     if (!deviceOk) {
       return (
@@ -354,10 +457,21 @@ function Root({ shareRef }) {
       <ScreenLiveShare viewRef={shareRef} />
       <AppStack />
       <ForceUpdateModal />
+=======
+  }
+  return (
+    <>
+      <LocationTracker />
+      <SiteVisitVerifier />
+      <IncomingCallManager />
+      <PushNotificationManager />
+      <AppStack />
+>>>>>>> c08b25b (first commit)
     </>
   );
 }
 
+<<<<<<< HEAD
 function ThemedRoot({ shareRef }) {
   const { colors, isDark } = useTheme();
   return (
@@ -397,6 +511,18 @@ export default function App() {
             </AppProvider>
           </ThemeProvider>
         </ErrorBoundary>
+=======
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppProvider>
+          <NavigationContainer ref={navigationRef} theme={navTheme}>
+            <StatusBar style="dark" />
+            <Root />
+          </NavigationContainer>
+        </AppProvider>
+>>>>>>> c08b25b (first commit)
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

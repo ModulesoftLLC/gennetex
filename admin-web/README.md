@@ -14,6 +14,7 @@ python3 -m http.server 5500
 
 > `file://`-ээр шууд нээхэд зарим хөтөч Supabase хүсэлтийг блоклодог тул серверээр нээх нь найдвартай.
 
+<<<<<<< HEAD
 ### Арга 2 — Vercel (production)
 
 > **Чухал:** Vercel дээр зөвхөн `admin-web/` (админ самбар) байршуулна.  
@@ -43,6 +44,22 @@ Deploy дууссаны дараа:
 3. Зураг/лого харагдахгүй бол Root Directory `admin-web` гэж зөв сонгосон эсэхээ шалгана.
 
 ### Арга 3 — GitHub Pages / бусад hosting
+=======
+### Арга 2 — GitHub Pages (энэ төсөл)
+
+Репозитори: https://github.com/ModulesoftLLC/gennetex
+
+`admin-web/` хавтсыг GitHub Pages эсвэл Netlify, Vercel, Cloudflare Pages дээр байршуулбол интернэтээс хандах боломжтой.
+
+```bash
+# Локал туршилт
+cd admin-web
+python3 -m http.server 5500
+# http://localhost:5500
+```
+
+### Арга 3 — Бусад hosting
+>>>>>>> c08b25b (first commit)
 
 ## Нэвтрэх
 - Зөвхөн **admin эрхтэй** хэрэглэгч нэвтэрнэ (ж: `admin@gennetex.mn`).
@@ -56,6 +73,7 @@ Deploy дууссаны дараа:
 - 🏠 Очсон лог — хэн хэзээ айлд очсон
 - 🚗 Аялал — машин, зам (км), түлш, зардал
 
+<<<<<<< HEAD
 ## Лого
 
 | Файл | Зориулалт |
@@ -72,6 +90,8 @@ Production URL: `https://adiya.site/gennetex/admin/logo.png`
 
 Баруун дээд буланд 🌙/☀️ товч — нэвтрэх хуудас болон самбар хоёуланд ажиллана. Сонголт `localStorage.theme`-д хадгалагдана.
 
+=======
+>>>>>>> c08b25b (first commit)
 ## Тохиргоо
 `index.html` доторх `SUPABASE_URL`, `SUPABASE_ANON_KEY` нь аппын `.env`-тэй ижил байна.
 Төслөө сольвол эдгээрийг шинэчил.

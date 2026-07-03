@@ -3,6 +3,7 @@ import * as notifyApi from './notificationService';
 
 const TABLE = 'service_calls';
 
+<<<<<<< HEAD
 export const SITE_KINDS = [
   { key: 'ail', label: 'Айл' },
   { key: 'baiguulga', label: 'Байгууллага' },
@@ -12,6 +13,8 @@ export function siteKindMeta(key) {
   return SITE_KINDS.find((s) => s.key === (key || 'ail')) || SITE_KINDS[0];
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 export function mapServiceCallRow(r) {
   if (!r) return null;
   return {
@@ -21,6 +24,7 @@ export function mapServiceCallRow(r) {
     address: r.address || '',
     problem: r.problem || '',
     type: r.call_type || 'other',
+<<<<<<< HEAD
     site_kind: r.site_kind || 'ail',
     engineer: r.engineer_name || '',
     engineer_id: r.engineer_id,
@@ -37,6 +41,14 @@ export function mapServiceCallRow(r) {
     created_by_name: r.created_by_name || null,
     created_at: r.created_at,
     updated_at: r.updated_at || null,
+=======
+    engineer: r.engineer_name || '',
+    engineer_id: r.engineer_id,
+    latitude: r.latitude,
+    longitude: r.longitude,
+    status: r.status || 'Хүлээгдэж буй',
+    created_at: r.created_at,
+>>>>>>> c08b25b (first commit)
   };
 }
 
@@ -120,6 +132,7 @@ export async function updateServiceCallStatus(id, status) {
   return mapServiceCallRow(data);
 }
 
+<<<<<<< HEAD
 /** Дурын багана шинэчлэх (status, close_meta, scheduled_at гэх мэт) */
 export async function updateServiceCall(id, patch) {
   const { data, error } = await supabase
@@ -138,6 +151,11 @@ export function subscribeServiceCalls(onChange) {
   const topic = `service-calls-sync-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const channel = supabase
     .channel(topic)
+=======
+export function subscribeServiceCalls(onChange) {
+  const channel = supabase
+    .channel('service-calls-sync')
+>>>>>>> c08b25b (first commit)
     .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => onChange())
     .subscribe();
   return () => supabase.removeChannel(channel);

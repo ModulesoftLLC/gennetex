@@ -6,17 +6,28 @@ import { Button } from '../components/ui';
 import NavIcon from '../components/NavIcon';
 import { requestAllAppPermissions, markOnboardingComplete } from '../services/permissionsService';
 import { enablePushForUser } from '../services/notificationService';
+<<<<<<< HEAD
 import { colors as palette, spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 
 const ITEMS = [
   { icon: 'chat', color: palette.primary, title: 'Мэдэгдэл', desc: 'Чат, ирц, дуудлагын мэдэгдэл хүлээн авах'},
   { icon: 'location', color: palette.success, title: 'Байршил', desc: 'Ажлын байршил real-time хянах'},
+=======
+import { colors, spacing, radius, shadow } from '../theme';
+
+const ITEMS = [
+  { icon: 'chat', color: colors.primary, title: 'Мэдэгдэл', desc: 'Чат, ирц, дуудлагын мэдэгдэл хүлээн авах'},
+  { icon: 'location', color: colors.success, title: 'Байршил', desc: 'Ажлын байршил real-time хянах'},
+>>>>>>> c08b25b (first commit)
   { icon: 'attendance', color: '#db2777', title: 'Камер', desc: 'Ирц бүртгэх, баркод унших'},
 ];
 
 export default function OnboardingPermissionsScreen({ onComplete }) {
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
   const { currentUser } = useApp();
   const [loading, setLoading] = useState(false);
 
@@ -83,7 +94,11 @@ export default function OnboardingPermissionsScreen({ onComplete }) {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   bg: { flex: 1, backgroundColor: colors.bgAlt },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   card: {

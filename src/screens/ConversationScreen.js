@@ -6,13 +6,17 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
+<<<<<<< HEAD
   Pressable,
+=======
+>>>>>>> c08b25b (first commit)
   KeyboardAvoidingView,
   Platform,
   Image,
   Linking,
   ActivityIndicator,
   Alert,
+<<<<<<< HEAD
   StatusBar,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -25,12 +29,23 @@ import { useTheme, useStyles } from '../context/ThemeContext';
 import VideoCallModal from '../components/VideoCallModal';
 import CallScreen from '../components/CallScreen';
 import ActiveTripsBanner from '../components/ActiveTripsBanner';
+=======
+} from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { Video, ResizeMode } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import { useApp } from '../context/AppContext';
+import { ScreenHeader, HeaderButton, EmptyState } from '../components/ui';
+import VideoCallModal from '../components/VideoCallModal';
+>>>>>>> c08b25b (first commit)
 import * as chatApi from '../services/chatService';
 import * as callApi from '../services/callService';
 import VoiceMessageButton from '../components/VoiceMessageButton';
 import ChatImagePreview from '../components/ChatImagePreview';
 import ChatVideoPreview from '../components/ChatVideoPreview';
 import { setActiveChatRoom } from '../lib/chatFocus';
+<<<<<<< HEAD
 import { formatTime, formatChatDay, isSameChatDay } from '../lib/formatTime';
 import { isOnline, formatLastSeen } from '../lib/online';
 
@@ -62,6 +77,19 @@ function ChatImage({ uri, onPress }) {
   useEffect(() => {
     let active = true;
     setFailed(false);
+=======
+import { formatTime } from '../lib/formatTime';
+import { colors, spacing, radius } from '../theme';
+
+const IMAGE_MAX_W = 260;
+const IMAGE_MAX_H = 340;
+
+function ChatImage({ uri, onPress }) {
+  const [size, setSize] = useState({ width: IMAGE_MAX_W, height: IMAGE_MAX_W * 0.75 });
+
+  useEffect(() => {
+    let active = true;
+>>>>>>> c08b25b (first commit)
     Image.getSize(
       uri,
       (w, h) => {
@@ -78,15 +106,20 @@ function ChatImage({ uri, onPress }) {
         }
         setSize({ width: Math.round(width), height: Math.round(height) });
       },
+<<<<<<< HEAD
       () => {
         if (active) setSize({ width: IMAGE_MAX_W, height: IMAGE_MAX_W * 0.75 });
       }
+=======
+      () => {}
+>>>>>>> c08b25b (first commit)
     );
     return () => {
       active = false;
     };
   }, [uri]);
 
+<<<<<<< HEAD
   if (failed) {
     return (
       <TouchableOpacity onPress={() => Linking.openURL(uri)} style={styles.mediaFallback}>
@@ -95,18 +128,24 @@ function ChatImage({ uri, onPress }) {
     );
   }
 
+=======
+>>>>>>> c08b25b (first commit)
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.92}>
       <Image
         source={{ uri }}
         style={[styles.msgImage, { width: size.width, height: size.height }]}
         resizeMode="cover"
+<<<<<<< HEAD
         onError={() => setFailed(true)}
+=======
+>>>>>>> c08b25b (first commit)
       />
     </TouchableOpacity>
   );
 }
 
+<<<<<<< HEAD
 const VIDEO_THUMB_W = 220;
 const VIDEO_THUMB_H = 124;
 
@@ -116,11 +155,29 @@ function ChatVideo({ onPress }) {
     <TouchableOpacity onPress={onPress} activeOpacity={0.92} style={styles.videoThumb}>
       <View style={styles.videoPlayCircle}>
         <Ionicons name="play" size={22} color="#fff" style={{ marginLeft: 2 }} />
+=======
+const VIDEO_THUMB_W = 240;
+const VIDEO_THUMB_H = 136;
+
+function ChatVideo({ uri, onPress }) {
+  return (
+    <TouchableOpacity onPress={onPress} activeOpacity={0.92} style={styles.videoThumb}>
+      <Video
+        source={{ uri }}
+        style={styles.videoThumbPlayer}
+        resizeMode={ResizeMode.COVER}
+        shouldPlay={false}
+        isMuted
+      />
+      <View style={styles.playBadge}>
+        <Text style={styles.playIcon}></Text>
+>>>>>>> c08b25b (first commit)
       </View>
     </TouchableOpacity>
   );
 }
 
+<<<<<<< HEAD
 function MessageTime({ time, edited, mine, overlay }) {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
@@ -146,6 +203,12 @@ export default function ConversationScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   const { conversationId, title, isGroup, otherUser, memberCount, groupAvatarUrl: initialGroupAvatar } = route.params || {};
+=======
+export default function ConversationScreen() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { conversationId, title, isGroup, otherUser } = route.params || {};
+>>>>>>> c08b25b (first commit)
   const { currentUser, isCloud } = useApp();
   const me = currentUser;
   const room = conversationId;
@@ -154,14 +217,18 @@ export default function ConversationScreen() {
   const [text, setText] = useState('');
   const [error, setError] = useState(null);
   const [callVisible, setCallVisible] = useState(false);
+<<<<<<< HEAD
   const [outgoing, setOutgoing] = useState(null);
   const outgoingUnsub = useRef(null);
+=======
+>>>>>>> c08b25b (first commit)
   const [uploading, setUploading] = useState(false);
   const [voiceActive, setVoiceActive] = useState(false);
   const [voicePreview, setVoicePreview] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [previewVideo, setPreviewVideo] = useState(null);
+<<<<<<< HEAD
   const [groupAvatarUrl, setGroupAvatarUrl] = useState(initialGroupAvatar || null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const listRef = useRef(null);
@@ -175,6 +242,10 @@ export default function ConversationScreen() {
     ? formatLastSeen(otherUser.last_seen)
     : 'хувийн чат';
 
+=======
+  const listRef = useRef(null);
+
+>>>>>>> c08b25b (first commit)
   const load = useCallback(async () => {
     if (!isCloud || !room) return;
     try {
@@ -207,6 +278,7 @@ export default function ConversationScreen() {
   }, [load, isCloud, room]);
 
   useEffect(() => {
+<<<<<<< HEAD
     if (!isGroup || !isCloud || !room) return;
     let active = true;
     chatApi.fetchConversation(room).then((conv) => {
@@ -218,6 +290,8 @@ export default function ConversationScreen() {
   }, [isGroup, isCloud, room]);
 
   useEffect(() => {
+=======
+>>>>>>> c08b25b (first commit)
     if (messages.length) {
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
@@ -263,7 +337,11 @@ export default function ConversationScreen() {
   const confirmDelete = useCallback(
     (item) => {
       Alert.alert('Устгах уу?', 'Энэ мессежийг бүрмөсөн устгах уу?', [
+<<<<<<< HEAD
         { text: 'Болих', style: 'cancel' },
+=======
+        { text: 'Болих', style: 'cancel'},
+>>>>>>> c08b25b (first commit)
         {
           text: 'Устгах',
           style: 'destructive',
@@ -291,7 +369,11 @@ export default function ConversationScreen() {
         options.push({ text: 'Засах', onPress: () => startEdit(item) });
       }
       options.push({ text: 'Устгах', style: 'destructive', onPress: () => confirmDelete(item) });
+<<<<<<< HEAD
       options.push({ text: 'Болих', style: 'cancel' });
+=======
+      options.push({ text: 'Болих', style: 'cancel'});
+>>>>>>> c08b25b (first commit)
       Alert.alert('Мессеж', 'Юу хийх вэ?', options);
     },
     [me, startEdit, confirmDelete]
@@ -346,7 +428,11 @@ export default function ConversationScreen() {
     });
     if (!res.canceled) {
       const a = res.assets[0];
+<<<<<<< HEAD
       sendAttachment({ uri: a.uri, type: 'image', mimeType: a.mimeType || 'image/jpeg', name: a.fileName || 'image.jpg' });
+=======
+      sendAttachment({ uri: a.uri, type: 'image', mimeType: a.mimeType || 'image/jpeg', name: a.fileName || 'image.jpg'});
+>>>>>>> c08b25b (first commit)
     }
   };
 
@@ -385,11 +471,16 @@ export default function ConversationScreen() {
       { text: 'Зураг', onPress: pickImage },
       { text: 'Видео', onPress: pickVideo },
       { text: 'Файл', onPress: pickFile },
+<<<<<<< HEAD
       { text: 'Болих', style: 'cancel' },
+=======
+      { text: 'Болих', style: 'cancel'},
+>>>>>>> c08b25b (first commit)
     ]);
   };
 
   const handleCall = async () => {
+<<<<<<< HEAD
     if (isGroup) {
       setCallVisible(true);
       await send('Групп видео дуудлага эхэллээ.');
@@ -579,11 +670,49 @@ export default function ConversationScreen() {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
+=======
+    setCallVisible(true);
+    // 1:1 бол нөгөө хэрэглэгч рүү "залгаж байна"дохио явуулна
+    if (!isGroup && otherUser?.id) {
+      try {
+        await callApi.startCall({ room, caller: me, callee: otherUser });
+      } catch (e) {}
+    }
+    await send(isGroup ? 'Групп видео дуудлага эхэллээ.' : 'Видео дуудлага руу залгаж байна...');
+  };
+
+  return (
+    <View style={styles.container}>
+      <ScreenHeader
+        title={title || 'Чат'}
+        subtitle={isGroup ? 'Групп яриа' : otherUser?.name || ''}
+        right={
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            {isGroup ? (
+              <HeaderButton title="Нэмэх"
+                onPress={() =>
+                  navigation.navigate('AddGroupMembers', { conversationId: room, title })
+                }
+              />
+            ) : null}
+            <HeaderButton title="Дуудлага" onPress={handleCall} />
+          </View>
+        }
+      />
+
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={90}
+>>>>>>> c08b25b (first commit)
       >
         <FlatList
           ref={listRef}
           data={messages}
           keyExtractor={(m) => m.id}
+<<<<<<< HEAD
           style={styles.chatBg}
           contentContainerStyle={[styles.messageList, !messages.length && styles.messageListEmpty]}
           renderItem={({ item, index }) => {
@@ -748,6 +877,87 @@ export default function ConversationScreen() {
               </View>
               <TouchableOpacity onPress={cancelEdit} hitSlop={10}>
                 <Ionicons name="close" size={22} color={colors.textMuted} />
+=======
+          contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.md }}
+          renderItem={({ item }) => {
+            const mine = item.sender_id === me?.id;
+            const hasImage = item.attachment_type === 'image'&& item.attachment_url;
+            const hasVideo = item.attachment_type === 'video'&& item.attachment_url;
+            const mediaOnly = (hasImage || hasVideo) && !item.content;
+            return (
+              <View style={[styles.bubbleRow, mine ? styles.rowMine : styles.rowOther]}>
+                <TouchableOpacity
+                  activeOpacity={mine ? 0.85 : 1}
+                  onLongPress={mine ? () => openMessageActions(item) : undefined}
+                  delayLongPress={400}
+                >
+                  <View
+                    style={[
+                      styles.bubble,
+                      mediaOnly
+                        ? styles.bubbleImageOnly
+                        : mine
+                        ? styles.bubbleMine
+                        : styles.bubbleOther,
+                    ]}
+                  >
+                    {!mine && !mediaOnly ? <Text style={styles.sender}>{item.sender_name}</Text> : null}
+                    {!mine && mediaOnly ? (
+                      <Text style={[styles.sender, styles.senderOnImage]}>{item.sender_name}</Text>
+                    ) : null}
+                    {hasImage ? (
+                      <ChatImage uri={item.attachment_url} onPress={() => setPreviewImage(item.attachment_url)} />
+                    ) : null}
+                    {hasVideo ? (
+                      <ChatVideo uri={item.attachment_url} onPress={() => setPreviewVideo(item.attachment_url)} />
+                    ) : null}
+                    {item.attachment_type === 'file'&& item.attachment_url ? (
+                      <TouchableOpacity
+                        style={[styles.fileChip, mine && styles.fileChipMine]}
+                        onPress={() => Linking.openURL(item.attachment_url)}
+                        activeOpacity={0.85}
+                      >
+                        <Text style={styles.fileIcon}></Text>
+                        <Text style={[styles.fileName, mine && styles.msgTextMine]} numberOfLines={1}>
+                          {item.attachment_name || 'Файл'}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
+                    {item.content ? (
+                      <Text style={[styles.msgText, mine && styles.msgTextMine]}>
+                        {item.content}
+                        <Text style={[styles.msgTimeInline, mine && styles.msgTimeMine]}>
+                          {item.edited_at ? 'зассан · ' : ''}{formatTime(item.created_at)}
+                        </Text>
+                      </Text>
+                    ) : mediaOnly ? (
+                      <Text style={[styles.imageTime, mine && styles.imageTimeMine]}>
+                        {item.edited_at ? 'зассан · ' : ''}
+                        {formatTime(item.created_at)}
+                      </Text>
+                    ) : (
+                      <View style={styles.msgMeta}>
+                        {item.edited_at ? (
+                          <Text style={[styles.msgEdited, mine && styles.msgEditedMine]}>зассан</Text>
+                        ) : null}
+                        <Text style={[styles.msgTime, mine && styles.msgTimeMine]}>{formatTime(item.created_at)}</Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+          ListEmptyComponent={<EmptyState text="Мессеж алга. Эхний мессежээ бичээрэй."/>}
+        />
+
+        <View style={styles.composer}>
+          {editingId ? (
+            <View style={styles.editBar}>
+              <Text style={styles.editLabel}>Мессеж засаж байна</Text>
+              <TouchableOpacity onPress={cancelEdit}>
+                <Text style={styles.editCancel}>Болих</Text>
+>>>>>>> c08b25b (first commit)
               </TouchableOpacity>
             </View>
           ) : null}
@@ -757,6 +967,7 @@ export default function ConversationScreen() {
               <Text style={styles.voiceText} numberOfLines={2}>
                 {voicePreview || 'Ярьж байна...'}
               </Text>
+<<<<<<< HEAD
               <Text style={styles.voiceHint}>Суллана</Text>
             </View>
           ) : null}
@@ -776,12 +987,35 @@ export default function ConversationScreen() {
             <TextInput
               style={styles.input}
               placeholder={voiceActive ? 'Ярьж байна...' : 'Мессеж'}
+=======
+              <Text style={styles.voiceHint}>Суллана — шууд илгээнэ</Text>
+            </View>
+          ) : null}
+          <View style={styles.inputRow}>
+            <TouchableOpacity style={styles.attachBtn} onPress={chooseAttachment} disabled={uploading || voiceActive}>
+              {uploading ? (
+                <ActivityIndicator size="small" color={colors.primary} />
+              ) : (
+                <Text style={styles.attachIcon}></Text>
+              )}
+            </TouchableOpacity>
+            <VoiceMessageButton
+              disabled={uploading}
+              onPartial={setVoicePreview}
+              onFinal={sendVoiceText}
+              onListeningChange={setVoiceActive}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder={voiceActive ? 'Ярьж байна...' : 'Бичих эсвэл MIC дарж ярина'}
+>>>>>>> c08b25b (first commit)
               placeholderTextColor={colors.textMuted}
               value={text}
               onChangeText={setText}
               multiline
               editable={!voiceActive}
             />
+<<<<<<< HEAD
             {text.trim() || editingId ? (
               <TouchableOpacity
                 style={[styles.sendBtn, voiceActive && styles.toolBtnDisabled]}
@@ -807,11 +1041,23 @@ export default function ConversationScreen() {
             )}
           </View>
         </SafeAreaView>
+=======
+            <TouchableOpacity
+              style={[styles.sendBtn, (!text.trim() || voiceActive) && styles.sendBtnDisabled]}
+              onPress={() => send()}
+              disabled={!text.trim() || voiceActive}
+            >
+              <Text style={styles.sendText}>{editingId ? 'Хадгалах' : 'Илгээх'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+>>>>>>> c08b25b (first commit)
       </KeyboardAvoidingView>
 
       <ChatImagePreview uri={previewImage} onClose={() => setPreviewImage(null)} />
       <ChatVideoPreview uri={previewVideo} onClose={() => setPreviewVideo(null)} />
 
+<<<<<<< HEAD
       <CallScreen
         visible={!!outgoing}
         mode="outgoing"
@@ -821,6 +1067,8 @@ export default function ConversationScreen() {
         onCancel={cancelOutgoing}
       />
 
+=======
+>>>>>>> c08b25b (first commit)
       <VideoCallModal
         visible={callVisible}
         room={`gennetex-${room}`}
@@ -831,6 +1079,7 @@ export default function ConversationScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.primary },
   flex: { flex: 1, backgroundColor: colors.background },
@@ -1067,6 +1316,98 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: colors.surface,
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+  error: { color: colors.danger, paddingHorizontal: spacing.lg },
+  bubbleRow: { marginBottom: spacing.sm, flexDirection: 'row'},
+  rowMine: { justifyContent: 'flex-end'},
+  rowOther: { justifyContent: 'flex-start'},
+  bubble: { maxWidth: '80%', borderRadius: radius.md, padding: spacing.md },
+  bubbleMine: { backgroundColor: colors.primary, borderTopRightRadius: 2 },
+  bubbleOther: { backgroundColor: colors.surface, borderTopLeftRadius: 2, borderWidth: 1, borderColor: colors.border },
+  bubbleImageOnly: {
+    backgroundColor: 'transparent',
+    padding: 0,
+    borderWidth: 0,
+    overflow: 'visible',
+  },
+  sender: { color: colors.primary, fontSize: 12, fontWeight: '700', marginBottom: 2 },
+  senderOnImage: { marginBottom: spacing.xs, marginLeft: 2 },
+  msgText: { color: colors.text, fontSize: 15, lineHeight: 20 },
+  msgTextMine: { color: '#fff'},
+  msgImage: {
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceAlt,
+  },
+  imageTime: {
+    color: colors.textMuted,
+    fontSize: 10,
+    marginTop: 4,
+    alignSelf: 'flex-end',
+    marginRight: 2,
+  },
+  imageTimeMine: { color: colors.textFaint },
+  videoThumb: {
+    width: VIDEO_THUMB_W,
+    height: VIDEO_THUMB_H,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+    backgroundColor: '#111827',
+  },
+  videoThumbPlayer: { width: '100%', height: '100%'},
+  playBadge: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.28)',
+  },
+  playIcon: { color: '#fff', fontSize: 36, marginLeft: 4 },
+  fileChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.bg,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    marginBottom: 4,
+    maxWidth: 220,
+  },
+  fileChipMine: { backgroundColor: 'rgba(255,255,255,0.2)'},
+  fileIcon: { fontSize: 18 },
+  fileName: { color: colors.text, fontSize: 14, flexShrink: 1 },
+  msgTimeInline: { color: colors.textMuted, fontSize: 10, lineHeight: 20 },
+  msgTime: { color: colors.textMuted, fontSize: 10 },
+  msgTimeMine: { color: 'rgba(255,255,255,0.8)'},
+  msgMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, alignSelf: 'flex-end'},
+  msgEdited: { color: colors.textMuted, fontSize: 10, fontStyle: 'italic'},
+  msgEditedMine: { color: 'rgba(255,255,255,0.65)'},
+  editBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: 4,
+    backgroundColor: colors.primary + '15',
+  },
+  editLabel: { color: colors.primary, fontSize: 13, fontWeight: '600'},
+  editCancel: { color: colors.danger, fontSize: 13, fontWeight: '600'},
+  composer: {
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  voiceBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: 4,
+    backgroundColor: colors.danger + '12',
+>>>>>>> c08b25b (first commit)
   },
   voiceDot: {
     width: 8,
@@ -1074,6 +1415,7 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.danger,
   },
+<<<<<<< HEAD
   voiceText: { flex: 1, color: colors.text, fontSize: 14, fontWeight: '600' },
   voiceHint: { color: colors.textMuted, fontSize: 12 },
   inputRow: {
@@ -1119,4 +1461,44 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     justifyContent: 'center',
   },
   sendIconOffset: { marginLeft: 2 },
+=======
+  voiceText: { flex: 1, color: colors.text, fontSize: 14, fontWeight: '600'},
+  voiceHint: { color: colors.textMuted, fontSize: 11 },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    padding: spacing.md,
+    gap: spacing.sm,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    color: colors.text,
+    maxHeight: 100,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  attachBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: radius.md,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  attachIcon: { fontSize: 24, color: colors.primary, lineHeight: 26 },
+  sendBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+  },
+  sendBtnDisabled: { opacity: 0.45 },
+  sendText: { color: '#fff', fontWeight: '700' },
+>>>>>>> c08b25b (first commit)
 });

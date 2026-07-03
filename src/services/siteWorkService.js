@@ -2,6 +2,7 @@ import * as Location from 'expo-location';
 import { supabase } from '../lib/supabase';
 import * as vehicleApi from './vehicleService';
 import * as notifyApi from './notificationService';
+<<<<<<< HEAD
 import { isCallCancelled, isCallRescheduled } from '../lib/callPermissions';
 
 const TABLE = 'field_site_sessions';
@@ -13,6 +14,10 @@ export function isActiveCallForSite(call) {
   if (isCallCancelled(call) || isCallRescheduled(call)) return false;
   return true;
 }
+=======
+
+const TABLE = 'field_site_sessions';
+>>>>>>> c08b25b (first commit)
 
 function todayStartIso() {
   const d = new Date();

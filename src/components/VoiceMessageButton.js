@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+<<<<<<< HEAD
 import { Pressable, StyleSheet, Platform, Alert, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useStyles } from '../context/ThemeContext';
+=======
+import { Text, Pressable, StyleSheet, Platform, Alert, View } from 'react-native';
+import { colors, spacing } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 const LOCALES = ['mn-MN', 'en-US'];
 
@@ -12,7 +17,11 @@ async function loadSpeechModule() {
     const M = mod?.ExpoSpeechRecognitionModule;
     if (!M) return null;
     try {
+<<<<<<< HEAD
       if (typeof M.isRecognitionAvailable === 'function' && !M.isRecognitionAvailable()) return null;
+=======
+      if (typeof M.isRecognitionAvailable === 'function'&& !M.isRecognitionAvailable()) return null;
+>>>>>>> c08b25b (first commit)
     } catch (e) {
       return null;
     }
@@ -31,7 +40,10 @@ export default function VoiceMessageButton({
   onFinal,
   onPartial,
   onListeningChange,
+<<<<<<< HEAD
   telegram = false,
+=======
+>>>>>>> c08b25b (first commit)
 }) {
   const [listening, setListening] = useState(false);
   const mounted = useRef(true);
@@ -39,8 +51,11 @@ export default function VoiceMessageButton({
   const sentRef = useRef(false);
   const modRef = useRef(null);
   const subsRef = useRef([]);
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
 
   const setListeningState = useCallback(
     (v) => {
@@ -108,7 +123,11 @@ export default function VoiceMessageButton({
   const showDevBuildHelp = () => {
     Alert.alert(
       'Development build шаардлагатай',
+<<<<<<< HEAD
       'Дуу хоолойгоор бичих нь Expo Go дээр ажиллахгүй.\n\nAndroid: eas build --profile development --platform android\nДараа нь: npx expo start --dev-client'
+=======
+      'Hold-to-talk (MIC) нь Expo Go дээр ажиллахгүй.\n\nУтсан дээрээ суулгах:\n• iOS: npx expo run:ios\n• Android: npx expo run:android\n\nДараа нь: npx expo start --dev-client'
+>>>>>>> c08b25b (first commit)
     );
   };
 
@@ -170,16 +189,24 @@ export default function VoiceMessageButton({
 
   if (Platform.OS === 'web') return null;
 
+<<<<<<< HEAD
   const idleColor = telegram ? '#4FAE4E' : colors.primary;
   const idleBg = telegram ? 'transparent' : colors.primarySoft;
 
+=======
+>>>>>>> c08b25b (first commit)
   return (
     <Pressable
       style={({ pressed }) => [
         styles.btn,
+<<<<<<< HEAD
         { backgroundColor: idleBg },
         listening && styles.btnActive,
         pressed && !listening && (telegram ? styles.btnPressedTg : styles.btnPressed),
+=======
+        listening && styles.btnActive,
+        pressed && !listening && styles.btnPressed,
+>>>>>>> c08b25b (first commit)
         disabled && styles.btnDisabled,
       ]}
       onPressIn={start}
@@ -188,16 +215,21 @@ export default function VoiceMessageButton({
       accessibilityLabel="Дуу хоолой"
       accessibilityHint="Удаан дарж ярина"
     >
+<<<<<<< HEAD
       <Ionicons
         name={listening ? 'mic' : 'mic-outline'}
         size={telegram ? 26 : 22}
         color={listening ? '#fff' : idleColor}
       />
+=======
+      <Text style={[styles.icon, listening && styles.iconActive]}>{listening ? '●' : 'MIC'}</Text>
+>>>>>>> c08b25b (first commit)
       {listening ? <View style={styles.pulse} /> : null}
     </Pressable>
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   btn: {
     width: 40,
@@ -217,5 +249,30 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: 'rgba(229,57,53,0.45)',
+=======
+const styles = StyleSheet.create({
+  btn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  btnPressed: { backgroundColor: colors.primary + '33'},
+  btnActive: { backgroundColor: colors.danger + '28', borderColor: colors.danger },
+  btnDisabled: { opacity: 0.4 },
+  icon: { color: colors.primary, fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
+  iconActive: { color: colors.danger },
+  pulse: {
+    position: 'absolute',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: colors.danger + '88',
+>>>>>>> c08b25b (first commit)
   },
 });

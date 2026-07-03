@@ -15,8 +15,12 @@ import { WebView } from 'react-native-webview';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, Card, EmptyState } from '../components/ui';
 import NavIcon from '../components/NavIcon';
+<<<<<<< HEAD
 import { colors as palette, spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing, radius, shadow } from '../theme';
+>>>>>>> c08b25b (first commit)
 import * as reportApi from '../services/reportService';
 
 const TYPE_LABEL = {
@@ -26,6 +30,7 @@ const TYPE_LABEL = {
 };
 
 const TYPE_COLOR = {
+<<<<<<< HEAD
   material: palette.primary,
   tool: '#ea580c',
   vehicle: palette.warning,
@@ -34,6 +39,14 @@ const TYPE_COLOR = {
 export default function AdminReportsScreen() {
   const { colors, shadow } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+  material: colors.primary,
+  tool: '#ea580c',
+  vehicle: colors.warning,
+};
+
+export default function AdminReportsScreen() {
+>>>>>>> c08b25b (first commit)
   const { isAdmin, isCloud } = useApp();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -152,7 +165,11 @@ export default function AdminReportsScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   container: { flex: 1, backgroundColor: colors.bgAlt },
   body: { padding: spacing.lg, paddingBottom: 40 },
   error: { color: colors.danger, textAlign: 'center', marginBottom: spacing.md, lineHeight: 20 },

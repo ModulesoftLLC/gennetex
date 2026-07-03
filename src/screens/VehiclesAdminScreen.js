@@ -11,7 +11,10 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import QRCode from '../components/QRCode';
+<<<<<<< HEAD
 import BarcodeScanner from '../components/BarcodeScanner';
+=======
+>>>>>>> c08b25b (first commit)
 import { useApp } from '../context/AppContext';
 import {
   Card,
@@ -22,6 +25,7 @@ import {
   HeaderButton,
   EmptyState,
 } from '../components/ui';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import * as vehicleApi from '../services/vehicleService';
@@ -43,6 +47,18 @@ export default function VehiclesAdminScreen() {
   const [scanVisible, setScanVisible] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [editForm, setEditForm] = useState(EMPTY);
+=======
+import { colors, spacing, radius } from '../theme';
+import * as vehicleApi from '../services/vehicleService';
+
+const EMPTY = { code: '', plate_number: '', liters_per_100km: '12', driver_name: '', driver_id: ''};
+
+export default function VehiclesAdminScreen() {
+  const { isAdmin, isCloud, fetchEmployees } = useApp();
+  const [list, setList] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [modal, setModal] = useState(false);
+>>>>>>> c08b25b (first commit)
   const [qrItem, setQrItem] = useState(null);
   const [logsVisible, setLogsVisible] = useState(false);
   const [logs, setLogs] = useState([]);
@@ -54,6 +70,7 @@ export default function VehiclesAdminScreen() {
   const load = useCallback(async () => {
     if (!isCloud) return;
     try {
+<<<<<<< HEAD
       const [veh, tr, emps] = await Promise.all([
         vehicleApi.fetchVehicles(),
         vehicleApi.fetchTrips(300),
@@ -61,6 +78,13 @@ export default function VehiclesAdminScreen() {
       ]);
       setList(veh);
       setTrips(tr || []);
+=======
+      const [veh, emps] = await Promise.all([
+        vehicleApi.fetchVehicles(),
+        fetchEmployees().catch(() => []),
+      ]);
+      setList(veh);
+>>>>>>> c08b25b (first commit)
       setEmployees(emps);
     } catch (e) {
       setError(e.message);
@@ -71,6 +95,7 @@ export default function VehiclesAdminScreen() {
     load();
   }, [load]);
 
+<<<<<<< HEAD
   const openEdit = (item) => {
     setEditItem(item);
     setEditForm({
@@ -129,6 +154,8 @@ export default function VehiclesAdminScreen() {
     }
   };
 
+=======
+>>>>>>> c08b25b (first commit)
   const openAdd = () => {
     setForm({ ...EMPTY, code: vehicleApi.generateVehicleCode() });
     setError(null);
@@ -151,8 +178,12 @@ export default function VehiclesAdminScreen() {
   };
 
   const handleCreate = async () => {
+<<<<<<< HEAD
     const plate = normalizePlateNumber(form.plate_number);
     if (!plate) {
+=======
+    if (!form.plate_number.trim()) {
+>>>>>>> c08b25b (first commit)
       setError('Улсын дугаар оруулна уу.');
       return;
     }
@@ -163,11 +194,19 @@ export default function VehiclesAdminScreen() {
     setError(null);
     setSaving(true);
     try {
+<<<<<<< HEAD
       const saved = await vehicleApi.insertVehicle({ ...form, plate_number: plate });
       setForm(EMPTY);
       setModal(false);
       setList((prev) => [saved, ...prev]);
       setQrItem(saved);
+=======
+      const saved = await vehicleApi.insertVehicle(form);
+      setForm(EMPTY);
+      setModal(false);
+      setList((prev) => [saved, ...prev]);
+      setQrItem(saved); // үүсгэсэн даруй QR-г нээж харуулна
+>>>>>>> c08b25b (first commit)
     } catch (e) {
       setError(mapError(e.message));
     } finally {
@@ -177,7 +216,11 @@ export default function VehiclesAdminScreen() {
 
   const handleDelete = (item) => {
     Alert.alert('Устгах', `${item.plate_number} машиныг устгах уу?`, [
+<<<<<<< HEAD
       { text: 'Болих', style: 'cancel' },
+=======
+      { text: 'Болих', style: 'cancel'},
+>>>>>>> c08b25b (first commit)
       {
         text: 'Устгах',
         style: 'destructive',
@@ -185,6 +228,7 @@ export default function VehiclesAdminScreen() {
           try {
             await vehicleApi.deleteVehicle(item.id);
             setList((prev) => prev.filter((v) => v.id !== item.id));
+<<<<<<< HEAD
             if (editItem?.id === item.id) closeEdit();
           } catch (e) {
             Alert.alert('Алдаа', e.message);
@@ -213,6 +257,8 @@ export default function VehiclesAdminScreen() {
           try {
             await vehicleApi.refillVehicleFuel(item.id);
             await load();
+=======
+>>>>>>> c08b25b (first commit)
           } catch (e) {
             Alert.alert('Алдаа', e.message);
           }
@@ -224,20 +270,32 @@ export default function VehiclesAdminScreen() {
   if (!isAdmin) {
     return (
       <View style={styles.container}>
+<<<<<<< HEAD
         <ScreenHeader title="Машины мэдээлэл солих" />
         <EmptyState text="Энэ хэсэг зөвхөн админд нээлттэй." />
+=======
+        <ScreenHeader title="Машин удирдлага"/>
+        <EmptyState text="Энэ хэсэг зөвхөн админд нээлттэй."/>
+>>>>>>> c08b25b (first commit)
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
       <ScreenHeader
         title="Машины мэдээлэл солих"
         subtitle={`${list.length} машин · QR уншуулж засах`}
         right={
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
             <HeaderButton title="QR" onPress={() => setScanVisible(true)} />
+=======
+      <ScreenHeader title="Машин удирдлага"
+        subtitle={`${list.length} машин · QR үүсгэх`}
+        right={
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+>>>>>>> c08b25b (first commit)
             <HeaderButton title="Логууд" onPress={openLogs} />
             <HeaderButton title="Нэмэх" onPress={openAdd} />
           </View>
@@ -245,7 +303,11 @@ export default function VehiclesAdminScreen() {
       />
 
       {!isCloud ? (
+<<<<<<< HEAD
         <EmptyState text="Машин бүртгэхэд Supabase холбогдсон байх шаардлагатай." />
+=======
+        <EmptyState text="Машин бүртгэхэд Supabase холбогдсон байх шаардлагатай."/>
+>>>>>>> c08b25b (first commit)
       ) : (
         <FlatList
           data={list}
@@ -254,6 +316,7 @@ export default function VehiclesAdminScreen() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
           }
+<<<<<<< HEAD
           renderItem={({ item }) => {
             const fuel = fuelByVehicle[item.id];
             const lvl = fuel?.currentLevel ?? Number(item.fuel_level_percent ?? 100);
@@ -382,6 +445,33 @@ export default function VehiclesAdminScreen() {
         </View>
       </Modal>
 
+=======
+          renderItem={({ item }) => (
+            <Card style={styles.row}>
+              <View style={styles.plateBox}>
+                <Text style={styles.plate}>{item.plate_number}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.code}>{item.code}</Text>
+                <Text style={styles.sub}>
+                  {item.liters_per_100km} л/100км · {item.driver_name || 'жолоочгүй'}
+                </Text>
+              </View>
+              <View style={{ alignItems: 'flex-end', gap: spacing.xs }}>
+                <TouchableOpacity onPress={() => setQrItem(item)}>
+                  <Badge text="QR харах" color={colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDelete(item)} hitSlop={8}>
+                  <Text style={styles.delete}>Устгах</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
+          )}
+          ListEmptyComponent={<EmptyState text="Машин бүртгэгдээгүй байна."/>}
+        />
+      )}
+
+>>>>>>> c08b25b (first commit)
       {/* Нэмэх modal */}
       <Modal visible={modal} transparent animationType="slide">
         <View style={styles.overlay}>
@@ -392,6 +482,7 @@ export default function VehiclesAdminScreen() {
               <Field
                 label="Улсын дугаар"
                 placeholder="Ж: 1234 УБА"
+<<<<<<< HEAD
                 autoCapitalize="characters"
                 value={form.plate_number}
                 onChangeText={(t) => setForm({ ...form, plate_number: formatPlateInput(t) })}
@@ -401,12 +492,18 @@ export default function VehiclesAdminScreen() {
                   <MongoliaPlate plate={form.plate_number} size="md" />
                 </View>
               ) : null}
+=======
+                value={form.plate_number}
+                onChangeText={(t) => setForm({ ...form, plate_number: t })}
+              />
+>>>>>>> c08b25b (first commit)
               <Field
                 label="100км-т зарцуулах литр"
                 keyboardType="numeric"
                 value={form.liters_per_100km}
                 onChangeText={(t) => setForm({ ...form, liters_per_100km: t })}
               />
+<<<<<<< HEAD
               <Field
                 label="Бензиний сав (л)"
                 keyboardType="numeric"
@@ -416,6 +513,11 @@ export default function VehiclesAdminScreen() {
               <Text style={styles.pickLabel}>Анхны жолооч (сонголтоор)</Text>
               {employees.length === 0 ? (
                 <Text style={styles.pickHint}>Ажилтан олдсонгүй.</Text>
+=======
+              <Text style={styles.pickLabel}>Анхны жолооч (сонголтоор — QR уншсан ажилтнаар автоматаар солигдоно)</Text>
+              {employees.length === 0 ? (
+                <Text style={styles.pickHint}>Ажилтан олдсонгүй. Эхлээд ажилтан бүртгэнэ үү.</Text>
+>>>>>>> c08b25b (first commit)
               ) : (
                 <View style={styles.pickWrap}>
                   {employees.map((e) => (
@@ -451,6 +553,10 @@ export default function VehiclesAdminScreen() {
         </View>
       </Modal>
 
+<<<<<<< HEAD
+=======
+      {/* Машины логууд modal */}
+>>>>>>> c08b25b (first commit)
       <Modal visible={logsVisible} transparent animationType="slide">
         <View style={styles.overlay}>
           <View style={styles.sheet}>
@@ -458,7 +564,11 @@ export default function VehiclesAdminScreen() {
             <Text style={styles.title}>Машины логууд</Text>
             <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
               {logs.length === 0 ? (
+<<<<<<< HEAD
                 <EmptyState text="Лог алга байна." />
+=======
+                <EmptyState text="Лог алга байна."/>
+>>>>>>> c08b25b (first commit)
               ) : (
                 logs.map((l) => (
                   <View key={l.id} style={styles.logRow}>
@@ -469,7 +579,11 @@ export default function VehiclesAdminScreen() {
                       </Text>
                       <Text style={styles.logSub}>
                         {eventMeta(l.event).label}
+<<<<<<< HEAD
                         {l.event === 'trip_end' && l.distance_km != null
+=======
+                        {l.event === 'trip_end'&& l.distance_km != null
+>>>>>>> c08b25b (first commit)
                           ? ` · ${Number(l.distance_km).toFixed(1)}км`
                           : ''}
                       </Text>
@@ -491,12 +605,20 @@ export default function VehiclesAdminScreen() {
         </View>
       </Modal>
 
+<<<<<<< HEAD
+=======
+      {/* QR харуулах modal */}
+>>>>>>> c08b25b (first commit)
       <Modal visible={!!qrItem} transparent animationType="fade">
         <View style={styles.qrOverlay}>
           <View style={styles.qrCard}>
             {qrItem && (
               <>
+<<<<<<< HEAD
                 <MongoliaPlate plate={qrItem.plate_number} size="lg" showCar={false} style={styles.qrPlateWrap} />
+=======
+                <Text style={styles.qrPlate}>{qrItem.plate_number}</Text>
+>>>>>>> c08b25b (first commit)
                 <Text style={styles.qrCode}>{qrItem.code}</Text>
                 <View style={styles.qrBox}>
                   <QRCode value={qrItem.code} size={340} />
@@ -525,6 +647,7 @@ function mapError(msg = '') {
 
 function eventMeta(event) {
   switch (event) {
+<<<<<<< HEAD
     case 'scan':
       return { icon: '', label: 'QR уншсан (жолооч боллоо)' };
     case 'trip_start':
@@ -610,3 +733,84 @@ const makeStyles = ({ colors }) =>
     logSub: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
     logTime: { color: colors.textFaint, fontSize: 11 },
   });
+=======
+    case 'scan' :
+      return { icon: '', label: 'QR уншсан (жолооч боллоо)'};
+    case 'trip_start' :
+      return { icon: '', label: 'Аялал эхлүүлсэн'};
+    case 'trip_end' :
+      return { icon: '', label: 'Аялал дуусгасан'};
+    default:
+      return { icon: '', label: event || 'Үйлдэл'};
+  }
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  plateBox: {
+    backgroundColor: colors.bgAlt,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+  },
+  plate: { color: colors.text, fontSize: 15, fontWeight: '900', letterSpacing: 0.5 },
+  code: { color: colors.text, fontSize: 15, fontWeight: '800'},
+  sub: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+  delete: { color: colors.danger, fontSize: 12, fontWeight: '700'},
+  overlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end'},
+  sheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    padding: spacing.xl,
+    maxHeight: '90%',
+  },
+  handle: { width: 40, height: 4, borderRadius: 2, backgroundColor: colors.borderHi, alignSelf: 'center', marginBottom: spacing.lg },
+  title: { color: colors.text, fontSize: 20, fontWeight: '800', marginBottom: spacing.lg },
+  pickLabel: { color: colors.textMuted, fontSize: 13, fontWeight: '600', marginBottom: spacing.sm },
+  pickHint: { color: colors.textFaint, fontSize: 12, fontStyle: 'italic', marginBottom: spacing.md },
+  pickWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+  pickBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  pickBtnActive: { backgroundColor: colors.primary + '22', borderColor: colors.primary },
+  pickText: { color: colors.textMuted, fontSize: 13, fontWeight: '700'},
+  pickTextActive: { color: colors.primary },
+  error: { color: colors.danger, marginBottom: spacing.md },
+  actions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm },
+  qrOverlay: { flex: 1, backgroundColor: '#000000cc', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
+  qrCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.xl,
+    padding: spacing.xl,
+    alignItems: 'center',
+    width: '100%',
+    maxWidth: 420,
+  },
+  qrPlate: { color: colors.text, fontSize: 24, fontWeight: '900', letterSpacing: 1 },
+  qrCode: { color: colors.textMuted, fontSize: 14, marginTop: 2, marginBottom: spacing.lg },
+  qrBox: { backgroundColor: '#fff', padding: spacing.lg, borderRadius: radius.md },
+  qrInfo: { color: colors.text, fontSize: 14, fontWeight: '700', marginTop: spacing.lg },
+  qrHint: { color: colors.textMuted, fontSize: 12, textAlign: 'center', marginTop: spacing.sm, lineHeight: 18 },
+  logRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  logIcon: { fontSize: 20 },
+  logName: { color: colors.text, fontSize: 14, fontWeight: '700' },
+  logSub: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+  logTime: { color: colors.textFaint, fontSize: 11 },
+});
+>>>>>>> c08b25b (first commit)

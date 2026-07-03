@@ -45,6 +45,7 @@ export function canAssignRoles(viewerRole) {
   return isSuperAdmin(viewerRole);
 }
 
+<<<<<<< HEAD
 /**
  * Хэрэглэгч дуудлагаар (service call) явж болох эсэх.
  * Ажилтан, админ, системийн админ бүгд дуудлага авна (нэвтэрсэн байхад л болно).
@@ -53,6 +54,8 @@ export function canTakeServiceCalls(profile) {
   return !!profile;
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 export function allowedAssignRole(viewerRole, newRole) {
   if (isSuperAdmin(viewerRole)) {
     return [ROLES.EMPLOYEE, ROLES.ADMIN, ROLES.SUPERADMIN].includes(newRole);

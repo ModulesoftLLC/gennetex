@@ -3,12 +3,19 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Linking } from 'rea
 import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, EmptyState } from '../components/ui';
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 import * as chatApi from '../services/chatService';
 
 export default function ChatArchiveScreen() {
   const styles = useStyles(makeStyles);
+=======
+import { colors, spacing } from '../theme';
+import * as chatApi from '../services/chatService';
+
+export default function ChatArchiveScreen() {
+>>>>>>> c08b25b (first commit)
   const { currentUser, isCloud } = useApp();
   const [files, setFiles] = useState([]);
 
@@ -57,7 +64,11 @@ export default function ChatArchiveScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   container: { flex: 1, backgroundColor: colors.bg },
   row: {
     flexDirection: 'row',

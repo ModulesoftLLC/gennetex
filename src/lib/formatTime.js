@@ -1,11 +1,14 @@
 const TZ = 'Asia/Ulaanbaatar';
 
+<<<<<<< HEAD
 function dayKeyInTz(value) {
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return '';
   return d.toLocaleDateString('en-CA', { timeZone: TZ });
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 export function formatTime(value) {
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return '';
@@ -27,6 +30,7 @@ export function formatDate(value) {
     timeZone: TZ,
   });
 }
+<<<<<<< HEAD
 
 export function formatConvTime(value) {
   const d = value instanceof Date ? value : new Date(value);
@@ -86,3 +90,5 @@ export function formatRelativeTime(value) {
     timeZone: TZ,
   });
 }
+=======
+>>>>>>> c08b25b (first commit)

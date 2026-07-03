@@ -13,14 +13,21 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window');
 
 function ZoomableImage({ uri }) {
   const [zoom, setZoom] = useState(1);
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
 
   const zoomBy = (delta) => setZoom((z) => Math.min(5, Math.max(1, +(z + delta).toFixed(2))));
 
@@ -79,10 +86,16 @@ function ZoomableImage({ uri }) {
 }
 
 export default function ChatImagePreview({ uri, onClose }) {
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
   if (!uri) return null;
   return (
     <Modal visible animationType="fade" transparent onRequestClose={onClose}>
+=======
+  if (!uri) return null;
+  return (
+    <Modal visible animationType="fade"transparent onRequestClose={onClose}>
+>>>>>>> c08b25b (first commit)
       <StatusBar barStyle="light-content" />
       <View style={styles.backdrop}>
         <SafeAreaView style={styles.safeTop}>
@@ -97,7 +110,11 @@ export default function ChatImagePreview({ uri, onClose }) {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   backdrop: { flex: 1, backgroundColor: '#000000ee'},
   safeTop: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2 },
   closeBtn: {

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Field, Badge, ScreenHeader, HeaderButton, EmptyState } from '../components/ui';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { ROLES, roleLabel, canManageProfile, canAssignRoles } from '../lib/roles';
@@ -22,6 +23,14 @@ const EMPTY = { name: '', last_name: '', email: '', password: '', position: '', 
 export default function EmployeesScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+import { colors, spacing, radius } from '../theme';
+import { ROLES, roleLabel, canManageProfile, canAssignRoles } from '../lib/roles';
+
+const EMPTY = { name: '', last_name: '', email: '', password: '', position: '', phone: '', address: '', role: 'employee'};
+
+export default function EmployeesScreen() {
+>>>>>>> c08b25b (first commit)
   const { isAdmin, isSuperAdmin: isSuperAdminUser, authProfile, fetchEmployees, adminCreateEmployee, adminUpdateEmployee, adminResetUserPassword } = useApp();
   const mayAssignRoles = canAssignRoles(authProfile?.role);
   const [list, setList] = useState([]);
@@ -251,7 +260,11 @@ function mapError(msg = '') {
   return msg;
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   container: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   avatar: {

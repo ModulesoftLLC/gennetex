@@ -4,14 +4,21 @@ import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Card, ScreenHeader, EmptyState } from '../components/ui';
 import InventoryThumb from '../components/InventoryThumb';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing, radius } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 import { computeHoldersByItem, movementDelta } from '../lib/stockBalance';
 export default function ToolAllocationScreen() {
   const route = useRoute();
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
   const category = route.params?.category === 'material' ? 'material' : 'tool';
   const isTool = category === 'tool';
   const { inventory, isCloud, fetchStockMovements } = useApp();
@@ -70,7 +77,11 @@ export default function ToolAllocationScreen() {
             <Card style={styles.card}>
               <View style={styles.headRow}>
                 <View style={styles.icon}>
+<<<<<<< HEAD
                   <InventoryThumb name={item.name} category={category} size={44} imageUrl={item.image_url} />
+=======
+                  <InventoryThumb name={item.name} category={category} size={44} />
+>>>>>>> c08b25b (first commit)
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.name}>{item.name}</Text>
@@ -103,8 +114,13 @@ export default function ToolAllocationScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+>>>>>>> c08b25b (first commit)
   card: { marginBottom: spacing.md },
   headRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   icon: {

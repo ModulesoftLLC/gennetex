@@ -1,9 +1,15 @@
+<<<<<<< HEAD
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Animated, Easing, useWindowDimensions } from 'react-native';
+=======
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+>>>>>>> c08b25b (first commit)
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import NavIcon from '../components/NavIcon';
+<<<<<<< HEAD
 import { spacing, radius, colors as C } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { roleLabel, canTakeServiceCalls } from '../lib/roles';
@@ -18,10 +24,22 @@ import TodayDashboard from '../components/enhancements/TodayDashboard';
 const EMPLOYEE_MODULES = [
   { key: 'Ohaab', label: 'ХААБ заавар', icon: 'attendance', color: '#b45309' },
   { key: 'Inventory', label: 'Бараа авах', icon: 'inventory', color: C.primary },
+=======
+import { colors, spacing, radius, shadow } from '../theme';
+import { roleLabel } from '../lib/roles';
+import * as tracking from '../services/trackingService';
+import * as vehicleApi from '../services/vehicleService';
+import { countTodayCheckIns } from '../services/attendanceService';
+import { formatTime, formatDate } from '../lib/formatTime';
+
+const EMPLOYEE_MODULES = [
+  { key: 'Inventory', label: 'Бараа авах', icon: 'inventory', color: colors.primary },
+>>>>>>> c08b25b (first commit)
   { key: 'MyStock', label: 'Миний үлдэгдэл', icon: 'allocation', color: '#16a34a'},
   { key: 'Tools', label: 'Багаж авах', icon: 'tools', color: '#ea580c'},
   { key: 'MyTools', label: 'Миний багаж', icon: 'allocation', color: '#ca8a04'},
   { key: 'SiteWork', label: 'Ажлын байр', icon: 'location', color: '#059669'},
+<<<<<<< HEAD
   { key: 'MyContract', label: 'Миний гэрээ', icon: 'report', color: '#0f766e'},
   { key: 'EmployeeDirectory', label: 'Ажилтны мэдээлэл', icon: 'employees', color: '#0d9488'},
   { key: 'Vehicle', label: 'Машин (код)', icon: 'vehicle', color: C.warning },
@@ -88,6 +106,28 @@ const AI_MODULES_ADMIN = [
   { key: 'AiInventoryHome', label: 'AI тооллого', sub: 'Камераар бараа тоолох', icon: 'inventory', color: '#0d9488' },
   { key: 'AdminPerformance', label: 'AI гүйцэтгэл', sub: 'Ажилтны дүн шинжилгээ', icon: 'report', color: '#6366f1' },
   { key: 'AdminAppUsage', label: 'Апп ашиглалт', sub: 'AI хэрэглээний тайлан', icon: 'report', color: '#8b5cf6' },
+=======
+  { key: 'EmployeeDirectory', label: 'Ажилтны мэдээлэл', icon: 'employees', color: '#0d9488'},
+  { key: 'Vehicle', label: 'Машин (код)', icon: 'vehicle', color: colors.warning },
+  { key: 'Fuel', label: 'Бензин тооцоо', icon: 'fuel', color: colors.success },
+  { key: 'Calls', label: 'Дуудлага', icon: 'calls', color: '#0891b2'},
+  { key: 'Attendance', label: 'Ирц', icon: 'attendance', color: '#db2777'},
+  { key: 'MyShift', label: 'Хуваарь харах', icon: 'clock', color: '#2563eb'},
+  { key: 'EmployeeReport', label: 'Ажилтан тайлан', icon: 'report', color: '#1e3a5f'},
+  { key: 'Chat', label: 'Чат', icon: 'chat', color: '#7c3aed'},
+];
+
+const ADMIN_MODULES = [
+  { key: 'Employees', label: 'Ажилтан бүртгэх', icon: 'employees', color: colors.primary },
+  { key: 'AdminReports', label: 'Тайлан', icon: 'report', color: '#1e3a5f'},
+  { key: 'EmployeeDirectory', label: 'Ажилтны мэдээлэл', icon: 'employees', color: '#0d9488'},
+  { key: 'SiteWork', label: 'Ажлын байр / баг', icon: 'location', color: '#059669'},
+  { key: 'VehiclesAdmin', label: 'Машин / QR', icon: 'qr', color: colors.warning },
+  { key: 'Live', label: 'Байршил хяналт', icon: 'location', color: colors.success },
+  { key: 'Inventory', label: 'Бараа материал', icon: 'inventory', color: colors.primary },
+  { key: 'Tools', label: 'Багаж', icon: 'tools', color: '#ea580c'},
+  { key: 'ToolAllocation', label: 'Ажилтны үлдэгдэл', icon: 'allocation', color: colors.accent },
+>>>>>>> c08b25b (first commit)
 ];
 
 const ADMIN_KEYS = new Set(ADMIN_MODULES.map((m) => m.key));
@@ -103,14 +143,19 @@ function greeting() {
 
 export default function HomeScreen() {
   const navigation = useNavigation();
+<<<<<<< HEAD
   const { colors } = useTheme();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const styles = useStyles(makeStyles);
   const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees, currentUser } = useApp();
+=======
+  const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees } = useApp();
+>>>>>>> c08b25b (first commit)
   const name = authProfile?.name || profile?.name || 'Ажилтан';
 
   const [stats, setStats] = useState({ employees: 0, online: 0, vehicles: 0, checkins: 0 });
   const [now, setNow] = useState(() => new Date());
+<<<<<<< HEAD
   const [ohaabSignedToday, setOhaabSignedToday] = useState(true);
 
   // Динамик хэмжээ тооцоолох (flex wrap болон gap тохируулахад багтахгүй байхаас сэргийлнэ)
@@ -119,6 +164,8 @@ export default function HomeScreen() {
   const availableWidth = SCREEN_WIDTH - bodyPadding * 2;
   const tileWidth = Math.floor((availableWidth - tileGap * 2) - 1) / 3;
   const aiCardWidth = Math.floor((availableWidth - tileGap) - 1) / 2;
+=======
+>>>>>>> c08b25b (first commit)
 
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 30_000);
@@ -127,6 +174,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+<<<<<<< HEAD
       let active = true;
       (async () => {
         if (isCloud && currentUser?.id) {
@@ -138,6 +186,11 @@ export default function HomeScreen() {
           }
         }
         if (!isAdmin || !isCloud) return;
+=======
+      if (!isAdmin || !isCloud) return;
+      let active = true;
+      (async () => {
+>>>>>>> c08b25b (first commit)
         try {
           const [emps, workers, vehicles, checkins] = await Promise.all([
             fetchEmployees().catch(() => []),
@@ -156,11 +209,16 @@ export default function HomeScreen() {
       return () => {
         active = false;
       };
+<<<<<<< HEAD
     }, [isAdmin, isCloud, fetchEmployees, currentUser?.id])
+=======
+    }, [isAdmin, isCloud, fetchEmployees])
+>>>>>>> c08b25b (first commit)
   );
 
   const dateStr = formatDate(now);
 
+<<<<<<< HEAD
   // Админ дуудлагаар явах эрхтэй эсэх (superadmin эрх өгсөн үед)
   const canTakeCalls = canTakeServiceCalls(authProfile);
   const serviceModules = useMemo(
@@ -205,6 +263,14 @@ export default function HomeScreen() {
   const aiSlide = mountAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] });
   const badgeScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
 
+=======
+  const serviceModules = useMemo(
+    () =>
+      (isAdmin ? EMPLOYEE_MODULES.filter((m) => !ADMIN_KEYS.has(m.key) && !ADMIN_HIDDEN_KEYS.has(m.key)) : EMPLOYEE_MODULES),
+    [isAdmin]
+  );
+
+>>>>>>> c08b25b (first commit)
   const go = (m) => {
     if (m.key === 'Vehicle') {
       navigation.navigate('Vehicle', { autoScan: true });
@@ -216,7 +282,11 @@ export default function HomeScreen() {
   const renderTile = (m, i) => (
     <TouchableOpacity
       key={`${m.key}-${i}`}
+<<<<<<< HEAD
       style={[styles.tile, { width: tileWidth }]}
+=======
+      style={styles.tile}
+>>>>>>> c08b25b (first commit)
       activeOpacity={0.82}
       onPress={() => go(m)}
     >
@@ -229,10 +299,13 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
+<<<<<<< HEAD
   const renderAiCard = (m, i) => (
     <AiCard key={`${m.key}-${i}`} m={m} styles={styles} width={aiCardWidth} onPress={() => go(m)} />
   );
 
+=======
+>>>>>>> c08b25b (first commit)
   return (
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.header}>
@@ -261,6 +334,7 @@ export default function HomeScreen() {
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+<<<<<<< HEAD
         <TodayDashboard />
 
         {isCloud && !ohaabSignedToday ? (
@@ -280,6 +354,8 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ) : null}
 
+=======
+>>>>>>> c08b25b (first commit)
         <View style={styles.clockCard}>
           <View style={{ flex: 1 }}>
             <Text style={styles.clockLabel}>Өнөөдрийн ирц</Text>
@@ -291,6 +367,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
+<<<<<<< HEAD
         <Animated.View style={{ opacity: mountAnim, transform: [{ translateY: aiSlide }] }}>
           <View style={styles.aiHeaderRow}>
             <View style={styles.aiTitleWrap}>
@@ -306,6 +383,8 @@ export default function HomeScreen() {
           <View style={styles.aiGrid}>{aiModules.map(renderAiCard)}</View>
         </Animated.View>
 
+=======
+>>>>>>> c08b25b (first commit)
         {isAdmin ? (
           <>
             <View style={styles.adminHeaderRow}>
@@ -335,7 +414,11 @@ export default function HomeScreen() {
               <Text style={styles.adminCtaArrow}>→</Text>
             </TouchableOpacity>
 
+<<<<<<< HEAD
             <View style={styles.grid}>{adminModules.map(renderTile)}</View>
+=======
+            <View style={styles.grid}>{ADMIN_MODULES.map(renderTile)}</View>
+>>>>>>> c08b25b (first commit)
           </>
         ) : (
           <Text style={styles.welcomeSub}>Доорх үйлчилгээнүүдээс сонгон ажлаа үргэлжлүүлнэ үү.</Text>
@@ -348,6 +431,7 @@ export default function HomeScreen() {
   );
 }
 
+<<<<<<< HEAD
 function AiCard({ m, styles, width, onPress }) {
   const scale = useRef(new Animated.Value(1)).current;
   const pressIn = () =>
@@ -375,6 +459,9 @@ function AiCard({ m, styles, width, onPress }) {
 
 function Stat({ icon, value, label, color }) {
   const styles = useStyles(makeStyles);
+=======
+function Stat({ icon, value, label, color }) {
+>>>>>>> c08b25b (first commit)
   return (
     <View style={styles.statCard}>
       <View style={[styles.statIcon, { backgroundColor: color + '14'}]}>
@@ -390,10 +477,17 @@ function Stat({ icon, value, label, color }) {
 
 const TILE_GAP = spacing.md;
 
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
     backgroundColor: colors.surfaceDim,
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bgAlt },
+  header: {
+    backgroundColor: colors.surface,
+>>>>>>> c08b25b (first commit)
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
@@ -534,6 +628,7 @@ const makeStyles = ({ colors, shadow }) => StyleSheet.create({
     marginBottom: spacing.sm,
   },
   tileLabel: { color: colors.text, fontSize: 12, fontWeight: '600', textAlign: 'center', lineHeight: 16 },
+<<<<<<< HEAD
   aiHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   aiTitleWrap: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   aiBadge: {
@@ -593,4 +688,6 @@ const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   ohaabTitle: { color: '#fff', fontWeight: '800', fontSize: 15 },
   ohaabSub: { color: 'rgba(255,255,255,0.92)', fontSize: 12, marginTop: 2, lineHeight: 16 },
   ohaabArrow: { color: '#fff', fontSize: 22, fontWeight: '800' },
+=======
+>>>>>>> c08b25b (first commit)
 });

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+=======
+import React, { useMemo, useState } from 'react';
+>>>>>>> c08b25b (first commit)
 import {
   View,
   Text,
@@ -9,6 +13,7 @@ import {
   ScrollView,
   Alert,
   RefreshControl,
+<<<<<<< HEAD
   TextInput,
   Image,
   ActivityIndicator,
@@ -21,6 +26,16 @@ import { useApp } from '../context/AppContext';
 import {
   Button,
   Field,
+=======
+} from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useApp } from '../context/AppContext';
+import {
+  Card,
+  Button,
+  Field,
+  Badge,
+>>>>>>> c08b25b (first commit)
   ScreenHeader,
   HeaderButton,
   EmptyState,
@@ -28,6 +43,7 @@ import {
 } from '../components/ui';
 import InventoryThumb from '../components/InventoryThumb';
 import BarcodeScanner from '../components/BarcodeScanner';
+<<<<<<< HEAD
 import GiveToEmployeeModal from '../components/GiveToEmployeeModal';
 import * as invApi from '../services/inventoryService';
 import * as ohaabApi from '../services/ohaabService';
@@ -77,6 +93,23 @@ export default function InventoryScreen() {
   const meta = CAT_META[category];
   const cardWidth = (width - spacing.lg * 2 - spacing.sm) / 2;
 
+=======
+import * as invApi from '../services/inventoryService';
+import { colors, spacing, radius } from '../theme';
+
+const EMPTY_FORM = { name: '', unit: 'ширхэг', quantity: '', price: '', barcode: '', category: 'material'};
+
+const CAT_META = {
+  material: { label: 'Бараа материал', empty: 'Бараа материал бүртгэгдээгүй байна.'},
+  tool: { label: 'Багаж', empty: 'Багаж бүртгэгдээгүй байна.'},
+};
+
+export default function InventoryScreen() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const category = route.params?.category === 'tool' ? 'tool' : 'material';
+  const meta = CAT_META[category];
+>>>>>>> c08b25b (first commit)
   const {
     inventory,
     addInventoryItem,
@@ -84,6 +117,7 @@ export default function InventoryScreen() {
     adjustQuantity,
     removeInventoryItem,
     withdrawItem,
+<<<<<<< HEAD
     giveItemToEmployee,
     getItemByBarcode,
     isCloud,
@@ -93,6 +127,13 @@ export default function InventoryScreen() {
     fetchEmployees,
   } = useApp();
 
+=======
+    getItemByBarcode,
+    isCloud,
+    isAdmin,
+    refreshInventory,
+  } = useApp();
+>>>>>>> c08b25b (first commit)
   const [modalVisible, setModalVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -100,6 +141,7 @@ export default function InventoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [takeItem, setTakeItem] = useState(null);
   const [takeQty, setTakeQty] = useState('1');
+<<<<<<< HEAD
   const [takePhotoUri, setTakePhotoUri] = useState(null);
   const [takeSaving, setTakeSaving] = useState(false);
   const [giveItem, setGiveItem] = useState(null);
@@ -142,6 +184,13 @@ export default function InventoryScreen() {
   const lowStockCount = useMemo(
     () => filtered.filter((it) => it.quantity > 0 && it.quantity <= LOW_STOCK).length,
     [filtered]
+=======
+  const [pendingAdd, setPendingAdd] = useState(false);
+
+  const filtered = useMemo(
+    () => inventory.filter((it) => (it.category || 'material') === category),
+    [inventory, category]
+>>>>>>> c08b25b (first commit)
   );
 
   const onRefresh = async () => {
@@ -166,6 +215,7 @@ export default function InventoryScreen() {
         ? 'Багаж авах'
         : meta.label;
 
+<<<<<<< HEAD
   const resetForm = () => {
     setEditingId(null);
     setForm({ ...EMPTY_FORM, category });
@@ -216,6 +266,42 @@ export default function InventoryScreen() {
     if (!ok) return;
     resetForm();
     setModalVisible(true);
+=======
+  const closeFormModal = () => {
+    setModalVisible(false);
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim()) return;
+    const payload = {
+      name: form.name.trim(),
+      unit: form.unit.trim() || 'ширхэг',
+      quantity: Number(form.quantity) || 0,
+      price: showPrice ? Number(form.price) || 0 : 0,
+      barcode: form.barcode.trim() || null,
+      category,
+    };
+    if (editingId) {
+      await updateInventoryItem(editingId, payload);
+      Alert.alert('Хадгалагдлаа', `${payload.name} шинэчлэгдлээ.`);
+    } else {
+      await addInventoryItem(payload);
+    }
+    closeFormModal();
+  };
+
+  const openAdd = () => {
+    setEditingId(null);
+    setForm({ ...EMPTY_FORM, category });
+    if (isAdmin) {
+      setPendingAdd(true);
+      setScanMode('form');
+    } else {
+      setModalVisible(true);
+    }
+>>>>>>> c08b25b (first commit)
   };
 
   const openEdit = (item) => {
@@ -227,12 +313,16 @@ export default function InventoryScreen() {
       price: String(item.price ?? ''),
       barcode: item.barcode || '',
       category: item.category || category,
+<<<<<<< HEAD
       image_url: item.image_url || null,
       imageUri: null,
+=======
+>>>>>>> c08b25b (first commit)
     });
     setModalVisible(true);
   };
 
+<<<<<<< HEAD
   const handleFormScan = (data) => {
     setScanMode(null);
     setForm((f) => ({ ...f, barcode: String(data || '').trim() }));
@@ -240,6 +330,36 @@ export default function InventoryScreen() {
   };
 
   const closeScanner = () => setScanMode(null);
+=======
+  const handleQuickScan = (data) => {
+    setScanMode(null);
+    const existing = getItemByBarcode(data);
+    if (existing) {
+      adjustQuantity(existing.id, 1);
+      Alert.alert('Бүртгэгдлээ', `${existing.name}\nТоо хэмжээ +1 (нийт ${existing.quantity + 1} ${existing.unit})`);
+    } else {
+      setForm({ ...EMPTY_FORM, barcode: data, category });
+      setModalVisible(true);
+      Alert.alert('Шинэ бараа', `Код: ${data}\nМэдээллийг бөглөж хадгална уу.`);
+    }
+  };
+
+  const handleFormScan = (data) => {
+    setScanMode(null);
+    const code = String(data || '').trim();
+    setForm((f) => ({ ...f, barcode: code }));
+    setModalVisible(true);
+    setPendingAdd(false);
+  };
+
+  const closeScanner = () => {
+    if (pendingAdd) {
+      setModalVisible(true);
+      setPendingAdd(false);
+    }
+    setScanMode(null);
+  };
+>>>>>>> c08b25b (first commit)
 
   const handleTakeScan = async (data) => {
     setScanMode(null);
@@ -251,19 +371,32 @@ export default function InventoryScreen() {
       } catch (e) {}
     }
     if (!item) {
+<<<<<<< HEAD
       Alert.alert('Олдсонгүй', `"${data}" кодтой бараа бүртгэлд алга.`);
+=======
+      Alert.alert('Олдсонгүй', `"${data}"кодтой бараа бүртгэлд алга.`);
+      return;
+    }
+    if (!item.barcode) {
+      Alert.alert('Бар кодгүй', 'Энэ бараанд бар код бүртгэгдээгүй байна. Админд хэлнэ үү.');
+>>>>>>> c08b25b (first commit)
       return;
     }
     const itemCat = item.category || 'material';
     if (itemCat !== category) {
       const where = itemCat === 'tool' ? 'Багаж' : 'Бараа материал';
+<<<<<<< HEAD
       Alert.alert('Буруу ангилал', `Энэ код "${where}" хэсэгт бүртгэгдсэн.`);
+=======
+      Alert.alert('Буруу ангилал', `Энэ код "${where}"хэсэгт бүртгэгдсэн.`);
+>>>>>>> c08b25b (first commit)
       return;
     }
     openTake(item);
   };
 
   const handleScanned = (data) => {
+<<<<<<< HEAD
     if (scanMode === 'form') handleFormScan(data);
     else if (scanMode === 'take') handleTakeScan(data);
   };
@@ -278,6 +411,33 @@ export default function InventoryScreen() {
     setTakeItem(item);
     setTakeQty('1');
     setTakePhotoUri(null);
+=======
+    if (scanMode === 'quick') handleQuickScan(data);
+    else if (scanMode === 'form') handleFormScan(data);
+    else if (scanMode === 'take') handleTakeScan(data);
+  };
+
+  const openScan = () => {
+    if (isAdmin) return;
+    setScanMode('take');
+  };
+
+  const employeeScanHeader = (
+    <View style={styles.scanBanner}>
+      <Text style={styles.scanBannerTitle}>Бар код уншуулж авна</Text>
+      <Text style={styles.scanBannerText}>
+        {category === 'tool'
+          ? 'Багаж авахын тулд заавал шошгоны бар кодыг уншуулна уу.'
+          : 'Бараа материал авахын тулд заавал шошгоны бар кодыг уншуулна уу.'}
+      </Text>
+      <Button title="Бар код унших" variant="success" onPress={openScan} />
+    </View>
+  );
+
+  const openTake = (item) => {
+    setTakeItem(item);
+    setTakeQty('1');
+>>>>>>> c08b25b (first commit)
   };
 
   const confirmTake = async () => {
@@ -287,6 +447,7 @@ export default function InventoryScreen() {
       Alert.alert('Хүрэлцэхгүй', `Агуулахад ${takeItem.quantity} ${takeItem.unit} л байна.`);
       return;
     }
+<<<<<<< HEAD
     if (!isAdmin && !takePhotoUri) {
       Alert.alert('Зураг шаардлагатай', 'Бараа авахын тулд баталгаа зураг авна уу.');
       return;
@@ -456,13 +617,92 @@ export default function InventoryScreen() {
     );
   };
 
+=======
+    const item = takeItem;
+    setTakeItem(null);
+    await withdrawItem(item, q);
+    Alert.alert('Олгогдлоо', `${item.name}\n${q} ${item.unit} авлаа. Үлдэгдэл: ${item.quantity - q} ${item.unit}`);
+  };
+
+  const renderItem = ({ item }) => (
+    <Card style={styles.itemCard}>
+      <View style={styles.row}>
+        <View style={styles.avatar}>
+          <InventoryThumb name={item.name} category={item.category || category} size={46} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          {showPrice ? (
+            <Text style={styles.itemSub}>
+              {formatMNT(item.price)} / {item.unit}
+            </Text>
+          ) : (
+            <Text style={styles.itemSub}>{item.unit}</Text>
+          )}
+          {item.barcode ? (
+            <Text style={styles.itemBarcode}>▮▯▮ {item.barcode}</Text>
+          ) : null}
+        </View>
+        <View style={styles.qtyPill}>
+          <Text style={styles.qtyNum}>{item.quantity}</Text>
+          <Text style={styles.qtyUnit}>{item.unit}</Text>
+        </View>
+      </View>
+
+      <View style={styles.itemFooter}>
+        {showPrice ? (
+          <Text style={styles.itemValue}>{formatMNT(item.quantity * item.price)}</Text>
+        ) : (
+          <View />
+        )}
+        {isAdmin ? (
+          <View style={styles.adminActions}>
+            <TouchableOpacity onPress={() => openEdit(item)} hitSlop={8}>
+              <Text style={styles.edit}>Засах</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => removeInventoryItem(item.id)} hitSlop={8}>
+              <Text style={styles.delete}>Устгах</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+      </View>
+
+      {/* Авах — зөвхөн бар код уншуулсны дараа (ажилтан) */}
+      {isAdmin ? (
+        <Button
+          title="Бараа авах" variant="success"
+          size="sm"
+          style={{ marginTop: spacing.md }}
+          onPress={() => openTake(item)}
+        />
+      ) : null}
+
+      {/* Тоо тохируулах — зөвхөн админ */}
+      {isAdmin ? (
+        <View style={styles.stepper}>
+          <Button title="−10" variant="ghost" size="sm" style={styles.stepBtn} onPress={() => adjustQuantity(item.id, -10)} />
+          <Button title="−1" variant="ghost" size="sm" style={styles.stepBtn} onPress={() => adjustQuantity(item.id, -1)} />
+          <Button title="+1" size="sm" style={styles.stepBtn} onPress={() => adjustQuantity(item.id, 1)} />
+          <Button title="+10" size="sm" style={styles.stepBtn} onPress={() => adjustQuantity(item.id, 10)} />
+        </View>
+      ) : null}
+    </Card>
+  );
+
+>>>>>>> c08b25b (first commit)
   return (
     <View style={styles.container}>
       <ScreenHeader
         title={screenTitle}
+<<<<<<< HEAD
         subtitle={isCloud ? 'Онлайн' : 'Офлайн'}
         right={
           <View style={styles.headerBtns}>
+=======
+        subtitle={`${filtered.length} нэр төрөл`}
+        right={
+          <View style={{ flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+>>>>>>> c08b25b (first commit)
             {!isAdmin ? (
               <>
                 <HeaderButton
@@ -488,10 +728,28 @@ export default function InventoryScreen() {
         data={filtered}
         keyExtractor={(it) => it.id}
         renderItem={renderItem}
+<<<<<<< HEAD
         numColumns={2}
         columnWrapperStyle={styles.gridRow}
         ListHeaderComponent={listHeader}
         contentContainerStyle={styles.listContent}
+=======
+        ListHeaderComponent={
+          isAdmin ? (
+            showPrice ? (
+              <View style={styles.summaryRow}>
+                <View style={styles.summaryMain}>
+                  <Text style={styles.summaryLabel}>Нийт үнэлгээ {isCloud ? '' : ''}</Text>
+                  <Text style={styles.summaryValue}>{formatMNT(totalValue)}</Text>
+                </View>
+              </View>
+            ) : null
+          ) : (
+            employeeScanHeader
+          )
+        }
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 40 }}
+>>>>>>> c08b25b (first commit)
         refreshControl={
           isCloud ? (
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
@@ -500,6 +758,7 @@ export default function InventoryScreen() {
         ListEmptyComponent={<EmptyState text={meta.empty} />}
       />
 
+<<<<<<< HEAD
       {/* Нэмэх / засах */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
@@ -548,6 +807,28 @@ export default function InventoryScreen() {
 
               <Field
                 label="Барааны нэр *"
+=======
+      <Modal visible={modalVisible && scanMode !== 'form'} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={styles.modalTitle}>
+                {editingId ? `${meta.label} засах` : `${meta.label} нэмэх`}
+              </Text>
+              <View style={styles.barcodeRow}>
+                <Field
+                  label="Зураасан код (barcode)"
+                  placeholder="Скан хийх эсвэл гараар"
+                  value={form.barcode}
+                  onChangeText={(t) => setForm({ ...form, barcode: t })}
+                  style={{ flex: 1, marginBottom: 0 }}
+                />
+                <Button title="Скан" variant="success" style={styles.scanBtn} onPress={() => setScanMode('form')} />
+              </View>
+              <Field
+                label="Барааны нэр"
+>>>>>>> c08b25b (first commit)
                 placeholder="Ж: Цахилгаан кабель"
                 value={form.name}
                 onChangeText={(t) => setForm({ ...form, name: t })}
@@ -574,6 +855,7 @@ export default function InventoryScreen() {
                   onChangeText={(t) => setForm({ ...form, price: t })}
                 />
               ) : null}
+<<<<<<< HEAD
               <View style={styles.barcodeRow}>
                 <Field
                   label="Бар код (заавал биш)"
@@ -594,11 +876,18 @@ export default function InventoryScreen() {
                 />
               </View>
               {saving ? <ActivityIndicator style={{ marginTop: spacing.md }} color={colors.primary} /> : null}
+=======
+              <View style={styles.modalActions}>
+                <Button title="Болих" variant="ghost" style={{ flex: 1 }} onPress={closeFormModal} />
+                <Button title={editingId ? 'Хадгалах' : 'Нэмэх'} style={{ flex: 1 }} onPress={handleSave} />
+              </View>
+>>>>>>> c08b25b (first commit)
             </ScrollView>
           </View>
         </View>
       </Modal>
 
+<<<<<<< HEAD
       {/* Ажилтан авах */}
       <Modal visible={takeItem !== null} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
@@ -674,10 +963,35 @@ export default function InventoryScreen() {
                 </>
               ) : null}
             </ScrollView>
+=======
+      <Modal visible={takeItem !== null} animationType="slide"transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>Бараа авах</Text>
+            {takeItem ? (
+              <>
+                <Text style={styles.takeName}>{takeItem.name}</Text>
+                <Text style={styles.takeSub}>Агуулахын үлдэгдэл: {takeItem.quantity} {takeItem.unit}</Text>
+                <Field
+                  label={`Авах тоо (${takeItem.unit})`}
+                  placeholder="1"
+                  keyboardType="numeric"
+                  value={takeQty}
+                  onChangeText={setTakeQty}
+                />
+                <View style={styles.modalActions}>
+                  <Button title="Болих" variant="ghost" style={{ flex: 1 }} onPress={() => setTakeItem(null)} />
+                  <Button title="Авах" variant="success" style={{ flex: 1 }} onPress={confirmTake} />
+                </View>
+              </>
+            ) : null}
+>>>>>>> c08b25b (first commit)
           </View>
         </View>
       </Modal>
 
+<<<<<<< HEAD
       <GiveToEmployeeModal
         visible={giveItem !== null}
         item={giveItem}
@@ -686,6 +1000,8 @@ export default function InventoryScreen() {
         onSubmit={handleGiveSubmit}
       />
 
+=======
+>>>>>>> c08b25b (first commit)
       <BarcodeScanner
         visible={scanMode !== null}
         onClose={closeScanner}
@@ -695,14 +1011,31 @@ export default function InventoryScreen() {
             ? category === 'tool'
               ? 'Багажийн бар код'
               : 'Барааны бар код'
+<<<<<<< HEAD
             : 'Бар код унших'
         }
         hint="QR эсвэл EAN/Code128 зураасан код"
+=======
+            : scanMode === 'form'
+              ? pendingAdd
+                ? 'Бараа нэмэх — бар код'
+                : 'Бар код унших'
+              : 'Бар код унших'
+        }
+        hint={
+          scanMode === 'take'
+            ? 'Барааны зураасан кодыг уншуулна уу'
+            : pendingAdd
+              ? 'Эхлээд барааны шошгоны кодыг уншуулна уу'
+              : 'QR эсвэл EAN/Code128 зураасан код'
+        }
+>>>>>>> c08b25b (first commit)
       />
     </View>
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   headerBtns: { flexDirection: 'row', gap: spacing.sm, flexWrap: 'wrap', justifyContent: 'flex-end' },
@@ -720,10 +1053,26 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   summaryValue: { color: colors.text, fontSize: 24, fontWeight: '900', marginTop: 2 },
   banner: {
     backgroundColor: colors.primarySoft,
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+  },
+  summaryMain: { flex: 1 },
+  summaryLabel: { color: colors.textMuted, fontSize: 13 },
+  summaryValue: { color: colors.text, fontSize: 24, fontWeight: '900', marginTop: 2 },
+  scanBanner: {
+    backgroundColor: colors.surface,
+>>>>>>> c08b25b (first commit)
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors.border,
     padding: spacing.lg,
+<<<<<<< HEAD
     marginBottom: spacing.md,
   },
   bannerTitle: { color: colors.text, fontSize: 16, fontWeight: '800', marginBottom: spacing.xs },
@@ -805,12 +1154,61 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   },
   stepText: { color: colors.text, fontWeight: '800', fontSize: 16 },
   modalOverlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end' },
+=======
+    marginBottom: spacing.lg,
+  },
+  scanBannerTitle: { color: colors.text, fontSize: 16, fontWeight: '800', marginBottom: spacing.xs },
+  scanBannerText: { color: colors.textMuted, fontSize: 13, lineHeight: 19, marginBottom: spacing.md },
+  itemCard: { paddingBottom: spacing.md },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  avatar: {
+    width: 46,
+    height: 46,
+    borderRadius: radius.md,
+    overflow: 'hidden',
+  },
+  itemName: { color: colors.text, fontSize: 16, fontWeight: '800'},
+  itemSub: { color: colors.textMuted, marginTop: 2, fontSize: 13 },
+  itemBarcode: { color: colors.primary, marginTop: 3, fontSize: 11, letterSpacing: 1 },
+  qtyPill: {
+    backgroundColor: colors.bgAlt,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    minWidth: 58,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  qtyNum: { color: colors.text, fontSize: 18, fontWeight: '900'},
+  qtyUnit: { color: colors.textMuted, fontSize: 10 },
+  itemFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  itemValue: { color: colors.success, fontWeight: '800', fontSize: 15 },
+  adminActions: { flexDirection: 'row', gap: spacing.md },
+  edit: { color: colors.primary, fontWeight: '700', fontSize: 13 },
+  delete: { color: colors.danger, fontWeight: '700', fontSize: 13 },
+  stepper: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  stepBtn: { flex: 1 },
+  modalOverlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end'},
+>>>>>>> c08b25b (first commit)
   modalContent: {
     backgroundColor: colors.surface,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
     padding: spacing.xl,
+<<<<<<< HEAD
     maxHeight: '92%',
+=======
+    maxHeight: '88%',
+>>>>>>> c08b25b (first commit)
   },
   modalHandle: {
     width: 40,
@@ -821,6 +1219,7 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     marginBottom: spacing.lg,
   },
   modalTitle: { color: colors.text, fontSize: 20, fontWeight: '800', marginBottom: spacing.lg },
+<<<<<<< HEAD
   fieldLabel: { color: colors.textMuted, fontSize: 13, fontWeight: '600', marginBottom: spacing.xs },
   formPhotoWrap: { position: 'relative', marginBottom: spacing.md },
   formPhoto: { width: '100%', height: 160, borderRadius: radius.md },
@@ -845,4 +1244,11 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   takePreview: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.lg },
   takeName: { color: colors.text, fontSize: 18, fontWeight: '800' },
   takeSub: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
+=======
+  takeName: { color: colors.text, fontSize: 18, fontWeight: '800', marginBottom: 2 },
+  takeSub: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.lg },
+  modalActions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm },
+  barcodeRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm, marginBottom: spacing.md },
+  scanBtn: { paddingVertical: spacing.md },
+>>>>>>> c08b25b (first commit)
 });

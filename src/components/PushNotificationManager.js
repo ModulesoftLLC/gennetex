@@ -7,11 +7,14 @@ import { startIncomingCallAlert, stopIncomingCallAlert } from '../services/callA
 import { navigateFromNotification } from '../lib/navigationRef';
 import { getActiveChatRoom } from '../lib/chatFocus';
 import { supabase } from '../lib/supabase';
+<<<<<<< HEAD
 import { registerBackgroundCallTask } from '../services/incomingCallBackgroundTask';
 import {
   isNativeIncomingCallAvailable,
   showNativeIncomingCallFromPush,
 } from '../services/nativeIncomingCallService';
+=======
+>>>>>>> c08b25b (first commit)
 
 export default function PushNotificationManager() {
   const { isCloud, currentUser } = useApp();
@@ -34,10 +37,13 @@ export default function PushNotificationManager() {
       } catch (e) {}
     })();
 
+<<<<<<< HEAD
     // App хаалттай/background үед дуудлагын push ирвэл утасны native
     // дуудлагын дэлгэц гаргах background task-ийг бүртгэнэ.
     registerBackgroundCallTask();
 
+=======
+>>>>>>> c08b25b (first commit)
     // Миний ярианууд — foreground чат мэдэгдэл
     (async () => {
       const { data } = await supabase
@@ -79,6 +85,7 @@ export default function PushNotificationManager() {
           .eq('user_id', currentUser.id);
         memberRooms.current = new Set((data || []).map((m) => m.conversation_id));
       })
+<<<<<<< HEAD
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => {
         const post = payload.new;
         if (!post || post.author_id === currentUser.id) return;
@@ -159,11 +166,14 @@ export default function PushNotificationManager() {
           });
         }
       })
+=======
+>>>>>>> c08b25b (first commit)
       .subscribe();
 
     receivedSub.current = Notifications.addNotificationReceivedListener(async (notification) => {
       const data = notification.request.content.data;
       if (data?.type === 'call') {
+<<<<<<< HEAD
         // Апп идэвхтэй (foreground) үед Supabase realtime (IncomingCallManager)
         // өөрөө дуудлагыг гаргана — давхардуулахгүй.
         if (AppState.currentState === 'active') return;
@@ -172,6 +182,9 @@ export default function PushNotificationManager() {
         } else {
           await startIncomingCallAlert(data.callerName || notification.request.content.title);
         }
+=======
+        await startIncomingCallAlert(data.callerName || notification.request.content.title);
+>>>>>>> c08b25b (first commit)
       }
     });
 

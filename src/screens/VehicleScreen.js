@@ -14,6 +14,7 @@ import {
   formatMNT,
 } from '../components/ui';
 import BarcodeScanner from '../components/BarcodeScanner';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { VEHICLES } from '../data/mockData';
@@ -27,6 +28,15 @@ import * as vehicleApi from '../services/vehicleService';
 export default function VehicleScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+import { colors, spacing, radius } from '../theme';
+import { VEHICLES } from '../data/mockData';
+import { distanceMeters } from '../lib/geo';
+import { calculateFuel, isDrivingSpeed, formatIdle } from '../lib/fuelCalc';
+import * as vehicleApi from '../services/vehicleService';
+
+export default function VehicleScreen() {
+>>>>>>> c08b25b (first commit)
   const navigation = useNavigation();
   const route = useRoute();
   const { isAdmin, isCloud, currentUser, authProfile, fuelSettings, addFuelLog } = useApp();
@@ -56,7 +66,10 @@ export default function VehicleScreen() {
   );
 
   const litersPer100 = vehicle?.liters_per_100km || fuelSettings.litersPer100km;
+<<<<<<< HEAD
   const tankLiters = vehicleTankLiters(vehicle);
+=======
+>>>>>>> c08b25b (first commit)
   const fuel = calculateFuel({
     distanceKm,
     idleSeconds,
@@ -64,10 +77,13 @@ export default function VehicleScreen() {
     idleLitersPerHour: fuelSettings.idleLitersPerHour,
     pricePerLiter: fuelSettings.pricePerLiter,
   });
+<<<<<<< HEAD
   const baseFuelLevel = Number(vehicle?.fuel_level_percent ?? 100);
   const tripDrainPct = tankLiters > 0 ? (fuel.liters / tankLiters) * 100 : 0;
   const currentFuelLevel = Math.max(0, Math.min(100, Math.round((baseFuelLevel - tripDrainPct) * 10) / 10));
   const remainingLiters = Math.max(0, Math.round(((currentFuelLevel / 100) * tankLiters) * 10) / 10);
+=======
+>>>>>>> c08b25b (first commit)
 
   useEffect(() => {
     if (!tripActive || !isCloud || !tripRef.current) return;
@@ -414,7 +430,13 @@ export default function VehicleScreen() {
           <>
             <Card>
               <View style={styles.vehHead}>
+<<<<<<< HEAD
                 <MongoliaPlate plate={vehicle.plate_number} size="lg" />
+=======
+                <View style={styles.plateBox}>
+                  <Text style={styles.plate}>{vehicle.plate_number}</Text>
+                </View>
+>>>>>>> c08b25b (first commit)
                 {tripActive && (
                   <Badge
                     text={moving ? 'Хөдөлж байна' : 'Зогсож байна'}
@@ -425,12 +447,16 @@ export default function VehicleScreen() {
               <View style={styles.infoRow}>
                 <InfoCol label="Код" value={vehicle.code} />
                 <InfoCol label="100км-т" value={`${litersPer100} л`} />
+<<<<<<< HEAD
                 <InfoCol label="Сав" value={`${tankLiters} л`} />
                 <InfoCol label="Бензин" value={`${currentFuelLevel}%`} />
               </View>
               <View style={[styles.infoRow, { marginTop: spacing.sm }]}>
                 <InfoCol label="Жолооч" value={vehicle.driver_name || '—'} />
                 {tripActive ? <InfoCol label="Явсан" value={`${distanceKm.toFixed(1)} км`} /> : null}
+=======
+                <InfoCol label="Жолооч" value={vehicle.driver_name || '—'} />
+>>>>>>> c08b25b (first commit)
               </View>
             </Card>
 
@@ -505,6 +531,7 @@ export default function VehicleScreen() {
             </View>
 
             <Card>
+<<<<<<< HEAD
               <SectionTitle>Бензиний түвшин</SectionTitle>
               <View style={styles.fuelGaugeRow}>
                 <FuelTankGauge
@@ -528,6 +555,8 @@ export default function VehicleScreen() {
             </Card>
 
             <Card>
+=======
+>>>>>>> c08b25b (first commit)
               {!tripActive ? (
                 <>
                   <SectionTitle>Аялал</SectionTitle>
@@ -587,7 +616,10 @@ export default function VehicleScreen() {
 }
 
 function InfoCol({ label, value }) {
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
   return (
     <View style={styles.infoCol}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -596,17 +628,36 @@ function InfoCol({ label, value }) {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   help: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md, lineHeight: 19 },
   vehHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+  help: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md, lineHeight: 19 },
+  vehHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
+  plateBox: {
+    backgroundColor: colors.bgAlt,
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  plate: { color: colors.text, fontSize: 22, fontWeight: '900', letterSpacing: 1 },
+>>>>>>> c08b25b (first commit)
   infoRow: { flexDirection: 'row', marginTop: spacing.md },
   infoCol: { flex: 1 },
   infoLabel: { color: colors.textMuted, fontSize: 12 },
   infoValue: { color: colors.text, fontSize: 16, fontWeight: '700', marginTop: 3 },
   statRow: { flexDirection: 'row', gap: spacing.sm, marginVertical: spacing.lg },
+<<<<<<< HEAD
   fuelGaugeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
   fuelLevelText: { fontSize: 32, fontWeight: '900' },
+=======
+>>>>>>> c08b25b (first commit)
   driverRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.sm },
   driverAvatar: {
     width: 56,

@@ -22,6 +22,7 @@ import InventoryThumb from '../components/InventoryThumb';
 import BarcodeScanner from '../components/BarcodeScanner';
 import { movementTypeLabel } from '../lib/stockBalance';
 import * as invApi from '../services/inventoryService';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 
@@ -29,6 +30,12 @@ export default function MyStockScreen() {
   const route = useRoute();
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+import { colors, spacing, radius } from '../theme';
+
+export default function MyStockScreen() {
+  const route = useRoute();
+>>>>>>> c08b25b (first commit)
   const category = route.params?.category === 'tool' ? 'tool' : 'material';
   const isTool = category === 'tool';
   const { inventory, isCloud, currentUser, consumeItem, fetchMyStock, getItemByBarcode } = useApp();
@@ -134,16 +141,23 @@ export default function MyStockScreen() {
               </Text>
             </View>
           }
+<<<<<<< HEAD
           renderItem={({ item }) => {
             const invItem = inventory.find((it) => it.id === item.item_id);
             return (
+=======
+          renderItem={({ item }) => (
+>>>>>>> c08b25b (first commit)
             <Card style={styles.card}>
               <View style={styles.row}>
                 <InventoryThumb
                   name={item.item_name}
                   category={item.category || category}
                   size={46}
+<<<<<<< HEAD
                   imageUrl={invItem?.image_url}
+=======
+>>>>>>> c08b25b (first commit)
                 />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.name}>{item.item_name}</Text>
@@ -161,16 +175,26 @@ export default function MyStockScreen() {
                 onPress={() => openConsume(item)}
               />
             </Card>
+<<<<<<< HEAD
             );
           }}
           ListEmptyComponent={
             <EmptyState text={isTool ? 'Танд багажийн үлдэгдэл алга.' : 'Танд бараа материалын үлдэгдэл алга.\nАгуулахаас жагсаалтаас сонгон авна уу.'}
+=======
+          )}
+          ListEmptyComponent={
+            <EmptyState text={isTool ? 'Танд багажийн үлдэгдэл алга.' : 'Танд бараа материалын үлдэгдэл алга.\nАгуулахаас бар код уншуулж авна уу.'}
+>>>>>>> c08b25b (first commit)
             />
           }
         />
       )}
 
+<<<<<<< HEAD
       <Modal visible={consumeTarget !== null} animationType="slide" transparent>
+=======
+      <Modal visible={consumeTarget !== null} animationType="slide"transparent>
+>>>>>>> c08b25b (first commit)
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Хэрэглэх</Text>
@@ -208,8 +232,13 @@ export default function MyStockScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+>>>>>>> c08b25b (first commit)
   banner: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,

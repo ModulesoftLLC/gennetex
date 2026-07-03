@@ -3,14 +3,21 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert } from
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, Button, EmptyState } from '../components/ui';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing, radius } from '../theme';
+>>>>>>> c08b25b (first commit)
 import * as chatApi from '../services/chatService';
 import { isOnline, formatLastSeen } from '../lib/online';
 
 export default function AddGroupMembersScreen() {
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
   const navigation = useNavigation();
   const route = useRoute();
   const { conversationId, title } = route.params || {};
@@ -94,7 +101,11 @@ export default function AddGroupMembersScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   container: { flex: 1, backgroundColor: colors.bg },
   hint: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md, lineHeight: 19 },
   row: {

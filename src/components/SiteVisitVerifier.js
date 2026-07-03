@@ -6,8 +6,12 @@ import * as attApi from '../services/attendanceService';
 import * as faceApi from '../services/faceService';
 import * as tracking from '../services/trackingService';
 import { Button } from './ui';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing, radius } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 // Байршилд очсон үед царайгаар баталгаажуулж, админд зураг харагдана
 export default function SiteVisitVerifier() {
@@ -15,7 +19,10 @@ export default function SiteVisitVerifier() {
   const [cameraVisible, setCameraVisible] = useState(false);
   const [busy, setBusy] = useState(false);
   const [faceUuid, setFaceUuid] = React.useState(null);
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
 
   React.useEffect(() => {
     if (!isCloud || !currentUser?.id) return;
@@ -80,7 +87,11 @@ export default function SiteVisitVerifier() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   overlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end'},
   sheet: {
     backgroundColor: colors.surface,

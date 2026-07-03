@@ -1,8 +1,12 @@
 // Web fallback — react-native-maps вэб дээр ажиллахгүй тул энд орлуулна.
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 export const PROVIDER_GOOGLE = 'google';
 
@@ -12,7 +16,10 @@ export function Marker() {
 }
 
 const MapView = React.forwardRef(function MapView({ children, style }, ref) {
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
   React.useImperativeHandle(ref, () => ({
     animateCamera() {},
     animateToRegion() {},
@@ -31,7 +38,11 @@ const MapView = React.forwardRef(function MapView({ children, style }, ref) {
 
 export default MapView;
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',

@@ -10,8 +10,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
+=======
+import { colors, spacing } from '../theme';
+>>>>>>> c08b25b (first commit)
 
 // Нэвтрэлт (Google sign-in) шаарддаггүй нээлттэй Jitsi сервер.
 // meet.jit.si нь өрөө үүсгэхэд Google auth шаарддаг болсон тул ашиглахгүй.
@@ -68,10 +72,15 @@ function buildHtml(room, name) {
 }
 
 export default function VideoCallModal({ visible, room, name, onClose }) {
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+=======
+  return (
+    <Modal visible={visible} animationType="slide"onRequestClose={onClose}>
+>>>>>>> c08b25b (first commit)
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.topBar}>
           <Text style={styles.topTitle}> Видео дуудлага</Text>
@@ -112,7 +121,11 @@ export default function VideoCallModal({ visible, room, name, onClose }) {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   container: { flex: 1, backgroundColor: '#000'},
   topBar: {
     flexDirection: 'row',

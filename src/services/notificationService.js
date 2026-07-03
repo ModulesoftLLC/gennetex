@@ -4,8 +4,11 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { supabase } from '../lib/supabase';
 
+<<<<<<< HEAD
 export const CALLS_CHANNEL = 'calls';
 
+=======
+>>>>>>> c08b25b (first commit)
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {
     const type = notification.request.content.data?.type;
@@ -19,7 +22,11 @@ Notifications.setNotificationHandler({
   },
 });
 
+<<<<<<< HEAD
 export async function ensureChannels() {
+=======
+async function ensureChannels() {
+>>>>>>> c08b25b (first commit)
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync('chat', {
     name: 'Чат мессеж',
@@ -31,6 +38,7 @@ export async function ensureChannels() {
     name: 'Видео дуудлага',
     importance: Notifications.AndroidImportance.MAX,
     vibrationPattern: [0, 800, 400, 800, 400, 800],
+<<<<<<< HEAD
     sound: 'incoming-call.wav',
     bypassDnd: true,
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -41,6 +49,12 @@ export async function ensureChannels() {
     vibrationPattern: [0, 200, 120, 200],
     sound: 'default',
   });
+=======
+    sound: 'default',
+    bypassDnd: true,
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  });
+>>>>>>> c08b25b (first commit)
 }
 
 // Утсан дээр push token авах
@@ -105,12 +119,15 @@ async function fetchAdminTokens() {
   return fetchTokensForUsers(admins.map((a) => a.id));
 }
 
+<<<<<<< HEAD
 async function fetchSuperadminTokens() {
   const { data: admins } = await supabase.from('profiles').select('id').eq('role', 'superadmin');
   if (!admins?.length) return [];
   return fetchTokensForUsers(admins.map((a) => a.id));
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 async function sendExpoPush(messages) {
   if (!messages?.length) return;
   for (let i = 0; i < messages.length; i += 100) {
@@ -127,14 +144,22 @@ async function sendExpoPush(messages) {
   }
 }
 
+<<<<<<< HEAD
 async function notifyTokens(tokens, { title, body, data, channelId, priority, sound }) {
+=======
+async function notifyTokens(tokens, { title, body, data, channelId, priority }) {
+>>>>>>> c08b25b (first commit)
   if (!tokens.length) return;
   await sendExpoPush(
     tokens.map((to) => ({
       to,
       title,
       body,
+<<<<<<< HEAD
       sound: sound || 'default',
+=======
+      sound: 'default',
+>>>>>>> c08b25b (first commit)
       priority: priority || 'high',
       channelId: channelId || 'chat',
       data: data || {},
@@ -170,6 +195,7 @@ export async function notifyAdmins(payload) {
   } catch (e) {}
 }
 
+<<<<<<< HEAD
 export async function notifySuperadmins(payload) {
   try {
     const tokens = await fetchSuperadminTokens();
@@ -241,6 +267,8 @@ export async function notifyDeviceDecisionToUser(userId, { status }) {
   });
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 // Чат мессеж — бусад гишүүдэд push
 export async function notifyChatMembers(conversationId, senderId, { senderName, content, attachmentType }) {
   const { data: members } = await supabase
@@ -266,6 +294,7 @@ export async function notifyChatMembers(conversationId, senderId, { senderName, 
   });
 }
 
+<<<<<<< HEAD
 /** SLA хэтэрсэн — бүх инженерт яаралтай push */
 export async function notifySlaExceededToEngineers(engineerIds, call) {
   const ids = [...new Set((engineerIds || []).filter(Boolean))];
@@ -303,13 +332,18 @@ export async function notifyServiceCallAssigned(engineerId, { engineerName, cust
   });
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 // Видео дуудлага — ringtone + TTS push
 export async function notifyIncomingCall(calleeId, { callerName, room, callId }) {
   const name = callerName || 'Ажилтан';
   await notifyUsers([calleeId], {
     title: `${name} залгаж байна`,
     body: 'Видео дуудлага — хариулахын тулд нээнэ үү',
+<<<<<<< HEAD
     sound: 'incoming-call.wav',
+=======
+>>>>>>> c08b25b (first commit)
     data: { type: 'call', room, callId, callerName: name },
     channelId: 'calls',
     priority: 'high',
@@ -324,6 +358,7 @@ export async function notifyRemoteAttendance({ staffName, note }) {
   });
 }
 
+<<<<<<< HEAD
 export async function notifyFeedbackToAdmins({ fromName, kind, preview, feedbackId, mentionedNames = [] }) {
   const mention = mentionedNames.length ? ` · ${mentionedNames.join(', ')}` : '';
   await notifyAdmins({
@@ -335,6 +370,8 @@ export async function notifyFeedbackToAdmins({ fromName, kind, preview, feedback
   });
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 export async function notifyOffSiteCheckIn({ staffName, locationName, distanceM }) {
   const where = locationName ? `"${locationName}"-аас` : 'ажлын байршлаас';
   await notifyAdmins({

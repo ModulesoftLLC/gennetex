@@ -22,6 +22,7 @@ const ICONS = {
   chat: (c) => (
     <Path d="M4 6 H20 V16 H9 L4 19 V6 Z" stroke={c} strokeWidth="1.8" fill="none" strokeLinejoin="round"/>
   ),
+<<<<<<< HEAD
   feed: (c) => (
     <>
       <Rect x="4" y="4" width="16" height="16" rx="2" stroke={c} strokeWidth="1.8" fill="none"/>
@@ -30,6 +31,8 @@ const ICONS = {
       <Line x1="8" y1="17" x2="13" y2="17" stroke={c} strokeWidth="1.8" strokeLinecap="round"/>
     </>
   ),
+=======
+>>>>>>> c08b25b (first commit)
   profile: (c) => (
     <>
       <Circle cx="12" cy="9" r="3.5" stroke={c} strokeWidth="1.8" fill="none"/>
@@ -114,6 +117,7 @@ const ICONS = {
       <Line x1="8" y1="16" x2="13" y2="16" stroke={c} strokeWidth="1.8" strokeLinecap="round"/>
     </>
   ),
+<<<<<<< HEAD
   ai: (c) => (
     <>
       <Path d="M12 3 L13.6 8.4 L19 10 L13.6 11.6 L12 17 L10.4 11.6 L5 10 L10.4 8.4 Z" stroke={c} strokeWidth="1.6" fill="none" strokeLinejoin="round"/>
@@ -124,6 +128,12 @@ const ICONS = {
 
 export default function NavIcon({ name, size = 22, color = '#7986a8', active = false, activeColor = '#00f0ff' }) {
   const stroke = active ? activeColor : color;
+=======
+};
+
+export default function NavIcon({ name, size = 22, color = '#7986a8', active = false }) {
+  const stroke = active ? '#fff' : color;
+>>>>>>> c08b25b (first commit)
   const render = ICONS[name];
   if (!render) return null;
   return (

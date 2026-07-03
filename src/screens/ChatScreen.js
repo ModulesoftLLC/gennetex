@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
@@ -120,12 +121,29 @@ function ConversationRow({ conv, me, employees, onPress }) {
       </View>
     </TouchableOpacity>
   );
+=======
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useApp } from '../context/AppContext';
+import { ScreenHeader, HeaderButton, EmptyState, SectionTitle } from '../components/ui';
+import * as chatApi from '../services/chatService';
+import { formatTime } from '../lib/formatTime';
+import { isOnline, formatLastSeen } from '../lib/online';
+import { colors, spacing, radius } from '../theme';
+
+function initials(name = '') {
+  return name.trim().charAt(0).toUpperCase() || ' ?';
+>>>>>>> c08b25b (first commit)
 }
 
 export default function ChatScreen() {
   const navigation = useNavigation();
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
   const { currentUser, isCloud, fetchEmployees } = useApp();
   const me = currentUser;
   const [employees, setEmployees] = useState([]);
@@ -141,7 +159,10 @@ export default function ChatScreen() {
       ]);
       setEmployees(emps.filter((e) => e.id !== me.id));
       setConversations(convs);
+<<<<<<< HEAD
       setError(null);
+=======
+>>>>>>> c08b25b (first commit)
     } catch (e) {
       setError(e.message);
     }
@@ -156,6 +177,7 @@ export default function ChatScreen() {
     }, [load, isCloud, me?.id])
   );
 
+<<<<<<< HEAD
   const sortedConversations = useMemo(() => {
     return [...conversations].sort((a, b) => {
       const ta = a.last?.created_at ? new Date(a.last.created_at).getTime() : 0;
@@ -164,6 +186,8 @@ export default function ChatScreen() {
     });
   }, [conversations]);
 
+=======
+>>>>>>> c08b25b (first commit)
   const openDirect = async (emp) => {
     try {
       const conv = await chatApi.getOrCreateDirect(
@@ -174,12 +198,16 @@ export default function ChatScreen() {
         conversationId: conv.id,
         title: emp.name,
         isGroup: false,
+<<<<<<< HEAD
         otherUser: {
           id: emp.id,
           name: emp.name,
           avatar_url: emp.avatar_url || null,
           last_seen: emp.last_seen || null,
         },
+=======
+        otherUser: { id: emp.id, name: emp.name },
+>>>>>>> c08b25b (first commit)
       });
     } catch (e) {
       setError(e.message);
@@ -188,11 +216,15 @@ export default function ChatScreen() {
 
   const openConversation = (c) => {
     const other = c.members?.find((m) => m.user_id !== me.id);
+<<<<<<< HEAD
     const emp = other ? employees.find((e) => e.id === other.user_id) : null;
+=======
+>>>>>>> c08b25b (first commit)
     navigation.navigate('Conversation', {
       conversationId: c.id,
       title: c.title,
       isGroup: c.is_group,
+<<<<<<< HEAD
       memberCount: c.members?.length || 0,
       groupAvatarUrl: c.avatar_url || null,
       otherUser: other
@@ -203,12 +235,16 @@ export default function ChatScreen() {
             last_seen: emp?.last_seen || null,
           }
         : null,
+=======
+      otherUser: other ? { id: other.user_id, name: other.user_name } : null,
+>>>>>>> c08b25b (first commit)
     });
   };
 
   if (!isCloud) {
     return (
       <View style={styles.container}>
+<<<<<<< HEAD
         <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
         <SafeAreaView edges={['top']} style={styles.headerSafe}>
           <View style={styles.header}>
@@ -216,12 +252,17 @@ export default function ChatScreen() {
           </View>
         </SafeAreaView>
         <EmptyState text="Чат хийхэд Supabase холбогдсон байх шаардлагатай." />
+=======
+        <ScreenHeader back={false} title="Чат"/>
+        <EmptyState text="Чат хийхэд Supabase холбогдсон байх шаардлагатай."/>
+>>>>>>> c08b25b (first commit)
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
       <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       <SafeAreaView edges={['top']} style={styles.headerSafe}>
         <View style={styles.header}>
@@ -355,11 +396,95 @@ export default function ChatScreen() {
             <Text style={styles.emptySub}>Дээрх ажилтан дээр дарж эхлүүлнэ үү</Text>
           </View>
         }
+=======
+      <ScreenHeader
+        back={false} title="Чат"
+        subtitle={me?.name || ''}
+        right={
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <HeaderButton title="Архив" onPress={() => navigation.navigate('ChatArchive')} />
+            <HeaderButton title="Групп" onPress={() => navigation.navigate('NewGroup')} />
+          </View>
+        }
+      />
+
+      <FlatList
+        data={conversations}
+        keyExtractor={(c) => c.id}
+        contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110 }}
+        ListHeaderComponent={
+          <View>
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <SectionTitle>Ажилчид</SectionTitle>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: spacing.lg }}>
+              {employees.length === 0 ? (
+                <Text style={styles.muted}>Ажилтан алга.</Text>
+              ) : (
+                employees.map((emp) => (
+                  <TouchableOpacity key={emp.id} style={styles.person} onPress={() => openDirect(emp)}>
+                    <View style={styles.avatarWrap}>
+                      <View style={styles.avatar}>
+                        {emp.avatar_url ? (
+                          <Image source={{ uri: emp.avatar_url }} style={styles.avatarImg} />
+                        ) : (
+                          <Text style={styles.avatarText}>{initials(emp.name)}</Text>
+                        )}
+                      </View>
+                      <View
+                        style={[
+                          styles.onlineDot,
+                          { backgroundColor: isOnline(emp.last_seen) ? colors.success : colors.textMuted },
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.personName} numberOfLines={1}>
+                      {emp.name || 'Ажилтан'}
+                    </Text>
+                    <Text style={styles.personStatus} numberOfLines={1}>
+                      {formatLastSeen(emp.last_seen)}
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+            <SectionTitle>Яриа</SectionTitle>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.convRow} onPress={() => openConversation(item)} activeOpacity={0.8}>
+            <View style={[styles.avatar, item.is_group && { backgroundColor: colors.accent + '33'}]}>
+              <Text style={styles.avatarText}>{initials(item.title)}</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.convTitle} numberOfLines={1}>{item.title}</Text>
+              <Text style={styles.convLast} numberOfLines={1}>
+                {item.last
+                  ? `${item.last.sender_name}: ${
+                      item.last.content ||
+                      (item.last.attachment_type === 'image'
+                        ? 'Зураг'
+                        : item.last.attachment_type === 'video'
+                        ? 'Видео'
+                        : item.last.attachment_type === 'file'
+                        ? 'Файл'
+                        : '')
+                    }`
+                  : 'Мессеж алга'}
+              </Text>
+            </View>
+            {item.last?.created_at ? (
+              <Text style={styles.convTime}>{formatTime(item.last.created_at)}</Text>
+            ) : null}
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={<EmptyState text="Яриа алга. Ажилтан дээр дарж эхлүүлээрэй." />}
+>>>>>>> c08b25b (first commit)
       />
     </View>
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.surface },
   headerSafe: { backgroundColor: colors.primary },
@@ -529,4 +654,50 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   },
   emptyTitle: { color: colors.text, fontSize: 17, fontWeight: '600', marginTop: 8 },
   emptySub: { color: colors.textMuted, fontSize: 14, textAlign: 'center' },
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+  error: { color: colors.danger, marginBottom: spacing.sm },
+  muted: { color: colors.textMuted, paddingVertical: spacing.md },
+  person: { alignItems: 'center', marginRight: spacing.md, width: 72 },
+  avatarWrap: { position: 'relative', marginBottom: 4 },
+  onlineDot: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: colors.bg,
+  },
+  avatar: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.primary + '33',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+    overflow: 'hidden',
+  },
+  avatarImg: { width: '100%', height: '100%', borderRadius: 27 },
+  avatarText: { color: colors.text, fontSize: 20, fontWeight: '800'},
+  personName: { color: colors.textMuted, fontSize: 11, textAlign: 'center'},
+  personStatus: { color: colors.textFaint, fontSize: 9, textAlign: 'center', marginTop: 1 },
+  convRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  convTitle: { color: colors.text, fontSize: 15, fontWeight: '800'},
+  convLast: { color: colors.textMuted, fontSize: 13, marginTop: 2 },
+  convTime: { color: colors.textFaint, fontSize: 11, marginTop: 2, minWidth: 44, textAlign: 'right' },
+>>>>>>> c08b25b (first commit)
 });

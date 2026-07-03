@@ -4,11 +4,17 @@ import { useNavigation } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, Field, Button, EmptyState } from '../components/ui';
 import * as chatApi from '../services/chatService';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 
 export default function NewGroupScreen() {
   const styles = useStyles(makeStyles);
+=======
+import { colors, spacing, radius } from '../theme';
+
+export default function NewGroupScreen() {
+>>>>>>> c08b25b (first commit)
   const navigation = useNavigation();
   const { currentUser, fetchEmployees } = useApp();
   const me = currentUser;
@@ -90,7 +96,11 @@ export default function NewGroupScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   container: { flex: 1, backgroundColor: colors.bg },
   error: { color: colors.danger, marginTop: spacing.sm },
   row: {

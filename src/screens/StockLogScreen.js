@@ -4,12 +4,18 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Card, ScreenHeader, EmptyState, Badge } from '../components/ui';
 import { movementTypeLabel } from '../lib/stockBalance';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 
 export default function StockLogScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
+=======
+import { colors, spacing, radius } from '../theme';
+
+export default function StockLogScreen() {
+>>>>>>> c08b25b (first commit)
   const { isAdmin, isCloud, fetchStockMovements } = useApp();
   const [rows, setRows] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -84,7 +90,11 @@ export default function StockLogScreen() {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
+=======
+const styles = StyleSheet.create({
+>>>>>>> c08b25b (first commit)
   container: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   icon: {

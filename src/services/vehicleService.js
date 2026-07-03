@@ -1,6 +1,9 @@
 import { supabase } from '../lib/supabase';
 import { parseEmployeeBadge } from '../lib/employeeBadge';
+<<<<<<< HEAD
 import { normalizePlateNumber } from '../lib/mongoliaPlate';
+=======
+>>>>>>> c08b25b (first commit)
 
 // Машины давтагдашгүй код (QR-д хадгалагдана)
 export function generateVehicleCode() {
@@ -17,15 +20,24 @@ export async function fetchVehicles() {
   return data || [];
 }
 
+<<<<<<< HEAD
 export async function insertVehicle({ code, plate_number, liters_per_100km, tank_capacity_liters, driver_name, driver_id }) {
+=======
+export async function insertVehicle({ code, plate_number, liters_per_100km, driver_name, driver_id }) {
+>>>>>>> c08b25b (first commit)
   const { data, error } = await supabase
     .from('vehicles')
     .insert({
       code: code.trim(),
+<<<<<<< HEAD
       plate_number: normalizePlateNumber(plate_number),
       liters_per_100km: Number(liters_per_100km) || 12,
       tank_capacity_liters: Number(tank_capacity_liters) || 60,
       fuel_level_percent: 100,
+=======
+      plate_number: plate_number.trim(),
+      liters_per_100km: Number(liters_per_100km) || 12,
+>>>>>>> c08b25b (first commit)
       driver_name: driver_name?.trim() || null,
       driver_id: driver_id || null,
     })
@@ -35,6 +47,7 @@ export async function insertVehicle({ code, plate_number, liters_per_100km, tank
   return data;
 }
 
+<<<<<<< HEAD
 export async function updateVehicle(id, { plate_number, liters_per_100km, tank_capacity_liters, driver_name, driver_id }) {
   const patch = {};
   if (plate_number != null) patch.plate_number = normalizePlateNumber(plate_number);
@@ -52,6 +65,8 @@ export async function updateVehicle(id, { plate_number, liters_per_100km, tank_c
   return data;
 }
 
+=======
+>>>>>>> c08b25b (first commit)
 export async function deleteVehicle(id) {
   const { error } = await supabase.from('vehicles').delete().eq('id', id);
   if (error) throw error;
@@ -156,6 +171,7 @@ export async function updateTrip(id, { distanceKm, liters, cost, idleSeconds }) 
 }
 
 export async function endTrip(id, { distanceKm, liters, cost, idleSeconds }) {
+<<<<<<< HEAD
   const { data: trip, error: tripErr } = await supabase
     .from('trips')
     .select('vehicle_id')
@@ -163,6 +179,8 @@ export async function endTrip(id, { distanceKm, liters, cost, idleSeconds }) {
     .maybeSingle();
   if (tripErr) throw tripErr;
 
+=======
+>>>>>>> c08b25b (first commit)
   const { error } = await supabase
     .from('trips')
     .update({
@@ -175,6 +193,7 @@ export async function endTrip(id, { distanceKm, liters, cost, idleSeconds }) {
     })
     .eq('id', id);
   if (error) throw error;
+<<<<<<< HEAD
 
   const usedLiters = Number(liters) || 0;
   if (trip?.vehicle_id && usedLiters > 0) {
@@ -209,6 +228,8 @@ export async function refillVehicleFuel(vehicleId) {
     .single();
   if (error) throw error;
   return data;
+=======
+>>>>>>> c08b25b (first commit)
 }
 
 export async function fetchTrips(limit = 30) {

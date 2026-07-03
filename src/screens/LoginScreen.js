@@ -11,12 +11,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { Button, Field } from '../components/ui';
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 import AmbientBackground from '../components/AmbientBackground';
 
 export default function LoginScreen() {
   const styles = useStyles(makeStyles);
+=======
+import { colors, spacing, radius, shadow } from '../theme';
+
+export default function LoginScreen() {
+>>>>>>> c08b25b (first commit)
   const { signIn, isCloud } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -41,7 +47,10 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.bg}>
+<<<<<<< HEAD
       <AmbientBackground />
+=======
+>>>>>>> c08b25b (first commit)
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -99,8 +108,13 @@ function mapError(msg = '') {
   return msg;
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   bg: { flex: 1, backgroundColor: colors.background },
+=======
+const styles = StyleSheet.create({
+  bg: { flex: 1, backgroundColor: colors.bgAlt },
+>>>>>>> c08b25b (first commit)
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   card: {
     backgroundColor: colors.surface,
@@ -116,7 +130,11 @@ const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   appSub: { color: colors.textMuted, marginTop: 6, fontSize: 14 },
   error: {
     color: colors.danger,
+<<<<<<< HEAD
     backgroundColor: colors.danger + '1f',
+=======
+    backgroundColor: '#fef2f2',
+>>>>>>> c08b25b (first commit)
     padding: spacing.sm,
     borderRadius: radius.sm,
     marginBottom: spacing.md,

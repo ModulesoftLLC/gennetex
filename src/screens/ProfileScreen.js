@@ -17,6 +17,7 @@ import QRCode from '../components/QRCode';
 import { formatEmployeeBadge } from '../lib/employeeBadge';
 import * as vehicleApi from '../services/vehicleService';
 import { roleLabel } from '../lib/roles';
+<<<<<<< HEAD
 import { DEVELOPER_LABEL, SUPERADMIN_EMAIL, HAS_DEVELOPER_EMAIL } from '../lib/developerConfig';
 import { useNavigation } from '@react-navigation/native';
 import { spacing, radius } from '../theme';
@@ -33,6 +34,12 @@ export default function ProfileScreen() {
   const { colors, mode, setMode } = useTheme();
   const styles = useStyles(makeStyles);
   const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, signOut, updateMyProfile } = useApp();
+=======
+import { colors, spacing, radius } from '../theme';
+
+export default function ProfileScreen() {
+  const { authProfile, profile, isAdmin, isCloud, signOut, updateMyProfile } = useApp();
+>>>>>>> c08b25b (first commit)
   const canEdit = isAdmin;
   const canEditAvatar = !!authProfile;
   const [editing, setEditing] = useState(false);
@@ -188,9 +195,13 @@ export default function ProfileScreen() {
         {authProfile && !isAdmin ? (
           <Card style={{ marginTop: spacing.lg, alignItems: 'center'}}>
             <SectionTitle>Миний QR</SectionTitle>
+<<<<<<< HEAD
             <Text style={styles.qrHint}>
               Жолооч хамт яваа хүн болгох эсвэл ганцаараа аялал эхлүүлэхэд энэ QR-ыг уншуулна
             </Text>
+=======
+            <Text style={styles.qrHint}>Жолооч таныг хамт яваа хүн болгохын тулд энэ QR-ыг уншуулна</Text>
+>>>>>>> c08b25b (first commit)
             <View style={styles.qrBox}>
               <QRCode value={formatEmployeeBadge(authProfile.id)} size={200} />
             </View>
@@ -239,6 +250,7 @@ export default function ProfileScreen() {
           <Text style={styles.note}>Нэвтэрсэн хэрэглэгчийн мэдээлэл энд харагдана.</Text>
         )}
 
+<<<<<<< HEAD
         {authProfile ? (
           <Card style={{ marginTop: spacing.lg }}>
             <SectionTitle>{DEVELOPER_LABEL}тэй холбогдох</SectionTitle>
@@ -280,6 +292,8 @@ export default function ProfileScreen() {
           </View>
         </Card>
 
+=======
+>>>>>>> c08b25b (first commit)
         <Button title="Системээс гарах" variant="danger" size="lg" style={{ marginTop: spacing.lg }} onPress={confirmSignOut} />
       </ScrollView>
     </View>
@@ -287,7 +301,10 @@ export default function ProfileScreen() {
 }
 
 function InfoRow({ label, value, last }) {
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
+=======
+>>>>>>> c08b25b (first commit)
   return (
     <View style={[styles.infoRow, !last && styles.infoBorder]}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -296,8 +313,13 @@ function InfoRow({ label, value, last }) {
   );
 }
 
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+=======
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.bg },
+>>>>>>> c08b25b (first commit)
   hero: { alignItems: 'center', paddingVertical: spacing.xl },
   avatar: {
     width: 88,
@@ -355,6 +377,7 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   withDriverLabel: { color: colors.textMuted, fontSize: 12, marginTop: spacing.sm },
   withDriverName: { color: colors.text, fontSize: 18, fontWeight: '800', marginTop: 2 },
   withDriverSub: { color: colors.primary, fontSize: 13, marginTop: 4, fontWeight: '600' },
+<<<<<<< HEAD
   themeHint: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md },
   themeRow: { flexDirection: 'row', gap: spacing.sm },
   themeOption: {
@@ -375,4 +398,6 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   themeIconActive: { color: colors.primary },
   themeLabel: { fontSize: 12, fontWeight: '600', color: colors.textMuted },
   themeLabelActive: { color: colors.primary },
+=======
+>>>>>>> c08b25b (first commit)
 });

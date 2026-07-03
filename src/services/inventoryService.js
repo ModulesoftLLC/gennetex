@@ -1,9 +1,13 @@
+<<<<<<< HEAD
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
+=======
+>>>>>>> c08b25b (first commit)
 import { supabase } from '../lib/supabase';
 import { MOVEMENT_TYPES, computeBalances, movementDelta } from '../lib/stockBalance';
 
 const TABLE = 'inventory';
+<<<<<<< HEAD
 const BUCKET = 'inventory';
 
 async function uploadImage(uri, folder) {
@@ -26,6 +30,8 @@ export async function uploadInventoryImage(uri) {
 export async function uploadMovementPhoto(uri) {
   return uploadImage(uri, 'movements');
 }
+=======
+>>>>>>> c08b25b (first commit)
 
 export async function fetchInventory() {
   const { data, error } = await supabase
@@ -57,7 +63,10 @@ export async function insertInventory(item) {
       quantity: item.quantity,
       price: item.price,
       barcode: item.barcode || null,
+<<<<<<< HEAD
       image_url: item.image_url || null,
+=======
+>>>>>>> c08b25b (first commit)
       category: item.category || 'material',
     })
     .select()
@@ -83,7 +92,11 @@ export async function deleteInventory(id) {
 }
 
 // Бараа олгох: тоо хасаад олголтын лог үүсгэнэ
+<<<<<<< HEAD
 export async function withdrawInventory({ item, userId, userName, qty, photoUrl }) {
+=======
+export async function withdrawInventory({ item, userId, userName, qty }) {
+>>>>>>> c08b25b (first commit)
   const newQty = Math.max(0, (Number(item.quantity) || 0) - qty);
   await updateInventory(item.id, { quantity: newQty });
   const { error } = await supabase.from('stock_movements').insert({
@@ -94,7 +107,10 @@ export async function withdrawInventory({ item, userId, userName, qty, photoUrl 
     user_name: userName,
     quantity: qty,
     movement_type: MOVEMENT_TYPES.WITHDRAW,
+<<<<<<< HEAD
     photo_url: photoUrl || null,
+=======
+>>>>>>> c08b25b (first commit)
   });
   if (error) throw error;
   return newQty;

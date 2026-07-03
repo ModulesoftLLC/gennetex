@@ -9,8 +9,11 @@ buildscript {
     classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+<<<<<<< HEAD
     // FCM (push) — google-services.json байгаа үед app module-д apply хийнэ.
     classpath('com.google.gms:google-services:4.4.2')
+=======
+>>>>>>> c08b25b (first commit)
   }
 }
 
