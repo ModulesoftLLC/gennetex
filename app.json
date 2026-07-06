@@ -2,7 +2,8 @@
   "expo": {
     "name": "Gennetex ERP",
     "slug": "gennetex-erp",
-    "version": "1.0.0",
+    "scheme": "gennetex-erp",
+    "version": "0.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/logo.png",
@@ -39,7 +40,14 @@
         "android.permission.READ_MEDIA_IMAGES",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.RECORD_AUDIO",
-        "android.permission.VIBRATE"
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.USE_FULL_SCREEN_INTENT",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_PHONE_CALL",
+        "android.permission.DISABLE_KEYGUARD",
+        "android.permission.MANAGE_OWN_CALLS",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
@@ -81,6 +89,7 @@
         {
           "icon": "./assets/logo.png",
           "color": "#3b82f6",
+          "defaultChannel": "chat",
           "sounds": []
         }
       ],
@@ -89,10 +98,18 @@
         {
           "microphonePermission": "Дуу хоолойгоор чат бичихэд микрофон ашиглана.",
           "speechRecognitionPermission": "Монгол дуу хоолой танихад яриа таних зөвшөөрөл шаардлагатай.",
-          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
         }
       ],
-      "expo-dev-client"
+      "expo-dev-client",
+      [
+        "react-native-full-screen-notification-incoming-call",
+        {
+          "statusBarColor": "#0b1220"
+        }
+      ]
     ],
     "extra": {
       "eas": {

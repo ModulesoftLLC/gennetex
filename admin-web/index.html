@@ -84,6 +84,22 @@
     .pill.in{background:#e3f9ef;color:#1fbf75}.pill.out{background:#ffeaea;color:#ef5350}
     .pill.admin{background:#efe9ff;color:#7b5cff}.pill.emp{background:#e8edff;color:#4f6ef7}
     img.selfie{width:42px;height:42px;border-radius:9px;object-fit:cover;vertical-align:middle}
+    /* Царай — иргэний үнэмлэх шиг, цагаан дэвсгэр */
+    img.selfie-face{width:44px;height:56px;object-fit:contain;background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:3px;vertical-align:middle;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    /* Байршлын зураг — бүтэн харагдана */
+    img.selfie-site{width:80px;height:60px;object-fit:contain;background:#eef0f4;border:1px solid var(--line);border-radius:8px;padding:2px;vertical-align:middle;cursor:pointer}
+    .av-id{width:40px;height:50px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:6px;padding:2px;flex:0 0 auto;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+    .visit-proof-btn{display:inline-flex;align-items:center;gap:6px;padding:2px;border:none;background:transparent;cursor:pointer;border-radius:10px;font:inherit}
+    .visit-proof-btn:hover{opacity:.9}
+    .visit-proof-thumb{width:80px;height:60px;border-radius:8px;object-fit:contain;background:#eef0f4;border:2px solid var(--line);padding:2px;transition:border-color .12s,transform .12s;vertical-align:middle}
+    .visit-proof-btn:hover .visit-proof-thumb{border-color:var(--primary);transform:scale(1.04)}
+    .modal.modal-photo-wide{max-width:min(960px,96vw)}
+    .modal.modal-photo-id{max-width:min(440px,96vw)}
+    .modal-photo-body{text-align:center;padding:20px 22px 24px;background:#f9fafb}
+    .photo-id-wrap{background:#fff;padding:14px 16px;border-radius:12px;border:1px solid var(--line);display:inline-block;box-shadow:0 4px 16px rgba(0,0,0,.06)}
+    .photo-id-wrap img{display:block;max-width:min(360px,100%);max-height:78vh;width:auto;height:auto;object-fit:contain;background:#fff}
+    .photo-site-wrap{background:#eef0f4;padding:10px;border-radius:12px;display:inline-block;max-width:100%;border:1px solid var(--line)}
+    .photo-site-wrap img{display:block;max-width:100%;max-height:88vh;width:auto;height:auto;object-fit:contain;background:#eef0f4}
     img.inv-thumb{width:42px;height:42px;border-radius:10px;object-fit:cover;vertical-align:middle;background:#f3f5fb}
     .muted{color:var(--muted)}
     .empty{text-align:center;color:var(--muted);padding:40px}
@@ -94,7 +110,8 @@
     .modal-h{padding:18px 22px;border-bottom:1px solid var(--line);font-size:17px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
     .modal-b{padding:22px}
     .modal-f{padding:16px 22px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
-    .x{background:none;color:var(--muted);font-size:20px}
+    .x{background:none;color:var(--muted);font-size:22px;font-weight:700;width:36px;height:36px;line-height:36px;text-align:center;cursor:pointer;border-radius:8px}
+    .x:hover{background:var(--bg)}
     .row{display:flex;gap:12px}.row>*{flex:1}
     .qrbox{text-align:center}
     .qrbox img{background:#fff;padding:10px;border:1px solid var(--line);border-radius:12px}
@@ -103,6 +120,14 @@
     .chk{display:flex;align-items:center;gap:10px;padding:8px 0}
     .bar-row{display:flex;gap:8px;align-items:flex-end}
     .bar-row>div{flex:1}
+    .excel-month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 20px}
+    .excel-month-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+    .excel-month-card:hover{border-color:var(--primary);background:var(--primary-soft)}
+    .excel-month-card.active{border-color:var(--primary);background:var(--primary-soft)}
+    .excel-month-card .m{font-size:13px;font-weight:800}
+    .excel-month-card .c{font-size:22px;font-weight:800;margin-top:4px;color:var(--primary)}
+    .excel-sheet-pills{display:flex;flex-wrap:wrap;gap:6px}
+    .excel-sheet-pill{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--muted)}
     #qr-reader{border-radius:12px;overflow:hidden;min-height:260px}
     @media(max-width:900px){.side{width:64px}.brand span,.nav a span.t,.nav .grp{display:none}.main{margin-left:64px}.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}}
   </style>
@@ -133,6 +158,9 @@
           <a data-view="dashboard" class="active"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="15" width="8" height="6" rx="1.5"/></svg></span><span class="t">Хяналт</span></a>
           <a data-view="employees"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M4 19c0-3 2.5-5 5-5s5 2 5 5M14 19c0-2 1.5-3.5 3.5-3.5"/></svg></span><span class="t">Ажилчид</span></a>
           <a data-view="reports"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="t">Тайлан</span></a>
+          <a data-view="feedback"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg></span><span class="t">Санал гомдол</span></a>
+          <a data-view="aiappusage"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/></svg></span><span class="t">AI апп хэрэглээ</span></a>
+          <a data-view="aiperformance"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><span class="t">AI гүйцэтгэл</span></a>
           <a data-view="attendance"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span><span class="t">Ирц</span></a>
           <div class="grp">Байршил</div>
           <a data-view="location"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10z"/><circle cx="12" cy="11" r="2"/></svg></span><span class="t">Байршил</span></a>
@@ -146,8 +174,17 @@
           <div class="grp">Агуулах</div>
           <a data-view="inventory"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4v10H4z"/><line x1="12" y1="11" x2="12" y2="15"/></svg></span><span class="t">Агуулах</span></a>
           <a data-view="usage"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span><span class="t">Барааны хэрэглээ</span></a>
+          <div class="grp">Post</div>
+          <a data-view="feedposts"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><circle cx="9" cy="11" r="1.5"/><path d="M4 16l4-4 3 3 4-5 5 6"/></svg></span><span class="t">Gennetex Post</span></a>
+          <a data-view="meetings"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h12v10H4z"/><path d="M16 10l4-2v8l-4-2z"/></svg></span><span class="t">Хурал</span></a>
+          <a data-view="livestreams"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M4 8v8M20 8v8M8 4h8M8 20h8"/></svg></span><span class="t">Live stream хянах</span></a>
+          <a data-view="screenshare"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 20h8"/></svg></span><span class="t">Дэлгэц хянах</span></a>
+          <div class="grp">Лог</div>
+          <a data-view="activitylogs"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="t">Нийт лог</span></a>
+          <div class="grp">Excel</div>
+          <a data-view="excelarchive"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="t">Excel архив</span></a>
         </nav>
-        <div class="foot">Gennetex ERP v1.0</div>
+        <div class="foot">Gennetex ERP v0.2.0</div>
       </aside>
       <div class="main">
         <div class="topbar">
@@ -184,13 +221,16 @@
     const SAMPLE_NAMES=new Set(['Бат-Эрдэнэ','Бат Эрдэнэ','Оюунчимэг','Ганбаатар']);
     const isSampleName=n=>SAMPLE_NAMES.has(String(n||'').trim());
     const dropSampleRows=(rows,fields)=> (rows||[]).filter(r=>!fields.some(f=>isSampleName(r[f])));
+    const ERP_NOT_FOUND='ERP-аас олдсонгүй';
+    const searchEmpty=(q,def)=>String(q||'').trim()?ERP_NOT_FOUND:def;
     const isSuperAdmin=r=>r==='superadmin';
     const isAdminRole=r=>r==='admin' ||r==='superadmin';
-    const roleLabel=r=>r==='superadmin' ?'Системийн админ':r==='admin' ?'Админ':'Ажилтан';
+    const roleLabel=r=>r==='superadmin' ?'Хөгжүүлэгч':r==='admin' ?'Админ':'Ажилтан';
     const visibleWorkers=()=>{
-      const base=(data.workers||[]).filter(w=>isSuperAdmin(me?.role)||w.role!=='superadmin');
-      if(isSuperAdmin(me?.role)) return base;
-      return base.filter(w=>w.role==='employee');
+      // Системийн админ: бүгд; энгийн админ: superadmin-аас бусад бүгд (ажилтан + админ)
+      const list=data.workers||[];
+      if(isSuperAdmin(me?.role)) return list;
+      return list.filter(w=>w.role!=='superadmin');
     };
     const fieldWorkers=()=>visibleWorkers().filter(w=>w.role==='employee');
 
@@ -208,12 +248,96 @@
       for(const [re,key] of INV_IMG_RULES) if(re.test(name||'')) return `images/inventory/${key}.svg`;
       return `images/inventory/${cat==='tool' ?'default-tool':'default-material'}.svg`;
     }
-    function invThumb(it){ return `<img class="inv-thumb" src="${invImg(it.name,it.category||'material')}" alt="" loading="lazy">`; }
+
+    async function uploadInvImageFile(file, itemId){
+      if(!file) return null;
+      const ext=(file.name||'jpg').split('.').pop()||'jpg';
+      const path=`${itemId||'new'}/${Date.now()}.${ext}`;
+      const {error}=await sb.storage.from('inventory').upload(path,file,{contentType:file.type||'image/jpeg',upsert:true});
+      if(error){
+        if(/bucket/i.test(error.message||'')) throw new Error('inventory bucket байхгүй. Supabase дээр migration_inventory_image.sql ажиллуулна уу.');
+        throw error;
+      }
+      const {data}=sb.storage.from('inventory').getPublicUrl(path);
+      return data.publicUrl;
+    }
+
+    function invNormCat(cat){ return cat==='tool' ? 'tool' : 'material'; }
+    function isMissingDbCol(error, column){
+      const msg=String(error?.message||error?.details||'').toLowerCase();
+      const col=String(column||'').toLowerCase();
+      return msg.includes(col) && (msg.includes('column') || msg.includes('schema cache') || msg.includes('could not find'));
+    }
+    function invBarVal(cat){
+      const id=invNormCat(cat)==='tool' ? 'i_bar' : 'i_bar_mat';
+      return ($(id)?.value || '').trim();
+    }
+    async function upsertInventoryRow(row){
+      let payload={...row};
+      let res=await sb.from('inventory').insert(payload).select().single();
+      if(res.error && isMissingDbCol(res.error,'image_url') && payload.image_url!=null){
+        const {image_url,...legacy}=payload;
+        res=await sb.from('inventory').insert(legacy).select().single();
+        if(!res.error) throw new Error('image_url багана байхгүй. migration_inventory_image.sql ажиллуулна уу.');
+      }
+      if(res.error && isMissingDbCol(res.error,'category') && payload.category){
+        const {category,...legacy}=payload;
+        res=await sb.from('inventory').insert(legacy).select().single();
+        if(!res.error) throw new Error('category багана байхгүй — багаж material болно. schema.sql (inventory.category) ажиллуулна уу.');
+      }
+      if(res.error) throw res.error;
+      return res.data;
+    }
+    async function patchInventoryRow(id, patch){
+      let payload={...patch};
+      let res=await sb.from('inventory').update(payload).eq('id',id).select().single();
+      if(res.error && isMissingDbCol(res.error,'image_url') && payload.image_url!=null){
+        const {image_url,...legacy}=payload;
+        res=await sb.from('inventory').update(legacy).eq('id',id).select().single();
+        if(!res.error) throw new Error('image_url багана байхгүй. migration_inventory_image.sql ажиллуулна уу.');
+      }
+      if(res.error && isMissingDbCol(res.error,'category') && payload.category){
+        const {category,...legacy}=payload;
+        res=await sb.from('inventory').update(legacy).eq('id',id).select().single();
+        if(!res.error) throw new Error('category багана байхгүй. schema.sql (inventory.category) ажиллуулна уу.');
+      }
+      if(res.error) throw res.error;
+      return res.data;
+    }
+    async function syncProductFromInventory(item){
+      if(!item?.name) return;
+      try{
+        const {data:products}=await sb.from('products').select('id,sku,barcode,name,category');
+        const cat=invNormCat(item.category);
+        let match=(products||[]).find(p=>p.sku===item.id);
+        if(!match && item.barcode) match=(products||[]).find(p=>p.barcode===item.barcode && invNormCat(p.category)===cat);
+        if(!match) match=(products||[]).find(p=>p.name===item.name && invNormCat(p.category)===cat);
+        const row={
+          name:item.name.trim(),
+          sku:item.id,
+          barcode:item.barcode||null,
+          category:cat,
+          stock:Number(item.quantity)||0,
+          purchase_price:Number(item.price)||0,
+        };
+        if(match){
+          await sb.from('products').update({...row,updated_at:new Date().toISOString()}).eq('id',match.id);
+        }else{
+          await sb.from('products').insert(row);
+        }
+      }catch(e){ console.warn('products sync:',e.message||e); }
+    }
+    function invPhotoFieldPreview(url){
+      return url?`<div style="text-align:center;margin:10px 0"><img src="${String(url).replace(/"/g,'&quot;')}" style="width:96px;height:96px;object-fit:cover;border-radius:12px;border:1px solid var(--line)"/></div>`:'';
+    }
+    function invThumb(it){ const src=it.image_url||invImg(it.name,it.category||'material'); return `<img class="inv-thumb" src="${String(src).replace(/"/g,'&quot;')}" alt="" loading="lazy" style="object-fit:cover">`; }
 
     let me=null, map=null, markers=[], view='dashboard', timer=null;
-    let data = {workers:[],attendance:[],visits:[],trips:[],tripGroups:[],tripGroupsToday:[],tripGroupsArchive:[],siteSessions:[],serviceCalls:[],inventory:[],vehicles:[],movements:[],reports:[],shifts:[],attLocations:[],breakSchedules:[]};
+    let data = {workers:[],attendance:[],visits:[],trips:[],tripGroups:[],tripGroupsToday:[],tripGroupsArchive:[],siteSessions:[],serviceCalls:[],inventory:[],vehicles:[],movements:[],reports:[],shifts:[],attLocations:[],breakSchedules:[],posts:[],lives:[],meetings:[]};
     let companionTab='today';
     let usageTab='balances';
+    let excelArchives=[];
+    let excelFilter={year:new Date().getFullYear(),month:0,day:0,category:''};
     const movementDelta=m=>{
       const q=Number(m.quantity)||0;
       const type=m.movement_type||'withdraw';
@@ -265,7 +389,12 @@
       {key:'repair',label:'Засвар',icon: '',color:'#06b6d4'},
       {key:'other',label:'Бусад',icon: '',color:'#64748b'}
     ];
+    const SITE_KINDS=[
+      {key:'ail',label:'Айл',color:'#22c55e'},
+      {key:'baiguulga',label:'Байгууллага',color:'#3b82f6'}
+    ];
     const callTypeMeta=k=>CALL_TYPES.find(t=>t.key===k)||CALL_TYPES[CALL_TYPES.length-1];
+    const siteKindMeta=k=>SITE_KINDS.find(t=>t.key===k)||SITE_KINDS[0];
     const WEEKDAYS=[{d:1,l:'Даваа'},{d:2,l:'Мягмар'},{d:3,l:'Лхагва'},{d:4,l:'Пүрэв'},{d:5,l:'Баасан'},{d:6,l:'Бямба'},{d:7,l:'Ням'}];
     const TIME_OPTIONS=(()=>{const o=[];for(let h=6;h<=22;h++)for(let m=0;m<60;m+=30){if(h===22&&m>0)break;o.push(String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'));}return o;})();
     function timeSelect(id,val,allowEmpty=true){
@@ -296,6 +425,11 @@
     const tripKm = t => Number(t?.distance_km ?? 0);
     const tripKmLabel = t => `${tripKm(t).toFixed(2)} км`;
     const siteStatusLabel = s => ({on_site:'Байр дээр',left:'Явсан',submitted:'Илгээсэн',pending:'Хүлээгдэж буй'}[s]||s);
+    const visitTypeLabel = t => {
+      if(t==='site_work') return 'Ажлын байр';
+      const m=callTypeMeta(t);
+      return m?.label||t||'—';
+    };
     const todayStart = () => { const d=new Date(); d.setHours(0,0,0,0); return d; };
     const countTodayBags = () => (data.tripGroupsToday||[]).length;
     const buildPassByTrip=(trips,tripPassengers,siteSessions)=>{
@@ -369,11 +503,11 @@
         p=data;
       }
       if(!p || !isAdminRole(p.role)){
-        showErr('Зөвхөн админ нэвтэрнэ. Системийн админ: superadmin@gennetex.mn — fix_superadmin_login.sql ажиллуулна уу.');
+        showErr('Зөвхөн админ нэвтэрнэ. Системийн админ эрх шаардлагатай.');
         await sb.auth.signOut(); return;
       }
       me=p; $('uName').textContent=p.name||'Админ'; $('uAvatar').textContent=(p.name||'A').charAt(0).toUpperCase();
-      const roleSub=isSuperAdmin(p.role)?'Системийн админ':'Админ эрх';
+      const roleSub=isSuperAdmin(p.role)?'Хөгжүүлэгч':'Админ эрх';
       document.querySelector('.user .muted').textContent=roleSub;
       $('login').style.display='none'; $('app').style.display='block';
       go('dashboard'); startRefresh();
@@ -383,18 +517,27 @@
 
     // ===== Navigation =====
     document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
-    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ'};
+    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
+    let activityFilter={year:new Date().getFullYear(),month:0,day:0,user:''};
+    const ACTION_LABEL={login:'Нэвтрэлт',leave_request:'Чөлөө хүсэлт',screen:'Дэлгэц нээсэн',tap:'Даралт',location:'Байршил',face_enroll:'Царай бүртгэл',attendance:'Ирц',inventory:'Бараа/багаж',visit:'Айлд очсон',site_work:'Ажлын байр',service_call:'Дуудлага',other:'Бусад'};
+    const fmtLogTime=ts=>{
+      if(!ts) return '—';
+      const d=new Date(ts);
+      const p=n=>String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+    };
     function go(v){
       view=v;
       document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
       $('pageTitle').textContent=TITLES[v];
       render();
     }
+    window.go=go;
 
     // ===== Data =====
     function startRefresh(){ loadAll(); if(timer)clearInterval(timer); timer=setInterval(()=>loadAll(true),15000); }
     async function loadAll(silent){
-      const [w,a,v,tr,sw,sc,inv,veh,mov,rep,sh,al,br]=await Promise.all([
+      const [w,a,v,tr,sw,sc,inv,veh,mov,rep,sh,al,br,alogs,posts,lives,meetings,lr]=await Promise.all([
         sb.from('profiles').select('id,name,last_name,role,latitude,longitude,last_seen,email,position,phone,address,avatar_url').order('name'),
         sb.from('attendance').select('*').order('created_at',{ascending:false}).limit(200),
         sb.from('visit_logs').select('*').order('arrived_at',{ascending:false}).limit(200),
@@ -407,13 +550,25 @@
         sb.from('employee_reports').select('*').order('created_at',{ascending:false}).limit(200),
         sb.from('employee_shifts').select('*,attendance_locations(name)').order('shift_date',{ascending:false}).limit(200),
         sb.from('attendance_locations').select('*').eq('active',true).order('name'),
-        sb.from('employee_break_schedules').select('*').order('user_name').order('day_of_week')
+        sb.from('employee_break_schedules').select('*').order('user_name').order('day_of_week'),
+        sb.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(2000),
+        sb.from('posts').select('*').order('created_at',{ascending:false}).limit(300),
+        sb.from('live_streams').select('*').order('started_at',{ascending:false}).limit(100),
+        sb.from('meetings').select('*').order('started_at',{ascending:false}).limit(100),
+        sb.from('leave_requests').select('*').order('created_at',{ascending:false}).limit(200)
       ]);
       if(rep.error){ console.error('employee_reports:', rep.error); toast('Тайлан ачаалахад алдаа: '+rep.error.message); }
       if(sw.error && String(sw.error.message).includes('field_site_sessions')) toast('Ажлын байр: migration_field_work.sql ажиллуулна уу');
+      if(v.error && String(v.error.message).includes('visit_logs')) toast('Очсон лог: schema.sql эсвэл migration_visit_logs.sql ажиллуулна уу');
       if(sc.error && String(sc.error.message).includes('service_calls')) toast('Дуудлага: migration_service_calls.sql ажиллуулна уу');
       if(sh.error && String(sh.error.message).includes('employee_shifts')) toast('Хуваарь: migration_shifts.sql ажиллуулна уу');
       if(br.error && String(br.error.message).includes('employee_break_schedules')) toast('Амралт: migration_break_schedules.sql ажиллуулна уу');
+      if(alogs.error && String(alogs.error.message).includes('activity_logs')) toast('Нийт лог: migration_activity_logs.sql ажиллуулна уу');
+      if(posts.error && String(posts.error.message).includes('posts')) toast('Post: migration_feed.sql ажиллуулна уу');
+      if(lives.error && String(lives.error.message).includes('live_streams')) toast('Live: migration_live_streams.sql ажиллуулна уу');
+      if(meetings.error && String(meetings.error.message).includes('meetings')) toast('Хурал: migration_meetings.sql ажиллуулна уу');
+      if(lr.error && String(lr.error.message).includes('leave_requests')) toast('Чөлөө: migration_leave_requests.sql ажиллуулна уу');
+      if(inv.error) toast('Агуулах: '+inv.error.message+(String(inv.error.message).includes('category')?' — schema.sql (inventory.category) ажиллуулна уу':''));
       try{
         const ts=todayStart().toISOString();
         await sb.from('trips').update({status:'done',ended_at:new Date().toISOString()}).eq('status','active').lt('started_at',ts);
@@ -435,6 +590,17 @@
       const tripGroupsToday=allTripGroups.filter(t=>new Date(t.started_at)>=todayMs);
       const tripGroupsArchive=allTripGroups.filter(t=>new Date(t.started_at)<todayMs);
       const tripGroups=tripGroupsToday;
+      let feedbackRows=[], aiReports=[], aiUsageReports=[];
+      try{
+        const fb=await sb.from('employee_feedback').select('*').order('created_at',{ascending:false}).limit(200);
+        if(!fb.error) feedbackRows=fb.data||[];
+      }catch(e){}
+      try{
+        const ar=await sb.from('ai_performance_reports').select('*').order('created_at',{ascending:false}).limit(50);
+        if(!ar.error) aiReports=(ar.data||[]).filter(r=>r.report_type==='instant'||r.report_type==='monthly');
+        const aur=await sb.from('ai_performance_reports').select('*').eq('report_type','app_usage').order('created_at',{ascending:false}).limit(50);
+        if(!aur.error) aiUsageReports=aur.data||[];
+      }catch(e){}
       data={workers:dropSampleRows(w.data,['name']),attendance:dropSampleRows(a.data,['staff_name','user_name']),
         visits:dropSampleRows(v.data,['customer','user_name']),trips:(tr.data||[]).map(t=>({...t,driver_name:isSampleName(t.driver_name)?null:t.driver_name})),
         tripGroups,tripGroupsToday,tripGroupsArchive,
@@ -443,7 +609,15 @@
         inventory:inv.data||[],vehicles:(veh.data||[]).map(v=>({...v,driver_name:isSampleName(v.driver_name)?null:v.driver_name})),
         movements:dropSampleRows(mov.data,['user_name','staff_name']),reports:dropSampleRows(rep.data,['user_name']),
         shifts:dropSampleRows((sh.data||[]).map(s=>({...s,location_name:s.attendance_locations?.name||null})),['user_name']),
-        attLocations:al.data||[],breakSchedules:dropSampleRows(br.data,['user_name'])};
+        attLocations:al.data||[],breakSchedules:dropSampleRows(br.data,['user_name']),
+        activityLogs:dropSampleRows(alogs.data||[],['user_name']),
+        posts:dropSampleRows(posts.data||[],['author_name']),
+        lives:lives.data||[],
+        meetings:meetings.data||[],
+        feedback:feedbackRows,
+        aiReports:aiReports,
+        aiUsageReports:aiUsageReports,
+        leaveRequests:lr.error?[]:(lr.data||[])};
       // Interval үед газрын зураг байвал зөвхөн marker шинэчилнэ (zoom тогтвортой)
       if(silent && (view==='dashboard' ||view==='location') && map && document.body.contains($('map'))){
         refreshMarkers(); return;
@@ -457,6 +631,9 @@
       if(view==='dashboard') return renderDashboard(c);
       if(view==='employees') return renderEmployees(c);
       if(view==='reports') return renderReports(c);
+      if(view==='feedback') return renderFeedback(c);
+      if(view==='aiappusage') return renderAiAppUsage(c);
+      if(view==='aiperformance') return renderAiPerformance(c);
       if(view==='attendance') return renderAttendance(c);
       if(view==='location') return renderLocation(c);
       if(view==='visits') return renderVisits(c);
@@ -468,7 +645,499 @@
       if(view==='vehicles') return renderVehicles(c);
       if(view==='inventory') return renderInventory(c);
       if(view==='usage') return renderUsage(c);
+      if(view==='feedposts') return renderFeedPosts(c);
+      if(view==='meetings') return renderMeetings(c);
+      if(view==='livestreams'){ renderLiveStreams(c); return; }
+      if(view==='screenshare'){ renderScreenShare(c); return; }
+      if(view==='activitylogs') return renderActivityLogs(c);
+      if(view==='excelarchive') return renderExcelArchive(c);
     }
+
+    function renderFeedPosts(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      const posts=data.posts||[];
+      const activeMeetings=(data.meetings||[]).filter(m=>m.status==='active'&&(m.kind==='meeting'||(!m.kind&&/хурал/i.test(m.title||''))));
+
+      const postHtml=posts.map(p=>{
+        const tags=(Array.isArray(p.tags)?p.tags:[]).map(t=>'@'+(t.user_name||'')).join(' ');
+        const img=p.image_url?`<a href="${esc(p.image_url)}" target="_blank" rel="noopener"><img src="${esc(p.image_url)}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:8px"/></a>`:'—';
+        return `<tr>
+          <td class="muted" style="white-space:nowrap">${p.created_at?new Date(p.created_at).toLocaleString('mn-MN'):'—'}</td>
+          <td><b>${esc(p.author_name)||'—'}</b></td>
+          <td style="max-width:360px">${esc(p.content)||'<span class=muted>Зурагтай пост</span>'}${tags?`<div class="muted" style="font-size:12px;margin-top:4px">${esc(tags)}</div>`:''}</td>
+          <td>${img}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick='deletePostAdmin(${JSON.stringify(p.id||'')})'>Устгах</button></td>
+        </tr>`;
+      }).join('')||'<tr><td colspan=5 class=empty>Пост алга</td></tr>';
+
+      const meetNote=activeMeetings.length
+        ? `<p style="margin:0 0 12px;font-size:13px"><span class="pill" style="background:#fee2e2;color:#b91c1c;font-weight:800">ХУРАЛ</span> Идэвхтэй хурал байна — <a href="#" onclick="go('meetings');return false">Хурал цэс</a> рүү орно уу.</p>`
+        : `<p class="muted" style="margin:0 0 12px;font-size:13px">Хурал эхлүүлэхийн тулд <b>Хурал</b> цэсийг ашиглана.</p>`;
+
+      c.innerHTML=`
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Бүх пост (${posts.length})</h3>
+          <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
+          <div class="card-b">
+            ${meetNote}
+            <p class="muted" style="margin:0 0 12px;font-size:13px">Хэн ямар пост тавьсан / share хийсэн — бүгд харагдана</p>
+          </div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Огноо</th><th>Ажилтан</th><th>Агуулга</th><th>Зураг</th><th></th>
+          </tr></thead><tbody>${postHtml}</tbody></table></div></div>`;
+    }
+
+    window.deletePostAdmin=async(id)=>{
+      if(!id||!confirm('Пост устгах уу?')) return;
+      const {error}=await sb.from('posts').delete().eq('id',id);
+      if(error) toast(error.message); else { toast('Пост устгагдлаа'); loadAll(); }
+    };
+
+    function isMeetingKind(m){
+      if(m.kind==='meeting') return true;
+      if(m.kind==='live') return false;
+      return /хурал/i.test(m.title||'');
+    }
+    function isLiveKind(m){
+      if(m.kind==='live') return true;
+      if(m.kind==='meeting') return false;
+      return !/хурал/i.test(m.title||'');
+    }
+
+    // ===== Дэлгэц live share (realtime frame — DB-д хадгалахгүй) =====
+    let screenPresenceList=[];
+    let screenPresenceSelected=null;
+    let screenPresenceCh=null;
+    let screenLiveCh=null;
+    let screenLiveFrame=null;
+    let screenLiveMeta=null;
+    function startScreenPresenceWatch(){
+      if(screenPresenceCh) return;
+      screenPresenceCh=sb.channel('employee-screen-presence',{config:{presence:{key:'watcher-admin-'+Math.random().toString(36).slice(2)}}});
+      const emit=()=>{
+        try{
+          const state=screenPresenceCh.presenceState();
+          const byUser={};
+          Object.values(state||{}).forEach(arr=>{
+            (arr||[]).forEach(p=>{
+              if(!p?.user_id || String(p.user_id).startsWith('watcher')) return;
+              const prev=byUser[p.user_id];
+              if(!prev || String(p.at||'')>=String(prev.at||'')) byUser[p.user_id]=p;
+            });
+          });
+          screenPresenceList=Object.values(byUser).sort((a,b)=>String(b.at||'').localeCompare(String(a.at||'')));
+          if(view==='screenshare'){
+            // зөвхөн жагсаалт шинэчлэх — live зургийг бүү устга
+            const listEl=$('screenUserList');
+            if(listEl) listEl.innerHTML=buildScreenUserRows();
+            else renderScreenShare($('content'));
+          }
+        }catch(e){}
+      };
+      screenPresenceCh.on('presence',{event:'sync'},emit);
+      screenPresenceCh.on('presence',{event:'join'},emit);
+      screenPresenceCh.on('presence',{event:'leave'},emit);
+      screenPresenceCh.subscribe(async(st)=>{
+        if(st==='SUBSCRIBED'){
+          try{ await screenPresenceCh.track({user_id:'watcher',user_name:'Админ',at:new Date().toISOString()}); }catch(e){}
+          emit();
+        }
+      });
+    }
+    function stopScreenLiveWatch(){
+      if(screenLiveCh){
+        try{ sb.removeChannel(screenLiveCh); }catch(e){}
+        screenLiveCh=null;
+      }
+    }
+    function startScreenLiveWatch(userId){
+      stopScreenLiveWatch();
+      screenLiveFrame=null;
+      screenLiveMeta=null;
+      if(!userId) return;
+      screenLiveCh=sb.channel('screen-live-'+userId);
+      screenLiveCh.on('broadcast',{event:'frame'},({payload})=>{
+        if(!payload?.image) return;
+        screenLiveFrame=payload.image;
+        screenLiveMeta=payload;
+        const img=$('screenLiveImg');
+        const meta=$('screenLiveMeta');
+        if(img){
+          img.src='data:image/jpeg;base64,'+payload.image;
+          img.style.display='block';
+        }
+        const wait=$('screenLiveWait');
+        if(wait) wait.style.display='none';
+        if(meta){
+          const t=payload.at?new Date(payload.at).toLocaleTimeString('mn-MN'):'';
+          meta.textContent=(payload.screen_label||payload.screen||'Апп')+' · '+t+' · '+(payload.user_name||'');
+        }
+      });
+      screenLiveCh.subscribe();
+    }
+    function screenPresenceById(){
+      const m={};
+      screenPresenceList.forEach(p=>{ if(p?.user_id) m[p.user_id]=p; });
+      return m;
+    }
+    function allScreenWorkers(){
+      // Бүх ажилтан (profiles) — апп нээлттэй эсэхээс үл хамааран
+      return (typeof visibleWorkers==='function'?visibleWorkers():(data.workers||[]))
+        .filter(w=>w && w.id)
+        .slice();
+    }
+    function buildScreenUserRows(){
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const presence=screenPresenceById();
+      const workers=allScreenWorkers();
+      // Presence-д байгаа ч profiles-д байхгүй бол нэмнэ
+      const seen=new Set(workers.map(w=>w.id));
+      screenPresenceList.forEach(p=>{
+        if(p.user_id && !seen.has(p.user_id)){
+          workers.push({id:p.user_id,name:p.user_name,role:'employee'});
+          seen.add(p.user_id);
+        }
+      });
+      workers.sort((a,b)=>{
+        const ap=presence[a.id]?1:0, bp=presence[b.id]?1:0;
+        if(ap!==bp) return bp-ap;
+        return String(a.name||'').localeCompare(String(b.name||''),'mn');
+      });
+      return workers.map(w=>{
+        const p=presence[w.id];
+        const active=screenPresenceSelected===w.id;
+        const online=!!p;
+        const name=(typeof empDisplayName==='function'?empDisplayName(w):null)||w.name||w.email||'—';
+        const screen=online?(p.screen_label||p.screen||'Апп'):'Апп хаалттай';
+        const t=online&&p.at?new Date(p.at).toLocaleTimeString('mn-MN'):'—';
+        const status=online
+          ?`<span class="pill" style="background:#dcfce7;color:#166534;font-weight:800">LIVE</span>`
+          :`<span class="pill" style="background:#f1f5f9;color:#64748b">Офлайн</span>`;
+        return `<tr style="${active?'background:#eff6ff':''}">
+          <td><b>${esc(name)}</b><div class="muted" style="font-size:11px">${esc(w.role||'')}</div></td>
+          <td>${status}</td>
+          <td>${esc(screen)}</td>
+          <td class="muted">${t}</td>
+          <td><button class="btn btn-primary btn-sm" onclick='selectScreenUser(${JSON.stringify(w.id)})'>${online?'Live харах':'Хүлээнэ'}</button></td>
+        </tr>`;
+      }).join('')||'<tr><td colspan=5 class=empty>Ажилтан алга</td></tr>';
+    }
+    window.selectScreenUser=(id)=>{
+      screenPresenceSelected=id;
+      screenLiveFrame=null;
+      screenLiveMeta=null;
+      startScreenLiveWatch(id);
+      renderScreenShare($('content'));
+    };
+    function renderScreenShare(c){
+      startScreenPresenceWatch();
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const workers=allScreenWorkers();
+      const presence=screenPresenceById();
+      const selWorker=workers.find(w=>w.id===screenPresenceSelected)
+        || screenPresenceList.find(p=>p.user_id===screenPresenceSelected);
+      const selName=selWorker
+        ?(selWorker.user_name||(typeof empDisplayName==='function'?empDisplayName(selWorker):selWorker.name)||'Ажилтан')
+        :'сонгоогүй';
+      const online=screenPresenceSelected && !!presence[screenPresenceSelected];
+      const hasFrame=!!screenLiveFrame;
+      const liveCount=screenPresenceList.length;
+      c.innerHTML=`
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Дэлгэц live share</h3>
+          <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
+          <div class="card-b">
+            <p class="muted" style="margin:0;font-size:13px">
+              <b>Бүх ажилтан</b> жагсаалтад харагдана. Апп нээлттэй бол <b>LIVE</b> гэж тэмдэглэгдэнэ.
+              Дэлгэцийн зураг <b>database-д хадгалагдахгүй</b> — зөвхөн шууд харагдана. Ажилтанд мэдэгдэл гарахгүй.
+            </p>
+            <p style="margin:8px 0 0;font-size:13px">Нийт: <b>${workers.length}</b> · Апп нээлттэй: <b style="color:#166534">${liveCount}</b></p>
+          </div></div>
+
+        <div class="grid2">
+          <div class="card"><div class="card-h"><h3>Бүх ажилчид (${workers.length})</h3></div>
+            <div class="card-b" style="padding:0;max-height:70vh;overflow:auto"><table><thead><tr>
+              <th>Ажилтан</th><th>Төлөв</th><th>Дэлгэц</th><th>Цаг</th><th></th>
+            </tr></thead><tbody id="screenUserList">${buildScreenUserRows()}</tbody></table></div></div>
+
+          <div class="card"><div class="card-h"><h3>Live дэлгэц — ${esc(selName)}</h3>
+            <span class="muted" id="screenLiveMeta" style="font-size:12px">${online?'Апп нээлттэй':'Апп хаалттай / холбогдоогүй'}</span></div>
+            <div class="card-b" style="padding:12px;background:#0b0f1a;min-height:420px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
+              <p id="screenLiveWait" class="muted" style="color:#94a3b8;text-align:center;${hasFrame?'display:none':''}">
+                ${!screenPresenceSelected
+                  ? 'Зүүн жагсаалтаас ажилтан сонгоно уу'
+                  : (online
+                    ? 'Live дэлгэц хүлээж байна… (хэдэн секунд)'
+                    : 'Энэ ажилтан апп нээгээгүй байна.<br>Апп нээхэд live автоматаар ирнэ.')}
+              </p>
+              <img id="screenLiveImg" alt="live screen" style="max-width:100%;max-height:70vh;border-radius:8px;${hasFrame?'':'display:none'}" ${hasFrame?`src="data:image/jpeg;base64,${screenLiveFrame}"`:''}/>
+            </div></div>
+        </div>`;
+      if(screenPresenceSelected && !screenLiveCh) startScreenLiveWatch(screenPresenceSelected);
+    }
+    window.renderScreenShare=renderScreenShare;
+    function liveRoomId(id){
+      return 'gennetexlive'+String(id||'').replace(/[^a-zA-Z0-9]/g,'').slice(0,32);
+    }
+    let liveMonitorId=null;
+    let liveCommentsCache={};
+    async function renderLiveStreams(c){
+      const list=(data.meetings||[]).filter(isLiveKind);
+      const active=list.filter(m=>m.status==='active');
+      const past=list.filter(m=>m.status==='ended').slice(0,30);
+      if(liveMonitorId && !active.some(m=>m.id===liveMonitorId)) liveMonitorId=null;
+      if(!liveMonitorId && active[0]) liveMonitorId=active[0].id;
+
+      // Сэтгэгдэл ачаалах
+      if(liveMonitorId){
+        const {data:coms,error:ce}=await sb.from('live_comments').select('*').eq('live_id',liveMonitorId).order('created_at',{ascending:true}).limit(200);
+        liveCommentsCache[liveMonitorId]=ce?[]:(coms||[]);
+        if(ce && String(ce.message).includes('live_comments')){
+          // migration_live_comments_invites.sql хэрэгтэй
+        }
+      }
+
+      const activeHtml=active.map(m=>`<tr>
+        <td><span class="pill" style="background:#fee2e2;color:#b91c1c;font-weight:800">LIVE</span></td>
+        <td><b>${(m.host_name||'—').replace(/</g,'&lt;')}</b></td>
+        <td>${(m.title||'Live').replace(/</g,'&lt;')}</td>
+        <td class="muted">${m.started_at?new Date(m.started_at).toLocaleString('mn-MN'):'—'}</td>
+        <td>
+          <button class="btn btn-primary btn-sm" onclick='watchLiveAdmin(${JSON.stringify(m.id)},${JSON.stringify(m.host_name||'')})'>Үзэх</button>
+          <button class="btn btn-ghost btn-sm" onclick='selectLiveMonitor(${JSON.stringify(m.id)})'>Сэтгэгдэл</button>
+          <button class="btn btn-ghost btn-sm" onclick='endLiveAdmin(${JSON.stringify(m.id)})'>Дуусгах</button>
+        </td>
+      </tr>`).join('')||'<tr><td colspan=5 class=empty>Идэвхтэй live алга</td></tr>';
+
+      const mon=active.find(m=>m.id===liveMonitorId);
+      const coms=liveCommentsCache[liveMonitorId]||[];
+      const comHtml=coms.map(c=>`<tr>
+        <td class="muted" style="white-space:nowrap">${c.created_at?new Date(c.created_at).toLocaleTimeString('mn-MN'):'—'}</td>
+        <td><b>${(c.user_name||'—').replace(/</g,'&lt;')}</b></td>
+        <td>${(c.content||'').replace(/</g,'&lt;')}</td>
+      </tr>`).join('')||'<tr><td colspan=3 class=empty>Сэтгэгдэл алга</td></tr>';
+
+      const pastHtml=past.map(m=>`<tr>
+        <td class="muted">${m.started_at?new Date(m.started_at).toLocaleString('mn-MN'):'—'}</td>
+        <td>${(m.host_name||'—').replace(/</g,'&lt;')}</td>
+        <td>${(m.title||'Live').replace(/</g,'&lt;')}</td>
+        <td class="muted">${m.ended_at?new Date(m.ended_at).toLocaleString('mn-MN'):'—'}</td>
+      </tr>`).join('')||'<tr><td colspan=4 class=empty>Түүх алга</td></tr>';
+
+      c.innerHTML=`
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Live stream хянах (${active.length})</h3>
+          <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
+          <div class="card-b">
+            <p class="muted" style="margin:0;font-size:13px">Бүх ажилтны live stream энд харагдана. Сэтгэгдэл (юу ярьж/бичиж байгаа) болон live үзэх боломжтой.</p>
+          </div></div>
+
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Идэвхтэй live</h3></div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Төлөв</th><th>Хэн</th><th>Гарчиг</th><th>Эхэлсэн</th><th></th>
+          </tr></thead><tbody>${activeHtml}</tbody></table></div></div>
+
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Сэтгэгдэл — ${mon?(mon.host_name||'Live').replace(/</g,'&lt;'):'—'}</h3>
+          <button class="btn btn-ghost btn-sm" onclick="render()">Шинэчлэх</button></div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Цаг</th><th>Хэн</th><th>Юу бичсэн</th>
+          </tr></thead><tbody>${comHtml}</tbody></table></div></div>
+
+        <div class="card"><div class="card-h"><h3>Live түүх</h3></div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Эхэлсэн</th><th>Хэн</th><th>Гарчиг</th><th>Дууссан</th>
+          </tr></thead><tbody>${pastHtml}</tbody></table></div></div>`;
+    }
+    window.selectLiveMonitor=(id)=>{ liveMonitorId=id; render(); };
+    window.watchLiveAdmin=(id,hostName)=>{
+      const room=liveRoomId(id);
+      const name=hostName||'Ажилтан';
+      // meet.ffmuc.net-ийг шууд iframe хийхэд "refused to connect" гардаг тул
+      // өөрийн live-watch.html (External API) эсвэл шинэ цонх ашиглана
+      const watchUrl=`live-watch.html?room=${encodeURIComponent(room)}&name=${encodeURIComponent(name)}`;
+      const directUrl=`https://meet.ffmuc.net/${room}#config.prejoinPageEnabled=false&config.startWithAudioMuted=true&config.startWithVideoMuted=true&userInfo.displayName=%22Admin%22`;
+      const w=window.open(watchUrl,'_blank','noopener,noreferrer,width=1280,height=800');
+      if(!w){
+        const title=`LIVE — ${String(name).replace(/</g,'&lt;')}`;
+        $('overlay').innerHTML=`<div class="modal" style="max-width:960px;width:100%">
+          <div class="modal-h"><span><span style="background:#ef4444;color:#fff;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:900;margin-right:8px">LIVE</span>${title}</span>
+          <button type="button" class="x" onclick="closeModal()" aria-label="Хаах">×</button></div>
+          <div class="modal-b" style="padding:16px;text-align:center">
+            <p class="muted">Popup блоклогдсон. Доорх холбоосоор нээнэ үү.</p>
+            <p style="margin:16px 0">
+              <a class="btn btn-primary" href="${watchUrl}" target="_blank" rel="noopener">Live үзэх</a>
+              <a class="btn btn-ghost" href="${directUrl}" target="_blank" rel="noopener" style="margin-left:8px">Шууд холбоос</a>
+            </p>
+          </div>
+          <div class="modal-f"><button class="btn btn-ghost" onclick="closeModal()">Хаах</button></div>
+        </div>`;
+        $('overlay').style.display='flex';
+      } else {
+        toast('Live шинэ цонхонд нээгдлээ');
+      }
+    };
+    window.endLiveAdmin=async(id)=>{
+      if(!id||!confirm('Энэ live-г дуусгах уу?')) return;
+      const {error}=await sb.from('meetings').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',id).eq('status','active');
+      if(error) toast(error.message); else { toast('Live дууслаа'); loadAll(); }
+    };
+    function renderMeetings(c){
+      const list=(data.meetings||[]).filter(isMeetingKind);
+      const active=list.filter(m=>m.status==='active');
+      const past=list.filter(m=>m.status==='ended').slice(0,40);
+      const activeHtml=active.map(m=>`<tr>
+        <td><span class="pill" style="background:#fee2e2;color:#b91c1c;font-weight:800">ИДЭВХТЭЙ</span></td>
+        <td><b>${(m.host_name||'Админ').replace(/</g,'&lt;')}</b></td>
+        <td>${(m.title||'Админ хурал').replace(/</g,'&lt;')}</td>
+        <td class="muted">${m.started_at?new Date(m.started_at).toLocaleString('mn-MN'):'—'}</td>
+        <td>
+          <button class="btn btn-primary btn-sm" onclick='openMeetingHost(${JSON.stringify(m.id||'')},${JSON.stringify(m.host_name||me?.name||'Админ')})'>Нээх / Share</button>
+          <button class="btn btn-ghost btn-sm" onclick='endMeetingAdmin(${JSON.stringify(m.id||'')})'>Дуусгах</button>
+        </td>
+      </tr>`).join('')||'<tr><td colspan=5 class=empty>Идэвхтэй хурал алга</td></tr>';
+      const pastHtml=past.map(m=>`<tr>
+        <td class="muted">${m.started_at?new Date(m.started_at).toLocaleString('mn-MN'):'—'}</td>
+        <td>${(m.host_name||'—').replace(/</g,'&lt;')}</td>
+        <td>${(m.title||'Хурал').replace(/</g,'&lt;')}</td>
+        <td class="muted">${m.ended_at?new Date(m.ended_at).toLocaleString('mn-MN'):'—'}</td>
+      </tr>`).join('')||'<tr><td colspan=4 class=empty>Түүх алга</td></tr>';
+
+      c.innerHTML=`
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Админ хурал</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="startMeetingAdmin()">Хурал эхлүүлэх</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button>
+          </div></div>
+          <div class="card-b">
+            <p class="muted" style="margin:0;font-size:13px">Өөрийн web дээр хурал эхлүүлнэ. Дэлгэц share хийгээд бүх ажилтан апп дээрээс <b>Хуралд орох</b> дарж холбогдоно. Гадны meet сервис ашиглахгүй.</p>
+          </div></div>
+
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Идэвхтэй хурал (${active.length})</h3></div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Төлөв</th><th>Хэн</th><th>Гарчиг</th><th>Эхэлсэн</th><th></th>
+          </tr></thead><tbody>${activeHtml}</tbody></table></div></div>
+
+        <div class="card"><div class="card-h"><h3>Хурлын түүх</h3></div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Эхэлсэн</th><th>Хэн</th><th>Гарчиг</th><th>Дууссан</th>
+          </tr></thead><tbody>${pastHtml}</tbody></table></div></div>`;
+    }
+
+    window.startMeetingAdmin=async()=>{
+      if(!me?.id){ toast('Нэвтэрнэ үү'); return; }
+      try{
+        await sb.from('meetings').update({status:'ended',ended_at:new Date().toISOString()}).eq('status','active').eq('kind','meeting');
+        const hostName=me.name||'Админ';
+        let {data:row,error}=await sb.from('meetings').insert({
+          host_id:me.id,
+          host_name:hostName,
+          title:'Админ хурал',
+          kind:'meeting',
+          status:'active',
+          started_at:new Date().toISOString()
+        }).select().single();
+        if(error && String(error.message).includes('kind')){
+          await sb.from('meetings').update({status:'ended',ended_at:new Date().toISOString()}).eq('status','active');
+          const retry=await sb.from('meetings').insert({
+            host_id:me.id,host_name:hostName,title:'Админ хурал',status:'active',started_at:new Date().toISOString()
+          }).select().single();
+          row=retry.data; error=retry.error;
+        }
+        if(error){
+          if(String(error.message).includes('meetings')) toast('migration_meetings.sql ажиллуулна уу');
+          else toast(error.message);
+          return;
+        }
+        // kind default=live алдааг засна
+        if(row && row.kind!=='meeting'){
+          const fix=await sb.from('meetings').update({kind:'meeting',title:'Админ хурал'}).eq('id',row.id).select().single();
+          if(!fix.error && fix.data) row=fix.data;
+        }
+        const sent=await pushLiveToAll({
+          title:'Хурал эхэллээ',
+          body:`${hostName} хурал эхлүүллээ — Нүүр → Хурал дээр дарж орно уу`,
+          data:{
+            type:'meeting',
+            kind:'meeting',
+            meetingId:String(row.id),
+            hostName:String(hostName),
+            hostId:String(me.id),
+            screen:'Meeting'
+          }
+        });
+        const chats=await sendMeetingChatInvites(row.id,hostName);
+        toast(sent?`Хурал эхэллээ — push: ${sent}, чат: ${chats}`:`Хурал эхэллээ — чат: ${chats} (push token олдсонгүй байж болно)`);
+        openMeetingHost(row.id,hostName);
+        loadAll();
+      }catch(e){ toast(e.message||'Алдаа'); }
+    };
+    function dmKey(a,b){ return ['dm',...[a,b].sort()].join('_'); }
+    async function sendMeetingChatInvites(meetingId,hostName){
+      const {data:profiles}=await sb.from('profiles').select('id,name').neq('id',me.id);
+      const list=profiles||[];
+      let n=0;
+      const text=`📢 Хурал эхэллээ!\n\n${hostName||'Админ'} хурал эхлүүллээ.\n\n➡️ Орох: Нүүр цэс → Хурал → «Хуралд орох»\n\n#meeting:${meetingId}`;
+      for(const p of list){
+        try{
+          const key=dmKey(me.id,p.id);
+          let {data:conv}=await sb.from('conversations').select('*').eq('dm_key',key).maybeSingle();
+          if(!conv){
+            const ins=await sb.from('conversations').insert({is_group:false,dm_key:key,created_by:me.id}).select().single();
+            if(ins.error) continue;
+            conv=ins.data;
+            await sb.from('conversation_members').insert([
+              {conversation_id:conv.id,user_id:me.id,user_name:hostName||me.name||'Админ'},
+              {conversation_id:conv.id,user_id:p.id,user_name:p.name||'Ажилтан'}
+            ]);
+          }
+          const msg=await sb.from('messages').insert({
+            room:conv.id,
+            sender_id:me.id,
+            sender_name:hostName||me.name||'Админ',
+            content:text
+          }).select().single();
+          if(!msg.error) n++;
+        }catch(e){}
+      }
+      return n;
+    }
+    async function pushLiveToAll({title,body,data}){
+      const {data:profiles}=await sb.from('profiles').select('id').neq('id',me.id);
+      const ids=(profiles||[]).map(p=>p.id).filter(Boolean);
+      if(!ids.length) return 0;
+      const {data:rows}=await sb.from('push_tokens').select('token').in('user_id',ids);
+      const tokens=[...new Set((rows||[]).map(r=>r.token).filter(Boolean))];
+      if(!tokens.length) return 0;
+      const safeData={};
+      Object.entries(data||{}).forEach(([k,v])=>{ if(v!=null) safeData[k]=String(v); });
+      for(let i=0;i<tokens.length;i+=100){
+        const chunk=tokens.slice(i,i+100);
+        await fetch('https://exp.host/--/api/v2/push/send',{
+          method:'POST',
+          headers:{'Accept':'application/json','Content-Type':'application/json'},
+          body:JSON.stringify(chunk.map(to=>{
+            const ring=safeData.type==='call'||safeData.type==='live_invite';
+            return {
+              to,title,body,
+              sound:'default',
+              priority:'high',
+              channelId:ring?'calls_ring_v2':'chat',
+              data:safeData,
+              ttl:ring?90:3600,
+              interruptionLevel:ring?'timeSensitive':'active'
+            };
+          }))
+        });
+      }
+      return tokens.length;
+    }
+    window.openMeetingHost=(id,hostName)=>{
+      if(!id) return;
+      const url=`meeting.html?id=${encodeURIComponent(id)}&role=host&name=${encodeURIComponent(hostName||'Админ')}`;
+      window.open(url,'_blank','noopener');
+    };
+    window.endMeetingAdmin=async(id)=>{
+      if(!id||!confirm('Хурал дуусгах уу?')) return;
+      const {error}=await sb.from('meetings').update({status:'ended',ended_at:new Date().toISOString()}).eq('id',id).eq('status','active');
+      if(error) toast(error.message); else { toast('Хурал дууслаа'); loadAll(); }
+    };
 
     function statCards(){
       const today=new Date();today.setHours(0,0,0,0);
@@ -512,10 +1181,10 @@
       const name = (w.name || 'А').charAt(0).toUpperCase();
       if (w.avatar_url) {
         return L.divIcon({
-          html: `<div style="width:44px;height:44px;border-radius:50%;border:3px solid ${col};overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35)"><img src="${w.avatar_url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;background:${col};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px\\'>${name}</div>'"></div>`,
+          html: `<div style="width:40px;height:50px;border-radius:6px;border:3px solid ${col};overflow:hidden;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);padding:2px"><img src="${w.avatar_url}" style="width:100%;height:100%;object-fit:contain;background:#fff" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;background:${col};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px\\'>${name}</div>'"></div>`,
           className: '',
-          iconSize: [44, 44],
-          iconAnchor: [22, 22],
+          iconSize: [40, 50],
+          iconAnchor: [20, 25],
         });
       }
       return L.divIcon({
@@ -532,7 +1201,7 @@
         const col=COLORS[i%COLORS.length];
         const icon=workerMapIcon(w,col);
         const popup=w.avatar_url
-          ? `<div style="text-align:center"><img src="${w.avatar_url}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid ${col};margin-bottom:6px"><br><b>${w.name||'Ажилтан'}</b><br>${timeAgo(w.last_seen)} өмнө</div>`
+          ? `<div style="text-align:center"><div style="background:#fff;padding:8px;border-radius:10px;border:1px solid #e5e7eb;display:inline-block;margin-bottom:8px"><img src="${w.avatar_url}" style="width:120px;height:150px;object-fit:contain;background:#fff;display:block" alt=""></div><br><b>${w.name||'Ажилтан'}</b><br>${timeAgo(w.last_seen)} өмнө</div>`
           : `<b>${w.name||'Ажилтан'}</b><br>${timeAgo(w.last_seen)} өмнө`;
         markers.push(L.marker([w.latitude,w.longitude],{icon}).addTo(map).bindPopup(popup));
       });
@@ -546,91 +1215,433 @@
         <tbody>${rows.length?rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join(''):`<tr><td colspan=${headers.length} class=empty>Мэдээлэл алга</td></tr>`}</tbody></table></div></div>`;
     }
 
-    // ===== Excel экспорт (SheetJS) =====
-    function exportExcel(filename, sheetName, aoa){
-      if(typeof XLSX==='undefined'){ toast('Excel сан ачаалагдаагүй байна'); return; }
-      const ws=XLSX.utils.aoa_to_sheet(aoa);
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,ws,sheetName);
-      const stamp=new Date().toISOString().slice(0,10);
-      XLSX.writeFile(wb,`${filename}_${stamp}.xlsx`);
+    // ===== Excel экспорт + lifetime архив =====
+    const EXCEL_YMD_HDR=['Он','Сар','Өдөр'];
+    const EXCEL_CAT_LABEL={
+      irts:'Ирц',ocson_log:'Очсон лог',ajlyn_bair:'Ажлын байр',ayalal:'Аялал',
+      baraa_hereglee:'Барааны хэрэглээ',hamt_yvaa_bag:'Хамт яваа баг',negtgesen:'Нэгтгэсэн',
+      niit_log:'Нийт лог',
+    };
+    const ymdFromDate=(v)=>{
+      const d=v?new Date(v):new Date();
+      if(Number.isNaN(d.getTime())) return [null,null,null];
+      return [d.getFullYear(),d.getMonth()+1,d.getDate()];
+    };
+    const prependYmd=(header)=>[...EXCEL_YMD_HDR,...header];
+    const pushYmdRow=(rows,dateVal,cells)=>{ const [y,m,day]=ymdFromDate(dateVal); rows.push([y,m,day,...cells]); };
+
+    async function loadExcelArchives(){
+      try{
+        const {data,error}=await sb.from('excel_archives').select('*').order('created_at',{ascending:false}).limit(2000);
+        if(error){
+          if(String(error.message).includes('excel_archives')) toast('Excel архив: migration_excel_archives.sql ажиллуулна уу');
+          excelArchives=[];
+          return;
+        }
+        excelArchives=data||[];
+      }catch(e){ excelArchives=[]; }
     }
-    window.exportUsage=()=>{
+
+    async function exportAndArchive({category,title,filename,sheets}){
       if(typeof XLSX==='undefined'){ toast('Excel сан ачаалагдаагүй байна'); return; }
-      const log=[['Төрөл','Бараа','Ажилтан','Тоо','Нэгж','Огноо']];
-      data.movements.forEach(m=>log.push([
-        movementTypeLabel(m.movement_type||'withdraw'),
-        m.item_name||'',m.user_name||'',Number(m.quantity)||0,m.unit||'',
-        new Date(m.created_at).toLocaleString('mn-MN'),
+      const now=new Date();
+      const y=now.getFullYear(),m=now.getMonth()+1,day=now.getDate();
+      const wb=XLSX.utils.book_new();
+      const sheetNames=[];
+      const sheetCounts={};
+      let rowCount=0;
+      (sheets||[]).forEach((sh,i)=>{
+        const name=(sh.name||`Sheet${i+1}`).slice(0,31);
+        const rows=sh.rows||[[]];
+        const body=Math.max(0,rows.length-1);
+        sheetNames.push(name);
+        sheetCounts[name]=body;
+        rowCount+=body;
+        XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),name);
+      });
+      const stamp=`${y}-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const fileBase=`${filename}_${stamp}`;
+      const localName=`${fileBase}.xlsx`;
+      XLSX.writeFile(wb,localName);
+      try{
+        const wbout=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+        const blob=new Blob([wbout],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+        const storagePath=`${y}/${String(m).padStart(2,'0')}/${String(day).padStart(2,'0')}/${fileBase}_${Date.now()}.xlsx`;
+        const {error:upErr}=await sb.storage.from('excel-exports').upload(storagePath,blob,{
+          contentType:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          upsert:false,
+        });
+        if(upErr) throw upErr;
+        const {data:urlData}=sb.storage.from('excel-exports').getPublicUrl(storagePath);
+        const {error:insErr}=await sb.from('excel_archives').insert({
+          category,title,filename:localName,storage_path:storagePath,file_url:urlData?.publicUrl||null,
+          sheet_names:sheetNames,sheet_counts:sheetCounts,row_count:rowCount,
+          export_year:y,export_month:m,export_day:day,created_by:me?.id||null,created_by_name:me?.name||null,
+        });
+        if(insErr) throw insErr;
+        await loadExcelArchives();
+        if(view==='excelarchive') render();
+        toast(`Excel татагдлаа (${sheetNames.length} sheet) — архивт хадгалагдлаа`);
+      }catch(e){
+        console.error('excel archive:',e);
+        toast('Excel татагдлаа (архив хадгалахад алдаа: '+(e.message||'')+')');
+      }
+    }
+
+    function buildAttendanceSheet(){
+      const rows=[prependYmd(['Ажилтан','Төрөл','Төлөв','Зайнаас','Байршил','Шалтгаан','Огноо','Өргөрөг','Уртраг'])];
+      const st={approved:'Зөвшөөрсөн',pending:'Хүлээгдэж буй',rejected:'Татгалзсан'};
+      data.attendance.forEach(r=>pushYmdRow(rows,r.created_at,[
+        r.staff_name||'',r.type==='check_in'?'Ирсэн':'Явсан',st[r.status]||r.status||'',
+        r.is_remote?'Тийм':'Үгүй',r.location_name||'',r.note||'',new Date(r.created_at).toLocaleString('mn-MN'),
+        r.latitude??'',r.longitude??'',
       ]));
-      const bal=[['Ажилтан','Бараа','Ангилал','Тоо','Нэгж']];
-      computeBalancesByUser(data.movements).forEach(u=>u.items.forEach(it=>bal.push([
-        u.user_name,it.item_name,it.category==='tool' ?'Багаж':'Бараа материал',
+      return rows;
+    }
+    function buildVisitsSheet(){
+      const rows=[prependYmd(['Айл/Байршил','Ажилтан','Төрөл','Асуудал','Огноо','Царай','Зураг'])];
+      data.visits.forEach(x=>pushYmdRow(rows,x.arrived_at,[
+        x.customer||x.location_name||'—',x.user_name||'',visitTypeLabel(x.call_type),x.problem||'',
+        new Date(x.arrived_at).toLocaleString('mn-MN'),x.face_verified?'Тийм':'Үгүй',x.photo_url||'',
+      ]));
+      return rows;
+    }
+    function buildSiteWorkSheet(){
+      const rows=[prependYmd(['Байршил','Хаяг','Жолооч','Баг','Ирсэн','Явсан','Хугацаа','Төлөв','Тайлбар','Зураг URL','Бүртгэсэн'])];
+      (data.siteSessions||[]).forEach(s=>pushYmdRow(rows,s.arrived_at||s.created_at,[
+        s.site_name||'',s.site_address||'',s.driver_name||'',
+        Array.isArray(s.passengers)&&s.passengers.length?s.passengers.map(p=>p.name||p.passenger_name).join(', '):'Ганцаараа',
+        s.arrived_at?new Date(s.arrived_at).toLocaleString('mn-MN'):'',
+        s.departed_at?new Date(s.departed_at).toLocaleString('mn-MN'):'',
+        s.arrived_at?formatDuration(sessionDuration(s)):'',siteStatusLabel(s.status),s.work_note||'',
+        s.photo_url||'',
+        new Date(s.created_at).toLocaleString('mn-MN'),
+      ]));
+      return rows;
+    }
+    function buildTripsSheet(){
+      const rows=[prependYmd(['Машин','Жолооч','Зам(км)','Хугацаа','Түлш(л)','Зардал','Эхэлсэн','Дууссан','Төлөв'])];
+      data.trips.forEach(t=>pushYmdRow(rows,t.started_at,[
+        t.plate_number||'',t.driver_name||'',Number(t.distance_km||0).toFixed(2),formatDuration(tripDuration(t)),
+        Number(t.liters||0).toFixed(2),Number(t.cost||0),new Date(t.started_at).toLocaleString('mn-MN'),
+        t.ended_at?new Date(t.ended_at).toLocaleString('mn-MN'):'',t.status==='active'?'Идэвхтэй':'Дууссан',
+      ]));
+      return rows;
+    }
+    function buildUsageSheets(){
+      const log=[prependYmd(['Төрөл','Бараа','Ажилтан','Тоо','Нэгж','Зураг URL','Огноо'])];
+      data.movements.forEach(m=>pushYmdRow(log,m.created_at,[
+        movementTypeLabel(m.movement_type||'withdraw'),m.item_name||'',m.user_name||'',
+        Number(m.quantity)||0,m.unit||'',m.photo_url||'',new Date(m.created_at).toLocaleString('mn-MN'),
+      ]));
+      const bal=[prependYmd(['Ажилтан','Бараа','Ангилал','Тоо','Нэгж'])];
+      const now=new Date();
+      computeBalancesByUser(data.movements).forEach(u=>u.items.forEach(it=>pushYmdRow(bal,now,[
+        u.user_name,it.item_name,it.category==='tool'?'Багаж':'Бараа материал',
         Number(it.quantity).toFixed(it.quantity%1?1:0),it.unit,
       ])));
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(log),'Гүйлгээ');
-      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(bal),'Үлдэгдэл');
-      const stamp=new Date().toISOString().slice(0,10);
-      XLSX.writeFile(wb,`baraa_hereglee_${stamp}.xlsx`);
-    };
-    window.exportAttendance=()=>{
-      const rows=[['Ажилтан','Төрөл','Төлөв','Зайнаас','Байршил','Шалтгаан','Огноо','Өргөрөг','Уртраг']];
-      const st={approved:'Зөвшөөрсөн',pending:'Хүлээгдэж буй',rejected:'Татгалзсан'};
-      data.attendance.forEach(r=>rows.push([r.staff_name||'',r.type==='check_in' ?'Ирсэн':'Явсан',st[r.status]||r.status||'',r.is_remote?'Тийм':'Үгүй',r.location_name||'',r.note||'',new Date(r.created_at).toLocaleString('mn-MN'),r.latitude??'',r.longitude??'']));
-      exportExcel('irts','Ирц',rows);
-    };
-    window.exportVisits=()=>{
-      const rows=[['Айл/Хэрэглэгч','Ажилтан','Огноо']];
-      data.visits.forEach(x=>rows.push([x.customer||'Айл',x.user_name||'',new Date(x.arrived_at).toLocaleString('mn-MN')]));
-      exportExcel('ocson_log','Очсон лог',rows);
-    };
-    window.exportTrips=()=>{
-      const rows=[['Машин','Жолооч','Зам(км)','Хугацаа','Түлш(л)','Зардал','Эхэлсэн','Дууссан','Төлөв']];
-      data.trips.forEach(t=>rows.push([
-        t.plate_number||'',t.driver_name||'',Number(t.distance_km||0).toFixed(2),formatDuration(tripDuration(t)),
-        Number(t.liters||0).toFixed(2),Number(t.cost||0),
-        new Date(t.started_at).toLocaleString('mn-MN'),
-        t.ended_at?new Date(t.ended_at).toLocaleString('mn-MN'):'',
-        t.status==='active' ?'Идэвхтэй':'Дууссан',
-      ]));
-      exportExcel('ayalal','Аялал',rows);
-    };
-    window.exportCompanions=()=>{
-      if(typeof XLSX==='undefined'){ toast('Excel сан ачаалагдаагүй байна'); return; }
-      const list=companionTab==='today' ?(data.tripGroupsToday||[]):(data.tripGroupsArchive||[]);
-      const summary=[['Огноо','Жолооч','Машин','Зам(км)','Хугацаа','Хамт явагчид','Төлөв','Эхэлсэн','Дууссан']];
-      const detail=[['Огноо','Жолооч','Машин','Зам(км)','Хугацаа','Хамт явагч','Төлөв']];
+      return [{name:'Гүйлгээ',rows:log},{name:'Үлдэгдэл',rows:bal}];
+    }
+    function buildCompanionsSheets(){
+      const list=companionTab==='today'?(data.tripGroupsToday||[]):(data.tripGroupsArchive||[]);
+      const summary=[prependYmd(['Жолооч','Машин','Зам(км)','Хугацаа','Хамт явагчид','Төлөв','Эхэлсэн','Дууссан'])];
+      const detail=[prependYmd(['Жолооч','Машин','Зам(км)','Хугацаа','Хамт явагч','Төлөв'])];
       list.forEach(t=>{
-        const day=new Date(t.started_at).toLocaleDateString('mn-MN');
-        const status=t.status==='active' ?'Идэвхтэй':'Дууссан';
+        const status=t.status==='active'?'Идэвхтэй':'Дууссан';
         const names=(t.passengers||[]).map(p=>p.passenger_name).filter(Boolean);
         const km=Number(t.distance_km||0).toFixed(2);
         const dur=formatDuration(tripDuration(t));
-        summary.push([
-          day,
-          t.driver_name||'',
-          t.plate_number||'',
-          km,
-          dur,
-          names.length?names.join(', '):'—',
-          status,
-          new Date(t.started_at).toLocaleString('mn-MN'),
-          t.ended_at?new Date(t.ended_at).toLocaleString('mn-MN'):'',
+        pushYmdRow(summary,t.started_at,[
+          t.driver_name||'',t.plate_number||'',km,dur,names.length?names.join(', '):'Ганцаараа',status,
+          new Date(t.started_at).toLocaleString('mn-MN'),t.ended_at?new Date(t.ended_at).toLocaleString('mn-MN'):'',
         ]);
-        if(names.length){
-          names.forEach(n=>detail.push([day,t.driver_name||'',t.plate_number||'',km,dur,n,status]));
-        }else{
-          detail.push([day,t.driver_name||'',t.plate_number||'',km,dur,'—',status]);
+        if(names.length) names.forEach(n=>pushYmdRow(detail,t.started_at,[t.driver_name||'',t.plate_number||'',km,dur,n,status]));
+        else pushYmdRow(detail,t.started_at,[t.driver_name||'',t.plate_number||'',km,dur,'Ганцаараа',status]);
+      });
+      return [{name:'Багууд',rows:summary},{name:'Дэлгэрэнгүй',rows:detail}];
+    }
+
+    window.exportAttendance=()=>exportAndArchive({
+      category:'irts',title:'Ирц',filename:'irts',sheets:[{name:'Ирц',rows:buildAttendanceSheet()}],
+    });
+    window.exportVisits=()=>exportAndArchive({
+      category:'ocson_log',title:'Очсон лог',filename:'ocson_log',sheets:[{name:'Очсон лог',rows:buildVisitsSheet()}],
+    });
+    window.exportSiteWork=()=>exportAndArchive({
+      category:'ajlyn_bair',title:'Ажлын байр',filename:'ajlyn_bair',sheets:[{name:'Ажлын байр',rows:buildSiteWorkSheet()}],
+    });
+    window.exportTrips=()=>exportAndArchive({
+      category:'ayalal',title:'Аялал',filename:'ayalal',sheets:[{name:'Аялал',rows:buildTripsSheet()}],
+    });
+    window.exportUsage=()=>exportAndArchive({
+      category:'baraa_hereglee',title:'Барааны хэрэглээ',filename:'baraa_hereglee',sheets:buildUsageSheets(),
+    });
+    window.exportCompanions=()=>exportAndArchive({
+      category:'hamt_yvaa_bag',title:'Хамт яваа баг',filename:`hamt_yvaa_bag_${companionTab==='today'?'unuudur':'arhiv'}`,sheets:buildCompanionsSheets(),
+    });
+    window.exportAllExcel=()=>exportAndArchive({
+      category:'negtgesen',title:'Нэгтгэсэн тайлан',filename:'negtgesen_buren',
+      sheets:[
+        {name:'Sheet1_Ирц',rows:buildAttendanceSheet()},
+        {name:'Sheet2_Очсон лог',rows:buildVisitsSheet()},
+        {name:'Sheet3_Ажлын байр',rows:buildSiteWorkSheet()},
+        {name:'Sheet4_Аялал',rows:buildTripsSheet()},
+        ...buildUsageSheets().map((s,i)=>({name:`Sheet${5+i}_${s.name}`,rows:s.rows})),
+        ...buildCompanionsSheets().map((s,i)=>({name:`Sheet${7+i}_${s.name}`,rows:s.rows})),
+      ],
+    });
+
+    function filteredActivityLogs(){
+      const list=data.activityLogs||[];
+      return list.filter(x=>{
+        const d=new Date(x.created_at);
+        if(activityFilter.year && d.getFullYear()!==activityFilter.year) return false;
+        if(activityFilter.month && (d.getMonth()+1)!==activityFilter.month) return false;
+        if(activityFilter.day && d.getDate()!==activityFilter.day) return false;
+        if(activityFilter.user && x.user_id!==activityFilter.user) return false;
+        return true;
+      });
+    }
+    function buildActivityLogRows(list){
+      return [
+        ['Он','Сар','Өдөр','Цаг (ц:м:с)','Ажилтан','Үйлдэл','Дэлгэц','Дэлгэрэнгүй','Өргөрөг','Уртраг'],
+        ...list.map(x=>{
+          const d=new Date(x.created_at);
+          const p=n=>String(n).padStart(2,'0');
+          return [
+            d.getFullYear(),
+            p(d.getMonth()+1),
+            p(d.getDate()),
+            `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,
+            x.user_name||'—',
+            ACTION_LABEL[x.action]||x.action||'—',
+            x.screen||'—',
+            x.detail||'—',
+            x.latitude??'',
+            x.longitude??'',
+          ];
+        })
+      ];
+    }
+    window.setActivityYear=(y)=>{ activityFilter.year=Number(y); activityFilter.month=0; activityFilter.day=0; render(); };
+    window.setActivityMonth=(m)=>{ const n=Number(m); activityFilter.month=activityFilter.month===n?0:n; activityFilter.day=0; render(); };
+    window.setActivityDay=(d)=>{ activityFilter.day=Number(d); render(); };
+    window.setActivityUser=(u)=>{ activityFilter.user=u||''; render(); };
+    window.clearActivityFilters=()=>{ activityFilter={year:new Date().getFullYear(),month:0,day:0,user:''}; render(); };
+    window.exportActivityExcel=()=>{
+      const list=filteredActivityLogs();
+      exportAndArchive({
+        category:'niit_log',
+        title:'Нийт лог',
+        filename:'niit_log',
+        sheets:[{name:'Нийт лог',rows:buildActivityLogRows(list)}],
+      });
+    };
+    window.exportActivityPdf=()=>{
+      const list=filteredActivityLogs();
+      const rows=list.map(x=>`<tr>
+        <td>${fmtLogTime(x.created_at)}</td>
+        <td>${x.user_name||'—'}</td>
+        <td>${ACTION_LABEL[x.action]||x.action||'—'}</td>
+        <td>${x.screen||'—'}</td>
+        <td>${(x.detail||'—').replace(/</g,'&lt;')}</td>
+        <td>${x.latitude!=null?Number(x.latitude).toFixed(5):'—'}</td>
+        <td>${x.longitude!=null?Number(x.longitude).toFixed(5):'—'}</td>
+      </tr>`).join('')||'<tr><td colspan="7">Мэдээлэл алга</td></tr>';
+      const w=window.open('','_blank');
+      if(!w){ toast('Popup блоклогдсон байна'); return; }
+      w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Нийт лог</title>
+        <style>
+          body{font-family:system-ui,sans-serif;padding:24px;color:#111}
+          h1{font-size:18px;margin:0 0 8px}
+          .meta{color:#666;font-size:12px;margin-bottom:16px}
+          table{width:100%;border-collapse:collapse;font-size:11px}
+          th,td{border:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top}
+          th{background:#f3f4f6}
+          @media print{body{padding:0}}
+        </style></head><body>
+        <h1>Gennetex ERP — Нийт лог</h1>
+        <div class="meta">Шүүлт: ${activityFilter.year} он${activityFilter.month?' · '+activityFilter.month+'-р сар':''}${activityFilter.day?' · '+activityFilter.day:''} · ${list.length} мөр · ${fmtLogTime(new Date())}</div>
+        <table><thead><tr><th>Цаг (ц:м:с)</th><th>Ажилтан</th><th>Үйлдэл</th><th>Дэлгэц</th><th>Дэлгэрэнгүй</th><th>Өргөрөг</th><th>Уртраг</th></tr></thead>
+        <tbody>${rows}</tbody></table>
+        <script>window.onload=function(){window.print();}<\/script>
+        </body></html>`);
+      w.document.close();
+    };
+    function renderActivityLogs(c){
+      const all=data.activityLogs||[];
+      const years=[...new Set(all.map(x=>new Date(x.created_at).getFullYear()))].sort((a,b)=>b-a);
+      if(!years.length) years.push(new Date().getFullYear());
+      if(!years.includes(activityFilter.year)) activityFilter.year=years[0];
+      const yearRows=all.filter(x=>new Date(x.created_at).getFullYear()===activityFilter.year);
+      const monthCounts={}; for(let mi=1;mi<=12;mi++) monthCounts[mi]=0;
+      yearRows.forEach(x=>{ const m=new Date(x.created_at).getMonth()+1; monthCounts[m]=(monthCounts[m]||0)+1; });
+      const list=filteredActivityLogs();
+      const latestByUser={};
+      list.forEach(x=>{
+        if(!x.user_id) return;
+        if(!latestByUser[x.user_id] || new Date(x.created_at)>new Date(latestByUser[x.user_id].created_at)){
+          latestByUser[x.user_id]=x;
         }
       });
-      const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(summary),'Багууд');
-      XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(detail),'Дэлгэрэнгүй');
-      const stamp=new Date().toISOString().slice(0,10);
-      const tag=companionTab==='today' ?'unuudur':'arhiv';
-      XLSX.writeFile(wb,`hamt_yvaa_bag_${tag}_${stamp}.xlsx`);
-    };
+      const latestRows=Object.values(latestByUser).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+      const users=[...new Map(all.map(x=>[x.user_id,x.user_name])).entries()].filter(([id])=>id);
+      const monthNames=['','1-р сар','2-р сар','3-р сар','4-р сар','5-р сар','6-р сар','7-р сар','8-р сар','9-р сар','10-р сар','11-р сар','12-р сар'];
+      const monthGrid=[1,2,3,4,5,6,7,8,9,10,11,12].map(mi=>{
+        const cnt=monthCounts[mi]||0;
+        const active=activityFilter.month===mi?' active':'';
+        return `<div class="excel-month-card${active}" onclick="setActivityMonth(${mi})"><div class="m">${monthNames[mi]}</div><div class="c">${cnt}</div><div class="muted" style="font-size:11px">лог</div></div>`;
+      }).join('');
+      const daysInMonth=activityFilter.month?new Date(activityFilter.year,activityFilter.month,0).getDate():0;
+      let dayFilter='';
+      if(activityFilter.month){
+        const dayOpts=['<option value="0">Бүх өдөр</option>'];
+        for(let d=1;d<=daysInMonth;d++){
+          const cnt=yearRows.filter(x=>new Date(x.created_at).getMonth()+1===activityFilter.month&&new Date(x.created_at).getDate()===d).length;
+          dayOpts.push(`<option value="${d}"${activityFilter.day===d?' selected':''}>${d} (${cnt})</option>`);
+        }
+        dayFilter=`<label>Өдөр</label><select onchange="setActivityDay(Number(this.value))">${dayOpts.join('')}</select>`;
+      }
+      const userOpts=['<option value="">Бүх ажилтан</option>'].concat(
+        users.map(([id,name])=>`<option value="${id}"${activityFilter.user===id?' selected':''}>${name||id}</option>`)
+      ).join('');
+      const actFiltered=activityFilter.month||activityFilter.day||activityFilter.user;
+      const actEmpty=actFiltered?ERP_NOT_FOUND:'Лог алга';
+      const latestHtml=latestRows.slice(0,12).map(x=>`<tr>
+        <td><b>${x.user_name||'—'}</b></td>
+        <td>${ACTION_LABEL[x.action]||x.action}</td>
+        <td>${x.screen||'—'}</td>
+        <td class=muted>${(x.detail||'—').slice(0,80)}</td>
+        <td class=muted>${fmtLogTime(x.created_at)}</td>
+        <td class=muted>${x.latitude!=null?Number(x.latitude).toFixed(5)+', '+Number(x.longitude).toFixed(5):'—'}</td>
+      </tr>`).join('')||`<tr><td colspan=6 class=empty>${actEmpty}</td></tr>`;
+      const allHtml=list.map(x=>`<tr>
+        <td class=muted style="white-space:nowrap">${fmtLogTime(x.created_at)}</td>
+        <td><b>${x.user_name||'—'}</b></td>
+        <td><span class="pill emp">${ACTION_LABEL[x.action]||x.action||'—'}</span></td>
+        <td>${x.screen||'—'}</td>
+        <td>${(x.detail||'—').replace(/</g,'&lt;')}</td>
+        <td class=muted>${x.latitude!=null?Number(x.latitude).toFixed(5):'—'}</td>
+        <td class=muted>${x.longitude!=null?Number(x.longitude).toFixed(5):'—'}</td>
+      </tr>`).join('')||`<tr><td colspan=7 class=empty>${actEmpty}</td></tr>`;
+
+      c.innerHTML=`
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Нийт лог (${all.length})</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="exportActivityExcel()">Excel татах</button>
+            <button class="btn btn-success btn-sm" onclick="exportActivityPdf()">PDF татах</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearActivityFilters()">Шүүлтүүр цэвэрлэх</button>
+          </div></div>
+          <div class="card-b">
+            <p class="muted" style="margin:0 0 12px;font-size:13px">Ажилтан аль дэлгэц дээр дарсан, сүүлийн байршил, бүх үйлдэл автоматаар бүртгэгдэнэ. Цаг: <b>цаг:минут:секунд</b>.</p>
+            <div class="row">
+              <div><label>Он</label><select onchange="setActivityYear(Number(this.value))">${years.map(y=>`<option value="${y}"${y===activityFilter.year?' selected':''}>${y}</option>`).join('')}</select></div>
+              <div><label>Ажилтан</label><select onchange="setActivityUser(this.value)">${userOpts}</select></div>
+              <div>${dayFilter||'<label>Өдөр</label><select disabled><option>Сар сонгоно уу</option></select>'}</div>
+            </div>
+            <div style="margin-top:8px;font-weight:700">${activityFilter.year} он — сар бүрийн лог</div>
+            <div class="excel-month-grid">${monthGrid}</div>
+            <p class="muted" style="margin:8px 0 0;font-size:13px">Шүүлтээр: <b>${list.length}</b> мөр</p>
+          </div></div>
+
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Ажилтан бүрийн хамгийн сүүлийн үйлдэл / байршил</h3></div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Ажилтан</th><th>Үйлдэл</th><th>Дэлгэц</th><th>Дэлгэрэнгүй</th><th>Цаг (ц:м:с)</th><th>Байршил</th>
+          </tr></thead><tbody>${latestHtml}</tbody></table></div></div>
+
+        <div class="card"><div class="card-h"><h3>Бүх лог (${list.length})</h3></div>
+          <div class="card-b" style="padding:0"><table><thead><tr>
+            <th>Цаг (ц:м:с)</th><th>Ажилтан</th><th>Үйлдэл</th><th>Дэлгэц</th><th>Дэлгэрэнгүй</th><th>Өргөрөг</th><th>Уртраг</th>
+          </tr></thead><tbody>${allHtml}</tbody></table></div></div>`;
+    }
+
+    window.setExcelYear=(y)=>{ excelFilter.year=Number(y); excelFilter.month=0; excelFilter.day=0; render(); };
+    window.setExcelMonth=(m)=>{ const n=Number(m); excelFilter.month=excelFilter.month===n?0:n; excelFilter.day=0; render(); };
+    window.setExcelDay=(d)=>{ excelFilter.day=Number(d); render(); };
+    window.setExcelCategory=(c)=>{ excelFilter.category=c||''; render(); };
+    window.clearExcelFilters=()=>{ excelFilter={year:new Date().getFullYear(),month:0,day:0,category:''}; render(); };
+
+    async function renderExcelArchive(c){
+      await loadExcelArchives();
+      const years=[...new Set(excelArchives.map(x=>x.export_year))].sort((a,b)=>b-a);
+      if(!years.length) years.push(new Date().getFullYear());
+      if(!years.includes(excelFilter.year)) excelFilter.year=years[0]||new Date().getFullYear();
+
+      const yearRows=excelArchives.filter(x=>x.export_year===excelFilter.year);
+      const monthCounts={};
+      for(let mi=1;mi<=12;mi++) monthCounts[mi]=0;
+      yearRows.forEach(x=>{ if(x.export_month) monthCounts[x.export_month]=(monthCounts[x.export_month]||0)+1; });
+
+      let filtered=yearRows;
+      if(excelFilter.month) filtered=filtered.filter(x=>x.export_month===excelFilter.month);
+      if(excelFilter.day) filtered=filtered.filter(x=>x.export_day===excelFilter.day);
+      if(excelFilter.category) filtered=filtered.filter(x=>x.category===excelFilter.category);
+
+      const monthNames=['','1-р сар','2-р сар','3-р сар','4-р сар','5-р сар','6-р сар','7-р сар','8-р сар','9-р сар','10-р сар','11-р сар','12-р сар'];
+      const monthGrid=[1,2,3,4,5,6,7,8,9,10,11,12].map(mi=>{
+        const cnt=monthCounts[mi]||0;
+        const active=excelFilter.month===mi?' active':'';
+        return `<div class="excel-month-card${active}" onclick="setExcelMonth(${mi})"><div class="m">${monthNames[mi]}</div><div class="c">${cnt}</div><div class="muted" style="font-size:11px">Excel</div></div>`;
+      }).join('');
+
+      const daysInMonth=excelFilter.month?new Date(excelFilter.year,excelFilter.month,0).getDate():0;
+      let dayFilter='';
+      if(excelFilter.month){
+        const dayOpts=['<option value="0">Бүх өдөр</option>'];
+        for(let d=1;d<=daysInMonth;d++){
+          const cnt=yearRows.filter(x=>x.export_month===excelFilter.month&&x.export_day===d).length;
+          dayOpts.push(`<option value="${d}"${excelFilter.day===d?' selected':''}>${d} (${cnt})</option>`);
+        }
+        dayFilter=`<label>Өдөр</label><select onchange="setExcelDay(Number(this.value))">${dayOpts.join('')}</select>`;
+      }
+
+      const catOpts=['<option value="">Бүх төрөл</option>'].concat(
+        Object.entries(EXCEL_CAT_LABEL).map(([k,l])=>`<option value="${k}"${excelFilter.category===k?' selected':''}>${l}</option>`)
+      ).join('');
+
+      const listRows=filtered.map(x=>{
+        const sheets=(x.sheet_names||[]).map((n,i)=>{
+          const cnt=(x.sheet_counts&&x.sheet_counts[n])??'';
+          return `<span class="excel-sheet-pill">${n}${cnt!==''?` (${cnt})`:''}</span>`;
+        }).join('')||'—';
+        const dl=x.file_url?`<a class="btn btn-primary btn-sm" href="${x.file_url}" target="_blank" rel="noopener">Татах</a>`:'<span class="muted">—</span>';
+        return `<tr>
+          <td>${x.export_year}-${String(x.export_month).padStart(2,'0')}-${String(x.export_day).padStart(2,'0')}</td>
+          <td>${EXCEL_CAT_LABEL[x.category]||x.title||x.category}</td>
+          <td>${x.filename||'—'}</td>
+          <td><div class="excel-sheet-pills">${sheets}</div></td>
+          <td>${x.row_count||0}</td>
+          <td class="muted">${x.created_by_name||'—'}<br>${new Date(x.created_at).toLocaleString('mn-MN')}</td>
+          <td>${dl}</td>
+        </tr>`;
+      }).join('');
+
+      c.innerHTML=`
+        <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Excel архив (${excelArchives.length})</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="exportAllExcel()">Бүгдийг нэг файл (Sheet1…)</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadExcelArchives().then(render)">Шинэчлэх</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearExcelFilters()">Шүүлтүүр цэвэрлэх</button>
+          </div></div>
+          <div class="card-b">
+            <p class="muted" style="margin:0 0 12px;font-size:13px">Бүх Excel таталт Supabase дээр lifetime хадгалагдана. Sheet бүрт <b>Он · Сар · Өдөр</b> багана нэмэгдсэн.</p>
+            <div class="row">
+              <div><label>Он</label><select onchange="setExcelYear(Number(this.value))">${years.map(y=>`<option value="${y}"${y===excelFilter.year?' selected':''}>${y}</option>`).join('')}</select></div>
+              <div><label>Төрөл</label><select onchange="setExcelCategory(this.value)">${catOpts}</select></div>
+              <div>${dayFilter||'<label>Өдөр</label><select disabled><option>Сар сонгоно уу</option></select>'}</div>
+            </div>
+            <div style="margin-top:8px;font-weight:700">${excelFilter.year} он — сар бүрийн Excel тоо</div>
+            <div class="excel-month-grid">${monthGrid}</div>
+          </div>
+        </div>
+        <div class="card"><div class="card-h"><h3>Файлууд (${filtered.length})</h3></div>
+          <div class="card-b" style="padding:0"><table>
+            <thead><tr><th>Огноо</th><th>Төрөл</th><th>Файл</th><th>Sheet-үүд</th><th>Мөр</th><th>Үүсгэсэн</th><th></th></tr></thead>
+            <tbody>${listRows||`<tr><td colspan="7" class="empty">${(excelFilter.month||excelFilter.day||excelFilter.category)?ERP_NOT_FOUND:'Шүүлтүүрт тохирох Excel алга'}</td></tr>`}</tbody>
+          </table></div>
+        </div>`;
+    }
 
     // ===== Ирц + зайнаас хүсэлт зөвшөөрөх =====
     function renderReports(c){
@@ -662,25 +1673,610 @@
       openModal(r.title,`<div style="max-height:65vh;overflow:auto">${logo}${r.body_html||'<p class=muted>Агуулга алга</p>'}</div>`,'Хаах',()=>true);
     };
 
+    window.exportFeedbackPdf=function(){
+      const list=data.feedback||[];
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const kindLabel=k=>k==='sanal'?'Санал':'Гомдол';
+      const gomdol=list.filter(f=>f.kind!=='sanal');
+      const sanal=list.filter(f=>f.kind==='sanal');
+      const rowHtml=f=>`<tr><td>${esc(f.user_name||'—')}</td><td>${kindLabel(f.kind)}</td><td>${esc(f.subject||'—')}</td><td>${esc(f.body||'')}</td><td>${esc((f.mentioned_employee_names||[]).join(', ')||'—')}</td><td>${esc(new Date(f.created_at).toLocaleString('mn-MN'))}</td></tr>`;
+      const table=(title,rows)=>`<h2>${title} (${rows.length})</h2><table><thead><tr><th>Ажилтан</th><th>Төрөл</th><th>Гарчиг</th><th>Агуулга</th><th>Дурдсан</th><th>Огноо</th></tr></thead><tbody>${rows.map(rowHtml).join('')||'<tr><td colspan=6>Алга</td></tr>'}</tbody></table>`;
+      const w=window.open('','_blank');
+      if(!w){ toast('Popup блоклогдсон'); return; }
+      w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/><title>Санал гomдol</title>
+        <style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}h1{font-size:18px;margin:0 0 8px}.meta{color:#666;font-size:12px;margin-bottom:16px}h2{font-size:15px;margin:20px 0 8px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{border:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top}th{background:#f3f4f6}@media print{body{padding:0}}</style></head><body>
+        <h1>Gennetex ERP — Санал гomдol</h1>
+        <div class="meta">Нийт ${list.length} · ${new Date().toLocaleString('mn-MN')}</div>
+        ${table('📛 Гомдол',gomdol)}
+        ${table('💡 Санал',sanal)}
+        <script>window.onload=function(){window.print();}<\/script></body></html>`);
+      w.document.close();
+    };
+
+    function renderFeedback(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const kindLabel=k=>k==='sanal'?'Санал':'Гомдол';
+      const list=data.feedback||[];
+      const gomdol=list.filter(f=>f.kind!=='sanal');
+      const sanal=list.filter(f=>f.kind==='sanal');
+      const rowHtml=f=>`<tr>
+        <td><b>${esc(f.user_name||'—')}</b></td>
+        <td><span class="pill ${f.kind==='gomdol'?'off':'emp'}">${kindLabel(f.kind)}</span></td>
+        <td>${esc(f.subject||'—')}</td>
+        <td style="max-width:320px">${esc(f.body||'')}</td>
+        <td class=muted>${(f.mentioned_employee_names||[]).join(', ')||'—'}</td>
+        <td class=muted>${new Date(f.created_at).toLocaleString('mn-MN')}</td>
+        <td><span class="pill ${f.status==='new'?'off':'on'}">${f.status==='new'?'Шинэ':f.status||'—'}</span></td>
+      </tr>`;
+      const table=(rows,emptyMsg)=>`<table><thead><tr><th>Ажилтан</th><th>Төрөл</th><th>Гарчиг</th><th>Агуулга</th><th>Дурдсан</th><th>Огноо</th><th>Төлөв</th></tr></thead>
+        <tbody>${rows.map(rowHtml).join('')||`<tr><td colspan=7 class=empty>${emptyMsg}</td></tr>`}</tbody></table>`;
+      c.innerHTML=`<div class="card"><div class="card-h"><h3>Санал гomдol (${list.length})</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-success btn-sm" onclick="exportFeedbackPdf()">PDF татах</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button>
+        </div></div>
+        <div class="card-b" style="padding:12px 16px"><p class="muted" style="margin:0;font-size:13px">Дурдсан инженерийн гomдol «Гомдол», санал «Санал» хэсэгт. AI гүйцэтгэлд тусдаа тооцогдоно.</p></div></div>
+        <div class="card"><div class="card-h"><h3>📛 Гомдол (${gomdol.length})</h3></div><div class="card-b" style="padding:0">${table(gomdol,'Гомдол алга')}</div></div>
+        <div class="card"><div class="card-h"><h3>💡 Санал (${sanal.length})</h3></div><div class="card-b" style="padding:0">${table(sanal,'Санал алга')}</div></div>`;
+    }
+
+
+    function renderAiAppUsage(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      const list=data.aiUsageReports||[];
+      const key=getGeminiKey();
+      const latestStats=list[0]?.stats;
+      window._latestAppUsageStats=latestStats;
+      const employees=(latestStats?.employees||[]).filter(e=>e.name&&e.name!=='Тодорхойгүй');
+      const engCards=employees.length?`<div class="card" style="margin-bottom:12px"><div class="card-h"><h3>Ажилтан (${employees.length})</h3><span class="muted" style="font-size:12px">Нэр дээр дарж дэлгэрэнгүй</span></div><div class="card-b" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+        ${employees.map((e,i)=>`<button type="button" class="card" style="margin:0;text-align:left;cursor:pointer;padding:12px 14px" onclick="showWebAppUsageDetail(${i})">
+          <div style="font-weight:800;font-size:15px">${esc(e.name)}</div>
+          <div class="muted" style="font-size:12px;margin-top:6px;line-height:1.5">${e.logged_in?'✓ Нэвтэрсэн':'○ Идэвхгүй'} · ${e.total_events??0} үйлдэл · ${e.active_days??0} өдөр</div>
+        </button>`).join('')}
+      </div></div>`:'';
+      const cards=list.map(r=>`<div class="card" style="margin-bottom:12px"><div class="card-b">
+        <p style="margin:0 0 8px;font-size:12px;color:var(--muted)"><b>Апп хэрэглээ</b> · ${esc(r.period_label||'—')} · ${new Date(r.created_at).toLocaleString('mn-MN')}</p>
+        <div style="font-size:14px;line-height:1.6;white-space:pre-wrap">${esc(r.analysis_text||'—')}</div>
+      </div></div>`).join('');
+      c.innerHTML=`<div class="card"><div class="card-h"><h3>AI апп хэрэглээ (${list.length})</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="runWebAppUsage(true)" id="aiUsageRunBtn">${window._aiUsageAnalyzing?'Шинжилж байна...':'Шууд шинжлэх'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button>
+        </div></div>
+        <div class="card-b" style="padding:12px 16px">
+          <p class="muted" style="margin:0 0 10px;font-size:13px">Нэвтэрсэн бүх ажилтны апп ашиглалтыг AI шинжилнэ (дэлгэц, үйлдэл, идэвх).</p>
+          ${window._aiUsageErr?`<p style="color:var(--danger);font-size:13px;margin:10px 0 0">${esc(window._aiUsageErr)}</p>`:''}
+        </div></div>
+        ${engCards}
+        ${cards||`<div class="card"><div class="card-b empty">${window._aiUsageAnalyzing?'AI шинжилж байна...':'Тайлан алга — «Шууд шинжлэх»'}</div></div>`}`;
+      queueWebAppUsage(true);
+    }
+
+    const APP_USAGE_SYSTEM=`Та бол Gennetex ERP аппын ажилтны хэрэглээний AI шинжлэгч.
+Монгол хэлээр JSON буцаа: {"summary":"...","employees":[{"name":"...","usage_level":"high|medium|low|inactive","login_count":0,"active_days":0,"total_events":0,"top_screens":[],"patterns":[],"recommendation":"","risk_flags":[]}],"alerts":[],"module_insights":[]}`;
+
+    function formatWebAppUsageDetail(row){
+      if(!row) return 'Мэдээлэл алга.';
+      const lines=[`👤 ${row.name}`,`Нэвтэрсэн: ${row.logged_in?'Тийм':'Үгүй'} · ${row.total_events||0} үйлдэл · ${row.active_days||0} өдөр`];
+      if(row.top_screens?.length) lines.push('Топ дэлгэц: '+row.top_screens.map(s=>`${s.label}(${s.count})`).join(', '));
+      if(row.sample_details?.length){
+        lines.push('\nСүүлийн үйлдлүүд:');
+        row.sample_details.forEach(s=>lines.push(`• ${s.detail||s.action_label||'—'}`));
+      }
+      return lines.join('\n');
+    }
+    window.showWebAppUsageDetail=function(idx){
+      const stats=window._latestAppUsageStats;
+      const emp=(stats?.employees||[])[idx];
+      if(!emp) return;
+      openModal(emp.name,`<pre style="white-space:pre-wrap;font-size:14px;line-height:1.6;margin:0">${formatWebAppUsageDetail(emp).replace(/</g,'&lt;')}</pre>`,'Хаах',()=>true);
+    };
+
+    async function collectWebAppUsageStats(from,to){
+      const [logsRes,profRes]=await Promise.all([
+        sb.from('activity_logs').select('*').gte('created_at',from).lte('created_at',to).order('created_at',{ascending:false}).limit(8000),
+        sb.from('profiles').select('id,name,email,role,last_seen').in('role',['employee','admin','superadmin']).order('name'),
+      ]);
+      const logs=logsRes.error?[]:(logsRes.data||[]);
+      const profiles=(profRes.data||[]).filter(p=>p.id&&(p.name||p.email));
+      const byUser={};
+      const ensure=(id,name,email,role,lastSeen)=>{
+        const key=id||String(name||'x').toLowerCase();
+        if(!byUser[key]) byUser[key]={user_id:id||null,name:name||'Тодорхойгүй',email,role,last_seen:lastSeen||null,logged_in:false,login_count:0,total_events:0,active_days:0,screen_opens:0,top_screens:[],sample_details:[]};
+        return byUser[key];
+      };
+      profiles.forEach(p=>ensure(p.id,p.name||p.email,p.email,p.role,p.last_seen));
+      const daySets={};
+      const fromMs=new Date(from).getTime(), toMs=new Date(to).getTime();
+      logs.forEach(log=>{
+        if(!log.user_id) return;
+        const row=ensure(log.user_id,log.user_name,null,'employee',null);
+        row.total_events+=1; row.logged_in=true;
+        if(log.action==='login') row.login_count+=1;
+        if(log.action==='screen') row.screen_opens+=1;
+        const dk=new Date(log.created_at).toISOString().slice(0,10);
+        if(!daySets[log.user_id]) daySets[log.user_id]=new Set();
+        daySets[log.user_id].add(dk);
+        if(row.sample_details.length<5) row.sample_details.push({action_label:ACTION_LABEL[log.action]||log.action,detail:log.detail||log.screen||''});
+      });
+      Object.values(byUser).forEach(row=>{
+        if(!row.user_id) return;
+        const prof=profiles.find(p=>p.id===row.user_id);
+        if(prof?.last_seen) row.last_seen=prof.last_seen;
+        const seenMs=row.last_seen?new Date(row.last_seen).getTime():0;
+        if(seenMs>=fromMs&&seenMs<=toMs) row.logged_in=true;
+        row.active_days=(daySets[row.user_id]||new Set()).size;
+        const sc={};
+        logs.forEach(l=>{ if(l.user_id===row.user_id&&l.action==='screen'&&l.screen) sc[l.screen]=(sc[l.screen]||0)+1; });
+        row.top_screens=Object.entries(sc).map(([screen,count])=>({screen,label:screen,count})).sort((a,b)=>b.count-a.count).slice(0,6);
+      });
+      const employees=Object.values(byUser).filter(e=>e.name!=='Тодорхойгүй').sort((a,b)=>b.total_events-a.total_events);
+      return {from,to,employees,total_events:logs.length,logged_in_count:employees.filter(e=>e.logged_in).length,employee_count:employees.length};
+    }
+
+    function formatWebAppUsageText(parsed,stats){
+      if(!parsed||typeof parsed==='string') return String(parsed||'');
+      const lines=[parsed.summary||''];
+      (parsed.employees||[]).forEach(e=>lines.push(`\n• ${e.name} [${e.usage_level||'—'}] — ${e.active_days??0} өдөр, ${e.total_events??0} үйлдэл`));
+      if(parsed.alerts?.length){ lines.push('\nАнхааруулга:'); parsed.alerts.forEach(a=>lines.push('- '+a)); }
+      lines.push(`\n(${stats.logged_in_count}/${stats.employee_count} идэвхтэй, ${stats.total_events} үйлдэл)`);
+      return lines.join('\n').trim();
+    }
+
+    window.runWebAppUsage=async function(force=false){
+      if(window._aiUsageAnalyzing) return;
+      const apiKey=getGeminiKey();
+      if(!apiKey){ window._aiUsageErr='Gemini API түлхүүр оруулна уу'; render(); toast(window._aiUsageErr); return; }
+      if(!force){
+        const {data:latest}=await sb.from('ai_performance_reports').select('*').eq('report_type','app_usage').order('created_at',{ascending:false}).limit(1).maybeSingle();
+        if(latest?.created_at && Date.now()-new Date(latest.created_at).getTime()<24*3600000){ window._aiUsageErr=null; return; }
+      }
+      window._aiUsageAnalyzing=true; window._aiUsageErr=null; render();
+      try{
+        const to=new Date().toISOString();
+        const from=new Date(Date.now()-14*24*3600000).toISOString();
+        const stats=await collectWebAppUsageStats(from,to);
+        window._latestAppUsageStats=stats;
+        let analysisText='';
+        try{
+          const parsed=await callWebGeminiJson(apiKey,{period:'сүүлийн 14 хоног',stats,type:'app_usage'},APP_USAGE_SYSTEM);
+          analysisText=formatWebAppUsageText(parsed,stats);
+        }catch(e){
+          analysisText=`AI алдаа: ${e.message}\n\n${stats.employees.slice(0,15).map(en=>`${en.name}: ${en.total_events} үйлдэл`).join('\n')}`;
+        }
+        const {error}=await sb.from('ai_performance_reports').insert({report_type:'app_usage',period_label:'сүүлийн 14 хоног',period_start:from,period_end:to,stats,analysis_text:analysisText,created_by:me?.id||null,created_by_name:me?.name||me?.email||null});
+        if(error) throw error;
+        toast('AI апп хэрэглээ хадгалагдлаа');
+        await loadAll(true);
+      }catch(e){ window._aiUsageErr=e.message||'Алдаа'; toast(window._aiUsageErr); render(); }
+      finally{ window._aiUsageAnalyzing=false; if(view==='aiappusage') render(); }
+    };
+    function queueWebAppUsage(force){ if(view!=='aiappusage') return; setTimeout(()=>runWebAppUsage(!!force),80); }
+
+    function renderAiPerformance(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;').replace(/\n/g,'<br>');
+      const list=data.aiReports||[];
+      const key=getGeminiKey();
+      const latestStats=list[0]?.stats||window._latestWebStats||null;
+      window._latestWebStats=latestStats;
+      const hiddenIds=new Set((data.workers||[]).filter(w=>w.role==='superadmin').map(w=>w.id));
+      const hiddenNames=new Set((data.workers||[]).filter(w=>w.role==='superadmin').map(w=>String(w.name||'').trim().toLowerCase()).filter(Boolean));
+      const engineers=(latestStats?.engineers||[]).filter(e=>{
+        if(!e.name||e.name==='Тодорхойгүй') return false;
+        if(e.engineer_id&&hiddenIds.has(e.engineer_id)) return false;
+        if(hiddenNames.has(String(e.name||'').trim().toLowerCase())) return false;
+        return true;
+      });
+      const engCards=engineers.length?`<div class="card" style="margin-bottom:12px"><div class="card-h"><h3>Инженерүүд (${engineers.length})</h3><span class="muted" style="font-size:12px">Нэр дээр дарж дэлгэрэнгүй</span></div><div class="card-b" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px">
+        ${engineers.map((e,i)=>`<button type="button" class="card" style="margin:0;text-align:left;cursor:pointer;padding:12px 14px" onclick="showWebEngineerDetail(${i})">
+          <div style="font-weight:800;font-size:15px">${esc(e.name)}</div>
+          <div class="muted" style="font-size:12px;margin-top:6px;line-height:1.5">Айл: ${e.ail_calls??0} · Гомдол: ${e.gomdol_mentioned??e.complaints_mentioned??0} · Санал: ${e.sanal_mentioned??0}<br>Бараа: ${e.materials_withdrawn??0} · Бagаж: ${e.tools_withdrawn??0}<br>Ирц: ${e.days_worked??0} ажилласан · ${e.days_absent??0} тас · ${e.days_leave??0} чөлөө</div>
+          ${(e.suspicious_flags?.length??0)>0?'<div style="color:var(--danger);font-size:12px;margin-top:6px;font-weight:700">⚠️ Зөрүү илэрсэн</div>':''}
+        </button>`).join('')}
+      </div></div>`:'';
+      const summary=latestStats?.summary||(list[0]?.analysis_text||'').split('\n')[0]||'';
+      c.innerHTML=`<div class="card"><div class="card-h"><h3>AI гүйцэтгэл</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="runWebAiPerformance(true)" id="aiRunBtn">${window._aiAnalyzing?'Шинжилж байна...':'Шууд шинжлэх'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button>
+        </div></div>
+        <div class="card-b" style="padding:12px 16px">
+          <p class="muted" style="margin:0 0 10px;font-size:13px">Инженерийн нэр дээр дарж: айл, гomдol, бараа/бagаж, ирц, зөрүү. Энэ хуудас нээгдмэгц AI автоматаар шинжилнэ.</p>
+          <label style="margin:0 0 6px;font-size:12px">Gemini API түлхүүр</label>
+          <div style="display:flex;gap:8px"><input id="ai_gemini_key" type="password" placeholder="AIza..." value="${esc(key)}" style="flex:1">
+          <button class="btn btn-ghost btn-sm" type="button" onclick="saveGeminiKeyFromInput()">Хадгалах</button></div>
+          ${window._aiPerfErr?`<p style="color:var(--danger);font-size:13px;margin:10px 0 0">${esc(window._aiPerfErr)}</p>`:''}
+        </div></div>
+        ${summary?`<div class="card" style="margin-bottom:12px"><div class="card-b"><p style="margin:0;font-size:14px;line-height:1.6">${esc(summary)}</p></div></div>`:''}
+        ${engCards||`<div class="card"><div class="card-b empty">${window._aiAnalyzing?'AI шинжилж байна...':'Инженер алга — «Шууд шинжлэх» дарна уу'}</div></div>`}`;
+      queueWebAiPerformance(true);
+    }
+
+    const GEMINI_LS='gennetex_gemini_api_key';
+    const AI_ANALYSIS_SYSTEM=`Та бол Gennetex компанийн инженерийн гүйцэтгэлийн AI шинжилгээч.
+Өгөгдөл: айл/байгууллагын дuudlaга, SLA, гomдol, бараа/бagаж, ирц (ажилласан/тасалсан/чөлөө), зөрүү (anomalies).
+Монгол хэлээр, товч, практик дүгнэлт бич. Зөвхөн талбайн ажилтан (инженер)-ийг шинжил. Системийн админ (superadmin)-ийг огт дурдахгүй.
+JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...","risk_level":"low|medium|high","ail_calls":0,"complaint_count":0,"materials_withdrawn":0,"tools_withdrawn":0,"days_worked":0,"days_absent":0,"days_leave":0,"sla_exceeded_count":0,"patterns":[],"recommendation":""}],"alerts":[],"suspicious_usage":[{"engineer":"...","customer":"...","detail":"...","confidence":"medium"}]}`;
+
+    function getGeminiKey(){ return localStorage.getItem(GEMINI_LS)||''; }
+    window.saveGeminiKeyFromInput=function(){
+      const v=($('ai_gemini_key')?.value||'').trim();
+      if(v) localStorage.setItem(GEMINI_LS,v); else localStorage.removeItem(GEMINI_LS);
+      toast('Gemini түлхүүр хадгалагдлаа');
+    };
+
+    function formatAiAnalysisText(parsed,stats){
+      if(!parsed||typeof parsed==='string') return String(parsed||'');
+      const lines=[parsed.summary||''];
+      (parsed.engineers||[]).forEach(e=>{
+        lines.push(`\n• ${e.name} [${e.risk_level||'—'}] — Айл: ${e.ail_calls??0}, SLA: ${e.sla_exceeded_count??0}, гomдol: ${e.complaint_count??0}, бараа: ${e.materials_withdrawn??0}, бagаж: ${e.tools_withdrawn??0}, ирц: ${e.days_worked??0}/${e.days_absent??0} тас/${e.days_leave??0} чөлөө`);
+        if(e.patterns?.length) lines.push(`  Давтамж: ${e.patterns.join('; ')}`);
+        if(e.recommendation) lines.push(`  Зөвлөмж: ${e.recommendation}`);
+      });
+      if(parsed.suspicious_usage?.length){
+        lines.push('\n🔍 Магадгүй буруу хэрэглээ:');
+        parsed.suspicious_usage.forEach(s=>lines.push(`- ${s.engineer} @ ${s.customer}: ${s.detail}`));
+      }
+      if(parsed.alerts?.length){ lines.push('\nАнхааруулга:'); parsed.alerts.forEach(a=>lines.push('- '+a)); }
+      if(stats.anomalies?.length){
+        lines.push(`\n⚠️ Зөрүү: ${stats.anomalies.length}`);
+        stats.anomalies.slice(0,5).forEach(a=>lines.push('- '+a.message));
+      }
+      lines.push(`\n(${stats.calls_count} дуудлага, ${stats.feedback_count} гомдол, ${stats.movements_count||0} барааны хөдөлгөөн)`);
+      return lines.join('\n').trim();
+    }
+
+    function formatWebEngineerDetail(row,anomalies=[]){
+      if(!row) return 'Мэдээлэл алга.';
+      const mine=(anomalies||[]).filter(a=>a.closer_id===row.engineer_id||a.taker_id===row.engineer_id||(a.assigned_ids||[]).includes(row.engineer_id));
+      const lines=[
+        `📋 ${row.name}`,
+        `Айл: ${row.ail_calls||0} · Байгууллага: ${row.baiguulga_calls||0} · Нийт: ${row.total_calls||0}`,
+        `Дууссан: ${row.done_calls||0} · SLA: ${row.sla_exceeded||0} · Гомдол: ${row.gomdol_mentioned??row.complaints_mentioned??0} · Санал: ${row.sanal_mentioned??0}`,
+        `Бараа авсан: ${row.materials_withdrawn||0} төрөл (${row.materials_withdrawn_qty||0} нэгж)`,
+        `Багаж авсан: ${row.tools_withdrawn||0} төрөл (${row.tools_withdrawn_qty||0} нэгж)`,
+        `Айл дээр бараа бүртгэсэн: ${row.materials_used_at_calls||0} удаа`,
+        `Ирц: ${row.days_worked||0} өдөр ажилласан · ${row.days_absent||0} тасалсан · ${row.days_leave||0} чөлөө/амралт`,
+        `Нийт ажилласан: ${row.total_work_hours||0} цаг`,
+      ];
+      if(row.materials_used_items?.length) lines.push(`Хэрэглэсэн: ${row.materials_used_items.map(m=>`${m.name}×${m.qty}`).join(', ')}`);
+      const gomdol=row.gomdol_snippets?.length?row.gomdol_snippets:(row.complaint_snippets||[]).filter(s=>s.kind!=='sanal');
+      const sanal=row.sanal_snippets?.length?row.sanal_snippets:(row.complaint_snippets||[]).filter(s=>s.kind==='sanal');
+      if(gomdol.length){ lines.push(`
+📛 Гомдол (${row.gomdol_mentioned??gomdol.length}):`); gomdol.forEach(s=>lines.push(`• ${s.from||'—'}: ${s.text}`)); }
+      if(sanal.length){ lines.push(`
+💡 Санал (${row.sanal_mentioned??sanal.length}):`); sanal.forEach(s=>lines.push(`• ${s.from||'—'}: ${s.text}`)); }
+      if(mine.length){
+        lines.push('\n⚠️ Анхаарах:');
+        mine.slice(0,5).forEach(a=>lines.push(`• ${a.message}`));
+      }
+      return lines.join('\n');
+    }
+
+    window.showWebEngineerDetail=function(idx){
+      const stats=window._latestWebStats;
+      const eng=(stats?.engineers||[])[idx];
+      if(!eng) return;
+      const ai=stats?.ai_insights?.[eng.name]; let detail=formatWebEngineerDetail(eng,stats.anomalies||[]); if(ai){ detail+='\n\n🤖 AI дүгнэлт:\nЭрсдэл: '+(ai.risk_level||'—'); if(ai.patterns?.length) detail+='\nДавтамж: '+ai.patterns.join('; '); if(ai.recommendation) detail+='\nЗөвлөмж: '+ai.recommendation; } openModal(eng.name,`<pre style="white-space:pre-wrap;font-size:14px;line-height:1.6;margin:0">${detail.replace(/</g,'&lt;')}</pre>`,'Хаах',()=>true);
+    };
+
+
+    function webDayKey(d=new Date()){
+      const x=new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+    }
+    function webIsoWeekday(d){ const n=new Date(d).getDay(); return n===0?7:n; }
+    function webLeaveNote(note){ return /чөлө|амралт|leave|coloo|off/i.test(String(note||'')); }
+    function webDaysInRange(fromIso,toIso){
+      const out=[], today=webDayKey(new Date());
+      const start=new Date(fromIso); start.setHours(0,0,0,0);
+      const end=new Date(toIso); end.setHours(0,0,0,0);
+      for(let d=new Date(start); d<=end; d.setDate(d.getDate()+1)){
+        const dk=webDayKey(d); if(dk>today) break; out.push(dk);
+      }
+      return out;
+    }
+    function webApplyAttendanceStats(row,userId,from,to,restMap,shiftMap,attMap){
+      const days=webDaysInRange(from,to);
+      const restDays=restMap[userId]||null;
+      const hasRest=restDays&&restDays.size>0;
+      const userShifts=shiftMap[userId]||{};
+      const att=attMap[userId]||{checkInDays:new Set(),records:[]};
+      let daysWorked=0,daysLeave=0,daysAbsent=0,totalWorkMs=0;
+      days.forEach(dk=>{
+        const weekday=webIsoWeekday(new Date(`${dk}T12:00:00`));
+        const isWeeklyRest=hasRest&&restDays.has(weekday);
+        const shift=userShifts[dk];
+        const isExplicitLeave=shift&&webLeaveNote(shift.note);
+        if(att.checkInDays.has(dk)){
+          daysWorked+=1;
+          const approved=att.records.filter(a=>(a.status||'approved')==='approved'&&webDayKey(new Date(a.created_at))===dk).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+          let openIn=null,gross=0;
+          approved.forEach(r=>{
+            if(r.type==='check_in') openIn=r;
+            else if(r.type==='check_out'&&openIn){ gross+=Math.max(0,new Date(r.created_at)-new Date(openIn.created_at)); openIn=null; }
+          });
+          totalWorkMs+=gross; return;
+        }
+        if(isWeeklyRest||isExplicitLeave){ daysLeave+=1; return; }
+        const expected=!!shift||(hasRest&&!isWeeklyRest)||(!hasRest&&weekday<=5);
+        if(expected) daysAbsent+=1;
+      });
+      row.days_worked=daysWorked; row.days_absent=daysAbsent; row.days_leave=daysLeave;
+      row.total_work_hours=Math.round((totalWorkMs/3600000)*10)/10;
+    }
+
+    async function collectWebEngineerStats(from,to){
+      const fromDate=webDayKey(new Date(from));
+      const toDate=webDayKey(new Date(to));
+      const [callsRes,fbRes,movRes,invRes,empRes,attRes,breakRes,shiftRes]=await Promise.all([
+        sb.from('service_calls').select('*').gte('created_at',from).lte('created_at',to).limit(800),
+        sb.from('employee_feedback').select('*').gte('created_at',from).lte('created_at',to).limit(400),
+        sb.from('stock_movements').select('*').gte('created_at',from).lte('created_at',to).limit(1500),
+        sb.from('inventory').select('id,name,category,unit'),
+        sb.from('profiles').select('id,name,email,role').eq('role','employee').order('name'),
+        sb.from('attendance').select('*').gte('created_at',from).lte('created_at',to).limit(3000),
+        sb.from('employee_break_schedules').select('user_id,day_of_week'),
+        sb.from('employee_shifts').select('user_id,shift_date,note').gte('shift_date',fromDate).lte('shift_date',toDate).limit(2000),
+      ]);
+      if(callsRes.error) throw callsRes.error;
+      const calls=callsRes.data||[];
+      const feedback=fbRes.error?[]:(fbRes.data||[]);
+      const movements=movRes.error?[]:(movRes.data||[]);
+      const inventoryById={};
+      (invRes.data||[]).forEach(r=>{ inventoryById[r.id]=r; });
+      const employees=(empRes.data||[]).filter(p=>p.id&&(p.name||p.email)&&p.role==='employee');
+      const attendance=attRes.error?[]:(attRes.data||[]);
+      const restMap={};
+      (breakRes.error?[]:(breakRes.data||[])).forEach(r=>{ if(!r.user_id) return; if(!restMap[r.user_id]) restMap[r.user_id]=new Set(); restMap[r.user_id].add(r.day_of_week); });
+      const shiftMap={};
+      (shiftRes.error?[]:(shiftRes.data||[])).forEach(s=>{ if(!s.user_id||!s.shift_date) return; if(!shiftMap[s.user_id]) shiftMap[s.user_id]={}; shiftMap[s.user_id][s.shift_date]=s; });
+      const attMap={};
+      attendance.forEach(a=>{ if(!a.staff_id||(a.status||'approved')!=='approved') return; if(!attMap[a.staff_id]) attMap[a.staff_id]={checkInDays:new Set(),records:[]}; attMap[a.staff_id].records.push(a); if(a.type==='check_in') attMap[a.staff_id].checkInDays.add(webDayKey(new Date(a.created_at))); });
+      const byEngineer={};
+      const ensure=(id,name)=>{
+        const key=id||String(name||'unknown').trim().toLowerCase();
+        if(!byEngineer[key]) byEngineer[key]={engineer_id:id||null,name:name||'Тодорхойгүй',total_calls:0,ail_calls:0,baiguulga_calls:0,done_calls:0,sla_exceeded:0,complaints_mentioned:0,gomdol_mentioned:0,sanal_mentioned:0,complaint_snippets:[],gomdol_snippets:[],sanal_snippets:[],materials_withdrawn:0,materials_withdrawn_qty:0,tools_withdrawn:0,tools_withdrawn_qty:0,materials_used_at_calls:0,materials_used_items:[],suspicious_flags:[],days_worked:0,days_absent:0,days_leave:0,total_work_hours:0};
+        return byEngineer[key];
+      };
+      employees.forEach(e=>ensure(e.id,e.name||e.email));
+      const matsFromClose=c=>{
+        const m=c?.close_meta?.materials;
+        if(!Array.isArray(m)||!m.length) return [];
+        return m.map(x=>({name:x.name,qty:x.qty,unit:x.unit||'ширхэг'}));
+      };
+      calls.forEach(c=>{
+        const add=(id,name)=>{
+          if(!id&&!name) return;
+          const row=ensure(id,name);
+          row.total_calls+=1;
+          if(c.site_kind==='baiguulga') row.baiguulga_calls+=1; else row.ail_calls+=1;
+          if(c.status==='Дууссан') row.done_calls+=1;
+          if(c.sla_alert_at) row.sla_exceeded+=1;
+          const mats=matsFromClose(c);
+          const closerId=c.close_meta?.closed_by_id;
+          if(mats.length&&(closerId===id||(!closerId&&c.engineer_id===id))){
+            row.materials_used_at_calls+=1;
+            mats.forEach(m=>{
+              const ex=row.materials_used_items.find(x=>x.name===m.name);
+              if(ex) ex.qty+=m.qty; else row.materials_used_items.push({...m});
+            });
+          }
+        };
+        add(c.engineer_id,c.engineer_name);
+        if(c.partner_engineer_id&&c.partner_engineer_id!==c.engineer_id) add(c.partner_engineer_id,c.partner_engineer_name);
+      });
+      feedback.forEach(f=>{
+        const names=f.mentioned_employee_names||[];
+        const ids=f.mentioned_employee_ids||[];
+        if(!names.length&&!ids.length) return;
+        const isSanal=f.kind==='sanal';
+        names.forEach((name,i)=>{
+          const id=ids[i]||null;
+          const row=ensure(id,name);
+          if(isSanal){
+            row.sanal_mentioned+=1;
+            if(row.sanal_snippets.length<8) row.sanal_snippets.push({from:f.user_name,kind:f.kind,text:String(f.body||'').slice(0,200),at:f.created_at});
+          }else{
+            row.complaints_mentioned+=1;
+            row.gomdol_mentioned+=1;
+            if(row.gomdol_snippets.length<8) row.gomdol_snippets.push({from:f.user_name,kind:f.kind,text:String(f.body||'').slice(0,200),at:f.created_at});
+          }
+          if(row.complaint_snippets.length<8) row.complaint_snippets.push({from:f.user_name,kind:f.kind,text:String(f.body||'').slice(0,200),at:f.created_at});
+        });
+      });
+      const countMov=(uid,cat)=>{
+        let lines=0,qty=0;
+        movements.forEach(m=>{
+          if(m.user_id!==uid) return;
+          const c=inventoryById[m.item_id]?.category||'material';
+          if(cat==='tool'&&c!=='tool') return;
+          if(cat==='material'&&c==='tool') return;
+          const t=m.movement_type||'withdraw';
+          if(t!=='withdraw'&&Number(m.quantity)<=0) return;
+          const q=Math.abs(Number(m.quantity)||0);
+          lines+=1; qty+=q;
+        });
+        return {lines,qty};
+      };
+      Object.values(byEngineer).forEach(row=>{
+        if(!row.engineer_id) return;
+        const mat=countMov(row.engineer_id,'material');
+        const tool=countMov(row.engineer_id,'tool');
+        row.materials_withdrawn=mat.lines; row.materials_withdrawn_qty=mat.qty;
+        row.tools_withdrawn=tool.lines; row.tools_withdrawn_qty=tool.qty;
+        webApplyAttendanceStats(row,row.engineer_id,from,to,restMap,shiftMap,attMap);
+      });
+      const anomalies=[];
+      calls.forEach(call=>{
+        const mats=matsFromClose(call);
+        if(!mats.length) return;
+        const closerId=call.close_meta?.closed_by_id;
+        const assigned=[call.engineer_id,call.partner_engineer_id].filter(Boolean);
+        if(!closerId||!assigned.length||assigned.includes(closerId)) return;
+        anomalies.push({type:'call_materials_wrong_engineer',call_id:call.id,customer:call.customer,closer_id:closerId,closer_name:call.close_meta?.closed_by||'—',assigned_ids:assigned,assigned_names:[call.engineer_name,call.partner_engineer_name].filter(Boolean).join(', '),materials:mats,message:`${call.close_meta?.closed_by||'—'} ${call.customer||'айл'} дээр бараа бүртгэлээ. Оноогдсон: ${[call.engineer_name,call.partner_engineer_name].filter(Boolean).join(', ')}.`});
+      });
+      const openCalls=calls.filter(c=>c.status==='Явж байгаа'||c.status==='Хүлээгдэж буй');
+      movements.forEach(m=>{
+        if((m.movement_type||'withdraw')!=='withdraw'&&Number(m.quantity)<=0) return;
+        if(!m.user_id) return;
+        openCalls.forEach(call=>{
+          const assigned=[call.engineer_id,call.partner_engineer_id].filter(Boolean);
+          if(!assigned.length||assigned.includes(m.user_id)) return;
+          anomalies.push({type:'stock_withdraw_not_assigned',call_id:call.id,customer:call.customer,taker_id:m.user_id,taker_name:m.user_name,assigned_ids:assigned,assigned_names:[call.engineer_name,call.partner_engineer_name].filter(Boolean).join(', '),item_name:m.item_name,qty:Math.abs(Number(m.quantity)||0),unit:m.unit,message:`${m.user_name||'Ажилтан'} «${m.item_name}» (${Math.abs(Number(m.quantity)||0)}) авлаа — «${call.customer||'айл'}» дээр ${[call.engineer_name,call.partner_engineer_name].filter(Boolean).join(', ')} оноогдсон.`});
+        });
+      });
+      Object.values(byEngineer).forEach(row=>{
+        anomalies.forEach(a=>{
+          if(a.closer_id===row.engineer_id||a.taker_id===row.engineer_id||(a.assigned_ids||[]).includes(row.engineer_id)){
+            if(!row.suspicious_flags.includes(a.type)) row.suspicious_flags.push(a.type);
+          }
+        });
+      });
+      const {data:saRows}=await sb.from('profiles').select('id,name').eq('role','superadmin');
+      const saIds=new Set((saRows||[]).map(r=>r.id).filter(Boolean));
+      const saNames=new Set((saRows||[]).map(r=>String(r.name||'').trim().toLowerCase()).filter(Boolean));
+      const isHiddenSa=(id,name)=>{
+        if(id&&saIds.has(id)) return true;
+        const n=String(name||'').trim().toLowerCase();
+        return n&&saNames.has(n);
+      };
+      const engineers=Object.values(byEngineer).filter(r=>!isHiddenSa(r.engineer_id,r.name)).sort((a,b)=>b.ail_calls-a.ail_calls||b.complaints_mentioned-a.complaints_mentioned);
+      const anomaliesFiltered=anomalies.filter(a=>!isHiddenSa(a.closer_id,a.closer_name)&&!isHiddenSa(a.taker_id,a.taker_name)&&!(a.assigned_ids||[]).some(id=>saIds.has(id)));
+      return {from,to,engineers,feedback_count:feedback.length,calls_count:calls.length,movements_count:movements.length,attendance_count:attendance.length,anomalies:anomaliesFiltered};
+    }
+
+    async function callWebGeminiJson(apiKey,payload,systemText){
+      const sys=systemText||AI_ANALYSIS_SYSTEM;
+      const models=['gemini-2.5-flash','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-flash-latest'];
+      let lastErr='Gemini холбогдсонгүй';
+      for(const model of models){
+        const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+          systemInstruction:{parts:[{text:sys}]},
+          contents:[{role:'user',parts:[{text:JSON.stringify(payload,null,2)}]}],
+          generationConfig:{temperature:0.35,responseMimeType:'application/json',...(model.includes('2.5-flash')?{thinkingConfig:{thinkingBudget:0}}:{})},
+        })});
+        const data=await res.json().catch(()=>({}));
+        if(!res.ok){ lastErr=data?.error?.message||`Gemini алдаа (${res.status})`; if(res.status===404) break; continue; }
+        const text=data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('')||'';
+        if(!text.trim()){ lastErr='Хоосон хариу'; continue; }
+        try{ return JSON.parse(text); }catch(e){
+          const m=text.match(/\{[\s\S]*\}/);
+          if(m) return JSON.parse(m[0]);
+          lastErr='JSON parse алдаа';
+        }
+      }
+      throw new Error(lastErr);
+    }
+
+    window.runWebAiPerformance=async function(force=false){
+      if(window._aiAnalyzing) return;
+      const apiKey=getGeminiKey();
+      if(!apiKey){ window._aiPerfErr='Gemini API түлхүүр оруулна уу'; render(); toast(window._aiPerfErr); return; }
+      if(!force){
+        const {data:latest}=await sb.from('ai_performance_reports').select('*').eq('report_type','instant').order('created_at',{ascending:false}).limit(1).maybeSingle();
+        if(latest?.created_at && Date.now()-new Date(latest.created_at).getTime()<24*3600000){
+          window._aiPerfErr=null;
+          return;
+        }
+      }
+      window._aiAnalyzing=true;
+      window._aiPerfErr=null;
+      render();
+      try{
+        const to=new Date().toISOString();
+        const from=new Date(Date.now()-30*24*3600000).toISOString();
+        const stats=await collectWebEngineerStats(from,to);
+        window._latestWebStats=stats;
+        let parsed=null, analysisText='';
+        try{
+          parsed=await callWebGeminiJson(apiKey,{period:'сүүлийн 30 хоног',stats});
+          analysisText=formatAiAnalysisText(parsed,stats);
+        }catch(e){
+          analysisText=`AI шинжилгээ амжилтгүй: ${e.message}\n\nГараар статистик:\n${stats.engineers.map(en=>`${en.name}: ${en.total_calls} дуудлага, SLA ${en.sla_exceeded}, гомдол ${en.complaints_mentioned}`).join('\n')}`;
+        }
+        if(parsed?.engineers?.length){ stats.ai_insights={}; parsed.engineers.forEach(e=>{ if(e?.name) stats.ai_insights[e.name]=e; }); }
+        if(parsed?.summary) stats.summary=parsed.summary;
+        const {error}=await sb.from('ai_performance_reports').insert({
+          report_type:'instant',
+          period_label:'сүүлийн 30 хоног',
+          period_start:from,
+          period_end:to,
+          stats,
+          analysis_text:analysisText,
+          created_by:me?.id||null,
+          created_by_name:me?.name||me?.email||null,
+        });
+        if(error) throw error;
+        toast('AI шинжилгээ хадгалагдлаа');
+        await loadAll(true);
+      }catch(e){
+        window._aiPerfErr=e.message||'AI шинжилгээ амжилтгүй';
+        toast(window._aiPerfErr);
+        render();
+      }finally{
+        window._aiAnalyzing=false;
+        if(view==='aiperformance') render();
+      }
+    };
+
+    function queueWebAiPerformance(force){
+      if(view!=='aiperformance') return;
+      setTimeout(()=>runWebAiPerformance(!!force),50);
+    }
+
+    function visitProofCell(x,i){
+      if(x.photo_url){
+        const esc=String(x.photo_url).replace(/"/g,'&quot;');
+        const face=x.face_verified?'<span class="pill on" style="font-size:10px">Царай</span>':'';
+        return `<button type="button" class="visit-proof-btn" onclick="viewVisitPhoto(${i})" title="Зураг харах">
+          <img class="visit-proof-thumb" src="${esc}" alt="баталгаа" loading="lazy" onerror="this.style.display='none'"/>
+          ${face}</button>`;
+      }
+      if(x.face_verified) return '<span class="pill on">Царай</span>';
+      return '<span class=muted>—</span>';
+    }
     function renderVisits(c){
       const rows=data.visits.map((x,i)=>`<tr>
-        <td><b>${x.customer||x.location_name||'Айл'}</b>${x.face_verified?` <span class="pill on">Царай </span>`:''}</td>
+        <td><b>${x.customer||x.location_name||'Айл'}</b>${x.location_name&&x.location_name!==x.customer?`<br><span class=muted style="font-size:12px">${x.location_name}</span>`:''}</td>
         <td>${x.user_name||'—'}</td>
+        <td><span class="pill emp">${visitTypeLabel(x.call_type)}</span></td>
+        <td class=muted>${x.problem||'—'}</td>
         <td class=muted>${new Date(x.arrived_at).toLocaleString('mn-MN')}</td>
-        <td>${x.photo_url?`<button class="btn btn-ghost btn-sm" onclick="viewVisitPhoto(${i})"> Зураг</button>`:'<span class=muted>—</span>'}</td>
+        <td>${visitProofCell(x,i)}</td>
       </tr>`).join('');
       c.innerHTML=`<div class="card"><div class="card-h"><h3>Айлд очсон лог (${data.visits.length})</h3>
-        <button class="btn btn-primary btn-sm" onclick="exportVisits()">Excel</button></div>
-        <div class="card-b" style="padding:0"><table><thead><tr><th>Байршил</th><th>Ажилтан</th><th>Огноо</th><th>Баталгаа</th></tr></thead>
-        <tbody>${rows||'<tr><td colspan=4 class=empty>Мэдээлэл алга</td></tr>'}</tbody></table></div></div>`;
+        <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="exportVisits()">Excel</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div></div>
+        <div class="card-b" style="padding:0"><table><thead><tr><th>Байршил</th><th>Ажилтан</th><th>Төрөл</th><th>Асуудал</th><th>Огноо</th><th>Баталгаа</th></tr></thead>
+        <tbody>${rows||'<tr><td colspan=6 class=empty>Мэдээлэл алга — апп дээр «Очсон бүртгэх» эсвэл ажлын байр дээр ирэх</td></tr>'}</tbody></table></div></div>`;
     }
     window.viewVisitPhoto=function(i){
       const x=data.visits[i]; if(!x?.photo_url) return;
-      openModal(`${x.customer||'Байршил'} — ${x.user_name||''}`,
-        `<div style="text-align:center"><img src="${x.photo_url}" style="max-width:100%;max-height:65vh;border-radius:12px" alt="site photo"/>
-        <p class=muted style="margin-top:8px">${new Date(x.arrived_at).toLocaleString('mn-MN')}${x.face_verified?'· Царай баталгаажсан':''}</p></div>`,'Хаах',()=>true);
+      const esc=String(x.photo_url).replace(/"/g,'&quot;');
+      openPhotoModal(`${x.customer||'Байршил'} — ${x.user_name||''}`,
+        `<div class="photo-site-wrap"><img src="${esc}" alt="байршил" onclick="window.open('${esc}','_blank')"/></div>
+        <p class=muted style="margin-top:10px">${new Date(x.arrived_at).toLocaleString('mn-MN')}${x.face_verified?' · Царай баталгаажсан':''}</p>
+        <a class="btn btn-ghost btn-sm" href="${esc}" target="_blank" rel="noopener" style="margin-top:8px;display:inline-block">Шинэ цонхонд нээх</a>`,
+        'site');
     };
 
+    function attPhotoCell(r){
+      const escUrl=u=>String(u||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+      const face=r.photo_url?`<img class="selfie-face" src="${String(r.photo_url).replace(/"/g,'&quot;')}" title="Царай" onclick="viewAttPhoto('${escUrl(r.photo_url)}','Царай','face')">`:'';
+      const site=r.site_photo_url?`<img class="selfie-site" src="${String(r.site_photo_url).replace(/"/g,'&quot;')}" title="Байршил" onclick="viewAttPhoto('${escUrl(r.site_photo_url)}','Байршил','site')">`:'';
+      return face||site?`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${face}${site}</div>`:'<span class=muted>—</span>';
+    }
+    window.viewAttPhoto=function(url,title,kind='site'){
+      if(!url) return;
+      const esc=String(url).replace(/"/g,'&quot;');
+      const isFace=kind==='face';
+      const wrap=isFace?'photo-id-wrap':'photo-site-wrap';
+      openPhotoModal(title||'Зураг',
+        `<div class="${wrap}"><img src="${esc}" alt="photo" onclick="window.open('${esc}','_blank')"/></div>
+        <a class="btn btn-ghost btn-sm" href="${esc}" target="_blank" rel="noopener" style="margin-top:12px;display:inline-block">Шинэ цонхонд нээх</a>`,
+        isFace?'face':'site');
+    };
     function renderAttendance(c){
       const pend=data.attendance.filter(r=>r.status==='pending');
       const rest=data.attendance.filter(r=>r.status!=='pending');
@@ -690,7 +2286,22 @@
         if(r.status==='rejected') b+='<span class="pill out">Татгалзсан</span>';
         return b;
       };
-      let html=`<div class="card"><div class="card-h"><h3> Ажилтны хуваарь</h3>
+      let html=`<div class="card"><div class="card-h"><h3>Бүртгэлийн байршил (GPS + WiFi)</h3>
+        <button class="btn btn-primary btn-sm" onclick="attLocModal()"${!isSuperAdmin(me?.role)&&(data.attLocations||[]).length>=2?' disabled title="Хамгийн 2 байршил"':''}>Байршил нэмэх</button></div>
+        <div class="card-b" style="padding:0"><table><thead><tr><th>Нэр</th><th>Радиус</th><th>WiFi IP</th><th></th></tr></thead>
+        <tbody>${(data.attLocations||[]).length?(data.attLocations||[]).map(l=>`<tr>
+          <td><b>${l.name||'—'}</b></td>
+          <td class=muted>${l.radius_m||200}м</td>
+          <td class=muted>${l.wifi_gateway_ip||'—'}</td>
+          <td><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="attLocEditModal('${l.id}')">Засах</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteAttLoc('${l.id}','${String(l.name||'').replace(/'/g,"\\'")}')">Устгах</button></div></td>
+        </tr>`).join(''):'<tr><td colspan=4 class=empty>Байршил тохируулаагүй</td></tr>'}
+        </tbody></table></div>
+        <div class="card-b" style="padding:12px 16px;border-top:1px solid var(--line)"><p class="muted" style="margin:0;font-size:13px">Энгийн админ: хамгийн 2 байршил. Сistemийн админ: хязгааргүй засвар.${!isSuperAdmin(me?.role)?' Одоо: '+(data.attLocations||[]).length+'/2.':''}</p></div></div>`;
+      html+=`<div class="card"><div class="card-h"><h3>Ажилтан дээр ирц бүртгэх</h3>
+        <button class="btn btn-primary btn-sm" onclick="adminAttModal()">Бүртгэх</button></div>
+        <div class="card-b" style="padding:12px 16px"><p class="muted" style="margin:0;font-size:13px">Зарим тохиолдолд админ ажилтны ирцийг шууд бүртгэнэ (утасгүй, царай алдаа гэх мэт).</p></div></div>`;
+      html+=`<div class="card"><div class="card-h"><h3> Ажилтны хуваарь</h3>
         <button class="btn btn-primary btn-sm" onclick="shiftModal()"> Хуваарь оноох</button></div>
         <div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Огноо</th><th>Цаг</th><th>Байршил</th></tr></thead>
         <tbody>${data.shifts.length?data.shifts.slice(0,30).map(s=>`<tr><td><b>${s.user_name||'—'}</b></td><td class=muted>${s.shift_date}</td>
@@ -708,11 +2319,26 @@
         <div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Амралтын гариг</th><th></th></tr></thead>
         <tbody>${breakRows||'<tr><td colspan=3 class=empty>Амралтын өдөр алга</td></tr>'}
         </tbody></table></div></div>`;
+      const leavePend=(data.leaveRequests||[]).filter(r=>r.status==='pending');
+      const leaveKind={coloo:'Чөлөө',amralt:'Амралт',other:'Бусад'};
+      if(leavePend.length){
+        html+=`<div class="card"><div class="card-h"><h3>Чөлөө авах хүсэлт (${leavePend.length})</h3></div>
+          <div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Огноо</th><th>Төрөл</th><th>Шалтгаан</th><th>Илгээсэн</th><th></th></tr></thead>
+          <tbody>${leavePend.map(r=>`<tr>
+            <td><b>${r.user_name||'—'}</b></td>
+            <td class=muted>${r.date_from}${r.date_to&&r.date_to!==r.date_from?' – '+r.date_to:''}</td>
+            <td>${leaveKind[r.kind]||r.kind||'—'}</td>
+            <td class=muted>${r.reason||'—'}</td>
+            <td class=muted>${new Date(r.created_at).toLocaleString('mn-MN')}</td>
+            <td><div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="decideLeave('${r.id}','approved')">Зөвшөөрөх</button>
+            <button class="btn btn-ghost btn-sm" onclick="decideLeave('${r.id}','rejected')">Татгалзах</button></div></td>
+          </tr>`).join('')}</tbody></table></div></div>`;
+      }
       if(pend.length){
         html+=`<div class="card"><div class="card-h"><h3> Зайнаас бүртгүүлэх хүсэлт (${pend.length})</h3></div>
           <div class="card-b" style="padding:0"><table><thead><tr><th></th><th>Ажилтан</th><th>Төрөл</th><th>Зай</th><th>Шалтгаан</th><th>Огноо</th><th></th></tr></thead>
           <tbody>${pend.map(r=>`<tr>
-            <td>${r.photo_url?`<img class=selfie src="${r.photo_url}">`:''}</td>
+            <td>${attPhotoCell(r)}</td>
             <td><b>${r.staff_name||'—'}</b></td>
             <td>${r.type==='check_in' ?'Ирсэн':'Явсан'}</td>
             <td class=muted>${r.distance_m!=null?`~${r.distance_m}м`:'—'}</td>
@@ -725,10 +2351,14 @@
       html+=`<div class="card"><div class="card-h"><h3>Ирцийн бүртгэл (${rest.length})</h3>
         <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="exportAttendance()">Excel татах</button>
         <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div></div>
-        <div class="card-b" style="padding:0"><table><thead><tr><th></th><th>Ажилтан</th><th>Төрөл</th><th>Байршил</th><th>Огноо</th></tr></thead>
-        <tbody>${rest.length?rest.map(r=>`<tr><td>${r.photo_url?`<img class=selfie src="${r.photo_url}">`:''}</td><td><b>${r.staff_name||'—'}</b></td>
-          <td>${badge(r)}</td><td class=muted>${r.location_name||(r.is_remote&&r.distance_m!=null?`~${r.distance_m}м зайд`:'—')}</td>
-          <td class=muted>${new Date(r.created_at).toLocaleString('mn-MN')}</td></tr>`).join(''):`<tr><td colspan=5 class=empty>Мэдээлэл алга</td></tr>`}</tbody></table></div></div>`;
+        <div class="card-b" style="padding:0"><table><thead><tr><th></th><th>Ажилтан</th><th>Төрөл</th><th>Байршил</th><th>Огноо</th>${isSuperAdmin(me?.role)?'<th></th>':''}</tr></thead>
+        <tbody>${rest.length?rest.map(r=>`<tr><td>${attPhotoCell(r)}</td><td><b>${r.staff_name||'—'}</b></td>
+          <td>${badge(r)}${(r.note||'').startsWith('[Админ')?'<span class="pill" style="background:#fff3cd;color:#856404">Админ</span>':''}</td>
+          <td class=muted>${r.location_name||(r.is_remote&&r.distance_m!=null?`~${r.distance_m}м зайд`:'—')}${r.note&&(r.note||'').startsWith('[Админ')?'<br><span class=muted style="font-size:11px">'+String(r.note).replace(/</g,'&lt;')+'</span>':''}</td>
+          <td class=muted>${new Date(r.created_at).toLocaleString('mn-MN')}</td>
+          ${isSuperAdmin(me?.role)?`<td><div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="toggleAttType('${r.id}','${r.type}')">${r.type==='check_in'?'→Явсан':'→Ирсэн'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteAttRecord('${r.id}')">Устгах</button></div></td>`:''}
+          </tr>`).join(''):`<tr><td colspan=${isSuperAdmin(me?.role)?6:5} class=empty>Мэдээлэл алга</td></tr>`}</tbody></table></div></div>`;
       c.innerHTML=html;
     }
     window.breakModal=async(uid='')=>{
@@ -783,6 +2413,101 @@
           closeModal(); toast('Хуваарь хадгалагдлаа'); loadAll(); return false;
         });
     };
+    window.fillAttLocGps=()=>{
+      if(!navigator.geolocation){ mErr('GPS дэмжигдэхгүй'); return; }
+      navigator.geolocation.getCurrentPosition(pos=>{
+        $('al_lat').value=pos.coords.latitude;
+        $('al_lng').value=pos.coords.longitude;
+        $('al_gps').textContent=`GPS: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+      },()=>mErr('GPS байршил авч чадсангүй'),{enableHighAccuracy:true,timeout:15000});
+    };
+    window.attLocModal=()=>{
+      if(!isSuperAdmin(me?.role)&&(data.attLocations||[]).length>=2){ toast('Энгийн админ хамгийн 2 байршил нэмнэ'); return; }
+      openModal('Байршил нэмэх (GPS + WiFi)',`
+        <label>Нэр</label><input id="al_name" placeholder="Ж: Төв оффис">
+        <label>Радиус (метр)</label><input id="al_rad" type="number" value="200">
+        <label>WiFi роутер IP</label><input id="al_wifi" placeholder="192.168.1.1">
+        <p class=muted style="font-size:12px;margin:8px 0">Офисын WiFi-д холбогдож роутерийн IP оруулна. Дараа нь «GPS авах» дарна.</p>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="fillAttLocGps()">GPS авах</button>
+        <div id="al_gps" class=muted style="font-size:12px;margin-top:8px"></div>
+        <input type="hidden" id="al_lat"><input type="hidden" id="al_lng">
+        <div class="err" id="m_err"></div>`,
+        'Хадгалах', async ()=>{
+          const name=$('al_name').value.trim();
+          const lat=Number($('al_lat').value); const lng=Number($('al_lng').value);
+          const wifi=$('al_wifi').value.trim()||null;
+          if(!name){ mErr('Нэр оруулна уу'); return false; }
+          if(!Number.isFinite(lat)||!Number.isFinite(lng)){ mErr('Эхлээд GPS авах дарна уу'); return false; }
+          const row={name,latitude:lat,longitude:lng,radius_m:Number($('al_rad').value)||200,wifi_gateway_ip:wifi,active:true};
+          const {error}=await sb.from('attendance_locations').insert(row);
+          if(error){ mErr(error.message); return false; }
+          closeModal(); toast('Байршил нэмэгдлээ'); loadAll(); return false;
+        });
+    };
+    window.attLocEditModal=(id)=>{
+      const l=(data.attLocations||[]).find(x=>x.id===id); if(!l){ toast(ERP_NOT_FOUND); return; }
+      openModal('Байршил засах',`
+        <label>Нэр</label><input id="al_name" value="${String(l.name||'').replace(/"/g,'&quot;')}">
+        <label>Радиус (метр)</label><input id="al_rad" type="number" value="${l.radius_m||200}">
+        <label>WiFi роутер IP</label><input id="al_wifi" value="${String(l.wifi_gateway_ip||'').replace(/"/g,'&quot;')}" placeholder="192.168.1.1">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="fillAttLocGps()">GPS шинэчлэх</button>
+        <div id="al_gps" class=muted style="font-size:12px;margin-top:8px">GPS: ${l.latitude}, ${l.longitude}</div>
+        <input type="hidden" id="al_lat" value="${l.latitude}"><input type="hidden" id="al_lng" value="${l.longitude}">
+        <div class="err" id="m_err"></div>`,
+        'Хадгалах', async ()=>{
+          const row={name:$('al_name').value.trim(),latitude:Number($('al_lat').value),longitude:Number($('al_lng').value),
+            radius_m:Number($('al_rad').value)||200,wifi_gateway_ip:$('al_wifi').value.trim()||null};
+          if(!row.name){ mErr('Нэр оруулна уu'); return false; }
+          const {error}=await sb.from('attendance_locations').update(row).eq('id',id);
+          if(error){ mErr(error.message); return false; }
+          closeModal(); toast('Байршил шинэчлэгдлээ'); loadAll(); return false;
+        });
+    };
+    window.adminAttModal=()=>{
+      const empOpts=fieldWorkers().map(w=>`<option value="${w.id}">${w.name||w.email}</option>`).join('');
+      const locOpts=(data.attLocations||[]).map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+      openModal('Ажилтан дээр ирц бүртгэх',`
+        <label>Ажилтан</label><select id="aa_user">${empOpts}</select>
+        <label>Төрөл</label><select id="aa_type"><option value="check_in">Ирсэн</option><option value="check_out">Явсан</option></select>
+        <label>Байршил</label><select id="aa_loc"><option value="">—</option>${locOpts}</select>
+        <label>Шалтгаан</label><input id="aa_note" placeholder="Заавал бичнэ">
+        <div class="err" id="m_err"></div>`,
+        'Бүртгэх', async ()=>{
+          const uid=$('aa_user').value; const w=data.workers.find(x=>x.id===uid);
+          const note=$('aa_note').value.trim();
+          if(!uid||!w){ mErr('Ажилтан сонгоно уu'); return false; }
+          if(!note){ mErr('Шалтгаан бичнэ үү'); return false; }
+          const locId=$('aa_loc').value; const locRow=(data.attLocations||[]).find(x=>x.id===locId);
+          const adminName=me?.name||me?.email||'Админ';
+          const row={staff_id:uid,staff_name:w.name,type:$('aa_type').value,status:'approved',is_remote:false,
+            location_name:locRow?.name||null,latitude:locRow?.latitude??null,longitude:locRow?.longitude??null,
+            note:`[Админ: ${adminName}] ${note}`};
+          const {error}=await sb.from('attendance').insert(row);
+          if(error){ mErr(error.message); return false; }
+          closeModal(); toast('Ирц бүртгэгдлээ'); loadAll(); return false;
+        });
+    };
+    window.toggleAttType=async(id,type)=>{
+      if(!isSuperAdmin(me?.role)){ toast('Зөвхөн системийн админ'); return; }
+      const next=type==='check_in'?'check_out':'check_in';
+      const {error}=await sb.from('attendance').update({type:next}).eq('id',id);
+      if(error) toast(error.message); else { toast('Шинэчлэгдлээ'); loadAll(); }
+    };
+    window.deleteAttRecord=async(id)=>{
+      if(!isSuperAdmin(me?.role)){ toast('Зөвхөн системийн админ'); return; }
+      if(!confirm('Ирцийн бүртгэл устгах уu?')) return;
+      const {error}=await sb.from('attendance').delete().eq('id',id);
+      if(error) toast(error.message); else { toast('Устгалаа'); loadAll(); }
+    };
+    window.deleteAttLoc=async(id,name)=>{
+      if(!confirm((name||'Байршил')+' устгах уу?')) return;
+      const {error}=await sb.from('attendance_locations').delete().eq('id',id);
+      if(error) toast(error.message); else { toast('Устгалаа'); loadAll(); }
+    };
+    window.decideLeave=async(id,status)=>{
+      const {error}=await sb.from('leave_requests').update({status,reviewed_by:me?.id||null,reviewed_by_name:me?.name||me?.email||null,updated_at:new Date().toISOString()}).eq('id',id);
+      if(error) toast(error.message); else { toast(status==='approved'?'Чөлөө зөвшөөрлөө':'Чөлөө татгалзлаа'); loadAll(); }
+    };
     window.decideAtt=async(id,status)=>{
       await sb.from('attendance').update({status}).eq('id',id);
       toast(status==='approved' ?'Зөвшөөрлөө':'Татгалзлаа'); loadAll();
@@ -791,7 +2516,7 @@
     // ===== Ажилчид =====
     function empDisplayName(w){ return [w.last_name,w.name].filter(Boolean).join(' ')||w.name||'—'; }
     function empRolePill(w){
-      if(w.role==='superadmin') return '<span class="pill admin">Сис.админ</span>';
+      if(w.role==='superadmin') return '<span class="pill admin">Хөгжүүлэгч</span>';
       if(w.role==='admin') return '<span class="pill admin">Админ</span>';
       return '<span class="pill emp">Ажилтан</span>';
     }
@@ -800,7 +2525,7 @@
       c.innerHTML=`<div class="card"><div class="card-h"><h3>Ажилчид (${list.length})</h3>
         <button class="btn btn-primary btn-sm" onclick="empModal()"> Ажилтан нэмэх</button></div>
         <div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Имэйл</th><th>Утас</th><th>Хаяг</th><th>Эрх</th><th></th></tr></thead>
-        <tbody>${list.map(w=>`<tr><td><div style="display:flex;align-items:center;gap:8px">${w.avatar_url?`<img class="av-sm" src="${w.avatar_url}">`:`<span class="av-sm av-ph">${(w.name||' ?').charAt(0).toUpperCase()}</span>`}<div><b>${empDisplayName(w)}</b>${w.position?`<br><span class=muted style="font-size:12px">${w.position}</span>`:''}</div></div></td><td class=muted>${w.email||'—'}</td><td class=muted>${w.phone||'—'}</td><td class=muted>${w.address||'—'}</td>
+        <tbody>${list.map(w=>`<tr><td><div style="display:flex;align-items:center;gap:8px">${w.avatar_url?`<img class="av-id" src="${w.avatar_url}" alt="">`:`<span class="av-sm av-ph">${(w.name||' ?').charAt(0).toUpperCase()}</span>`}<div><b>${empDisplayName(w)}</b>${w.position?`<br><span class=muted style="font-size:12px">${w.position}</span>`:''}</div></div></td><td class=muted>${w.email||'—'}</td><td class=muted>${w.phone||'—'}</td><td class=muted>${w.address||'—'}</td>
           <td>${empRolePill(w)}</td>
           <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick='openEmpStockModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Бараа</button><button class="btn btn-ghost btn-sm" onclick='editEmpModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Засах</button>${isSuperAdmin(me.role)?`<button class="btn btn-ghost btn-sm" onclick='resetPwModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Нууц үг</button>`:''}${isSuperAdmin(me.role)&&w.id!==me.id&&w.role!=='superadmin' ?`<button class="btn btn-ghost btn-sm" onclick="toggleRole('${w.id}','${w.role}')">${w.role==='admin' ?'→ Ажилтан':w.role==='employee' ?'→ Админ':'Эрх'}</button>`:''}${w.id===me.id?'<span class=muted>та</span>':''}</div></td></tr>`).join('')||'<tr><td colspan=6 class=empty>Ажилтан алга</td></tr>'}</tbody></table></div></div>`;
     }
@@ -822,7 +2547,7 @@
       if(w.role!=='employee'&&!isSuperAdmin(me.role)){ toast('Зөвхөн ажилтны мэдээлэл засна. Эрхийг системийн админ өөрчилнө.'); return; }
       if(w.role==='superadmin'&&!isSuperAdmin(me.role)){ toast('Энэ хэрэглэгчийг засах эрхгүй'); return; }
       const roleOpts=isSuperAdmin(me.role)
-        ? `<option value="employee"${w.role==='employee' ?'selected':''}>Ажилтан</option><option value="admin"${w.role==='admin' ?'selected':''}>Админ</option><option value="superadmin"${w.role==='superadmin' ?'selected':''}>Системийн админ</option>`
+        ? `<option value="employee"${w.role==='employee' ?'selected':''}>Ажилтан</option><option value="admin"${w.role==='admin' ?'selected':''}>Админ</option><option value="superadmin"${w.role==='superadmin' ?'selected':''}>Хөгжүүлэгч</option>`
         : `<option value="employee"selected>Ажилтан</option>`;
       const roleField=isSuperAdmin(me.role)
         ? `<label>Эрх</label><select id="e_role">${roleOpts}</select>`
@@ -892,7 +2617,7 @@
     function mapPwErr(m=''){
       if(/forbidden/i.test(m)) return 'Зөвхөн системийн админ нууц үг солино.';
       if(/password_too_short/i.test(m)) return 'Нууц үг 6+ тэмдэгт байх ёстой.';
-      if(/user_not_found/i.test(m)) return 'Хэрэглэгч олдсонгүй.';
+      if(/user_not_found/i.test(m)) return ERP_NOT_FOUND;
       if(/Could not find the function/i.test(m)) return 'Supabase дээр migration_admin_reset_password.sql ажиллуулна уу.';
       return m;
     }
@@ -904,9 +2629,10 @@
     };
     window.empModal = ()=>{
       const roleField=isSuperAdmin(me.role)
-        ? `<label>Эрх</label><select id="m_role"><option value="employee">Ажилтан</option><option value="admin">Админ</option><option value="superadmin">Системийн админ</option></select>`
+        ? `<label>Эрх</label><select id="m_role"><option value="employee">Ажилтан</option><option value="admin">Админ</option><option value="superadmin">Хөгжүүлэгч</option></select>`
         : `<p class="muted" style="font-size:12px;margin-bottom:8px">Шинэ хэрэглэгч ажилтны эрхтэй үүснэ.</p>`;
       openModal('Шинэ ажилтан нэмэх',`
+        <label>Овог</label><input id="m_lname" placeholder="Овог">
         <label>Нэр</label><input id="m_name">
         <label>Имэйл</label><input id="m_email" type="email">
         <div class="row"><div><label>Албан тушаал</label><input id="m_pos"></div><div><label>Утас</label><input id="m_phone"></div></div>
@@ -914,16 +2640,20 @@
         <label>Нууц үг (хоосон бол авто)</label><input id="m_pw">
         <div class="err" id="m_err"></div>`,
         'Үүсгэх', async ()=>{
+          const last_name=$('m_lname').value.trim();
           const name=$('m_name').value.trim(), email=$('m_email').value.trim();
           if(!name||!email){ mErr('Нэр, имэйл шаардлагатай'); return false; }
           const pw = $('m_pw').value || genPw();
           const newRole=isSuperAdmin(me.role)?($('m_role')?.value||'employee'):'employee';
           const temp = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
-          const { error } = await temp.auth.signUp({email,password:pw,options:{data:{name,position:$('m_pos').value.trim(),phone:$('m_phone').value.trim(),role:newRole,must_change_password:true}}});
+          const { data: signupData, error } = await temp.auth.signUp({email,password:pw,options:{data:{name,last_name:last_name||null,position:$('m_pos').value.trim(),phone:$('m_phone').value.trim(),role:newRole,must_change_password:true}}});
           if(error){ mErr(error.message); return false; }
+          if(signupData?.user?.id && last_name){
+            await sb.from('profiles').update({last_name}).eq('id',signupData.user.id);
+          }
           closeModal();
           openModal('Ажилтан үүслээ',`<p>Дараах нэвтрэх мэдээллийг ажилтанд өгнө үү:</p>
-            <div class="card" style="padding:16px"><b>Имэйл:</b> ${email}<br><b>Нууц үг:</b> <span style="font-size:18px;color:var(--primary)">${pw}</span></div>
+            <div class="card" style="padding:16px"><b>Нэр:</b> ${[last_name,name].filter(Boolean).join(' ')||name}<br><b>Имэйл:</b> ${email}<br><b>Нууц үг:</b> <span style="font-size:18px;color:var(--primary)">${pw}</span></div>
             <p class="muted" style="font-size:13px">Ажилтан анх нэвтэрмэгц нууц үгээ солино.</p>`,'Ойлголоо',()=>{closeModal();return true;});
           setTimeout(loadAll,1500);
           return false;
@@ -985,15 +2715,17 @@
           <div><div class="v">${submitted}</div><div class="l">Илгээсэн тайлан</div></div></div>
       </div>
       <div class="card"><div class="card-h"><h3>Ажлын байрын бүртгэл (${list.length})</h3>
-        <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
-        <div class="card-b" style="padding:0"><table><thead><tr><th>Байршил</th><th>Жолооч</th><th>Баг</th><th>Хугацаа</th><th>Төлөв</th><th>Огноо</th></tr></thead>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="exportSiteWork()">Excel</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div></div>
+        <div class="card-b" style="padding:0"><table><thead><tr><th>Зураг</th><th>Байршил</th><th>Жолооч</th><th>Баг</th><th>Хугацаа</th><th>Төлөв</th><th>Огноо</th></tr></thead>
         <tbody>${list.map((s,i)=>`<tr style="cursor:pointer" onclick="openSiteModal(${i})">
+          <td>${s.photo_url?`<img class="selfie-site" src="${String(s.photo_url).replace(/"/g,'&quot;')}" alt="work">`:'<span class=muted>—</span>'}</td>
           <td><b>${s.site_name||'—'}</b>${s.site_address?`<br><span class=muted style="font-size:12px">${s.site_address}</span>`:''}</td>
           <td>${s.driver_name||'—'}</td>
-          <td class=muted>${Array.isArray(s.passengers)&&s.passengers.length?s.passengers.map(p=>p.name||p.passenger_name).join(', '):'—'}</td>
+          <td class=muted>${Array.isArray(s.passengers)&&s.passengers.length?s.passengers.map(p=>p.name||p.passenger_name).join(', '):'Ганцаараа'}</td>
           <td>${s.arrived_at?formatDuration(sessionDuration(s)):'—'}</td>
           <td><span class="pill ${s.status==='on_site' ?'on':s.status==='submitted' ?'admin':'off'}">${siteStatusLabel(s.status)}</span></td>
-          <td class=muted>${new Date(s.created_at).toLocaleString('mn-MN')}</td></tr>`).join('')||`<tr><td colspan=6 class=empty>Бүртгэл алга</td></tr>`}
+          <td class=muted>${new Date(s.created_at).toLocaleString('mn-MN')}</td></tr>`).join('')||`<tr><td colspan=7 class=empty>Бүртгэл алга</td></tr>`}
         </tbody></table></div></div>`;
     }
     window.openSiteModal=(i)=>{
@@ -1002,6 +2734,9 @@
       const pass=Array.isArray(s.passengers)&&s.passengers.length
         ? s.passengers.map(p=>`<li>${esc(p.name||p.passenger_name)}</li>`).join('')
         : '<li class=muted>—</li>';
+      const photoHtml=s.photo_url
+        ? `<label>Ажлын зураг</label><div style="text-align:center;margin:8px 0 14px"><div class="photo-site-wrap"><img src="${String(s.photo_url).replace(/"/g,'&quot;')}" style="max-width:100%;max-height:70vh;object-fit:contain" alt="work photo" onclick="window.open('${String(s.photo_url).replace(/'/g,"\\'")}','_blank')"/></div></div>`
+        : '<p class=muted>Зураг илгээгдээгүй</p>';
       openModal('Ажлын байр — '+esc(s.site_name),`
         <p><b>Жолооч:</b> ${esc(s.driver_name||'—')}</p>
         <p><b>Хаяг:</b> ${esc(s.site_address||'—')}</p>
@@ -1011,6 +2746,7 @@
         <p><b>Төлөв:</b> ${siteStatusLabel(s.status)}</p>
         <label>Багийн гишүүд</label><ul style="margin:4px 0 12px;padding-left:20px">${pass}</ul>
         ${s.work_note?`<label>Хийсэн ажлын тайлбар</label><div style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap">${esc(s.work_note)}</div>`:'<p class=muted>Тайлбар оруулаагүй</p>'}
+        ${photoHtml}
         ${s.submitted_at?`<p class=muted style="margin-top:12px;font-size:12px">Илгээсэн: ${new Date(s.submitted_at).toLocaleString('mn-MN')}</p>`:''}
       `,'Хаах',()=>false);
     };
@@ -1020,10 +2756,22 @@
       const {data:rows}=await sb.from('push_tokens').select('token').eq('user_id',userId);
       const tokens=[...new Set((rows||[]).map(r=>r.token).filter(Boolean))];
       if(!tokens.length) return;
+      const safeData={};
+      Object.entries(data||{}).forEach(([k,v])=>{ if(v!=null) safeData[k]=String(v); });
+      const ring=safeData.type==='call'||safeData.type==='live_invite';
+      const ch=safeData.type==='service_call'?'service_calls':(ring?'calls_ring_v2':'chat');
       await fetch('https://exp.host/--/api/v2/push/send',{
         method:'POST',
         headers:{'Accept':'application/json','Content-Type':'application/json'},
-        body:JSON.stringify(tokens.map(to=>({to,title,body,sound:'default',priority:'high',channelId:'chat',data:data||{}})))
+        body:JSON.stringify(tokens.map(to=>({
+          to,title,body,
+          sound:'default',
+          priority:'high',
+          channelId:ch,
+          data:safeData,
+          ttl:ring?90:3600,
+          interruptionLevel:ring?'timeSensitive':'active'
+        })))
       });
     }
 
@@ -1031,32 +2779,51 @@
     function renderServiceCalls(c){
       const list=data.serviceCalls||[];
       window._serviceCallList=list;
+      const ailList=list.filter(x=>(x.site_kind||'ail')==='ail');
+      const orgList=list.filter(x=>x.site_kind==='baiguulga');
       const pending=list.filter(x=>x.status!=='Дууссан').length;
       const statusPill=s=>{
         if(s==='Явж байгаа') return 'admin';
         if(s==='Дууссан') return 'on';
         return 'off';
       };
-      c.innerHTML=`<div class="stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
-        <div class="stat"><span class="ic" style="background:#0891b218;color:#0891b2"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
-          <div><div class="v">${list.length}</div><div class="l">Нийт дуудлага</div></div></div>
-        <div class="stat"><span class="ic" style="background:#f59e0b18;color:#f59e0b"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
-          <div><div class="v">${pending}</div><div class="l">Хүлээгдэж буй</div></div></div>
-        <div class="stat"><span class="ic" style="background:#1fbf7518;color:#1fbf75"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M20 6 9 17l-5-5"/></svg></span>
-          <div><div class="v">${list.filter(x=>x.status==='Дууссан').length}</div><div class="l">Дууссан</div></div></div>
-      </div>
-      <div class="card"><div class="card-h"><h3>Инженерийн дуудлага (${list.length})</h3>
-        <button class="btn btn-primary btn-sm" onclick="serviceCallModal()"> Дуудлага бүртгэх</button></div>
-        <div class="card-b" style="padding:0"><table><thead><tr><th>Захиалагч</th><th>Инженер</th><th>Төрөл</th><th>Төлөв</th><th>Огноо</th><th></th></tr></thead>
-        <tbody>${list.map((x,i)=>{const t=callTypeMeta(x.call_type);return `<tr>
-          <td><b>${x.customer||'—'}</b>${x.address?`<br><span class=muted style="font-size:12px">${x.address}</span>`:''}</td>
+      const callRows=(rows)=>{
+        if(!rows.length) return `<tr><td colspan=8 class=empty>Дуудлага алга</td></tr>`;
+        return rows.map(x=>{
+          const i=list.indexOf(x);
+          const t=callTypeMeta(x.call_type);
+          const sk=siteKindMeta(x.site_kind||'ail');
+          return `<tr>
+          <td><b>${x.customer||'—'}</b><br><span class="pill emp">${sk.label}</span></td>
+          <td>${x.phone||'—'}<br><span class=muted style="font-size:12px">${x.address||'—'}</span></td>
+          <td style="max-width:220px">${x.problem||'—'}</td>
           <td>${x.engineer_name||'—'}</td>
+          <td><span class="muted" style="font-size:12px">${x.created_by_name||'—'}</span></td>
           <td><span class="pill emp">${t.label}</span></td>
           <td><span class="pill ${statusPill(x.status)}">${x.status||'—'}</span></td>
-          <td class=muted>${new Date(x.created_at).toLocaleString('mn-MN')}</td>
-          <td><button class="btn btn-ghost btn-sm" onclick="openServiceCallModal(${i})">Дэлгэрэнгүй</button></td></tr>`;}).join('')||`<tr><td colspan=6 class=empty>Дуудлага алга</td></tr>`}
-        </tbody></table></div>
-        <div class="card-b"><p class="muted" style="margin:0;font-size:13px">Админ дуудлага бүртгэж инженерт онооно. Инженер апп дээр «Дуудлага» цэсээр харна.</p></div></div>`;
+          <td><button class="btn btn-ghost btn-sm" onclick="openServiceCallModal(${i})">Дэлгэрэнгүй</button></td></tr>`;
+        }).join('');
+      };
+      const tableCard=(title,rows)=>`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>${title} (${rows.length})</h3></div>
+        <div class="card-b" style="padding:0"><table><thead><tr>
+          <th>Захиалагч</th><th>Утас / Хаяг</th><th>Юу болохгүй байгаа</th><th>Инженер</th><th>Илгээсэн</th><th>Үйлчилгээ</th><th>Төлөв</th><th></th>
+        </tr></thead><tbody>${callRows(rows)}</tbody></table></div></div>`;
+      c.innerHTML=`<div class="stats" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="stat"><span class="ic" style="background:#0891b218;color:#0891b2"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+          <div><div class="v">${list.length}</div><div class="l">Нийт дуудлага</div></div></div>
+        <div class="stat"><span class="ic" style="background:#22c55e18;color:#22c55e"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>
+          <div><div class="v">${ailList.length}</div><div class="l">Айл</div></div></div>
+        <div class="stat"><span class="ic" style="background:#3b82f618;color:#3b82f6"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 21V9h6v12"/></svg></span>
+          <div><div class="v">${orgList.length}</div><div class="l">Байгууллага</div></div></div>
+        <div class="stat"><span class="ic" style="background:#f59e0b18;color:#f59e0b"><svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></span>
+          <div><div class="v">${pending}</div><div class="l">Хүлээгдэж буй</div></div></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="btn btn-primary btn-sm" onclick="serviceCallModal()">Дуудлага бүртгэх</button>
+      </div>
+      ${tableCard('Айл дээрх дуудлага', ailList)}
+      ${tableCard('Байгууллага дээрх дуудлага', orgList)}
+      <p class="muted" style="margin:0;font-size:13px">Админ дуудлагыг Айл эсвэл Байгууллага гэж бүртгэж инженерт онооно. Утас, хаяг, «юу болохгүй байгаа» бүгд харагдана.</p>`;
     }
     window.serviceCallModal=()=>{
       const engOpts=fieldWorkers().map(w=>{
@@ -1064,38 +2831,54 @@
         return `<option value="${w.id}"data-name="${(w.name||'').replace(/"/g,'&quot;')}">${label}</option>`;
       }).join('');
       const typeOpts=CALL_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('');
+      const siteOpts=SITE_KINDS.map(t=>`<option value="${t.key}">${t.label}</option>`).join('');
       openModal('Шинэ дуудлага бүртгэх',`
+        <label>Айл / Байгууллага *</label>
+        <select id="sc_site">${siteOpts}</select>
         <label>Инженер сонгох *</label>
         <select id="sc_eng"><option value="">— Сонгох —</option>${engOpts}</select>
-        <label>Дуудлагын төрөл</label>
+        <label>Үйлчилгээний төрөл</label>
         <select id="sc_type">${typeOpts}</select>
-        <label>Захиалагчийн нэр *</label><input id="sc_cust" placeholder="Айл / хэрэглэгч">
-        <label>Утас</label><input id="sc_phone" placeholder="99112233">
-        <label>Хаяг</label><input id="sc_addr" placeholder="Байршил">
-        <label>Асуудал</label><input id="sc_prob" placeholder="Тайлбар">
+        <label>Захиалагчийн нэр *</label><input id="sc_cust" placeholder="Айл / байгууллагын нэр">
+        <label>Утасны дугаар *</label><input id="sc_phone" placeholder="99112233">
+        <label>Хаяг</label><input id="sc_addr" placeholder="Байршил, хаяг">
+        <label>Юу болохгүй байгаа *</label><textarea id="sc_prob" rows="3" placeholder="Жишээ: Интернет ажиллахгүй, ONU гэрэл асахгүй..."></textarea>
         <div class="row"><div><label>Өргөрөг</label><input id="sc_lat" placeholder="47.9185"></div><div><label>Уртраг</label><input id="sc_lng" placeholder="106.9176"></div></div>
         <div class="err" id="m_err"></div>`,
         'Оноох', async ()=>{
           const engSel=$('sc_eng'); const uid=engSel.value;
           const engName=engSel.selectedOptions[0]?.dataset?.name||'';
           const customer=$('sc_cust').value.trim();
+          const phone=$('sc_phone').value.trim();
+          const problem=$('sc_prob').value.trim();
+          const siteKind=$('sc_site').value==='baiguulga'?'baiguulga':'ail';
           if(!uid||!customer){ mErr('Инженер болон захиалагчийн нэр шаардлагатай'); return false; }
+          if(!phone){ mErr('Утасны дугаар шаардлагатай'); return false; }
+          if(!problem){ mErr('«Юу болохгүй байгаа» тайлбар шаардлагатай'); return false; }
           const row={
             engineer_id:uid,
             engineer_name:engName,
+            site_kind:siteKind,
             call_type:$('sc_type').value||'other',
             customer,
-            phone:$('sc_phone').value.trim()||null,
+            phone,
             address:$('sc_addr').value.trim()||null,
-            problem:$('sc_prob').value.trim()||null,
+            problem,
             latitude:Number($('sc_lat').value)||47.9185,
             longitude:Number($('sc_lng').value)||106.9176,
             status:'Хүлээгдэж буй',
-            created_by:me.id
+            created_by:me.id,
+            created_by_name:me.name||me.email||'Админ'
           };
           const {error}=await sb.from('service_calls').insert(row);
-          if(error){ mErr(error.message); return false; }
-          await pushToUser(uid,{title:'Шинэ дуудлага',body:`${customer}${row.address?` · ${row.address}`:''}`,data:{type:'service_call'}});
+          if(error){ mErr(error.message+(String(error.message).includes('site_kind')?' — migration_service_calls_site_kind.sql ажиллуулна уу':'')); return false; }
+          const kindLabel=siteKindMeta(siteKind).label;
+          const engLabel=engName||'Ажилтан';
+          await pushToUser(uid,{
+            title:`${engLabel}, танд шинээр дуудлага ирлээ`,
+            body:`${kindLabel}: ${customer} · ${problem} · ${phone}`,
+            data:{type:'service_call',siteKind,callId:null}
+          });
           closeModal(); toast('Инженерт дуудлага оноогдлоо'); loadAll(); return false;
         });
     };
@@ -1103,12 +2886,15 @@
       const x=(window._serviceCallList||[])[i]; if(!x) return;
       const esc=v=>String(v??'').replace(/</g,'&lt;');
       const t=callTypeMeta(x.call_type);
+      const sk=siteKindMeta(x.site_kind||'ail');
       openModal('Дуудлага — '+esc(x.customer),`
+        <p><b>Айл / Байгууллага:</b> ${sk.label}</p>
         <p><b>Инженер:</b> ${esc(x.engineer_name||'—')}</p>
-        <p><b>Төрөл:</b> ${t.label}</p>
-        <p><b>Утас:</b> ${esc(x.phone||'—')}</p>
+        <p><b>Илгээсэн админ:</b> ${esc(x.created_by_name||'—')}</p>
+        <p><b>Үйлчилгээ:</b> ${t.label}</p>
+        <p><b>Утасны дугаар:</b> ${esc(x.phone||'—')}</p>
         <p><b>Хаяг:</b> ${esc(x.address||'—')}</p>
-        <p><b>Асуудал:</b> ${esc(x.problem||'—')}</p>
+        <p><b>Юу болохгүй байгаа:</b> ${esc(x.problem||'—')}</p>
         <p><b>Төлөв:</b> ${esc(x.status)}</p>
         <p><b>Координат:</b> ${x.latitude??'—'}, ${x.longitude??'—'}</p>
         <p class=muted style="font-size:12px">Бүртгэсэн: ${new Date(x.created_at).toLocaleString('mn-MN')}</p>
@@ -1139,7 +2925,7 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap">${tab('today','Өнөөдөр ('+(data.tripGroupsToday||[]).length+')')}${tab('archive','Архив ('+(data.tripGroupsArchive||[]).length+')')}
         <button class="btn btn-primary btn-sm" onclick="exportCompanions()">Excel</button></div></div>
         <div class="card-b" style="padding:12px 16px">
-          <p class="muted" style="margin:0 0 8px;font-size:13px">Нэг баг = нэг жолооч + түүний QR уншуулсан хүмүүс. Өдөр бүр шинэ баг үүснэ.</p>
+          <p class="muted" style="margin:0 0 8px;font-size:13px">Нэг баг = нэг жолооч + (заавал биш) QR уншуулсан хамт явагч. Ганцаараа аялал ч бүртгэгдэнэ.</p>
           <p style="margin:0;font-size:14px"><b>Нийт:</b> ${totalKm.toFixed(2)} км · ${formatDuration(totalSec)}${activeCount?` · <span class="pill on">${activeCount} идэвхтэй</span>`:''}</p>
         </div>
         <div class="card-b" style="padding:0"><table><thead><tr><th>Огноо</th><th>Жолооч</th><th>Машин</th><th>Зам</th><th>Хугацаа</th><th>Хамт явагч</th><th>Төлөв</th>${isSuperAdmin(me?.role)?'<th></th>':''}</tr></thead>
@@ -1149,16 +2935,16 @@
           <td style="cursor:pointer" onclick="openCompanionModal(${i})">${t.plate_number||'—'}</td>
           <td style="cursor:pointer" onclick="openCompanionModal(${i})"><b>${tripKmLabel(t)}</b></td>
           <td class=muted style="cursor:pointer" onclick="openCompanionModal(${i})">${formatDuration(tripDuration(t))}${t.status==='active'&&!t.ended_at?'*':''}</td>
-          <td class=muted style="cursor:pointer" onclick="openCompanionModal(${i})">${(t.passengers||[]).length?(t.passengers||[]).map(p=>p.passenger_name).join(', '):'—'}</td>
+          <td class=muted style="cursor:pointer" onclick="openCompanionModal(${i})">${(t.passengers||[]).length?(t.passengers||[]).map(p=>p.passenger_name).join(', '):'<span class=muted>Ганцаараа</span>'}</td>
           <td style="cursor:pointer" onclick="openCompanionModal(${i})"><span class="pill ${t.status==='active' ?'on':'off'}">${t.status==='active' ?'Идэвхтэй':'Дууссан'}</span></td>
           ${isSuperAdmin(me?.role)?`<td><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCompanionTeam('${t.id}','${String(t.driver_name||'').replace(/'/g,"\\'")}')">Устгах</button></td>`:''}
         </tr>`).join('')||`<tr><td colspan=${colSpan} class=empty>${companionTab==='today' ?'Өнөөдрийн баг алга':'Архив хоосон'}</td></tr>`}
         </tbody></table></div>
-        <div class="card-b"><p class="muted" style="margin:0;font-size:13px">* идэвхтэй аялал — хугацаа шинэчлэгдэж байна. Мөр дээр дарж дэлгэрэнгүй харна.${isSuperAdmin(me?.role)?'Системийн админ багийг устгаж болно.':''}</p></div></div>`;
+        <div class="card-b"><p class="muted" style="margin:0;font-size:13px">* идэвхтэй аялал — хугацаа шинэчлэгдэж байна. Мөр дээр дарж дэлгэрэнгүй харна.${isSuperAdmin(me?.role)?'Хөгжүүлэгч багийг устгаж болно.':''}</p></div></div>`;
     }
     async function deleteCompanionTeam(tripId, driverName){
       if(!isSuperAdmin(me?.role)){ toast('Зөвхөн системийн админ устгана'); return; }
-      if(!tripId){ toast('Баг олдсонгүй'); return; }
+      if(!tripId){ toast(ERP_NOT_FOUND); return; }
       const label=driverName||'баг';
       if(!confirm(`"${label}"багийг бүрмөсөн устгах уу?\n\nАялал, хамт явагчдын бүртгэл устгагдана.`)) return;
       try{
@@ -1184,7 +2970,7 @@
       const esc=v=>String(v??'').replace(/</g,'&lt;');
       const pass=(t.passengers||[]).length
         ? (t.passengers||[]).map(p=>`<li><b>${esc(p.passenger_name)}</b> <span class=muted>${new Date(p.scanned_at).toLocaleString('mn-MN')}</span></li>`).join('')
-        : '<li class=muted>Хамт яваа хүн бүртгэгдээгүй</li>';
+        : '<li class=muted>Ганцаараа явж байна</li>';
       const delBtn=isSuperAdmin(me?.role)
         ? `<button type="button" class="btn btn-danger btn-sm" style="margin-top:16px" onclick="deleteCompanionTeam('${t.id}','${String(t.driver_name||'').replace(/'/g,"\\'")}')"> Баг устгах</button>`
         : '';
@@ -1209,18 +2995,46 @@
       const byUser=computeBalancesByUser(data.movements);
       const totalItems=byUser.reduce((s,u)=>s+u.items.length,0);
       const totalQty=byUser.reduce((s,u)=>s+u.items.reduce((a,it)=>a+Number(it.quantity||0),0),0);
-      if(usageTab==='log'){
-        const rows=(data.movements||[]).map(m=>{
-          const type=m.movement_type||'withdraw';
-          const isOut=type==='consume' ||type==='return';
-          const pill=isOut?`<span class="pill out">−${m.quantity} ${m.unit||''}</span>`:`<span class="pill in">+${m.quantity} ${m.unit||''}</span>`;
-          return `<tr><td><span class="pill ${isOut?'out':'in'}">${movementTypeLabel(type)}</span></td><td><b>${m.item_name||'—'}</b></td><td>${m.user_name||'—'}</td><td>${pill}</td><td class=muted>${new Date(m.created_at).toLocaleString('mn-MN')}</td></tr>`;
+      const invMap=inventoryByIdMap();
+      const allMov=data.movements||[];
+      window._movList=allMov;
+      const withdraws=allMov.filter(m=>(m.movement_type||'withdraw')==='withdraw');
+      const materialTakes=withdraws.filter(m=>(invMap[m.item_id]?.category||'material')==='material');
+      const toolTakes=withdraws.filter(m=>(invMap[m.item_id]?.category||'material')==='tool');
+
+      const takeRows=(list)=>{
+        if(!list.length) return '<tr><td colspan=6 class=empty>Бүртгэл алга</td></tr>';
+        return list.map(m=>{
+          const i=allMov.indexOf(m);
+          const photoBtn=m.photo_url
+            ? `<button type="button" class="btn btn-primary btn-sm" onclick="openMovementPhoto(${i})">Зураг харах</button>`
+            : '<span class=muted>Зураггүй</span>';
+          const thumb=m.photo_url
+            ? `<img class="selfie-site" src="${String(m.photo_url).replace(/"/g,'&quot;')}" alt="take" style="cursor:zoom-in" onclick="openMovementPhoto(${i})">`
+            : '<span class=muted>—</span>';
+          return `<tr>
+            <td>${thumb}</td>
+            <td><b>${m.user_name||'—'}</b></td>
+            <td><b>${m.item_name||'—'}</b></td>
+            <td><span class="pill in">+${m.quantity} ${m.unit||'ш'}</span></td>
+            <td>${photoBtn}</td>
+            <td class=muted>${new Date(m.created_at).toLocaleString('mn-MN')}</td>
+          </tr>`;
         }).join('');
-        c.innerHTML=`<div class="card"><div class="card-h"><h3>Барааны гүйлгээ</h3>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">${tab('balances','Үлдэгдэл ('+totalItems+')')}${tab('log','Гүйлгээ ('+(data.movements||[]).length+')')}
+      };
+
+      const takeTable=(title,list)=>`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>${title} (${list.length})</h3></div>
+        <div class="card-b" style="padding:0"><table><thead><tr>
+          <th>Зураг</th><th>Ажилтан (нэр)</th><th>Бараа / Багаж</th><th>Тоо</th><th>Баталгаа</th><th>Огноо</th>
+        </tr></thead><tbody>${takeRows(list)}</tbody></table></div></div>`;
+
+      if(usageTab==='log'){
+        c.innerHTML=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Авсан бүртгэл</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">${tab('balances','Үлдэгдэл ('+totalItems+')')}${tab('log','Авсан ('+withdraws.length+')')}
           <button class="btn btn-primary btn-sm" onclick="exportUsage()">Excel</button></div></div>
-          <div class="card-b" style="padding:0"><table><thead><tr><th>Төрөл</th><th>Бараа</th><th>Ажилтан</th><th>Тоо</th><th>Огноо</th></tr></thead>
-          <tbody>${rows||'<tr><td colspan=5 class=empty>Гүйлгээ алга</td></tr>'}</tbody></table></div></div>`;
+          <div class="card-b"><p class="muted" style="margin:0;font-size:13px">Ажилтан бар код уншуулж, хэдэн ширхэг авснаа зургаар баталгаажуулбал энд <b>автоматаар</b> бүртгэгдэнэ. «Зураг харах» дарвал баталгаа зураг нээгдэнэ.</p></div></div>
+          ${takeTable('Бараа материал авсан', materialTakes)}
+          ${takeTable('Багаж авсан', toolTakes)}`;
         return;
       }
       const rows=byUser.flatMap(u=>u.items.map(it=>`<tr>
@@ -1231,7 +3045,7 @@
         <td><button class="btn btn-ghost btn-sm" onclick='openEmpStockModal(${JSON.stringify({id:u.user_id,name:u.user_name}).replace(/'/g,"&#39;")})'>Дэлгэрэнгүй</button></td>
       </tr>`)).join('');
       c.innerHTML=`<div class="card"><div class="card-h"><h3>Ажилтны үлдэгдэл</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">${tab('balances','Үлдэгдэл ('+totalItems+')')}${tab('log','Гүйлгээ ('+(data.movements||[]).length+')')}
+        <div style="display:flex;gap:8px;flex-wrap:wrap">${tab('balances','Үлдэгдэл ('+totalItems+')')}${tab('log','Авсан ('+withdraws.length+')')}
         <button class="btn btn-primary btn-sm" onclick="exportUsage()">Excel</button></div></div>
         <div class="card-b" style="padding:12px 16px"><p style="margin:0"><b>Нийт:</b> ${totalItems} төрөл · ${totalQty.toFixed(totalQty%1?1:0)} нэгж · ${byUser.length} ажилтан</p>
         <p class="muted" style="margin:6px 0 0;font-size:13px">Агуулахаас авсан − ажил дээр хэрэглэсэн = үлдэгдэл</p></div>
@@ -1248,15 +3062,33 @@
       return `<div class="bar-row"><div><label>Баркод</label><input id="${inputId}" value="${esc(value)}" placeholder="Скан эсвэл гараар"></div>
         <button type="button" class="btn btn-success btn-sm" onclick="openBarScan('${inputId}')"> Скан</button></div>`;
     }
+    window.openMovementPhoto=(i)=>{
+      const m=(window._movList||[])[i];
+      if(!m){ toast(ERP_NOT_FOUND); return; }
+      if(!m.photo_url){ toast('Энэ олголтод зураг байхгүй'); return; }
+      const esc=String(m.photo_url).replace(/"/g,'&quot;');
+      openPhotoModal('Зураг харах — '+(m.user_name||'Ажилтан'),
+        `<div class="photo-site-wrap"><img src="${esc}" alt="take photo" onclick="window.open('${esc}','_blank')"/></div>
+          <p style="margin-top:14px;font-size:16px"><b>${m.user_name||'—'}</b></p>
+          <p style="margin:6px 0"><b>${m.item_name||'—'}</b> · <span class="pill in">+${m.quantity} ${m.unit||'ш'}</span></p>
+          <p class=muted style="font-size:13px">Авсан баталгаа зураг · ${new Date(m.created_at).toLocaleString('mn-MN')}</p>
+          <a class="btn btn-ghost btn-sm" href="${esc}" target="_blank" rel="noopener" style="margin-top:8px;display:inline-block">Шинэ цонхонд нээх</a>`,
+        'site');
+    };
     function renderInventory(c){
       const list=data.inventory.filter(it=>(it.category||'material')===invCat);
       window._invList=list;
+      const totalQty=list.reduce((s,it)=>s+(Number(it.quantity)||0),0);
       const tab=(k,label)=>`<button class="btn btn-sm ${invCat===k?'btn-primary':'btn-ghost'}" onclick="setInvCat('${k}')">${label}</button>`;
       const priceHead = invCat === 'tool' ? '<th>Үнэ</th>': '';
       const priceCell = (it) => (invCat === 'tool' ? `<td>${money(it.price)}</td>` : '');
       const colSpan = invCat === 'tool' ? 7 : 6;
-      c.innerHTML=`<div class="card"><div class="card-h"><h3>Агуулах (${list.length})</h3>
-        <div style="display:flex;gap:8px">${tab('material','Бараа материал')}${tab('tool','Багаж')}<button class="btn btn-primary btn-sm" onclick="invModal()"> Бараа нэмэх</button></div></div>
+      c.innerHTML=`<div class="stats" style="grid-template-columns:repeat(2,1fr);margin-bottom:16px">
+        <div class="stat"><div><div class="v">${list.length}</div><div class="l">Нэр төрөл</div></div></div>
+        <div class="stat"><div><div class="v">${totalQty}</div><div class="l">Нийт тоо (агуулахад)</div></div></div>
+      </div>
+      <div class="card"><div class="card-h"><h3>Агуулах — ${catName(invCat)} (${list.length} төрөл · ${totalQty} нэгж)</h3>
+        <div style="display:flex;gap:8px">${tab('material','Бараа материал')}${tab('tool','Багаж')}<button class="btn btn-primary btn-sm" onclick="invModal()"> ${catName(invCat)} нэмэх</button></div></div>
         <div class="card-b" style="padding:0"><table><thead><tr><th></th><th>Нэр</th><th>Нэгж</th><th>Тоо</th>${priceHead}<th>Баркод</th><th></th></tr></thead>
         <tbody>${list.map((it,i)=>`<tr><td>${invThumb(it)}</td><td><b>${it.name}</b></td><td>${it.unit||''}</td>
           <td><button class="btn btn-ghost btn-sm" onclick="adjQty('${it.id}',${it.quantity},-1)">−</button> <b>${it.quantity}</b> <button class="btn btn-ghost btn-sm" onclick="adjQty('${it.id}',${it.quantity},1)"></button></td>
@@ -1266,21 +3098,33 @@
     window.adjQty = async (id,q,d)=>{ const nq=Math.max(0,q+d); await sb.from('inventory').update({quantity:nq}).eq('id',id); loadAll(); };
     window.delInv = async (id,name)=>{ if(!confirm(name+'устгах уу?'))return; await sb.from('inventory').delete().eq('id',id); toast('Устгагдлаа'); loadAll(); };
     window.invModal = ()=>{
-      openModal('Шинэ бараа нэмэх',`
+      window._invEditImageUrl='';
+      openModal(`${catName(invCat)} нэмэх`,`
         <label>Ангилал</label>
         <select id="i_cat" onchange="toggleInvPrice()"><option value="material"${invCat==='material' ?'selected':''}>Бараа материал</option><option value="tool"${invCat==='tool' ?'selected':''}>Багаж</option></select>
         <label>Нэр</label><input id="i_name" placeholder="Router (чиглүүлэгч)">
+        <div class="row"><div><label>Модель</label><input id="i_model" placeholder="TL-WR840N"></div><div><label>Сериал</label><input id="i_serial" placeholder="SN123"></div></div>
+        <div class="row"><div><label>Брэнд</label><input id="i_brand" placeholder="TP-Link"></div><div><label>Компани</label><input id="i_company" placeholder="Gennetex"></div></div>
+        <label>Зураг</label><input id="i_photo" type="file" accept="image/*" onchange="window._invEditImageUrl='';this.dataset.changed='1'">
+        <p class="muted" style="font-size:12px;margin:4px 0 0">Барааны жинхэнэ зураг оруулна (заавал биш)</p>
         <div class="row"><div><label>Нэгж</label><input id="i_unit" value="ширхэг"></div><div><label>Тоо</label><input id="i_qty" value="0"></div></div>
         <div class="row" id="i_price_row" style="display:${invCat==='tool' ?'flex':'none'}"><div><label>Үнэ (₮)</label><input id="i_price" value="0"></div></div>
         <div id="i_bar_wrap">${barFieldHtml('', invCat==='tool' ?'i_bar':'i_bar_mat')}</div>
         <div class="err" id="m_err"></div>`,
         'Хадгалах', async ()=>{
           const name=$('i_name').value.trim(); if(!name){ mErr('Нэр оруулна уу'); return false; }
-          const cat=$('i_cat').value;
-          const barcode=cat==='tool' ?$('i_bar').value.trim():$('i_bar_mat').value.trim();
-          const { error } = await sb.from('inventory').insert({name,unit:$('i_unit').value.trim()||'ширхэг',quantity:Number($('i_qty').value)||0,price:cat==='tool' ?Number($('i_price').value)||0:0,barcode:barcode||null,category:cat});
-          if(error){ mErr(error.message); return false; }
-          closeModal(); toast('Бараа нэмэгдлээ'); loadAll(); return false;
+          const cat=invNormCat($('i_cat').value);
+          const barcode=invBarVal(cat);
+          let image_url=window._invEditImageUrl||null;
+          const file=$('i_photo')?.files?.[0];
+          if(file){ try{ image_url=await uploadInvImageFile(file,'new'); }catch(e){ mErr(e.message); return false; } }
+          const row={name,unit:$('i_unit').value.trim()||'ширхэг',quantity:Number($('i_qty').value)||0,price:cat==='tool'?Number($('i_price').value)||0:0,barcode:barcode||null,category:cat,model:$('i_model')?.value?.trim()||null,serial_number:$('i_serial')?.value?.trim()||null,brand:$('i_brand')?.value?.trim()||null,company:$('i_company')?.value?.trim()||null};
+          if(image_url) row.image_url=image_url;
+          try{
+            const saved=await upsertInventoryRow(row);
+            await syncProductFromInventory(saved);
+          }catch(e){ mErr(e.message||String(e)); return false; }
+          closeModal(); toast(catName(cat)+' нэмэгдлээ'); loadAll(); return false;
         });
       setTimeout(()=>openBarScan(invCat==='tool' ?'i_bar':'i_bar_mat'), 350);
     };
@@ -1295,27 +3139,31 @@
       const it=(window._invList||[])[i]; if(!it) return;
       const esc=v=>String(v??'').replace(/"/g,'&quot;');
       const cat=it.category||'material';
+      window._invEditImageUrl=it.image_url||'';
       openModal('Бараа засах',`
         <label>Ангилал</label>
         <select id="i_cat" onchange="toggleInvPrice()"><option value="material"${cat==='material' ?'selected':''}>Бараа материал</option><option value="tool"${cat==='tool' ?'selected':''}>Багаж</option></select>
+        ${invPhotoFieldPreview(it.image_url||'')}
         <label>Нэр</label><input id="i_name" value="${esc(it.name)}">
+        <div class="row"><div><label>Модель</label><input id="i_model" value="${esc(it.model||'')}"></div><div><label>Сериал</label><input id="i_serial" value="${esc(it.serial_number||'')}"></div></div>
+        <div class="row"><div><label>Брэнд</label><input id="i_brand" value="${esc(it.brand||'')}"></div><div><label>Компани</label><input id="i_company" value="${esc(it.company||'')}"></div></div>
+        <label>Шинэ зураг</label><input id="i_photo" type="file" accept="image/*">
         <div class="row"><div><label>Нэгж</label><input id="i_unit" value="${esc(it.unit||'ширхэг')}"></div><div><label>Тоо</label><input id="i_qty" value="${it.quantity??0}"></div></div>
         <div class="row" id="i_price_row" style="display:${cat==='tool' ?'flex':'none'}"><div><label>Үнэ (₮)</label><input id="i_price" value="${it.price??0}"></div></div>
         <div id="i_bar_wrap">${barFieldHtml(it.barcode||'', cat==='tool' ?'i_bar':'i_bar_mat')}</div>
         <div class="err" id="m_err"></div>`,
         'Хадгалах', async ()=>{
           const name=$('i_name').value.trim(); if(!name){ mErr('Нэр оруулна уу'); return false; }
-          const newCat=$('i_cat').value;
-          const barcode=newCat==='tool' ?$('i_bar').value.trim():$('i_bar_mat').value.trim();
-          const { error } = await sb.from('inventory').update({
-            name,
-            unit:$('i_unit').value.trim()||'ширхэг',
-            quantity:Number($('i_qty').value)||0,
-            price:newCat==='tool' ?Number($('i_price').value)||0:0,
-            barcode:barcode||null,
-            category:newCat,
-          }).eq('id',it.id);
-          if(error){ mErr(error.message); return false; }
+          const newCat=invNormCat($('i_cat').value);
+          const barcode=invBarVal(newCat);
+          let image_url=window._invEditImageUrl||it.image_url||null;
+          const file=$('i_photo')?.files?.[0];
+          if(file){ try{ image_url=await uploadInvImageFile(file,it.id); }catch(e){ mErr(e.message); return false; } }
+          const patch={name,unit:$('i_unit').value.trim()||'ширхэг',quantity:Number($('i_qty').value)||0,price:newCat==='tool'?Number($('i_price').value)||0:0,barcode:barcode||null,category:newCat,image_url:image_url||null,model:$('i_model')?.value?.trim()||null,serial_number:$('i_serial')?.value?.trim()||null,brand:$('i_brand')?.value?.trim()||null,company:$('i_company')?.value?.trim()||null};
+          try{
+            const saved=await patchInventoryRow(it.id,patch);
+            await syncProductFromInventory(saved);
+          }catch(e){ mErr(e.message||String(e)); return false; }
           closeModal(); toast('Шинэчлэгдлээ'); loadAll(); return false;
         });
     };
@@ -1344,6 +3192,13 @@
 
     // ===== Modal helper =====
     let modalConfirm=null;
+    function openPhotoModal(title,body,kind='site'){
+      const cls=kind==='face'?' modal-photo-id':' modal-photo-wide';
+      $('overlay').innerHTML=`<div class="modal${cls}"><div class="modal-h">${title}<button class="x" onclick="closeModal()">×</button></div>
+        <div class="modal-b modal-photo-body">${body}</div>
+        <div class="modal-f"><button class="btn btn-primary" onclick="closeModal()">Хаах</button></div></div>`;
+      $('overlay').style.display='flex';
+    }
     function openModal(title,body,okText,onOk){
       modalConfirm=onOk;
       $('overlay').innerHTML=`<div class="modal"><div class="modal-h">${title}<button class="x" onclick="closeModal()"></button></div>
