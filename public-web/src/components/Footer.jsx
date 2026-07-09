@@ -5,7 +5,7 @@ export default function Footer() {
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
         <div className="flex items-center gap-2">
           <img src="/logo.png" alt="Gennetex" className="h-7 w-auto opacity-90" />
-          <span className="font-semibold tracking-tight">GENNETEX</span>
+          <span className="font-semibold tracking-tight">ЖЕННЕТЕКС</span>
         </div>
         <p className="text-sm text-gray-500">© {year} Gennetex. Бүх эрх хуулиар хамгаалагдсан.</p>
       </div>

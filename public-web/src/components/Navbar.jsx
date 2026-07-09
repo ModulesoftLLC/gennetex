@@ -19,7 +19,7 @@ export default function Navbar() {
       <nav className="relative z-50 flex items-center justify-between px-4 py-4 sm:px-6 md:px-12 md:py-6">
         <a href="#" className="animate-blur-fade-up flex items-center gap-2" style={{ animationDelay: '0ms' }}>
           <img src="/logo.png" alt="Gennetex" className="h-8 w-auto md:h-10" />
-          <span className="text-lg font-semibold tracking-tight md:text-xl">GENNETEX</span>
+          <span className="text-lg font-semibold tracking-tight md:text-xl">ЖЕННЕТЕКС</span>
         </a>
 
         <div className="hidden items-center gap-8 lg:flex">
