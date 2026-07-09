@@ -5,6 +5,14 @@
   "outputDirectory": "dist-web",
   "framework": null,
   "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/gennetex/admin/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/gennetex/admin", "destination": "/gennetex/admin/index.html" },
     { "source": "/about", "destination": "/index.html" },

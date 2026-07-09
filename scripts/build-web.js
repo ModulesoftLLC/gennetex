@@ -73,6 +73,20 @@ console.log('[build-web] Админ самбар (admin-web → gennetex/admin)'
 copyDir(adminWeb, adminDest);
 syncAdminEnv(path.join(adminDest, 'index.html'));
 
+// Админ index.html дээр build хувилбар (кэш шалгах)
+try {
+  const versionSrc = fs.readFileSync(path.join(root, 'src/version.js'), 'utf8');
+  const ver = /patch:\s*(\d+)/.exec(versionSrc);
+  const minor = /minor:\s*(\d+)/.exec(versionSrc);
+  const major = /major:\s*(\d+)/.exec(versionSrc);
+  if (major && minor && ver) {
+    const v = `${major[1]}.${minor[1]}.${ver[1]}`;
+    let adminHtml = fs.readFileSync(path.join(adminDest, 'index.html'), 'utf8');
+    adminHtml = adminHtml.replace(/<meta name="admin-build-version" content="[^"]*"\/>/, `<meta name="admin-build-version" content="${v}"/>`);
+    fs.writeFileSync(path.join(adminDest, 'index.html'), adminHtml);
+  }
+} catch (_) {}
+
 // Лого fallback — /gennetex/logo.png (relative path алдаа гарвал)
 if (fs.existsSync(logo)) {
   fs.copyFileSync(logo, path.join(dist, 'gennetex', 'logo.png'));
