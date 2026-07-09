@@ -24,14 +24,19 @@ import {
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import * as vehicleApi from '../services/vehicleService';
+import FuelTankGauge from '../components/FuelTankGauge';
+import { buildVehicleFuelStats, fuelLevelColor, vehicleTankLiters } from '../lib/vehicleFuelStats';
+import { formatPlateInput, normalizePlateNumber } from '../lib/mongoliaPlate';
+import MongoliaPlate from '../components/MongoliaPlate';
 
-const EMPTY = { code: '', plate_number: '', liters_per_100km: '12', driver_name: '', driver_id: ''};
+const EMPTY = { code: '', plate_number: '', liters_per_100km: '12', tank_capacity_liters: '60', driver_name: '', driver_id: '' };
 
 export default function VehiclesAdminScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   const { isAdmin, isCloud, fetchEmployees } = useApp();
   const [list, setList] = useState([]);
+  const [trips, setTrips] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [modal, setModal] = useState(false);
   const [qrItem, setQrItem] = useState(null);
@@ -45,11 +50,13 @@ export default function VehiclesAdminScreen() {
   const load = useCallback(async () => {
     if (!isCloud) return;
     try {
-      const [veh, emps] = await Promise.all([
+      const [veh, tr, emps] = await Promise.all([
         vehicleApi.fetchVehicles(),
+        vehicleApi.fetchTrips(300),
         fetchEmployees().catch(() => []),
       ]);
       setList(veh);
+      setTrips(tr || []);
       setEmployees(emps);
     } catch (e) {
       setError(e.message);
@@ -82,7 +89,8 @@ export default function VehiclesAdminScreen() {
   };
 
   const handleCreate = async () => {
-    if (!form.plate_number.trim()) {
+    const plate = normalizePlateNumber(form.plate_number);
+    if (!plate) {
       setError('Улсын дугаар оруулна уу.');
       return;
     }
@@ -93,7 +101,7 @@ export default function VehiclesAdminScreen() {
     setError(null);
     setSaving(true);
     try {
-      const saved = await vehicleApi.insertVehicle(form);
+      const saved = await vehicleApi.insertVehicle({ ...form, plate_number: plate });
       setForm(EMPTY);
       setModal(false);
       setList((prev) => [saved, ...prev]);
@@ -115,6 +123,33 @@ export default function VehiclesAdminScreen() {
           try {
             await vehicleApi.deleteVehicle(item.id);
             setList((prev) => prev.filter((v) => v.id !== item.id));
+          } catch (e) {
+            Alert.alert('Алдаа', e.message);
+          }
+        },
+      },
+    ]);
+  };
+
+  const fuelByVehicle = React.useMemo(() => {
+    const rows = buildVehicleFuelStats(list, trips, { days: 30 });
+    const map = {};
+    rows.forEach((r) => {
+      const id = r.vehicle?.id;
+      if (id) map[id] = r;
+    });
+    return map;
+  }, [list, trips]);
+
+  const refillFuel = (item) => {
+    Alert.alert('Сав дүүргэх', `${item.plate_number} — бензин 100% болгох уу?`, [
+      { text: 'Болих', style: 'cancel' },
+      {
+        text: '100%',
+        onPress: async () => {
+          try {
+            await vehicleApi.refillVehicleFuel(item.id);
+            await load();
           } catch (e) {
             Alert.alert('Алдаа', e.message);
           }
@@ -154,27 +189,44 @@ export default function VehiclesAdminScreen() {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
           }
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+            const fuel = fuelByVehicle[item.id];
+            const lvl = fuel?.currentLevel ?? Number(item.fuel_level_percent ?? 100);
+            const tank = vehicleTankLiters(item);
+            const remain = fuel?.remainingLiters ?? Math.round(((lvl / 100) * tank) * 10) / 10;
+            const km = fuel?.totalKm ?? 0;
+            return (
             <Card style={styles.row}>
-              <View style={styles.plateBox}>
-                <Text style={styles.plate}>{item.plate_number}</Text>
-              </View>
+              <FuelTankGauge levelPercent={lvl} tankLiters={tank} remainingLiters={remain} height={96} showLabels={false} />
               <View style={{ flex: 1 }}>
+                <View style={styles.plateBoxInline}>
+                  <MongoliaPlate plate={item.plate_number} size="sm" />
+                  {fuel?.active ? <Badge text="Явж байна" color={colors.success} /> : null}
+                </View>
                 <Text style={styles.code}>{item.code}</Text>
                 <Text style={styles.sub}>
-                  {item.liters_per_100km} л/100км · {item.driver_name || 'жолоочгүй'}
+                  {item.liters_per_100km} л/100км · сав {tank}л · {item.driver_name || 'жолоочгүй'}
                 </Text>
+                <Text style={[styles.fuelMeta, { color: fuelLevelColor(lvl) }]}>
+                  {lvl}% · {remain.toFixed(1)}л үлдсэн · {km.toFixed(1)} км
+                </Text>
+                <View style={styles.barTrack}>
+                  <View style={[styles.barFill, { width: `${lvl}%`, backgroundColor: fuelLevelColor(lvl) }]} />
+                </View>
               </View>
               <View style={{ alignItems: 'flex-end', gap: spacing.xs }}>
                 <TouchableOpacity onPress={() => setQrItem(item)}>
-                  <Badge text="QR харах" color={colors.primary} />
+                  <Badge text="QR" color={colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => refillFuel(item)} hitSlop={8}>
+                  <Text style={styles.refill}>Сав</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleDelete(item)} hitSlop={8}>
                   <Text style={styles.delete}>Устгах</Text>
                 </TouchableOpacity>
               </View>
             </Card>
-          )}
+          );}}
           ListEmptyComponent={<EmptyState text="Машин бүртгэгдээгүй байна."/>}
         />
       )}
@@ -189,14 +241,26 @@ export default function VehiclesAdminScreen() {
               <Field
                 label="Улсын дугаар"
                 placeholder="Ж: 1234 УБА"
+                autoCapitalize="characters"
                 value={form.plate_number}
-                onChangeText={(t) => setForm({ ...form, plate_number: t })}
+                onChangeText={(t) => setForm({ ...form, plate_number: formatPlateInput(t) })}
               />
+              {form.plate_number ? (
+                <View style={styles.platePreview}>
+                  <MongoliaPlate plate={form.plate_number} size="md" />
+                </View>
+              ) : null}
               <Field
                 label="100км-т зарцуулах литр"
                 keyboardType="numeric"
                 value={form.liters_per_100km}
                 onChangeText={(t) => setForm({ ...form, liters_per_100km: t })}
+              />
+              <Field
+                label="Бензиний сав (л)"
+                keyboardType="numeric"
+                value={form.tank_capacity_liters}
+                onChangeText={(t) => setForm({ ...form, tank_capacity_liters: t })}
               />
               <Text style={styles.pickLabel}>Анхны жолооч (сонголтоор — QR уншсан ажилтнаар автоматаар солигдоно)</Text>
               {employees.length === 0 ? (
@@ -283,7 +347,7 @@ export default function VehiclesAdminScreen() {
           <View style={styles.qrCard}>
             {qrItem && (
               <>
-                <Text style={styles.qrPlate}>{qrItem.plate_number}</Text>
+                <MongoliaPlate plate={qrItem.plate_number} size="lg" style={styles.qrPlateWrap} />
                 <Text style={styles.qrCode}>{qrItem.code}</Text>
                 <View style={styles.qrBox}>
                   <QRCode value={qrItem.code} size={340} />
@@ -326,6 +390,19 @@ function eventMeta(event) {
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  plateBoxInline: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 },
+  platePreview: { alignItems: 'center', marginBottom: spacing.md, marginTop: -4 },
+  qrPlateWrap: { alignSelf: 'center', marginBottom: spacing.sm },
+  fuelMeta: { fontSize: 13, fontWeight: '800', marginTop: 6 },
+  barTrack: {
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: colors.bgAlt,
+    overflow: 'hidden',
+    marginTop: 8,
+  },
+  barFill: { height: '100%', borderRadius: 999 },
+  refill: { color: colors.primary, fontSize: 12, fontWeight: '700' },
   plateBox: {
     backgroundColor: colors.bgAlt,
     borderWidth: 2,

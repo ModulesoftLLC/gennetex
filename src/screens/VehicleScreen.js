@@ -19,6 +19,9 @@ import { useTheme, useStyles } from '../context/ThemeContext';
 import { VEHICLES } from '../data/mockData';
 import { distanceMeters } from '../lib/geo';
 import { calculateFuel, isDrivingSpeed, formatIdle } from '../lib/fuelCalc';
+import { vehicleTankLiters, fuelLevelColor } from '../lib/vehicleFuelStats';
+import FuelTankGauge from '../components/FuelTankGauge';
+import MongoliaPlate from '../components/MongoliaPlate';
 import * as vehicleApi from '../services/vehicleService';
 
 export default function VehicleScreen() {
@@ -53,6 +56,7 @@ export default function VehicleScreen() {
   );
 
   const litersPer100 = vehicle?.liters_per_100km || fuelSettings.litersPer100km;
+  const tankLiters = vehicleTankLiters(vehicle);
   const fuel = calculateFuel({
     distanceKm,
     idleSeconds,
@@ -60,6 +64,10 @@ export default function VehicleScreen() {
     idleLitersPerHour: fuelSettings.idleLitersPerHour,
     pricePerLiter: fuelSettings.pricePerLiter,
   });
+  const baseFuelLevel = Number(vehicle?.fuel_level_percent ?? 100);
+  const tripDrainPct = tankLiters > 0 ? (fuel.liters / tankLiters) * 100 : 0;
+  const currentFuelLevel = Math.max(0, Math.min(100, Math.round((baseFuelLevel - tripDrainPct) * 10) / 10));
+  const remainingLiters = Math.max(0, Math.round(((currentFuelLevel / 100) * tankLiters) * 10) / 10);
 
   useEffect(() => {
     if (!tripActive || !isCloud || !tripRef.current) return;
@@ -406,9 +414,7 @@ export default function VehicleScreen() {
           <>
             <Card>
               <View style={styles.vehHead}>
-                <View style={styles.plateBox}>
-                  <Text style={styles.plate}>{vehicle.plate_number}</Text>
-                </View>
+                <MongoliaPlate plate={vehicle.plate_number} size="lg" />
                 {tripActive && (
                   <Badge
                     text={moving ? 'Хөдөлж байна' : 'Зогсож байна'}
@@ -419,7 +425,12 @@ export default function VehicleScreen() {
               <View style={styles.infoRow}>
                 <InfoCol label="Код" value={vehicle.code} />
                 <InfoCol label="100км-т" value={`${litersPer100} л`} />
+                <InfoCol label="Сав" value={`${tankLiters} л`} />
+                <InfoCol label="Бензин" value={`${currentFuelLevel}%`} />
+              </View>
+              <View style={[styles.infoRow, { marginTop: spacing.sm }]}>
                 <InfoCol label="Жолооч" value={vehicle.driver_name || '—'} />
+                {tripActive ? <InfoCol label="Явсан" value={`${distanceKm.toFixed(1)} км`} /> : null}
               </View>
             </Card>
 
@@ -494,6 +505,29 @@ export default function VehicleScreen() {
             </View>
 
             <Card>
+              <SectionTitle>Бензиний түвшин</SectionTitle>
+              <View style={styles.fuelGaugeRow}>
+                <FuelTankGauge
+                  levelPercent={currentFuelLevel}
+                  tankLiters={tankLiters}
+                  remainingLiters={remainingLiters}
+                  height={130}
+                />
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.fuelLevelText, { color: fuelLevelColor(currentFuelLevel) }]}>
+                    {currentFuelLevel}%
+                  </Text>
+                  <Text style={styles.help}>
+                    {remainingLiters.toFixed(1)} л үлдсэн · сав {tankLiters} л
+                  </Text>
+                  {tripActive ? (
+                    <Text style={styles.help}>Энэ аялалд: {fuel.liters.toFixed(2)} л зарцуулсан</Text>
+                  ) : null}
+                </View>
+              </View>
+            </Card>
+
+            <Card>
               {!tripActive ? (
                 <>
                   <SectionTitle>Аялал</SectionTitle>
@@ -566,20 +600,13 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   help: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md, lineHeight: 19 },
   vehHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
-  plateBox: {
-    backgroundColor: colors.bgAlt,
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  plate: { color: colors.text, fontSize: 22, fontWeight: '900', letterSpacing: 1 },
   infoRow: { flexDirection: 'row', marginTop: spacing.md },
   infoCol: { flex: 1 },
   infoLabel: { color: colors.textMuted, fontSize: 12 },
   infoValue: { color: colors.text, fontSize: 16, fontWeight: '700', marginTop: 3 },
   statRow: { flexDirection: 'row', gap: spacing.sm, marginVertical: spacing.lg },
+  fuelGaugeRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.lg },
+  fuelLevelText: { fontSize: 32, fontWeight: '900' },
   driverRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.sm },
   driverAvatar: {
     width: 56,
