@@ -1,18 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, User } from 'lucide-react';
-
-const NAV_LINKS = [
-  { to: '/about', label: 'Бидний тухай', delay: 100 },
-  { to: '/services', label: 'Үйлчилгээ', delay: 150 },
-  { to: '/projects', label: 'Төслүүд', delay: 200 },
-  { to: '/careers', label: 'Ажлын байр', delay: 250 },
-  { to: '/contact', label: 'Холбоо барих', delay: 300 },
-];
+import { useSiteContent } from '../context/SiteContentContext';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
+  const { navbar } = useSiteContent();
   const isHome = pathname === '/';
   const close = () => setOpen(false);
 
@@ -20,23 +14,23 @@ export default function Navbar() {
     <>
       <nav
         className={`relative z-50 flex items-center justify-between px-4 py-4 sm:px-6 md:px-12 md:py-6 ${
-          isHome ? '' : 'border-b border-white/10 bg-black/80 backdrop-blur-md'
+          isHome ? '' : 'border-b border-graphite-800 bg-graphite-950/90 backdrop-blur-md'
         }`}
       >
         <Link to="/" className="animate-blur-fade-up flex items-center gap-2" style={{ animationDelay: '0ms' }}>
-          <img src="/logo.png" alt="ЖЕННЕТЕКС" className="h-8 w-auto md:h-10" />
-          <span className="text-lg font-semibold tracking-tight md:text-xl">ЖЕННЕТЕКС</span>
+          <img src="/logo.png" alt={navbar.brand} className="h-8 w-auto md:h-10" />
+          <span className="text-lg font-semibold tracking-tight md:text-xl">{navbar.brand}</span>
         </Link>
 
         <div className="hidden items-center gap-8 lg:flex">
-          {NAV_LINKS.map((link) => (
+          {navbar.links.map((link, i) => (
             <Link
               key={link.to}
               to={link.to}
               className={`animate-blur-fade-up text-sm transition-colors ${
-                pathname === link.to ? 'text-white font-medium' : 'text-white/90 hover:text-gray-300'
+                pathname === link.to ? 'font-medium text-graphite-50' : 'text-graphite-300 hover:text-graphite-100'
               }`}
-              style={{ animationDelay: `${link.delay}ms` }}
+              style={{ animationDelay: `${100 + i * 50}ms` }}
             >
               {link.label}
             </Link>
@@ -50,7 +44,7 @@ export default function Navbar() {
             style={{ animationDelay: '350ms' }}
           >
             <Search size={18} />
-            <span>Ажилд орох</span>
+            <span>{navbar.ctaCareers}</span>
           </Link>
 
           <Link
@@ -87,17 +81,17 @@ export default function Navbar() {
       </nav>
 
       <div
-        className={`absolute left-0 right-0 top-[72px] z-40 border-b border-gray-800 border-t bg-gray-900/95 shadow-2xl backdrop-blur-lg transition-all duration-500 ease-out lg:hidden ${
+        className={`absolute left-0 right-0 top-[72px] z-40 border-b border-t border-graphite-800 bg-graphite-900/95 shadow-2xl backdrop-blur-lg transition-all duration-500 ease-out lg:hidden ${
           open ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-4 opacity-0'
         }`}
       >
         <div className="flex flex-col px-4 py-4">
-          {NAV_LINKS.map((link, i) => (
+          {navbar.links.map((link, i) => (
             <Link
               key={link.to}
               to={link.to}
               onClick={close}
-              className="rounded-lg px-3 py-3 text-sm transition-all hover:bg-gray-800/50"
+              className="rounded-lg px-3 py-3 text-sm text-graphite-200 transition-all hover:bg-graphite-800/60"
               style={{
                 transitionDelay: open ? `${i * 50}ms` : '0ms',
                 transform: open ? 'translateX(0)' : 'translateX(-12px)',
@@ -107,14 +101,14 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <div className="mt-4 flex gap-3 border-t border-gray-800 pt-4 sm:hidden">
+          <div className="mt-4 flex gap-3 border-t border-graphite-800 pt-4 sm:hidden">
             <Link
               to="/careers"
               className="liquid-glass flex flex-1 items-center justify-center gap-2 rounded-full py-2.5 text-sm"
               onClick={close}
             >
               <Search size={18} />
-              Ажилд орох
+              {navbar.ctaCareers}
             </Link>
             <Link
               to="/contact"

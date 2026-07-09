@@ -51,12 +51,12 @@ export default function HeroBackground() {
         </p>
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/80" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(69,63,193,0.22),transparent_55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_60%,rgba(16,185,129,0.12),transparent_50%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-graphite-950/70 via-graphite-950/40 to-graphite-950/90" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,rgba(59,130,246,0.15),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_60%,rgba(113,113,122,0.12),transparent_50%)]" />
 
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 border-t border-white/10 bg-black/30 py-3 backdrop-blur-sm">
-        <div className="hero-marquee flex w-max gap-10 whitespace-nowrap text-xs font-medium uppercase tracking-[0.2em] text-white/50 sm:text-sm">
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 border-t border-graphite-800/80 bg-graphite-950/40 py-3 backdrop-blur-sm">
+        <div className="hero-marquee flex w-max gap-10 whitespace-nowrap text-xs font-medium uppercase tracking-[0.2em] text-graphite-400 sm:text-sm">
           {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
             <span key={`${item}-${i}`} className="inline-flex items-center gap-10">
               {item}

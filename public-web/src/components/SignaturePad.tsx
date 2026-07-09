@@ -1,13 +1,14 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface Props {
   onChange: (svg: string) => void;
+  disabled?: boolean;
 }
 
 const W = 600;
 const H = 180;
 
-export default function SignaturePad({ onChange }: Props) {
+export default function SignaturePad({ onChange, disabled = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawing = useRef(false);
   const [hasInk, setHasInk] = useState(false);
@@ -17,12 +18,28 @@ export default function SignaturePad({ onChange }: Props) {
     if (!c) return null;
     const ctx = c.getContext('2d');
     if (!ctx) return null;
-    ctx.strokeStyle = '#111827';
+    ctx.strokeStyle = '#fafafa';
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     return ctx;
   };
+
+  const clearCanvas = useCallback(() => {
+    const c = canvasRef.current;
+    const ctx = getCtx();
+    if (!c || !ctx) return;
+    ctx.clearRect(0, 0, c.width, c.height);
+    onChange('');
+    setHasInk(false);
+  }, [onChange]);
+
+  useEffect(() => {
+    if (disabled) {
+      drawing.current = false;
+      clearCanvas();
+    }
+  }, [disabled, clearCanvas]);
 
   const emit = useCallback(() => {
     const c = canvasRef.current;
@@ -54,6 +71,7 @@ export default function SignaturePad({ onChange }: Props) {
   };
 
   const start = (e: React.MouseEvent | React.TouchEvent) => {
+    if (disabled) return;
     e.preventDefault();
     drawing.current = true;
     const ctx = getCtx();
@@ -64,7 +82,7 @@ export default function SignaturePad({ onChange }: Props) {
   };
 
   const move = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!drawing.current) return;
+    if (disabled || !drawing.current) return;
     e.preventDefault();
     const ctx = getCtx();
     if (!ctx) return;
@@ -79,22 +97,16 @@ export default function SignaturePad({ onChange }: Props) {
     emit();
   };
 
-  const clear = () => {
-    const c = canvasRef.current;
-    const ctx = getCtx();
-    if (!c || !ctx) return;
-    ctx.clearRect(0, 0, c.width, c.height);
-    onChange('');
-    setHasInk(false);
-  };
-
   return (
-    <div>
+    <div className={disabled ? 'opacity-50' : ''}>
       <canvas
         ref={canvasRef}
         width={W}
         height={H}
-        className="w-full cursor-crosshair rounded-lg border border-slate-200 bg-white touch-none"
+        aria-disabled={disabled}
+        className={`w-full rounded-lg border border-graphite-700 bg-graphite-900 touch-none ${
+          disabled ? 'cursor-not-allowed' : 'cursor-crosshair'
+        }`}
         onMouseDown={start}
         onMouseMove={move}
         onMouseUp={end}
@@ -103,9 +115,20 @@ export default function SignaturePad({ onChange }: Props) {
         onTouchMove={move}
         onTouchEnd={end}
       />
-      <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
-        <span>{hasInk ? 'Зурсан' : 'Энд зурна уу'}</span>
-        <button type="button" onClick={clear} className="text-[#453fc1] hover:underline">
+      <div className="mt-2 flex items-center justify-between text-xs text-graphite-500">
+        <span>
+          {disabled
+            ? 'Эхлээд дүрмийг уншиж зөвшөөрнө үү'
+            : hasInk
+              ? 'Зурсан'
+              : 'Энд гарын үсгээ зурна уу'}
+        </span>
+        <button
+          type="button"
+          onClick={clearCanvas}
+          disabled={disabled}
+          className="text-accent hover:underline disabled:pointer-events-none disabled:opacity-40"
+        >
           Цэвэрлэх
         </button>
       </div>

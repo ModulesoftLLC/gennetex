@@ -7,7 +7,7 @@ export default function SiteLayout({ showFooter = true }) {
   const isHome = pathname === '/';
 
   return (
-    <div className={isHome ? 'bg-black text-white' : 'min-h-screen bg-black text-white'}>
+    <div className={isHome ? 'bg-graphite-950 text-graphite-50' : 'min-h-screen bg-graphite-950 text-graphite-50'}>
       <Navbar />
       <Outlet />
       {showFooter ? <Footer /> : null}
