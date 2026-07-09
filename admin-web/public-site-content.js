@@ -1,5 +1,5 @@
 /**
- * Public вэбсайтын текст — админ засварлах
+ * Public вэбсайтын текст — админ засварлах (CMS)
  */
 (function (global) {
   var DEFAULT_PUBLIC_SITE_CONTENT = {
@@ -115,6 +115,53 @@
     },
   };
 
+  var TAB_META = {
+    hero: { label: 'Нүүр хэсэг', icon: 'home', preview: '/', desc: 'Үндсэн гарчиг, тайлбар, товчлуурууд' },
+    home: { label: 'Хуудаснууд', icon: 'dashboard', preview: '/', desc: 'Нүүр дээрх хуудасны жагсаалт' },
+    about: { label: 'Бидний тухай', icon: 'groups', preview: '/about', desc: 'Компанийн танилцуулга' },
+    services: { label: 'Үйлчилгээ', icon: 'handyman', preview: '/services', desc: 'Үйлчилгээний жагсаалт' },
+    projects: { label: 'Төслүүд', icon: 'architecture', preview: '/projects', desc: 'Статистик, гол чиглэл' },
+    contact: { label: 'Холбоо барих', icon: 'call', preview: '/contact', desc: 'Хаяг, утас, ажлын цаг' },
+    careers: { label: 'Ажлын байр', icon: 'work', preview: '/careers', desc: 'Анкет хуудасны текст' },
+    navbar: { label: 'Дээд цэс', icon: 'menu', preview: '/', desc: 'Навигацийн холбоосууд' },
+    footer: { label: 'Footer', icon: 'bottom_panel_close', preview: '/', desc: 'Доод хэсгийн текст' },
+  };
+
+  var PSC_STYLES =
+    '.psc-editor{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:min(72vh,720px);border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}' +
+    '.psc-sidebar{border-right:1px solid var(--line);background:var(--primary-soft);padding:12px 10px;display:flex;flex-direction:column;gap:4px}' +
+    '.psc-sidebar-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 10px 6px}' +
+    '.psc-nav-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}' +
+    '.psc-nav-btn:hover{background:var(--card);color:var(--text)}' +
+    '.psc-nav-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.06);font-weight:700}' +
+    '.psc-nav-btn .material-symbols-outlined{font-size:20px;flex-shrink:0}' +
+    '.psc-main{display:flex;flex-direction:column;min-width:0}' +
+    '.psc-toolbar{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--card)}' +
+    '.psc-toolbar h4{margin:0 0 4px;font-size:17px;font-weight:800;letter-spacing:-.2px}' +
+    '.psc-toolbar p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}' +
+    '.psc-updated{font-size:12px;color:var(--muted);white-space:nowrap}' +
+    '.psc-body{flex:1;padding:20px;overflow:auto}' +
+    '.psc-panel{display:none;animation:psc-fade .25s ease}' +
+    '.psc-panel.active{display:block}' +
+    '@keyframes psc-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}' +
+    '.psc-block{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px;background:var(--bg)}' +
+    '.psc-block-title{margin:0 0 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:8px}' +
+    '.psc-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}' +
+    '.psc-field{display:flex;flex-direction:column;gap:6px}' +
+    '.psc-label{font-size:12px;font-weight:600;color:var(--muted)}' +
+    '.psc-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}' +
+    '.psc-field input,.psc-field textarea{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--card)!important;color:var(--text)!important;-webkit-text-fill-color:var(--text);font:inherit;font-size:14px;transition:border-color .15s,box-shadow .15s}' +
+    '.psc-field input:focus,.psc-field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15)}' +
+    '.psc-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card);margin-bottom:12px}' +
+    '.psc-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}' +
+    '.psc-item-title{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.02em}' +
+    '.psc-item-path{font-size:11px;color:var(--muted);font-family:JetBrains Mono,monospace}' +
+    '.psc-actions{position:sticky;bottom:0;padding:14px 20px;border-top:1px solid var(--line);background:rgba(250,250,250,.92);backdrop-filter:blur(10px);display:flex;gap:10px;flex-wrap:wrap;align-items:center}' +
+    '.dark .psc-actions{background:rgba(24,24,27,.92)}' +
+    '.psc-preview-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card)}' +
+    '.psc-preview-link:hover{background:var(--primary-soft)}' +
+    '@media(max-width:768px){.psc-editor{grid-template-columns:1fr}.psc-sidebar{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);padding:8px}.psc-sidebar-title{display:none}.psc-nav-btn{flex:0 0 auto;white-space:nowrap;padding:8px 12px}.psc-nav-btn span:last-child{display:none}.psc-body{padding:14px}.psc-actions{padding:12px 14px}}';
+
   function deepMerge(base, patch) {
     if (!patch || typeof patch !== 'object') return base;
     if (Array.isArray(patch)) {
@@ -148,6 +195,7 @@
   function field(label, id, value, opts) {
     opts = opts || {};
     var val = esc(value);
+    var hint = opts.hint ? '<span class="psc-hint">' + esc(opts.hint) + '</span>' : '';
     if (opts.area) {
       return (
         '<label class="psc-field"><span class="psc-label">' +
@@ -158,7 +206,9 @@
         (opts.rows || 3) +
         '">' +
         val +
-        '</textarea></label>'
+        '</textarea>' +
+        hint +
+        '</label>'
       );
     }
     return (
@@ -168,17 +218,44 @@
       id +
       '" type="text" value="' +
       val +
-      '"/></label>'
+      '"/>' +
+      hint +
+      '</label>'
     );
   }
 
-  function itemPairFields(prefix, title, text, i) {
+  function block(title, inner) {
+    return '<div class="psc-block"><div class="psc-block-title">' + esc(title) + '</div>' + inner + '</div>';
+  }
+
+  function itemPairFields(prefix, title, text, i, pathLabel) {
     return (
-      '<div class="psc-item"><div class="psc-item-title">#' +
+      '<div class="psc-item"><div class="psc-item-head"><span class="psc-item-title">#' +
       (i + 1) +
-      '</div>' +
+      '</span>' +
+      (pathLabel ? '<span class="psc-item-path">' + esc(pathLabel) + '</span>' : '') +
+      '</div><div class="psc-grid">' +
       field('Гарчиг', prefix + '_title_' + i, title) +
-      field('Текст', prefix + '_text_' + i, text, { area: true, rows: 2 }) +
+      field('Тайлбар', prefix + '_text_' + i, text, { area: true, rows: 2 }) +
+      '</div></div>'
+    );
+  }
+
+  function panelHeader(tabId) {
+    var meta = TAB_META[tabId] || { label: tabId, desc: '' };
+    return (
+      '<div class="psc-toolbar" data-psc-toolbar="' +
+      tabId +
+      '"><div><h4>' +
+      esc(meta.label) +
+      '</h4><p>' +
+      esc(meta.desc) +
+      '</p></div>' +
+      (meta.preview
+        ? '<a class="psc-preview-link" href="' +
+          esc(meta.preview) +
+          '" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:18px">open_in_new</span> Хуудас харах</a>'
+        : '') +
       '</div>'
     );
   }
@@ -194,7 +271,7 @@
     var cr = c.careers || {};
     var ft = c.footer || {};
     var nb = c.navbar || {};
-    var updated = updatedAt ? new Date(updatedAt).toLocaleString('mn-MN') : '—';
+    var updated = updatedAt ? new Date(updatedAt).toLocaleString('mn-MN') : 'Хэзээ ч хадгалаагүй';
 
     var aboutItems = (ab.items || []).map(function (it, i) {
       return itemPairFields('about', it.title, it.text, i);
@@ -203,23 +280,16 @@
       return itemPairFields('service', it.title, it.text, i);
     }).join('');
     var homeLinks = (hm.links || []).map(function (it, i) {
-      return (
-        '<div class="psc-item"><div class="psc-item-title">Холбоос #' +
-        (i + 1) +
-        '</div>' +
-        field('Гарчиг', 'home_link_title_' + i, it.title) +
-        field('Текст', 'home_link_text_' + i, it.text, { area: true, rows: 2 }) +
-        '</div>'
-      );
+      return itemPairFields('home_link', it.title, it.text, i, it.to || '');
     }).join('');
     var stats = (pj.stats || []).map(function (s, i) {
       return (
-        '<div class="psc-item"><div class="psc-item-title">Статистик #' +
+        '<div class="psc-item"><div class="psc-item-head"><span class="psc-item-title">Статистик #' +
         (i + 1) +
-        '</div>' +
-        field('Утга', 'proj_stat_value_' + i, s.value) +
+        '</span></div><div class="psc-grid">' +
+        field('Тоо / утга', 'proj_stat_value_' + i, s.value) +
         field('Шошго', 'proj_stat_label_' + i, s.label) +
-        '</div>'
+        '</div></div>'
       );
     }).join('');
     var highlights = (pj.highlights || [])
@@ -229,138 +299,229 @@
       .join('');
     var navLinks = (nb.links || [])
       .map(function (l, i) {
-        return field('Цэс #' + (i + 1), 'nav_link_' + i, l.label);
+        return (
+          '<div class="psc-item"><div class="psc-item-head"><span class="psc-item-title">Цэс #' +
+          (i + 1) +
+          '</span><span class="psc-item-path">' +
+          esc(l.to || '') +
+          '</span></div>' +
+          field('Харагдах нэр', 'nav_link_' + i, l.label) +
+          '</div>'
+        );
       })
       .join('');
     var perks = (cr.perks || [])
       .map(function (p, i) {
-        return field('Давуу тал #' + (i + 1), 'career_perk_' + i, p);
+        return field('Мөр #' + (i + 1), 'career_perk_' + i, p);
       })
       .join('');
 
+    var navHtml = Object.keys(TAB_META)
+      .map(function (id, i) {
+        var m = TAB_META[id];
+        return (
+          '<button type="button" class="psc-nav-btn' +
+          (i === 0 ? ' active' : '') +
+          '" data-psc-tab="' +
+          id +
+          '"><span class="material-symbols-outlined">' +
+          m.icon +
+          '</span><span>' +
+          esc(m.label) +
+          '</span></button>'
+        );
+      })
+      .join('');
+
+    var panels =
+      '<div class="psc-panel active" data-psc-panel="hero">' +
+      block(
+        'Үндсэн мэдээлэл',
+        '<div class="psc-grid">' +
+          field('Тэмдэг (badge)', 'hero_badge', h.badge) +
+          field('Уриа', 'hero_tagline', h.tagline) +
+          '</div>',
+      ) +
+      block(
+        'Статистик мөр',
+        '<div class="psc-grid">' +
+          field('1-р мөр', 'hero_stat1', h.stat1) +
+          field('2-р мөр', 'hero_stat2', h.stat2) +
+          field('3-р мөр', 'hero_stat3', h.stat3) +
+          '</div>',
+      ) +
+      block(
+        'Гарчиг ба тайлбар',
+        '<div class="psc-grid">' +
+          field('Гарчиг — эхний мөр', 'hero_title1', h.title1) +
+          field('Гарчиг — хоёр дахь мөр', 'hero_title2', h.title2) +
+          field('Тайлбар', 'hero_description', h.description, { area: true, rows: 4 }) +
+          '</div>',
+      ) +
+      block(
+        'Товчлуурууд',
+        '<div class="psc-grid">' +
+          field('Үйлчилгээ', 'hero_btnServices', h.btnServices) +
+          field('Дэлгэрэнгүй', 'hero_btnAbout', h.btnAbout) +
+          field('Холбогдох', 'hero_btnContact', h.btnContact) +
+          field('Ажилд орох', 'hero_btnCareers', h.btnCareers) +
+          '</div>',
+      ) +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="home">' +
+      block(
+        'Толгой хэсэг',
+        '<div class="psc-grid">' +
+          field('Дээд шошго', 'home_label', hm.label) +
+          field('Гарчиг', 'home_title', hm.title) +
+          field('«Нээх» товч', 'home_linkOpen', hm.linkOpen) +
+          '</div>',
+      ) +
+      block('Хуудасны картууд', homeLinks) +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="about">' +
+      block(
+        'Толгой хэсэг',
+        '<div class="psc-grid">' +
+          field('Дээд шошго', 'about_label', ab.label) +
+          field('Гарчиг', 'about_title', ab.title) +
+          field('Танилцуулга', 'about_intro', ab.intro, { area: true, rows: 4 }) +
+          '</div>',
+      ) +
+      block('Гол цэгүүд', aboutItems) +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="services">' +
+      block(
+        'Толгой хэсэг',
+        '<div class="psc-grid">' +
+          field('Дээд шошго', 'services_label', sv.label) +
+          field('Гарчиг', 'services_title', sv.title) +
+          '</div>',
+      ) +
+      block('Үйлчилгээнүүд', serviceItems) +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="projects">' +
+      block(
+        'Толгой хэсэг',
+        '<div class="psc-grid">' +
+          field('Дээд шошго', 'projects_label', pj.label) +
+          field('Гарчиг', 'projects_title', pj.title) +
+          field('Гол чиглэлийн гарчиг', 'projects_highlightsTitle', pj.highlightsTitle) +
+          '</div>',
+      ) +
+      block('Статистик', stats) +
+      block('Гол чиглэлүүд', '<div class="psc-grid">' + highlights + '</div>') +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="contact">' +
+      block(
+        'Толгой хэсэг',
+        '<div class="psc-grid">' +
+          field('Дээд шошго', 'contact_label', ct.label) +
+          field('Гарчиг', 'contact_title', ct.title) +
+          '</div>',
+      ) +
+      block(
+        'Холбоо',
+        '<div class="psc-grid">' +
+          field('Хаяг', 'contact_address', ct.address, { area: true, rows: 2 }) +
+          field('Утас', 'contact_phone', ct.phone, { hint: 'Жишээ: +976 9911-2233' }) +
+          field('Имэйл', 'contact_email', ct.email) +
+          field('Вэбсайт', 'contact_website', ct.website, { hint: 'Жишээ: adiya.site' }) +
+          '</div>',
+      ) +
+      block(
+        'Ажлын цаг',
+        '<div class="psc-grid">' +
+          field('Гарчиг', 'contact_hoursTitle', ct.hoursTitle) +
+          field('Даваа – Баасан', 'contact_hoursWeekday', ct.hoursWeekday) +
+          field('Бямба', 'contact_hoursSaturday', ct.hoursSaturday) +
+          field('Ням', 'contact_hoursSunday', ct.hoursSunday) +
+          field('Тэмдэглэл', 'contact_hoursNote', ct.hoursNote, { area: true, rows: 2 }) +
+          '</div>',
+      ) +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="careers">' +
+      block(
+        'Толгой хэсэг',
+        '<div class="psc-grid">' +
+          field('Дээд шошго', 'careers_label', cr.label) +
+          field('Гарчиг', 'careers_title', cr.title) +
+          field('Танилцуулга (нүүр)', 'careers_intro', cr.intro, { area: true, rows: 3 }) +
+          field('Танилцуулга (анкет)', 'careers_pageIntro', cr.pageIntro, { area: true, rows: 3 }) +
+          '</div>',
+      ) +
+      block('Хажуугийн мэдээлэл', '<div class="psc-grid">' + field('Гарчиг', 'careers_perksTitle', cr.perksTitle) + perks + field('Тэмдэглэл', 'careers_sidebarNote', cr.sidebarNote, { area: true, rows: 3 }) + '</div>') +
+      block(
+        'Бусад',
+        '<div class="psc-grid">' +
+          field('Footer мөр', 'careers_footer', cr.footer, { hint: '{year} → одоогийн он' }) +
+          field('Буцах (урт)', 'careers_backHome', cr.backHome) +
+          field('Буцах (товч)', 'careers_backShort', cr.backShort) +
+          '</div>',
+      ) +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="navbar">' +
+      block(
+        'Ерөнхий',
+        '<div class="psc-grid">' +
+          field('Брэнд нэр', 'navbar_brand', nb.brand) +
+          field('«Ажилд орох» товч', 'navbar_ctaCareers', nb.ctaCareers) +
+          '</div>',
+      ) +
+      block('Цэсний холбоосууд', navLinks) +
+      '</div>' +
+      '<div class="psc-panel" data-psc-panel="footer">' +
+      block(
+        'Доод хэсэг',
+        '<div class="psc-grid">' +
+          field('Брэнд', 'footer_brand', ft.brand) +
+          field('Зохиогчийн эрх', 'footer_copyright', ft.copyright, {
+            area: true,
+            rows: 2,
+            hint: '{year} гэж бичвэл автоматаар солигдоно',
+          }) +
+          '</div>',
+      ) +
+      '</div>';
+
     return (
-      '<style>.psc-wrap{display:grid;gap:16px}.psc-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}.psc-tab{border:1px solid var(--line);background:var(--card);color:var(--text);padding:8px 14px;border-radius:999px;font-size:13px;cursor:pointer}.psc-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}.psc-panel{display:none}.psc-panel.active{display:block}.psc-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.psc-field{display:flex;flex-direction:column;gap:6px}.psc-label{font-size:12px;color:var(--muted)}.psc-field input,.psc-field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card)!important;color:var(--text)!important;-webkit-text-fill-color:var(--text);font:inherit;font-size:14px}.psc-item{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card)}.psc-item-title{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px}</style>' +
-      '<div class="psc-wrap">' +
-      '<p class="muted" style="margin:0;font-size:13px">Сүүлд хадгалсан: <b>' +
+      '<style>' +
+      PSC_STYLES +
+      '</style>' +
+      '<div class="psc-editor">' +
+      '<aside class="psc-sidebar" id="pscTabs"><div class="psc-sidebar-title">Хуудас</div>' +
+      navHtml +
+      '</aside>' +
+      '<div class="psc-main">' +
+      panelHeader('hero') +
+      '<div class="psc-body">' +
+      '<p class="psc-updated" style="margin:0 0 16px">Сүүлд хадгалсан: <b>' +
       esc(updated) +
-      '</b> · Өөрчлөлт нь <a href="/" target="_blank" rel="noopener">public вэб</a> дээр шууд харагдана.</p>' +
-      '<div class="psc-tabs" id="pscTabs">' +
-      ['hero', 'home', 'about', 'services', 'projects', 'contact', 'careers', 'navbar', 'footer']
-        .map(function (id, i) {
-          var labels = {
-            hero: 'Нүүр',
-            home: 'Хуудаснууд',
-            about: 'Бидний тухай',
-            services: 'Үйлчилгээ',
-            projects: 'Төслүүд',
-            contact: 'Холбоо',
-            careers: 'Ажлын байр',
-            navbar: 'Цэс',
-            footer: 'Footer',
-          };
-          return (
-            '<button type="button" class="psc-tab' +
-            (i === 0 ? ' active' : '') +
-            '" data-psc-tab="' +
-            id +
-            '">' +
-            labels[id] +
-            '</button>'
-          );
-        })
-        .join('') +
+      '</b></p>' +
+      panels +
       '</div>' +
-      '<div class="psc-panel active" data-psc-panel="hero"><div class="psc-grid">' +
-      field('Тэмдэг', 'hero_badge', h.badge) +
-      field('Статистик 1', 'hero_stat1', h.stat1) +
-      field('Статистик 2', 'hero_stat2', h.stat2) +
-      field('Статистик 3', 'hero_stat3', h.stat3) +
-      field('Гарчиг 1', 'hero_title1', h.title1) +
-      field('Гарчиг 2', 'hero_title2', h.title2) +
-      field('Тайлбар', 'hero_description', h.description, { area: true, rows: 3 }) +
-      field('Уриа', 'hero_tagline', h.tagline) +
-      field('Товч: Үйлчилгээ', 'hero_btnServices', h.btnServices) +
-      field('Товч: Дэлгэрэнгүй', 'hero_btnAbout', h.btnAbout) +
-      field('Товч: Холбогдох', 'hero_btnContact', h.btnContact) +
-      field('Товч: Ажилд орох', 'hero_btnCareers', h.btnCareers) +
-      '</div></div>' +
-      '<div class="psc-panel" data-psc-panel="home"><div class="psc-grid">' +
-      field('Шошго', 'home_label', hm.label) +
-      field('Гарчиг', 'home_title', hm.title) +
-      field('«Нээх» товч', 'home_linkOpen', hm.linkOpen) +
-      '</div>' +
-      homeLinks +
-      '</div>' +
-      '<div class="psc-panel" data-psc-panel="about"><div class="psc-grid">' +
-      field('Шошго', 'about_label', ab.label) +
-      field('Гарчиг', 'about_title', ab.title) +
-      field('Танилцуулга', 'about_intro', ab.intro, { area: true, rows: 4 }) +
-      '</div>' +
-      aboutItems +
-      '</div>' +
-      '<div class="psc-panel" data-psc-panel="services"><div class="psc-grid">' +
-      field('Шошго', 'services_label', sv.label) +
-      field('Гарчиг', 'services_title', sv.title) +
-      '</div>' +
-      serviceItems +
-      '</div>' +
-      '<div class="psc-panel" data-psc-panel="projects"><div class="psc-grid">' +
-      field('Шошго', 'projects_label', pj.label) +
-      field('Гарчиг', 'projects_title', pj.title) +
-      field('Гол чиглэл гарчиг', 'projects_highlightsTitle', pj.highlightsTitle) +
-      '</div>' +
-      stats +
-      highlights +
-      '</div>' +
-      '<div class="psc-panel" data-psc-panel="contact"><div class="psc-grid">' +
-      field('Шошго', 'contact_label', ct.label) +
-      field('Гарчиг', 'contact_title', ct.title) +
-      field('Хаяг', 'contact_address', ct.address, { area: true, rows: 2 }) +
-      field('Утас', 'contact_phone', ct.phone) +
-      field('Утас (href)', 'contact_phoneHref', ct.phoneHref) +
-      field('Имэйл', 'contact_email', ct.email) +
-      field('Имэйл (href)', 'contact_emailHref', ct.emailHref) +
-      field('Вэб', 'contact_website', ct.website) +
-      field('Ажлын цаг гарчиг', 'contact_hoursTitle', ct.hoursTitle) +
-      field('Даваа–Баасан', 'contact_hoursWeekday', ct.hoursWeekday) +
-      field('Бямба', 'contact_hoursSaturday', ct.hoursSaturday) +
-      field('Ням', 'contact_hoursSunday', ct.hoursSunday) +
-      field('Тэмдэглэл', 'contact_hoursNote', ct.hoursNote, { area: true, rows: 2 }) +
-      '</div></div>' +
-      '<div class="psc-panel" data-psc-panel="careers"><div class="psc-grid">' +
-      field('Шошго', 'careers_label', cr.label) +
-      field('Гарчиг', 'careers_title', cr.title) +
-      field('Танилцуулга (нүүр)', 'careers_intro', cr.intro, { area: true, rows: 3 }) +
-      field('Танилцуулга (анкет хуудас)', 'careers_pageIntro', cr.pageIntro, { area: true, rows: 3 }) +
-      field('Хажуугийн гарчиг', 'careers_perksTitle', cr.perksTitle) +
-      '</div>' +
-      perks +
-      field('Хажуугийн тэмдэглэл', 'careers_sidebarNote', cr.sidebarNote, { area: true, rows: 3 }) +
-      field('Footer', 'careers_footer', cr.footer) +
-      field('Буцах (урт)', 'careers_backHome', cr.backHome) +
-      field('Буцах (товч)', 'careers_backShort', cr.backShort) +
-      '</div>' +
-      '<div class="psc-panel" data-psc-panel="navbar"><div class="psc-grid">' +
-      field('Брэнд нэр', 'navbar_brand', nb.brand) +
-      field('Ажилд орох товч', 'navbar_ctaCareers', nb.ctaCareers) +
-      '</div>' +
-      navLinks +
-      '</div>' +
-      '<div class="psc-panel" data-psc-panel="footer"><div class="psc-grid">' +
-      field('Брэнд', 'footer_brand', ft.brand) +
-      field('Зохиогчийн эрх ({year} ашиглана)', 'footer_copyright', ft.copyright, { area: true, rows: 2 }) +
-      '</div></div>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">' +
+      '<div class="psc-actions">' +
       '<button class="btn btn-primary" type="button" id="pscSaveBtn"><span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle">save</span> Хадгалах</button>' +
-      '<button class="btn btn-ghost" type="button" id="pscResetBtn">Анхны утга руу</button>' +
-      '<a class="btn btn-ghost" href="/" target="_blank" rel="noopener">Вэб нээх</a>' +
-      '</div></div>'
+      '<button class="btn btn-ghost" type="button" id="pscResetBtn">Анхны утга</button>' +
+      '<a class="btn btn-ghost" href="/" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:17px;vertical-align:middle">language</span> Вэб нээх</a>' +
+      '<span class="muted" style="font-size:12px;margin-left:auto">Хадгалсны дараа public вэб дээр шууд харагдана</span>' +
+      '</div></div></div>'
     );
   }
 
   function val(id) {
     var el = document.getElementById(id);
     return el ? el.value.trim() : '';
+  }
+
+  function phoneHrefFrom(phone) {
+    var digits = String(phone || '').replace(/[^\d+]/g, '');
+    return digits ? 'tel:' + digits : '';
+  }
+
+  function emailHrefFrom(email) {
+    var e = String(email || '').trim();
+    return e ? 'mailto:' + e : '';
   }
 
   function collectPublicSiteContentFromForm(base) {
@@ -386,6 +547,8 @@
     var perks = (base.careers.perks || []).map(function (_, i) {
       return val('career_perk_' + i);
     });
+    var phone = val('contact_phone');
+    var email = val('contact_email');
 
     return {
       navbar: {
@@ -435,10 +598,10 @@
         label: val('contact_label'),
         title: val('contact_title'),
         address: val('contact_address'),
-        phone: val('contact_phone'),
-        phoneHref: val('contact_phoneHref'),
-        email: val('contact_email'),
-        emailHref: val('contact_emailHref'),
+        phone: phone,
+        phoneHref: phoneHrefFrom(phone),
+        email: email,
+        emailHref: emailHrefFrom(email),
         website: val('contact_website'),
         hoursTitle: val('contact_hoursTitle'),
         hoursWeekday: val('contact_hoursWeekday'),
@@ -465,16 +628,36 @@
     };
   }
 
+  function updatePanelToolbar(tabId) {
+    var meta = TAB_META[tabId];
+    if (!meta) return;
+    var toolbar = document.querySelector('.psc-toolbar');
+    if (!toolbar) return;
+    toolbar.setAttribute('data-psc-toolbar', tabId);
+    toolbar.innerHTML =
+      '<div><h4>' +
+      esc(meta.label) +
+      '</h4><p>' +
+      esc(meta.desc) +
+      '</p></div>' +
+      (meta.preview
+        ? '<a class="psc-preview-link" href="' +
+          esc(meta.preview) +
+          '" target="_blank" rel="noopener"><span class="material-symbols-outlined" style="font-size:18px">open_in_new</span> Хуудас харах</a>'
+        : '');
+  }
+
   function initPublicSiteEditorTabs() {
     document.querySelectorAll('[data-psc-tab]').forEach(function (btn) {
       btn.onclick = function () {
         var tab = btn.getAttribute('data-psc-tab');
-        document.querySelectorAll('.psc-tab').forEach(function (b) {
+        document.querySelectorAll('.psc-nav-btn').forEach(function (b) {
           b.classList.toggle('active', b === btn);
         });
         document.querySelectorAll('.psc-panel').forEach(function (p) {
           p.classList.toggle('active', p.getAttribute('data-psc-panel') === tab);
         });
+        updatePanelToolbar(tab);
       };
     });
   }
