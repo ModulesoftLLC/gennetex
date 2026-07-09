@@ -13,12 +13,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PinchGestureHandler, State } from 'react-native-gesture-handler';
-import { colors, spacing } from '../theme';
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
 
 const { width: WIN_W, height: WIN_H } = Dimensions.get('window');
 
 function ZoomableImage({ uri }) {
   const [zoom, setZoom] = useState(1);
+  const styles = useStyles(makeStyles);
 
   const zoomBy = (delta) => setZoom((z) => Math.min(5, Math.max(1, +(z + delta).toFixed(2))));
 
@@ -77,6 +79,7 @@ function ZoomableImage({ uri }) {
 }
 
 export default function ChatImagePreview({ uri, onClose }) {
+  const styles = useStyles(makeStyles);
   if (!uri) return null;
   return (
     <Modal visible animationType="fade" transparent onRequestClose={onClose}>
@@ -94,7 +97,7 @@ export default function ChatImagePreview({ uri, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: '#000000ee'},
   safeTop: { position: 'absolute', top: 0, left: 0, right: 0, zIndex: 2 },
   closeBtn: {

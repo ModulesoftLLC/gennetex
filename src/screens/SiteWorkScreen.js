@@ -3,11 +3,14 @@ import { View, Text, StyleSheet, ScrollView, Alert, Image } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Field, ScreenHeader, SectionTitle, Badge } from '../components/ui';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import * as siteWorkApi from '../services/siteWorkService';
 import { elapsedSeconds, formatDuration } from '../lib/online';
 
 export default function SiteWorkScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const { currentUser, authProfile, isCloud } = useApp();
   const [ctx, setCtx] = useState(null);
   const [session, setSession] = useState(null);
@@ -220,7 +223,7 @@ export default function SiteWorkScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   help: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},

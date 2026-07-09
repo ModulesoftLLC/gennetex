@@ -2,7 +2,8 @@ import React, { useRef, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Button } from './ui';
-import { colors, spacing } from '../theme';
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
 
 export default function SelfieCamera({
   visible,
@@ -18,6 +19,7 @@ export default function SelfieCamera({
   const cameraRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
   const [countdown, setCountdown] = useState(null);
+  const styles = useStyles(makeStyles);
 
   const takePhoto = async () => {
     if (!cameraRef.current || capturing) return;
@@ -107,7 +109,7 @@ export default function SelfieCamera({
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000'},
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   msg: { color: colors.text, fontSize: 16, textAlign: 'center', marginBottom: spacing.lg },

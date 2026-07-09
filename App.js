@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { View, ActivityIndicator, Image } from 'react-native';
+import { View, Text, ActivityIndicator, Image } from 'react-native';
+import { APP_VERSION_LABEL } from './src/version';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AppProvider, useApp } from './src/context/AppContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
@@ -17,9 +19,16 @@ import InventoryScreen from './src/screens/InventoryScreen';
 import FuelScreen from './src/screens/FuelScreen';
 import LiveLocationScreen from './src/screens/LiveLocationScreen';
 import CallsMapScreen from './src/screens/CallsMapScreen';
+import AdminCallsScreen from './src/screens/AdminCallsScreen';
+import AdminVisitsScreen from './src/screens/AdminVisitsScreen';
+import CallDetailScreen from './src/screens/CallDetailScreen';
 import AttendanceScreen from './src/screens/AttendanceScreen';
 import MyShiftScreen from './src/screens/MyShiftScreen';
 import ChatScreen from './src/screens/ChatScreen';
+import FeedScreen from './src/screens/FeedScreen';
+import FeedProfileScreen from './src/screens/FeedProfileScreen';
+import FeedSearchScreen from './src/screens/FeedSearchScreen';
+import FeedPostScreen from './src/screens/FeedPostScreen';
 import ConversationScreen from './src/screens/ConversationScreen';
 import NewGroupScreen from './src/screens/NewGroupScreen';
 import EmployeesScreen from './src/screens/EmployeesScreen';
@@ -30,43 +39,73 @@ import StockLogScreen from './src/screens/StockLogScreen';
 import MyStockScreen from './src/screens/MyStockScreen';
 import ToolAllocationScreen from './src/screens/ToolAllocationScreen';
 import EmployeeReportScreen from './src/screens/EmployeeReportScreen';
+import RequisitionScreen from './src/screens/RequisitionScreen';
 import AdminReportsScreen from './src/screens/AdminReportsScreen';
+import AdminPerformanceScreen from './src/screens/AdminPerformanceScreen';
+import AdminAppUsageScreen from './src/screens/AdminAppUsageScreen';
+import AdminFeedbackScreen from './src/screens/AdminFeedbackScreen';
+import AdminOhaabScreen from './src/screens/AdminOhaabScreen';
+import FeedbackScreen from './src/screens/FeedbackScreen';
+import OhaabScreen from './src/screens/OhaabScreen';
+import OhaabGateScreen from './src/screens/OhaabGateScreen';
+import DeviceGateScreen from './src/screens/DeviceGateScreen';
+import AdminDevicesScreen from './src/screens/AdminDevicesScreen';
+import AdminApplicationsScreen from './src/screens/AdminApplicationsScreen';
+import AdminContractsScreen from './src/screens/AdminContractsScreen';
+import MyContractScreen from './src/screens/MyContractScreen';
 import SiteWorkScreen from './src/screens/SiteWorkScreen';
 import EmployeeDirectoryScreen from './src/screens/EmployeeDirectoryScreen';
 import ChatArchiveScreen from './src/screens/ChatArchiveScreen';
+import ChatSharedScreen from './src/screens/ChatSharedScreen';
+import GennetexAiScreen from './src/screens/GennetexAiScreen';
+import AiAdminScreen from './src/screens/AiAdminScreen';
+import MeetingScreen from './src/screens/MeetingScreen';
+import DeveloperContactScreen from './src/screens/DeveloperContactScreen';
+import DeveloperInboxScreen from './src/screens/DeveloperInboxScreen';
 import AddGroupMembersScreen from './src/screens/AddGroupMembersScreen';
+import AiInventoryHomeScreen from './src/screens/ai-inventory/AiInventoryHomeScreen';
+import InventoryCameraScreen from './src/screens/ai-inventory/InventoryCameraScreen';
+import InventoryResultScreen from './src/screens/ai-inventory/InventoryResultScreen';
+import InventoryHistoryScreen from './src/screens/ai-inventory/InventoryHistoryScreen';
+import ProductTrainingScreen from './src/screens/ai-inventory/ProductTrainingScreen';
+import InventorySettingsScreen from './src/screens/ai-inventory/InventorySettingsScreen';
 import LocationTracker from './src/components/LocationTracker';
 import SiteVisitVerifier from './src/components/SiteVisitVerifier';
 import IncomingCallManager from './src/components/IncomingCallManager';
+import IncomingLiveInviteManager from './src/components/IncomingLiveInviteManager';
 import PushNotificationManager from './src/components/PushNotificationManager';
+import ActivityLogger from './src/components/ActivityLogger';
+import ScreenLiveShare from './src/components/ScreenLiveShare';
+import ErrorBoundary from './src/components/ErrorBoundary';
 import TabBar from './src/components/TabBar';
-import { colors } from './src/theme';
 import { navigationRef } from './src/lib/navigationRef';
 import { ONBOARDING_KEY } from './src/services/permissionsService';
+import * as ohaabApi from './src/services/ohaabService';
+import * as deviceApi from './src/services/deviceAuthService';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const navTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: colors.bg,
-    card: colors.surface,
-    text: colors.text,
-    border: colors.border,
-    primary: colors.primary,
-  },
-};
+function buildNavTheme(colors) {
+  return {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: colors.background,
+      card: colors.surface,
+      text: colors.text,
+      border: colors.border,
+      primary: colors.primary,
+    },
+  };
+}
 
 function MainTabs() {
   return (
-    <Tab.Navigator
-      screenOptions={{ headerShown: false }}
-      tabBar={(props) => <TabBar {...props} />}
-    >
+    <Tab.Navigator screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Нүүр' }} />
       <Tab.Screen name="Attendance" component={AttendanceScreen} options={{ title: 'Ирц' }} />
+      <Tab.Screen name="Feed" component={FeedScreen} options={{ title: 'Пост' }} />
       <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Чат' }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Профайл' }} />
     </Tab.Navigator>
@@ -74,14 +113,25 @@ function MainTabs() {
 }
 
 function AppStack() {
+  const { colors } = useTheme();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+        gestureEnabled: true,
+        animation: 'slide_from_right',
+      }}
+    >
       <Stack.Screen name="MainTabs" component={MainTabs} />
-      <Stack.Screen name="Inventory" component={InventoryScreen} initialParams={{ category: 'material' }} />
-      <Stack.Screen name="Tools" component={InventoryScreen} initialParams={{ category: 'tool' }} />
+      <Stack.Screen name="Inventory" component={InventoryScreen} initialParams={{ category: 'material', mode: 'manage' }} />
+      <Stack.Screen name="Tools" component={InventoryScreen} initialParams={{ category: 'tool', mode: 'manage' }} />
       <Stack.Screen name="Fuel" component={FuelScreen} />
       <Stack.Screen name="Live" component={LiveLocationScreen} />
       <Stack.Screen name="Calls" component={CallsMapScreen} />
+      <Stack.Screen name="AdminCalls" component={AdminCallsScreen} />
+      <Stack.Screen name="AdminVisits" component={AdminVisitsScreen} />
+      <Stack.Screen name="CallDetail" component={CallDetailScreen} />
       <Stack.Screen name="Vehicle" component={VehicleScreen} />
       <Stack.Screen name="VehiclesAdmin" component={VehiclesAdminScreen} />
       <Stack.Screen name="Conversation" component={ConversationScreen} />
@@ -92,28 +142,61 @@ function AppStack() {
       <Stack.Screen name="MyStock" component={MyStockScreen} initialParams={{ category: 'material' }} />
       <Stack.Screen name="MyTools" component={MyStockScreen} initialParams={{ category: 'tool' }} />
       <Stack.Screen name="EmployeeReport" component={EmployeeReportScreen} />
+      <Stack.Screen name="Requisition" component={RequisitionScreen} />
       <Stack.Screen name="MyShift" component={MyShiftScreen} />
       <Stack.Screen name="AdminReports" component={AdminReportsScreen} />
+      <Stack.Screen name="AdminFeedback" component={AdminFeedbackScreen} />
+      <Stack.Screen name="AdminOhaab" component={AdminOhaabScreen} />
+      <Stack.Screen name="AdminPerformance" component={AdminPerformanceScreen} />
+      <Stack.Screen name="AdminAppUsage" component={AdminAppUsageScreen} />
+      <Stack.Screen name="Feedback" component={FeedbackScreen} />
+      <Stack.Screen name="Ohaab" component={OhaabScreen} />
+      <Stack.Screen name="AdminDevices" component={AdminDevicesScreen} />
+      <Stack.Screen name="AdminApplications" component={AdminApplicationsScreen} />
+      <Stack.Screen name="AdminContracts" component={AdminContractsScreen} />
+      <Stack.Screen name="MyContract" component={MyContractScreen} />
       <Stack.Screen name="SiteWork" component={SiteWorkScreen} />
       <Stack.Screen name="EmployeeDirectory" component={EmployeeDirectoryScreen} />
       <Stack.Screen name="ChatArchive" component={ChatArchiveScreen} />
+      <Stack.Screen name="ChatShared" component={ChatSharedScreen} />
+      <Stack.Screen name="GennetexAi" component={GennetexAiScreen} />
+      <Stack.Screen name="AiAdmin" component={AiAdminScreen} />
+      <Stack.Screen name="Meeting" component={MeetingScreen} />
+      <Stack.Screen name="DeveloperContact" component={DeveloperContactScreen} />
+      <Stack.Screen name="DeveloperInbox" component={DeveloperInboxScreen} />
+      <Stack.Screen name="FeedProfile" component={FeedProfileScreen} />
+      <Stack.Screen name="FeedSearch" component={FeedSearchScreen} />
+      <Stack.Screen name="FeedPost" component={FeedPostScreen} />
       <Stack.Screen name="AddGroupMembers" component={AddGroupMembersScreen} />
+      <Stack.Screen name="AiInventoryHome" component={AiInventoryHomeScreen} />
+      <Stack.Screen name="InventoryCamera" component={InventoryCameraScreen} />
+      <Stack.Screen name="InventoryResult" component={InventoryResultScreen} />
+      <Stack.Screen name="InventoryHistory" component={InventoryHistoryScreen} />
+      <Stack.Screen name="ProductTraining" component={ProductTrainingScreen} />
+      <Stack.Screen name="InventorySettings" component={InventorySettingsScreen} />
     </Stack.Navigator>
   );
 }
 
 function Splash() {
+  const { colors } = useTheme();
   return (
-    <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
       <Image source={require('./assets/logo.png')} style={{ width: 180, height: 150, marginBottom: 24 }} resizeMode="contain" />
       <ActivityIndicator size="large" color={colors.primary} />
+      <Text style={{ marginTop: 20, color: colors.textMuted, fontSize: 12, letterSpacing: 0.3 }}>
+        {APP_VERSION_LABEL}
+      </Text>
     </View>
   );
 }
 
-function Root() {
-  const { isCloud, authLoading, session, mustChangePassword } = useApp();
+function Root({ shareRef }) {
+  const { isCloud, authLoading, session, mustChangePassword, currentUser, authProfile, isSuperAdmin } = useApp();
   const [onboarded, setOnboarded] = useState(null);
+  const [ohaabOk, setOhaabOk] = useState(null);
+  const [deviceOk, setDeviceOk] = useState(null);
+  const [deviceInfo, setDeviceInfo] = useState(null);
 
   useEffect(() => {
     if (!isCloud || !session) {
@@ -129,7 +212,63 @@ function Root() {
     };
   }, [isCloud, session?.user?.id]);
 
-  // Supabase холбогдоогүй бол шууд апп (локал горим)
+  // Апп руу орохын өмнө: шинэ төхөөрөмж бол системийн админы зөвшөөрөл шаардлагатай.
+  // Системийн админыг (superadmin) шалгахгүй.
+  useEffect(() => {
+    if (!isCloud || !session || !currentUser?.id) {
+      setDeviceOk(true);
+      return;
+    }
+    if (isSuperAdmin) {
+      setDeviceOk(true);
+      return;
+    }
+    let active = true;
+    setDeviceOk(null);
+    (async () => {
+      try {
+        const res = await deviceApi.ensureDeviceApproval({
+          id: currentUser.id,
+          name: authProfile?.name || currentUser?.name,
+        });
+        if (!active) return;
+        setDeviceInfo(res);
+        setDeviceOk(res.status === 'approved');
+      } catch (e) {
+        if (active) setDeviceOk(true);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [isCloud, session?.user?.id, currentUser?.id, isSuperAdmin]);
+
+  // Апп руу орохын өмнө: өнөөдрийн ХААБ зааврыг гарын үсгээр баталсан эсэх
+  useEffect(() => {
+    if (!isCloud || !session || !currentUser?.id) {
+      setOhaabOk(true);
+      return;
+    }
+    let active = true;
+    setOhaabOk(null);
+    (async () => {
+      try {
+        const [signed, inst] = await Promise.all([
+          ohaabApi.hasTodayAck(currentUser.id),
+          ohaabApi.fetchInstruction(),
+        ]);
+        const needs = !signed && !!(inst?.body || '').trim();
+        if (active) setOhaabOk(!needs);
+      } catch (e) {
+        // Алдаа гарвал хатуу блоклохгүй
+        if (active) setOhaabOk(true);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [isCloud, session?.user?.id, currentUser?.id]);
+
   if (isCloud) {
     if (authLoading) return <Splash />;
     if (!session) return <LoginScreen />;
@@ -138,28 +277,58 @@ function Root() {
     if (!onboarded) {
       return <OnboardingPermissionsScreen onComplete={() => setOnboarded(true)} />;
     }
+    if (deviceOk === null) return <Splash />;
+    if (!deviceOk) {
+      return (
+        <DeviceGateScreen
+          deviceInfo={deviceInfo}
+          onApproved={() => setDeviceOk(true)}
+        />
+      );
+    }
+    if (ohaabOk === null) return <Splash />;
+    if (!ohaabOk) {
+      return <OhaabGateScreen onComplete={() => setOhaabOk(true)} />;
+    }
   }
   return (
     <>
       <LocationTracker />
       <SiteVisitVerifier />
       <IncomingCallManager />
+      <IncomingLiveInviteManager />
       <PushNotificationManager />
+      <ActivityLogger />
+      <ScreenLiveShare viewRef={shareRef} />
       <AppStack />
     </>
   );
 }
 
+function ThemedRoot({ shareRef }) {
+  const { colors, isDark } = useTheme();
+  return (
+    <NavigationContainer ref={navigationRef} theme={buildNavTheme(colors)}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Root shareRef={shareRef} />
+    </NavigationContainer>
+  );
+}
+
 export default function App() {
+  const shareRef = useRef(null);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AppProvider>
-          <NavigationContainer ref={navigationRef} theme={navTheme}>
-            <StatusBar style="dark" />
-            <Root />
-          </NavigationContainer>
-        </AppProvider>
+        <ErrorBoundary>
+          <ThemeProvider>
+            <AppProvider>
+              <View ref={shareRef} style={{ flex: 1 }} collapsable={false}>
+                <ThemedRoot shareRef={shareRef} />
+              </View>
+            </AppProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

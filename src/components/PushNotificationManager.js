@@ -70,6 +70,86 @@ export default function PushNotificationManager() {
           .eq('user_id', currentUser.id);
         memberRooms.current = new Set((data || []).map((m) => m.conversation_id));
       })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => {
+        const post = payload.new;
+        if (!post || post.author_id === currentUser.id) return;
+        if (AppState.currentState !== 'active') return;
+        await notifyApi.showLocalNotification({
+          title: `${post.author_name || 'Ажилтан'} шинэ пост тавилаа`,
+          body: post.content || 'Зурагтай пост',
+          data: { type: 'feed', postId: post.id },
+          channelId: 'feed',
+        });
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'post_comments' }, async (payload) => {
+        const comment = payload.new;
+        if (!comment || comment.user_id === currentUser.id) return;
+        if (AppState.currentState !== 'active') return;
+        const { data: post } = await supabase
+          .from('posts')
+          .select('author_id')
+          .eq('id', comment.post_id)
+          .maybeSingle();
+        if (post?.author_id !== currentUser.id) return;
+        await notifyApi.showLocalNotification({
+          title: `${comment.user_name || 'Ажилтан'} сэтгэгдэл бичлээ`,
+          body: comment.content,
+          data: { type: 'feed', postId: comment.post_id },
+          channelId: 'feed',
+        });
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'service_calls' }, async (payload) => {
+        const call = payload.new;
+        if (!call || call.engineer_id !== currentUser.id) return;
+        if (AppState.currentState !== 'active') return;
+        const name = call.engineer_name || currentUser.name || 'Ажилтан';
+        const kind = call.site_kind === 'baiguulga' ? 'Байгууллага' : 'Айл';
+        const details = [call.customer, call.problem, call.phone].filter(Boolean).join(' · ');
+        await notifyApi.showLocalNotification({
+          title: `${name}, танд шинээр дуудлага ирлээ`,
+          body: details ? `${kind}: ${details}` : `${kind} дээрх шинэ дуудлага`,
+          data: { type: 'service_call', callId: call.id, siteKind: call.site_kind || 'ail' },
+          channelId: 'chat',
+        });
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'meetings' }, async (payload) => {
+        const meeting = payload.new;
+        if (!meeting || meeting.status !== 'active') return;
+        if (meeting.host_id === currentUser.id) return;
+        // kind=meeting → зөвхөн хурал; kind=live эсвэл бусад → live
+        const isMeeting =
+          meeting.kind === 'meeting' ||
+          (meeting.kind !== 'live' && /хурал/i.test(meeting.title || ''));
+        if (isMeeting) {
+          await notifyApi.showLocalNotification({
+            title: 'Хурал эхэллээ',
+            body: `${meeting.host_name || 'Админ'} хурал эхлүүллээ — Нүүр → Хурал дээр дарж орно уу`,
+            data: {
+              type: 'meeting',
+              kind: 'meeting',
+              meetingId: meeting.id,
+              hostName: meeting.host_name,
+              hostId: meeting.host_id,
+              screen: 'Meeting',
+            },
+            channelId: 'chat',
+          });
+        } else {
+          await notifyApi.showLocalNotification({
+            title: 'Live эхэллээ',
+            body: `${meeting.host_name || 'Ажилтан'} live хийж эхэллээ — Пост цэсээр үзнэ үү`,
+            data: {
+              type: 'live',
+              kind: 'live',
+              meetingId: meeting.id,
+              hostName: meeting.host_name,
+              hostId: meeting.host_id,
+              screen: 'Feed',
+            },
+            channelId: 'chat',
+          });
+        }
+      })
       .subscribe();
 
     receivedSub.current = Notifications.addNotificationReceivedListener(async (notification) => {

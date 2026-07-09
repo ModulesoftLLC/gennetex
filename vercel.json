@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "echo \"Static admin dashboard — no npm install\"",
-  "buildCommand": "",
-  "outputDirectory": "admin-web",
-  "framework": null
+  "installCommand": "echo \"Static site — no npm install\"",
+  "buildCommand": "node scripts/build-web.js",
+  "outputDirectory": "dist-web",
+  "framework": null,
+  "cleanUrls": true
 }

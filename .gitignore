@@ -1,6 +1,7 @@
 node_modules/
 .expo/
 dist/
+dist-web/
 web-build/
 npm-debug.*
 *.jks
@@ -11,4 +12,6 @@ npm-debug.*
 *.orig.*
 .DS_Store
 .env
+fcm-service-account.json
+.cursor/
 .aider*

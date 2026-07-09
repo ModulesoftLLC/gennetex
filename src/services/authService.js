@@ -143,6 +143,12 @@ export async function adminUpdateEmployee(userId, patch) {
     }
     clean.role = nextRole;
   }
+  if (patch.can_take_calls !== undefined) {
+    if (!isSuperAdmin(viewerRole)) {
+      throw new Error('Дуудлагаар явах эрхийг зөвхөн системийн админ өгнө.');
+    }
+    clean.can_take_calls = !!patch.can_take_calls;
+  }
   const { data, error } = await supabase
     .from('profiles')
     .update(clean)

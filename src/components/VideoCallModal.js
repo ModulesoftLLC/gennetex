@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
-import { colors, spacing } from '../theme';
+import { spacing } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 
 // Нэвтрэлт (Google sign-in) шаарддаггүй нээлттэй Jitsi сервер.
 // meet.jit.si нь өрөө үүсгэхэд Google auth шаарддаг болсон тул ашиглахгүй.
@@ -67,6 +68,8 @@ function buildHtml(room, name) {
 }
 
 export default function VideoCallModal({ visible, room, name, onClose }) {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -109,7 +112,7 @@ export default function VideoCallModal({ visible, room, name, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000'},
   topBar: {
     flexDirection: 'row',

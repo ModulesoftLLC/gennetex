@@ -21,12 +21,15 @@ import {
   HeaderButton,
   EmptyState,
 } from '../components/ui';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import * as vehicleApi from '../services/vehicleService';
 
 const EMPTY = { code: '', plate_number: '', liters_per_100km: '12', driver_name: '', driver_id: ''};
 
 export default function VehiclesAdminScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const { isAdmin, isCloud, fetchEmployees } = useApp();
   const [list, setList] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -320,7 +323,7 @@ function eventMeta(event) {
   }
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   plateBox: {

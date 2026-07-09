@@ -12,7 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, Card } from '../components/ui';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import * as shiftApi from '../services/shiftService';
 import { dayKey, formatDuration, calculateDayWork } from '../lib/workHours';
 import {
@@ -37,6 +38,8 @@ function formatDayLabel(dateKey) {
 }
 
 export default function MyShiftScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const { currentUser, isCloud } = useApp();
   const [loading, setLoading] = useState(true);
   const [todayShift, setTodayShift] = useState(null);
@@ -263,7 +266,7 @@ export default function MyShiftScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   scroll: { padding: spacing.lg, paddingBottom: 110 },
   blockTitle: { color: colors.text, fontSize: 16, fontWeight: '800', marginBottom: spacing.sm },

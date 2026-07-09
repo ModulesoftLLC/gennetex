@@ -10,9 +10,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { Button, Field } from '../components/ui';
-import { colors, spacing, radius, shadow } from '../theme';
+import { spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
 
 export default function ChangePasswordScreen() {
+  const styles = useStyles(makeStyles);
   const { changePassword, signOut, currentUser } = useApp();
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -93,7 +95,7 @@ export default function ChangePasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   bg: { flex: 1, backgroundColor: colors.bgAlt },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   card: {

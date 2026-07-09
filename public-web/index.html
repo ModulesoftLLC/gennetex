@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gennetex — Технологийн шийдэл</title>
+  <meta name="description" content="Gennetex — сүлжээ, шилэн кабель, аюулгүй байдал, IT дэд бүтцийн иж бүрэн шийдэл."/>
+  <link rel="icon" href="logo.png"/>
+  <style>
+    :root{
+      --bg:#0b1220;--bg2:#0f1a30;--card:#12203a;--line:#1e2f4d;
+      --text:#eaf1ff;--muted:#9fb2d0;--primary:#4f8cff;--primary2:#6aa4ff;--accent:#22d3ee;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+    /* Header */
+    header{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+    .nav{display:flex;align-items:center;justify-content:space-between;height:66px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.3px}
+    .brand img{height:34px}
+    .menu{display:flex;gap:26px;align-items:center}
+    .menu a{color:var(--muted);font-weight:600;font-size:14px;transition:color .15s}
+    .menu a:hover{color:var(--text)}
+    .btn{display:inline-block;background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;font-weight:700;padding:11px 20px;border-radius:12px;font-size:14px;border:none;cursor:pointer;transition:transform .12s,opacity .15s}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+    @media(max-width:760px){.menu a:not(.btn){display:none}}
+    /* Hero */
+    .hero{position:relative;overflow:hidden;padding:90px 0 80px}
+    .hero:before{content:"";position:absolute;inset:0;background:
+      radial-gradient(600px 300px at 80% -10%,rgba(79,140,255,.25),transparent),
+      radial-gradient(500px 300px at 0% 20%,rgba(34,211,238,.14),transparent)}
+    .hero .wrap{position:relative}
+    .tag{display:inline-block;background:rgba(79,140,255,.14);border:1px solid rgba(79,140,255,.35);color:var(--primary2);font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;letter-spacing:.5px}
+    h1{font-size:clamp(32px,5vw,54px);line-height:1.08;margin:18px 0 16px;font-weight:800;letter-spacing:-1px}
+    h1 span{background:linear-gradient(120deg,var(--primary2),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lead{color:var(--muted);font-size:18px;max-width:640px;margin-bottom:30px}
+    .hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+    /* Sections */
+    section{padding:72px 0}
+    .sec-tag{color:var(--accent);font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase}
+    h2{font-size:clamp(26px,3.4vw,38px);margin:10px 0 14px;font-weight:800;letter-spacing:-.5px}
+    .sec-lead{color:var(--muted);max-width:620px;font-size:16px}
+    .grid{display:grid;gap:20px;margin-top:40px}
+    .g3{grid-template-columns:repeat(3,1fr)}
+    .g2{grid-template-columns:1.1fr .9fr}
+    @media(max-width:860px){.g3{grid-template-columns:1fr}.g2{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;transition:transform .15s,border-color .15s}
+    .card:hover{transform:translateY(-3px);border-color:rgba(79,140,255,.5)}
+    .card .ic{width:48px;height:48px;border-radius:13px;background:rgba(79,140,255,.15);display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:24px}
+    .card h3{margin:0 0 8px;font-size:19px}
+    .card p{margin:0;color:var(--muted);font-size:14.5px}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:44px}
+    @media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;text-align:center}
+    .stat .v{font-size:34px;font-weight:800;color:var(--primary2)}
+    .stat .l{color:var(--muted);font-size:13px;margin-top:4px}
+    /* Careers / form */
+    #careers{background:linear-gradient(180deg,transparent,rgba(18,32,58,.5))}
+    .form-card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px}
+    .field{margin-bottom:16px}
+    label{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:7px}
+    input,textarea,select{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;color:var(--text);font-size:15px;font-family:inherit;transition:border-color .15s}
+    input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary)}
+    textarea{min-height:110px;resize:vertical}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media(max-width:560px){.row2{grid-template-columns:1fr}}
+    .form-msg{margin-top:14px;padding:12px 14px;border-radius:12px;font-size:14px;display:none}
+    .form-msg.ok{display:block;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.4);color:#86efac}
+    .form-msg.err{display:block;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fca5a5}
+    /* Contact */
+    .contact-list{list-style:none;padding:0;margin:24px 0 0}
+    .contact-list li{display:flex;gap:12px;align-items:center;margin-bottom:14px;color:var(--muted)}
+    .contact-list b{color:var(--text)}
+    footer{border-top:1px solid var(--line);padding:34px 0;color:var(--muted);font-size:13px}
+    .foot-row{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand"><img src="logo.png" alt="Gennetex"/> Gennetex</div>
+      <nav class="menu">
+        <a href="#about">Бидний тухай</a>
+        <a href="#services">Үйлчилгээ</a>
+        <a href="#careers">Ажлын байр</a>
+        <a href="#contact">Холбоо барих</a>
+        <a class="btn" href="#careers">Ажилд орох</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="wrap">
+      <span class="tag">ТЕХНОЛОГИЙН ИЖ БҮРЭН ШИЙДЭЛ</span>
+      <h1>Танай бизнесийн <span>дижитал дэд бүтэц</span>-ийг бид бүтээнэ</h1>
+      <p class="lead">Gennetex нь сүлжээ, шилэн кабель, аюулгүй байдлын систем болон IT дэд бүтцийн найдвартай шийдлийг санал болгодог инженерингийн компани юм.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#services">Үйлчилгээ үзэх</a>
+        <a class="btn btn-ghost" href="#careers">Манай багт нэгдэх</a>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="v">10+</div><div class="l">Жилийн туршлага</div></div>
+        <div class="stat"><div class="v">500+</div><div class="l">Хэрэгжүүлсэн төсөл</div></div>
+        <div class="stat"><div class="v">50+</div><div class="l">Мэргэжлийн инженер</div></div>
+        <div class="stat"><div class="v">24/7</div><div class="l">Техник дэмжлэг</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About -->
+  <section id="about">
+    <div class="wrap">
+      <div class="sec-tag">Бидний тухай</div>
+      <h2>Найдвартай технологийн түнш</h2>
+      <p class="sec-lead">Бид орчин үеийн технологи, туршлагатай инженерүүдийн багаараа дамжуулан байгууллагуудын дижитал шилжилтийг дэмжиж, тасралтгүй, аюулгүй үйл ажиллагааг хангадаг.</p>
+      <div class="grid g3">
+        <div class="card"><div class="ic">🎯</div><h3>Эрхэм зорилго</h3><p>Чанартай, найдвартай технологийн шийдлээр харилцагчдынхаа өсөлтөд хувь нэмэр оруулах.</p></div>
+        <div class="card"><div class="ic">💡</div><h3>Мэргэжлийн баг</h3><p>Гэрчилгээжсэн, тасралтгүй хөгжиж буй инженерүүдийн туршлагатай хамт олон.</p></div>
+        <div class="card"><div class="ic">🤝</div><h3>Хариуцлага</h3><p>Төслийн эхнээс дуустал, дараах засвар үйлчилгээ хүртэл бүрэн хариуцлага.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section id="services">
+    <div class="wrap">
+      <div class="sec-tag">Үйлчилгээ</div>
+      <h2>Бидний санал болгодог шийдлүүд</h2>
+      <div class="grid g3">
+        <div class="card"><div class="ic">🌐</div><h3>Сүлжээний шийдэл</h3><p>LAN/WAN, өгөгдлийн төв, wireless сүлжээний зураг төсөл, суурилуулалт.</p></div>
+        <div class="card"><div class="ic">🔌</div><h3>Шилэн кабель</h3><p>Fiber optic татах, гагнах, хэмжилт, терминаци болон бүрэн шинжилгээ.</p></div>
+        <div class="card"><div class="ic">📹</div><h3>Хяналтын систем</h3><p>CCTV, хяналт-камер, хандалт удирдлагын иж бүрэн систем.</p></div>
+        <div class="card"><div class="ic">🛡️</div><h3>Аюулгүй байдал</h3><p>Гал хамгаалалт, дохиолол, мэдээллийн аюулгүй байдлын шийдэл.</p></div>
+        <div class="card"><div class="ic">🖥️</div><h3>IT дэд бүтэц</h3><p>Сервер, өгөгдлийн төв, виртуалчлал, дэд бүтцийн зөвлөгөө.</p></div>
+        <div class="card"><div class="ic">🔧</div><h3>Техник үйлчилгээ</h3><p>24/7 хяналт, урьдчилан сэргийлэх засвар, шуурхай дэмжлэг.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Careers -->
+  <section id="careers">
+    <div class="wrap">
+      <div class="grid g2">
+        <div>
+          <div class="sec-tag">Ажлын байр</div>
+          <h2>Манай багт нэгдээрэй</h2>
+          <p class="sec-lead">Технологид дуртай, хөгжихийг эрмэлздэг хүмүүсийг бид урьж байна. Доорх анкетыг бөглөснөөр таны хүсэлт шууд манай хүний нөөцийн багт очно.</p>
+          <ul class="contact-list">
+            <li>✅ <b>Мэргэжлийн хөгжил</b> — тасралтгүй сургалт, гэрчилгээ</li>
+            <li>✅ <b>Тогтвортой орлого</b> — өрсөлдөхүйц цалин, урамшуулал</li>
+            <li>✅ <b>Найрсаг хамт олон</b> — дэмжлэгтэй ажлын орчин</li>
+          </ul>
+        </div>
+        <div class="form-card">
+          <form id="applyForm">
+            <div class="row2">
+              <div class="field"><label>Нэр *</label><input name="name" required placeholder="Таны нэр"/></div>
+              <div class="field"><label>Овог</label><input name="last_name" placeholder="Овог"/></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>Утас</label><input name="phone" placeholder="99xxxxxx"/></div>
+              <div class="field"><label>Имэйл</label><input name="email" type="email" placeholder="name@email.com"/></div>
+            </div>
+            <div class="field"><label>Хүсэж буй албан тушаал</label><input name="position" placeholder="Сүлжээний инженер"/></div>
+            <div class="field"><label>CV холбоос (заавал биш)</label><input name="cv_url" placeholder="Google Drive / линк"/></div>
+            <div class="field"><label>Танилцуулга / нэмэлт мэдээлэл</label><textarea name="message" placeholder="Өөрийнхөө тухай товч бичнэ үү"></textarea></div>
+            <button class="btn" type="submit" id="applyBtn" style="width:100%;padding:14px">Анкет илгээх</button>
+            <div class="form-msg" id="applyMsg"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="sec-tag">Холбоо барих</div>
+      <h2>Бидэнтэй холбогдоорой</h2>
+      <div class="grid g2">
+        <ul class="contact-list">
+          <li>📍 <b>Хаяг:</b> Улаанбаатар хот, Монгол улс</li>
+          <li>📞 <b>Утас:</b> <a href="tel:+97600000000">+976 0000-0000</a></li>
+          <li>✉️ <b>Имэйл:</b> <a href="mailto:info@adiya.site">info@adiya.site</a></li>
+          <li>🌐 <b>Вэб:</b> adiya.site</li>
+        </ul>
+        <div class="card">
+          <h3>Ажлын цаг</h3>
+          <p>Даваа – Баасан: 09:00 – 18:00<br/>Бямба: 10:00 – 14:00<br/>Ням: Амарна</p>
+          <p style="margin-top:14px">Яаралтай техник дэмжлэг 24/7 ажиллана.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap foot-row">
+      <div class="brand" style="font-size:16px"><img src="logo.png" style="height:26px"/> Gennetex</div>
+      <div>© <span id="yr"></span> Gennetex. Бүх эрх хуулиар хамгаалагдсан.</div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    document.getElementById('yr').textContent=new Date().getFullYear();
+    const SUPABASE_URL='https://xhxyrzzgmksjlibfrmlx.supabase.co';
+    const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeHlyenpnbWtzamxpYmZybWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODEwMjYsImV4cCI6MjA5ODQ1NzAyNn0.nYWs_N09RLHvhmEUCdbS6M8yvthsKJ5TkXjdRv4VMag';
+    const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false}});
+    const form=document.getElementById('applyForm');
+    const msg=document.getElementById('applyMsg');
+    const btn=document.getElementById('applyBtn');
+    form.addEventListener('submit',async(e)=>{
+      e.preventDefault();
+      msg.className='form-msg';msg.textContent='';
+      const f=new FormData(form);
+      const name=(f.get('name')||'').trim();
+      if(!name){msg.className='form-msg err';msg.textContent='Нэрээ бичнэ үү.';return;}
+      btn.disabled=true;btn.textContent='Илгээж байна...';
+      const row={
+        name,
+        last_name:(f.get('last_name')||'').trim()||null,
+        phone:(f.get('phone')||'').trim()||null,
+        email:(f.get('email')||'').trim()||null,
+        position:(f.get('position')||'').trim()||null,
+        cv_url:(f.get('cv_url')||'').trim()||null,
+        message:(f.get('message')||'').trim()||null,
+        source:'web',status:'new'
+      };
+      const {error}=await sb.from('job_applications').insert(row);
+      btn.disabled=false;btn.textContent='Анкет илгээх';
+      if(error){
+        msg.className='form-msg err';
+        msg.textContent='Алдаа гарлаа. Дахин оролдоно уу. ('+error.message+')';
+      }else{
+        form.reset();
+        msg.className='form-msg ok';
+        msg.textContent='Таны анкет амжилттай илгээгдлээ. Бид тун удахгүй холбогдоно.';
+      }
+    });
+  </script>
+</body>
+</html>

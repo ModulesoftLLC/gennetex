@@ -9,22 +9,30 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { colors, radius, spacing, shadow, gradients } from '../theme';
+import { radius, spacing } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 export function Card({ children, style, elevated = true, borderless = false }) {
+  const { colors, shadow } = useTheme();
   return (
-    <View style={[styles.card, borderless && styles.cardBorderless, elevated && shadow.sm, style]}>
+    <View
+      style={[
+        {
+          backgroundColor: colors.surface,
+          borderRadius: radius.lg,
+          padding: spacing.lg,
+          marginBottom: spacing.md,
+          borderWidth: 1,
+          borderColor: borderless ? 'transparent' : colors.border,
+        },
+        elevated && shadow.sm,
+        style,
+      ]}
+    >
       {children}
     </View>
   );
 }
-
-const GRADIENT_MAP = {
-  primary: gradients.primary,
-  success: gradients.success,
-  danger: gradients.danger,
-  warning: gradients.warning,
-};
 
 export function Button({
   title,
@@ -35,11 +43,18 @@ export function Button({
   style,
   disabled,
 }) {
+  const { colors, gradients, shadow } = useTheme();
+  const GRADIENT_MAP = {
+    primary: gradients.primary,
+    success: gradients.success,
+    danger: gradients.danger,
+    warning: gradients.warning,
+  };
   const grad = GRADIENT_MAP[variant];
   const sizeStyle = size === 'sm' ? styles.btnSm : size === 'lg' ? styles.btnLg : styles.btnMd;
   const textSize = size === 'sm' ? 13 : size === 'lg' ? 17 : 15;
-  // Градиент товчинд цагаан, ghost/идэвхгүйд бол theme өнгө
-  const fg = grad && !disabled ? '#fff' : disabled ? colors.textFaint : colors.primary;
+  // Градиент товч дээр контраст текст; ghost дээр primary
+  const fg = grad && !disabled ? colors.onPrimaryContainer : disabled ? colors.textFaint : colors.primary;
 
   const content = (
     <View style={styles.btnRow}>
@@ -55,7 +70,7 @@ export function Button({
           colors={grad}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={[styles.btn, sizeStyle, shadow.sm]}
+          style={[styles.btn, sizeStyle, shadow.glow]}
         >
           {content}
         </LinearGradient>
@@ -68,8 +83,12 @@ export function Button({
       style={[
         styles.btn,
         sizeStyle,
-        { backgroundColor: disabled ? colors.surfaceAlt : colors.surfaceHi },
-        variant === 'ghost'&& styles.btnGhost,
+        { backgroundColor: disabled ? colors.surfaceAlt : colors.surfaceContainerHigh },
+        variant === 'ghost' && {
+          backgroundColor: 'transparent',
+          borderWidth: 1,
+          borderColor: colors.outlineVariant,
+        },
         style,
       ]}
       onPress={disabled ? undefined : onPress}
@@ -81,19 +100,23 @@ export function Button({
 }
 
 export function Field({ label, style, variant, labelStyle, inputStyle, ...props }) {
+  const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
-  const isGlass = variant === 'glass';
   return (
     <View style={[{ marginBottom: spacing.md }, style]}>
       {label ? (
-        <Text style={[styles.label, isGlass && styles.labelGlass, labelStyle]}>{label}</Text>
+        <Text style={[styles.label, { color: colors.textMuted }, labelStyle]}>{label}</Text>
       ) : null}
       <TextInput
-        placeholderTextColor={isGlass ? 'rgba(255,255,255,0.45)' : colors.textFaint}
+        placeholderTextColor={colors.textFaint}
         style={[
           styles.input,
-          isGlass && styles.inputGlass,
-          focused && (isGlass ? styles.inputGlassFocused : styles.inputFocused),
+          {
+            backgroundColor: colors.surfaceContainerLow,
+            borderColor: focused ? colors.primaryContainer : colors.outlineVariant,
+            color: colors.text,
+          },
+          focused && { borderWidth: 1.5 },
           inputStyle,
         ]}
         onFocus={() => setFocused(true)}
@@ -104,37 +127,49 @@ export function Field({ label, style, variant, labelStyle, inputStyle, ...props 
   );
 }
 
-export function Badge({ text, color = colors.primary }) {
+export function Badge({ text, color }) {
+  const { colors } = useTheme();
+  const c = color || colors.primaryContainer;
   return (
-    <View style={[styles.badge, { backgroundColor: color + '22', borderColor: color + '66'}]}>
-      <View style={[styles.dot, { backgroundColor: color }]} />
-      <Text style={[styles.badgeText, { color }]}>{text}</Text>
+    <View style={[styles.badge, { backgroundColor: c + '22', borderColor: c + '66' }]}>
+      <View style={[styles.dot, { backgroundColor: c }]} />
+      <Text style={[styles.badgeText, { color: c }]}>{text}</Text>
     </View>
   );
 }
 
-// Градиент толгой — цагаан цэвэрхэн
+// Blur толгой — Synthetic Horizon
 export function ScreenHeader({ title, subtitle, right, icon, back }) {
   const navigation = useNavigation();
+  const { colors } = useTheme();
   const showBack = back === undefined ? navigation.canGoBack() : back;
   return (
-    <View style={styles.header}>
+    <View
+      style={[
+        styles.header,
+        { backgroundColor: colors.surfaceDim, borderBottomColor: colors.outlineVariant + '55' },
+      ]}
+    >
       <SafeAreaView edges={['top']}>
         <View style={styles.headerRow}>
           <View style={[styles.headerLeft, { flex: 1, minWidth: 0 }]}>
             {showBack ? (
-              <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} hitSlop={8}>
-                <Text style={styles.backIcon}>‹</Text>
+              <TouchableOpacity
+                style={[styles.backBtn, { backgroundColor: colors.surfaceContainerHigh, borderColor: colors.outlineVariant }]}
+                onPress={() => navigation.goBack()}
+                hitSlop={8}
+              >
+                <Text style={[styles.backIcon, { color: colors.text }]}>‹</Text>
               </TouchableOpacity>
             ) : icon ? (
               <Text style={styles.headerIcon}>{icon}</Text>
             ) : null}
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={styles.headerTitle} numberOfLines={2}>
+              <Text style={[styles.headerTitle, { color: colors.onSurface }]} numberOfLines={2}>
                 {title}
               </Text>
               {subtitle ? (
-                <Text style={styles.headerSub} numberOfLines={1}>
+                <Text style={[styles.headerSub, { color: colors.textMuted }]} numberOfLines={1}>
                   {subtitle}
                 </Text>
               ) : null}
@@ -147,37 +182,51 @@ export function ScreenHeader({ title, subtitle, right, icon, back }) {
   );
 }
 
-export function StatCard({ label, value, color = colors.primary, icon }) {
+export function StatCard({ label, value, color, icon }) {
+  const { colors, shadow } = useTheme();
+  const c = color || colors.primaryContainer;
   return (
-    <View style={[styles.statCard, shadow.sm]}>
+    <View
+      style={[
+        styles.statCard,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+        shadow.sm,
+      ]}
+    >
       {icon ? <Text style={styles.statIcon}>{icon}</Text> : null}
-      <Text style={[styles.statValue, { color }]} numberOfLines={1}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statValue, { color: c }]} numberOfLines={1}>{value}</Text>
+      <Text style={[styles.statLabel, { color: colors.textMuted }]}>{label}</Text>
     </View>
   );
 }
 
 export function SectionTitle({ children, style }) {
-  return <Text style={[styles.sectionTitle, style]}>{children}</Text>;
+  const { colors } = useTheme();
+  return <Text style={[styles.sectionTitle, { color: colors.text }, style]}>{children}</Text>;
 }
 
 export function EmptyState({ text }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.empty}>
-      <View style={styles.emptyIconWrap}>
-        <Text style={styles.emptyIconDot}>·</Text>
+      <View style={[styles.emptyIconWrap, { backgroundColor: colors.surfaceAlt }]}>
+        <Text style={[styles.emptyIconDot, { color: colors.textFaint }]}>·</Text>
       </View>
-      <Text style={styles.emptyText}>{text}</Text>
+      <Text style={[styles.emptyText, { color: colors.textMuted }]}>{text}</Text>
     </View>
   );
 }
 
-// Хөвөгч дугуй товч (толгой дээрх)
 export function HeaderButton({ title, icon, onPress }) {
+  const { colors } = useTheme();
   return (
-    <TouchableOpacity style={styles.headerBtn} onPress={onPress} activeOpacity={0.8}>
-      {icon ? <Text style={styles.headerBtnIcon}>{icon}</Text> : null}
-      {title ? <Text style={styles.headerBtnText}>{title}</Text> : null}
+    <TouchableOpacity
+      style={[styles.headerBtn, { backgroundColor: colors.primarySoft, borderColor: colors.primaryContainer + '40' }]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      {icon ? <Text style={[styles.headerBtnIcon, { color: colors.primary }]}>{icon}</Text> : null}
+      {title ? <Text style={[styles.headerBtnText, { color: colors.primary }]}>{title}</Text> : null}
     </TouchableOpacity>
   );
 }
@@ -188,18 +237,6 @@ export function formatMNT(value) {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  cardBorderless: {
-    borderWidth: 0,
-    backgroundColor: colors.surface,
-  },
   btn: {
     borderRadius: radius.pill,
     alignItems: 'center',
@@ -208,42 +245,20 @@ const styles = StyleSheet.create({
   btnSm: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md },
   btnMd: { paddingVertical: spacing.md, paddingHorizontal: spacing.lg },
   btnLg: { paddingVertical: spacing.lg, paddingHorizontal: spacing.xl },
-  btnGhost: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.borderHi,
-  },
   btnRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  btnIcon: { color: '#fff'},
-  btnText: { color: '#fff', fontWeight: '700'},
+  btnIcon: {},
+  btnText: { fontWeight: '700' },
   label: {
-    color: colors.textMuted,
     marginBottom: spacing.xs,
     fontSize: 13,
     fontWeight: '600',
   },
   input: {
-    backgroundColor: colors.bgAlt,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    color: colors.text,
     borderWidth: 1,
-    borderColor: colors.border,
     fontSize: 15,
-  },
-  inputFocused: {
-    borderColor: colors.primary,
-    backgroundColor: colors.bg,
-  },
-  labelGlass: { color: 'rgba(255,255,255,0.85)'},
-  inputGlass: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderWidth: 0,
-    color: '#fff',
-  },
-  inputGlassFocused: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
   },
   badge: {
     flexDirection: 'row',
@@ -256,13 +271,11 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   dot: { width: 6, height: 6, borderRadius: 3 },
-  badgeText: { fontSize: 12, fontWeight: '700'},
+  badgeText: { fontSize: 12, fontWeight: '700' },
   header: {
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
-    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   headerRow: {
     flexDirection: 'row',
@@ -277,29 +290,24 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: colors.bgAlt,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
   },
-  backIcon: { color: colors.text, fontSize: 28, fontWeight: '800', marginTop: -4 },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: colors.text, letterSpacing: -0.3 },
-  headerSub: { fontSize: 13, color: colors.textMuted, marginTop: 2, fontWeight: '500'},
+  backIcon: { fontSize: 28, fontWeight: '800', marginTop: -4 },
+  headerTitle: { fontSize: 22, fontWeight: '800', letterSpacing: -0.3 },
+  headerSub: { fontSize: 13, marginTop: 2, fontWeight: '500' },
   statCard: {
     flex: 1,
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.border,
     alignItems: 'center',
   },
   statIcon: { fontSize: 22, marginBottom: 4 },
-  statValue: { fontSize: 20, fontWeight: '900'},
-  statLabel: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+  statValue: { fontSize: 20, fontWeight: '900' },
+  statLabel: { fontSize: 12, marginTop: 2 },
   sectionTitle: {
-    color: colors.text,
     fontSize: 16,
     fontWeight: '800',
     marginBottom: spacing.md,
@@ -309,24 +317,21 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
   },
-  emptyIconDot: { color: colors.textFaint, fontSize: 36, lineHeight: 40, fontWeight: '300'},
-  emptyText: { color: colors.textMuted, textAlign: 'center', fontSize: 14 },
+  emptyIconDot: { fontSize: 36, lineHeight: 40, fontWeight: '300' },
+  emptyText: { textAlign: 'center', fontSize: 14 },
   headerBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    backgroundColor: colors.primarySoft,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors.border,
   },
   headerBtnIcon: { fontSize: 15 },
-  headerBtnText: { color: colors.primary, fontWeight: '700', fontSize: 14 },
+  headerBtnText: { fontWeight: '700', fontSize: 14 },
 });

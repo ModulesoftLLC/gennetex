@@ -1,7 +1,31 @@
+import * as FileSystem from 'expo-file-system/legacy';
+import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
 import { MOVEMENT_TYPES, computeBalances, movementDelta } from '../lib/stockBalance';
 
 const TABLE = 'inventory';
+const BUCKET = 'inventory';
+
+async function uploadImage(uri, folder) {
+  const base64 = await FileSystem.readAsStringAsync(uri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, decode(base64), { contentType: 'image/jpeg', upsert: true });
+  if (error) throw error;
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export async function uploadInventoryImage(uri) {
+  return uploadImage(uri, 'items');
+}
+
+export async function uploadMovementPhoto(uri) {
+  return uploadImage(uri, 'movements');
+}
 
 export async function fetchInventory() {
   const { data, error } = await supabase
@@ -33,6 +57,7 @@ export async function insertInventory(item) {
       quantity: item.quantity,
       price: item.price,
       barcode: item.barcode || null,
+      image_url: item.image_url || null,
       category: item.category || 'material',
     })
     .select()
@@ -58,7 +83,7 @@ export async function deleteInventory(id) {
 }
 
 // Бараа олгох: тоо хасаад олголтын лог үүсгэнэ
-export async function withdrawInventory({ item, userId, userName, qty }) {
+export async function withdrawInventory({ item, userId, userName, qty, photoUrl }) {
   const newQty = Math.max(0, (Number(item.quantity) || 0) - qty);
   await updateInventory(item.id, { quantity: newQty });
   const { error } = await supabase.from('stock_movements').insert({
@@ -69,6 +94,7 @@ export async function withdrawInventory({ item, userId, userName, qty }) {
     user_name: userName,
     quantity: qty,
     movement_type: MOVEMENT_TYPES.WITHDRAW,
+    photo_url: photoUrl || null,
   });
   if (error) throw error;
   return newQty;

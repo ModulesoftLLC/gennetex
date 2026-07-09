@@ -14,13 +14,14 @@ import { useApp } from '../context/AppContext';
 import { ScreenHeader, Button, Card } from '../components/ui';
 import SignaturePad from '../components/SignaturePad';
 import NavIcon from '../components/NavIcon';
-import { colors, spacing, radius, shadow } from '../theme';
+import { colors as palette, spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
 import * as reportApi from '../services/reportService';
 
 const TYPES = [
-  { key: 'material', icon: 'inventory', color: colors.primary },
+  { key: 'material', icon: 'inventory', color: palette.primary },
   { key: 'tool', icon: 'tools', color: '#ea580c'},
-  { key: 'vehicle', icon: 'vehicle', color: colors.warning },
+  { key: 'vehicle', icon: 'vehicle', color: palette.warning },
 ];
 
 function previewLines(report) {
@@ -41,6 +42,7 @@ function previewLines(report) {
 }
 
 export default function EmployeeReportScreen() {
+  const styles = useStyles(makeStyles);
   const { authProfile, currentUser, isCloud, updateMyProfile } = useApp();
   const [preview, setPreview] = useState(null);
   const [loadingType, setLoadingType] = useState(null);
@@ -234,7 +236,7 @@ export default function EmployeeReportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bgAlt },
   body: { padding: spacing.lg, paddingBottom: 40 },
   logoWrap: { alignItems: 'center', marginBottom: spacing.lg },

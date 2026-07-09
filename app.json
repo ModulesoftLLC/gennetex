@@ -3,7 +3,7 @@
     "name": "Gennetex ERP",
     "slug": "gennetex-erp",
     "scheme": "gennetex-erp",
-    "version": "0.2.0",
+    "version": "0.4.8",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/logo.png",
@@ -90,7 +90,9 @@
           "icon": "./assets/logo.png",
           "color": "#3b82f6",
           "defaultChannel": "chat",
-          "sounds": []
+          "sounds": [
+            "./assets/sounds/incoming-call.wav"
+          ]
         }
       ],
       [

@@ -4,6 +4,8 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { supabase } from '../lib/supabase';
 
+export const CALLS_CHANNEL = 'calls';
+
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {
     const type = notification.request.content.data?.type;
@@ -17,7 +19,7 @@ Notifications.setNotificationHandler({
   },
 });
 
-async function ensureChannels() {
+export async function ensureChannels() {
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync('chat', {
     name: 'Чат мессеж',
@@ -29,9 +31,15 @@ async function ensureChannels() {
     name: 'Видео дуудлага',
     importance: Notifications.AndroidImportance.MAX,
     vibrationPattern: [0, 800, 400, 800, 400, 800],
-    sound: 'default',
+    sound: 'incoming-call.wav',
     bypassDnd: true,
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  });
+  await Notifications.setNotificationChannelAsync('feed', {
+    name: 'Пост / сэтгэгдэл',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 200, 120, 200],
+    sound: 'default',
   });
 }
 
@@ -97,6 +105,12 @@ async function fetchAdminTokens() {
   return fetchTokensForUsers(admins.map((a) => a.id));
 }
 
+async function fetchSuperadminTokens() {
+  const { data: admins } = await supabase.from('profiles').select('id').eq('role', 'superadmin');
+  if (!admins?.length) return [];
+  return fetchTokensForUsers(admins.map((a) => a.id));
+}
+
 async function sendExpoPush(messages) {
   if (!messages?.length) return;
   for (let i = 0; i < messages.length; i += 100) {
@@ -113,14 +127,14 @@ async function sendExpoPush(messages) {
   }
 }
 
-async function notifyTokens(tokens, { title, body, data, channelId, priority }) {
+async function notifyTokens(tokens, { title, body, data, channelId, priority, sound }) {
   if (!tokens.length) return;
   await sendExpoPush(
     tokens.map((to) => ({
       to,
       title,
       body,
-      sound: 'default',
+      sound: sound || 'default',
       priority: priority || 'high',
       channelId: channelId || 'chat',
       data: data || {},
@@ -156,6 +170,77 @@ export async function notifyAdmins(payload) {
   } catch (e) {}
 }
 
+export async function notifySuperadmins(payload) {
+  try {
+    const tokens = await fetchSuperadminTokens();
+    await notifyTokens(tokens, { channelId: 'chat', ...payload });
+  } catch (e) {}
+}
+
+/** Ажилд орох шинэ анкет — админд */
+export async function notifyApplicationToAdmins({ name, position, phone, applicationId }) {
+  const details = [position, phone].filter(Boolean).join(' · ');
+  await notifyAdmins({
+    title: 'Ажлын байрны шинэ анкет',
+    body: `${name || 'Нэр байхгүй'}${details ? ` · ${details}` : ''}`.slice(0, 200),
+    data: { type: 'job_application', applicationId: String(applicationId || '') },
+    channelId: 'chat',
+    priority: 'high',
+  });
+}
+
+/** Шинэ хөдөлмөрийн гэрээ — ажилтанд */
+export async function notifyContractToEmployee(employeeId, { employeeName, position, contractId }) {
+  if (!employeeId) return;
+  await notifyUsers([employeeId], {
+    title: 'Хөдөлмөрийн гэрээ ирлээ',
+    body: `${employeeName || 'Танд'} гэрээ бэлэн боллоо${position ? ` · ${position}` : ''}. Уншиж гарын үсэг зурна уу.`,
+    data: { type: 'job_contract', contractId: String(contractId || '') },
+    channelId: 'chat',
+    priority: 'high',
+  });
+}
+
+/** Гэрээнд гарын үсэг зурсан — админд */
+export async function notifyContractSignedToAdmins({ employeeName, contractId }) {
+  await notifyAdmins({
+    title: 'Гэрээнд гарын үсэг зурлаа',
+    body: `${employeeName || 'Ажилтан'} хөдөлмөрийн гэрээндээ гарын үсэг зурж баталгаажууллаа.`,
+    data: { type: 'job_contract_signed', contractId: String(contractId || '') },
+    channelId: 'chat',
+    priority: 'high',
+  });
+}
+
+/** Шинэ төхөөрөмжөөр нэвтрэх хүсэлт — зөвхөн системийн админд */
+export async function notifyDeviceRequestToSuperadmins({ userName, deviceModel, publicIp, localIp, mac, deviceId }) {
+  const info = [deviceModel, publicIp ? `IP: ${publicIp}` : null, mac ? `MAC: ${mac}` : null]
+    .filter(Boolean)
+    .join(' · ');
+  await notifySuperadmins({
+    title: 'Шинэ төхөөрөмжийн зөвшөөрөл',
+    body: `${userName || 'Ажилтан'} шинэ төхөөрөмжөөр нэвтрэхийг хүсэж байна. ${info}`.slice(0, 220),
+    data: { type: 'device_approval', deviceId: String(deviceId || '') },
+    channelId: 'chat',
+    priority: 'high',
+  });
+}
+
+/** Төхөөрөмжийн шийдвэр — хэрэглэгчид */
+export async function notifyDeviceDecisionToUser(userId, { status }) {
+  if (!userId) return;
+  const approved = status === 'approved';
+  await notifyUsers([userId], {
+    title: approved ? 'Төхөөрөмж зөвшөөрөгдлөө' : 'Төхөөрөмж татгалзагдлаа',
+    body: approved
+      ? 'Системийн админ таны төхөөрөмжийг зөвшөөрлөө. Апп руу орж болно.'
+      : 'Системийн админ таны шинэ төхөөрөмжөөр нэвтрэхийг татгалзлаа.',
+    data: { type: 'device_decision', status: String(status || '') },
+    channelId: 'chat',
+    priority: 'high',
+  });
+}
+
 // Чат мессеж — бусад гишүүдэд push
 export async function notifyChatMembers(conversationId, senderId, { senderName, content, attachmentType }) {
   const { data: members } = await supabase
@@ -181,12 +266,50 @@ export async function notifyChatMembers(conversationId, senderId, { senderName, 
   });
 }
 
+/** SLA хэтэрсэн — бүх инженерт яаралтай push */
+export async function notifySlaExceededToEngineers(engineerIds, call) {
+  const ids = [...new Set((engineerIds || []).filter(Boolean))];
+  if (!ids.length || !call?.id) return;
+
+  const kind = call.site_kind === 'baiguulga' ? 'Байгууллага' : 'Айл';
+  const who = call.engineer ? `Жолооч: ${call.engineer} · ` : '';
+  const where = [call.customer, call.address || call.problem].filter(Boolean).join(' · ');
+  const body = `${who}${kind}: ${where || 'Дуудлага'}`.trim();
+
+  await notifyUsers(ids, {
+    title: '⚠️ SLA хэтэрсэн — яаралтай очно уу!',
+    body,
+    data: {
+      type: 'service_call_sla',
+      callId: call.id,
+      siteKind: call.site_kind || 'ail',
+    },
+    channelId: CALLS_CHANNEL,
+    priority: 'high',
+  });
+}
+
+/** Инженерт шинэ үйлчилгээний дуудлага оноогдоход */
+export async function notifyServiceCallAssigned(engineerId, { engineerName, customer, problem, phone, siteKind, callId }) {
+  const name = engineerName || 'Ажилтан';
+  const kind = siteKind === 'baiguulga' ? 'Байгууллага' : 'Айл';
+  const details = [customer, problem, phone].filter(Boolean).join(' · ');
+  await notifyUsers([engineerId], {
+    title: `${name}, танд шинээр дуудлага ирлээ`,
+    body: details ? `${kind}: ${details}` : `${kind} дээрх шинэ дуудлага`,
+    data: { type: 'service_call', callId, siteKind: siteKind || 'ail' },
+    channelId: 'chat',
+    priority: 'high',
+  });
+}
+
 // Видео дуудлага — ringtone + TTS push
 export async function notifyIncomingCall(calleeId, { callerName, room, callId }) {
   const name = callerName || 'Ажилтан';
   await notifyUsers([calleeId], {
     title: `${name} залгаж байна`,
     body: 'Видео дуудлага — хариулахын тулд нээнэ үү',
+    sound: 'incoming-call.wav',
     data: { type: 'call', room, callId, callerName: name },
     channelId: 'calls',
     priority: 'high',
@@ -198,6 +321,17 @@ export async function notifyRemoteAttendance({ staffName, note }) {
     title: 'Зайнаас ирцийн хүсэлт',
     body: `${staffName || 'Ажилтан'}: ${note || 'Зөвшөөрөл хүлээж байна'}`,
     data: { type: 'attendance_pending'},
+  });
+}
+
+export async function notifyFeedbackToAdmins({ fromName, kind, preview, feedbackId, mentionedNames = [] }) {
+  const mention = mentionedNames.length ? ` · ${mentionedNames.join(', ')}` : '';
+  await notifyAdmins({
+    title: `Ажилтан ${fromName || '—'} ${kind || 'гомдол'} ирлээ`,
+    body: `${preview || ''}${mention}`.trim().slice(0, 200),
+    data: { type: 'employee_feedback', feedbackId: String(feedbackId || '') },
+    channelId: 'chat',
+    priority: 'high',
   });
 }
 

@@ -6,15 +6,17 @@ import { Button } from '../components/ui';
 import NavIcon from '../components/NavIcon';
 import { requestAllAppPermissions, markOnboardingComplete } from '../services/permissionsService';
 import { enablePushForUser } from '../services/notificationService';
-import { colors, spacing, radius, shadow } from '../theme';
+import { colors as palette, spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
 
 const ITEMS = [
-  { icon: 'chat', color: colors.primary, title: 'Мэдэгдэл', desc: 'Чат, ирц, дуудлагын мэдэгдэл хүлээн авах'},
-  { icon: 'location', color: colors.success, title: 'Байршил', desc: 'Ажлын байршил real-time хянах'},
+  { icon: 'chat', color: palette.primary, title: 'Мэдэгдэл', desc: 'Чат, ирц, дуудлагын мэдэгдэл хүлээн авах'},
+  { icon: 'location', color: palette.success, title: 'Байршил', desc: 'Ажлын байршил real-time хянах'},
   { icon: 'attendance', color: '#db2777', title: 'Камер', desc: 'Ирц бүртгэх, баркод унших'},
 ];
 
 export default function OnboardingPermissionsScreen({ onComplete }) {
+  const styles = useStyles(makeStyles);
   const { currentUser } = useApp();
   const [loading, setLoading] = useState(false);
 
@@ -81,7 +83,7 @@ export default function OnboardingPermissionsScreen({ onComplete }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   bg: { flex: 1, backgroundColor: colors.bgAlt },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   card: {

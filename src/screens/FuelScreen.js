@@ -12,11 +12,14 @@ import {
   EmptyState,
   formatMNT,
 } from '../components/ui';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import * as vehicleApi from '../services/vehicleService';
 import { formatIdle } from '../lib/fuelCalc';
 
 export default function FuelScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const {
     isAdmin,
     isCloud,
@@ -167,7 +170,7 @@ export default function FuelScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   statRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
   note: { color: colors.textMuted, fontSize: 13, lineHeight: 19, marginBottom: spacing.xs },

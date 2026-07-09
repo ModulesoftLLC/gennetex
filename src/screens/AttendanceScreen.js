@@ -32,10 +32,13 @@ import {
   isRestDay,
 } from '../lib/breakSchedule';
 import { distanceMeters } from '../lib/geo';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 
 export default function AttendanceScreen() {
   const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const { currentUser, isCloud, isAdmin, fetchEmployees } = useApp();
   const profile = currentUser;
   const [cameraVisible, setCameraVisible] = useState(false);
@@ -998,8 +1001,8 @@ export default function AttendanceScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
+const makeStyles = ({ colors }) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   heroCard: { marginTop: spacing.lg },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.lg },
   faceCircle: {

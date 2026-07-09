@@ -3,7 +3,8 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking } fr
 import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Card, ScreenHeader, EmptyState } from '../components/ui';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import { isOnline, formatLastSeen } from '../lib/online';
 
 function initials(name = '') {
@@ -13,6 +14,8 @@ function initials(name = '') {
 }
 
 export default function EmployeeDirectoryScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const { fetchEmployees, isCloud } = useApp();
   const [list, setList] = useState([]);
 
@@ -81,7 +84,7 @@ export default function EmployeeDirectoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   card: { marginBottom: spacing.md },
   row: { flexDirection: 'row', gap: spacing.md },

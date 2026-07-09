@@ -14,7 +14,7 @@ import * as fuelApi from '../services/fuelService';
 import * as serviceCallApi from '../services/serviceCallService';
 import { calculateFuel } from '../lib/fuelCalc';
 import { withoutSampleByName, withoutSampleCalls } from '../lib/sampleNames';
-import { isAdminRole, isSuperAdmin } from '../lib/roles';
+import { isAdminRole, isSuperAdmin, canTakeServiceCalls } from '../lib/roles';
 
 const AppContext = createContext(null);
 
@@ -280,7 +280,7 @@ export function AppProvider({ children }) {
   };
 
   // Бараа олгох (ажилтан авах) — тоо хасаж, лог үүсгэнэ
-  const withdrawItem = async (item, qty) => {
+  const withdrawItem = async (item, qty, photoUrl) => {
     const q = Math.max(1, Number(qty) || 0);
     const newQty = Math.max(0, item.quantity - q);
     setInventory((prev) => prev.map((it) => (it.id === item.id ? { ...it, quantity: newQty } : it)));
@@ -291,9 +291,31 @@ export function AppProvider({ children }) {
           userId: currentUser?.id,
           userName: currentUser?.name,
           qty: q,
+          photoUrl,
         });
       } catch (e) {
         setSyncError(e.message);
+      }
+    }
+    return newQty;
+  };
+
+  const giveItemToEmployee = async (item, employee, qty, photoUrl) => {
+    const q = Math.max(1, Number(qty) || 0);
+    const newQty = Math.max(0, item.quantity - q);
+    setInventory((prev) => prev.map((it) => (it.id === item.id ? { ...it, quantity: newQty } : it)));
+    if (isSupabaseConfigured) {
+      try {
+        await invApi.withdrawInventory({
+          item,
+          userId: employee.id,
+          userName: employee.name || employee.email || 'Ажилтан',
+          qty: q,
+          photoUrl,
+        });
+      } catch (e) {
+        setSyncError(e.message);
+        throw e;
       }
     }
     return newQty;
@@ -380,7 +402,7 @@ export function AppProvider({ children }) {
   // ---- Дуудлага (Supabase эсвэл локал) ----
   const refreshCalls = useCallback(async (profile = authProfile) => {
     if (!isSupabaseConfigured) return;
-    if (!profile || isAdminRole(profile.role)) {
+    if (!profile || !canTakeServiceCalls(profile)) {
       setCalls([]);
       return;
     }
@@ -393,18 +415,18 @@ export function AppProvider({ children }) {
     } catch (e) {
       setSyncError(e.message);
     }
-  }, [authProfile?.id, authProfile?.name, authProfile?.role]);
+  }, [authProfile?.id, authProfile?.name, authProfile?.role, authProfile?.can_take_calls]);
 
   useEffect(() => {
     if (!loaded || !isSupabaseConfigured || !authProfile) return;
     refreshCalls(authProfile);
-  }, [loaded, authProfile?.id, authProfile?.role]);
+  }, [loaded, authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !authProfile || isAdminRole(authProfile.role)) return;
+    if (!isSupabaseConfigured || !authProfile || !canTakeServiceCalls(authProfile)) return;
     const unsub = serviceCallApi.subscribeServiceCalls(() => refreshCalls(authProfile));
     return unsub;
-  }, [authProfile?.id, authProfile?.role]);
+  }, [authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
 
   const addCall = async (call) => {
     if (isSupabaseConfigured) {
@@ -430,6 +452,45 @@ export function AppProvider({ children }) {
       return updated;
     }
     setCalls((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
+  };
+
+  const closeCall = async (id, meta) => {
+    const by = authProfile?.name || currentUser?.name || 'Инженер';
+    const existing = calls.find((c) => c.id === id)?.close_meta || {};
+    const close_meta = { ...existing, ...meta, closed_by: by, closed_at: meta.closed_at || new Date().toISOString() };
+    if (isSupabaseConfigured) {
+      const updated = await serviceCallApi.updateServiceCall(id, { status: 'Дууссан', close_meta });
+      setCalls((prev) => prev.map((c) => (c.id === id ? updated : c)));
+      return updated;
+    }
+    const local = { status: 'Дууссан', close_meta };
+    setCalls((prev) => prev.map((c) => (c.id === id ? { ...c, ...local } : c)));
+    return local;
+  };
+
+  const transferCall = async (id, meta) => {
+    const by = authProfile?.name || currentUser?.name || 'Инженер';
+    const at = new Date().toISOString();
+    const existing = calls.find((c) => c.id === id)?.close_meta || {};
+    const isReschedule = meta.type === 'Dahimdah' || meta.type === 'Reschedule';
+    const transfer = { type: meta.type, reason: meta.reason || '', comment: meta.comment || '', by, at };
+    const patch = { close_meta: { ...existing, transfer } };
+    if (isReschedule) {
+      const t = new Date();
+      t.setDate(t.getDate() + 1);
+      t.setHours(9, 0, 0, 0);
+      patch.status = 'Дахимдах';
+      patch.scheduled_at = t.toISOString();
+    } else {
+      patch.status = 'Татгалзсан';
+    }
+    if (isSupabaseConfigured) {
+      const updated = await serviceCallApi.updateServiceCall(id, patch);
+      setCalls((prev) => prev.map((c) => (c.id === id ? updated : c)));
+      return updated;
+    }
+    setCalls((prev) => prev.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+    return patch;
   };
 
   // ---- Бензиний тооцоо (локал) ----
@@ -501,6 +562,7 @@ export function AppProvider({ children }) {
     adjustQuantity,
     removeInventoryItem,
     withdrawItem,
+    giveItemToEmployee,
     consumeItem,
     fetchMyStock,
     fetchStockMovements,
@@ -512,6 +574,8 @@ export function AppProvider({ children }) {
     calls,
     addCall,
     updateCallStatus,
+    closeCall,
+    transferCall,
     refreshCalls,
     fuelSettings,
     updateFuelSettings,

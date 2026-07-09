@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Video, ResizeMode } from 'expo-av';
-import { colors, spacing } from '../theme';
+import { spacing } from '../theme';
 
 export default function ChatVideoPreview({ uri, onClose }) {
   const videoRef = useRef(null);

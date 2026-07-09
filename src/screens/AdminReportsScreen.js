@@ -15,7 +15,8 @@ import { WebView } from 'react-native-webview';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, Card, EmptyState } from '../components/ui';
 import NavIcon from '../components/NavIcon';
-import { colors, spacing, radius, shadow } from '../theme';
+import { colors as palette, spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import * as reportApi from '../services/reportService';
 
 const TYPE_LABEL = {
@@ -25,12 +26,14 @@ const TYPE_LABEL = {
 };
 
 const TYPE_COLOR = {
-  material: colors.primary,
+  material: palette.primary,
   tool: '#ea580c',
-  vehicle: colors.warning,
+  vehicle: palette.warning,
 };
 
 export default function AdminReportsScreen() {
+  const { colors, shadow } = useTheme();
+  const styles = useStyles(makeStyles);
   const { isAdmin, isCloud } = useApp();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -149,7 +152,7 @@ export default function AdminReportsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bgAlt },
   body: { padding: spacing.lg, paddingBottom: 40 },
   error: { color: colors.danger, textAlign: 'center', marginBottom: spacing.md, lineHeight: 20 },
