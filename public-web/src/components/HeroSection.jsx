@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Star, Clock, Calendar, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function HeroSection() {
@@ -23,59 +24,76 @@ export default function HeroSection() {
             </span>
           </div>
 
+          <div
+            className="animate-blur-fade-up mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90 backdrop-blur-md sm:mb-6 sm:text-sm"
+            style={{ animationDelay: '250ms' }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            ЖЕННЕТЕКС ХХК
+          </div>
+
           <h1
             className="animate-blur-fade-up mb-4 text-3xl font-normal tracking-tightest sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl"
             style={{ animationDelay: '400ms' }}
           >
             Илүү ухаалгаар.
             <br />
-            Илүү хурдан.
+            <span className="bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">
+              Илүү хурдан.
+            </span>
           </h1>
 
           <p
-            className="animate-blur-fade-up mb-6 max-w-2xl text-base text-gray-400 sm:mb-12 sm:text-lg md:text-xl"
+            className="animate-blur-fade-up mb-2 max-w-2xl text-base text-gray-300 sm:mb-4 sm:text-lg md:text-xl"
             style={{ animationDelay: '500ms' }}
           >
-            Gennetex — сүлжээ, шилэн кабель, аюулгүй байдал болон IT дэд бүтцийн иж бүрэн шийдлийг
-            Монголын бизнесүүдэд хүргэдэг инженерингийн компани.
+            Сүлжээ, шилэн кабель, CCTV болон IT дэд бүтцийн иж бүрэн шийдлийг Монголын бизнесүүдэд
+            хүргэдэг инженерингийн компани.
+          </p>
+
+          <p
+            className="animate-blur-fade-up mb-6 max-w-xl text-sm italic text-white/45 sm:mb-12 sm:text-base"
+            style={{ animationDelay: '550ms' }}
+          >
+            «Холбоо — итгэлцлийн суурь»
           </p>
 
           <div className="flex flex-wrap gap-3 sm:gap-4">
-            <a
-              href="#services"
+            <Link
+              to="/services"
               className="animate-blur-fade-up inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-medium text-black transition-colors hover:bg-gray-200 sm:px-8 sm:py-3 sm:text-base"
               style={{ animationDelay: '600ms' }}
             >
               <Play size={18} className="fill-black" />
               Үйлчилгээ үзэх
-            </a>
-            <a
-              href="#about"
+            </Link>
+            <Link
+              to="/about"
               className="animate-blur-fade-up liquid-glass inline-flex items-center rounded-full px-6 py-2.5 text-sm font-medium sm:px-8 sm:py-3 sm:text-base"
               style={{ animationDelay: '700ms' }}
             >
               Дэлгэрэнгүй
-            </a>
+            </Link>
           </div>
         </div>
 
         <div className="flex w-full gap-3 md:w-auto md:flex-col md:items-end">
-          <a
-            href="#contact"
+          <Link
+            to="/contact"
             className="animate-blur-fade-up liquid-glass inline-flex flex-1 items-center justify-center gap-1 rounded-full px-4 py-2.5 text-sm sm:px-6 md:flex-none"
             style={{ animationDelay: '800ms' }}
           >
             <ChevronLeft size={18} />
             Холбогдох
-          </a>
-          <a
-            href="#careers"
+          </Link>
+          <Link
+            to="/careers"
             className="animate-blur-fade-up liquid-glass inline-flex flex-1 items-center justify-center gap-1 rounded-full px-4 py-2.5 text-sm sm:px-6 md:flex-none"
             style={{ animationDelay: '900ms' }}
           >
             Ажилд орох
             <ChevronRight size={18} />
-          </a>
+          </Link>
         </div>
       </div>
     </div>

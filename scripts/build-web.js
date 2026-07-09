@@ -15,6 +15,7 @@ const publicWebDist = path.join(publicWeb, 'dist');
 const publicWebPublic = path.join(publicWeb, 'public');
 const adminWeb = path.join(root, 'admin-web');
 const logo = path.join(root, 'assets', 'logo.png');
+const reportLogo = path.join(root, 'assets', 'report-logo.png');
 
 function rimraf(p) {
   if (fs.existsSync(p)) fs.rmSync(p, { recursive: true, force: true });
@@ -30,10 +31,17 @@ console.log('[build-web] Цэвэрлэж байна:', dist);
 rimraf(dist);
 fs.mkdirSync(dist, { recursive: true });
 
-// Лого — Vite public + dist-web root
+// Лого — Vite public + dist-web root + admin-web
 if (fs.existsSync(logo)) {
   fs.mkdirSync(publicWebPublic, { recursive: true });
   fs.copyFileSync(logo, path.join(publicWebPublic, 'logo.png'));
+  fs.copyFileSync(logo, path.join(adminWeb, 'logo.png'));
+  const adminReport = path.join(adminWeb, 'report-logo.png');
+  if (fs.existsSync(reportLogo)) {
+    fs.copyFileSync(reportLogo, adminReport);
+  } else {
+    fs.copyFileSync(logo, adminReport);
+  }
 }
 
 // 1) React + Tailwind public site build

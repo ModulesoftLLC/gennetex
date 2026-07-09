@@ -1,59 +1,65 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Search, User } from 'lucide-react';
 
 const NAV_LINKS = [
-  { href: '#about', label: 'Бидний тухай', delay: 100 },
-  { href: '#services', label: 'Үйлчилгээ', delay: 150 },
-  { href: '#projects', label: 'Төслүүд', delay: 200 },
-  { href: '#careers', label: 'Ажлын байр', delay: 250 },
-  { href: '#contact', label: 'Холбоо барих', delay: 300 },
+  { to: '/about', label: 'Бидний тухай', delay: 100 },
+  { to: '/services', label: 'Үйлчилгээ', delay: 150 },
+  { to: '/projects', label: 'Төслүүд', delay: 200 },
+  { to: '/careers', label: 'Ажлын байр', delay: 250 },
+  { to: '/contact', label: 'Холбоо барих', delay: 300 },
 ];
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-
+  const { pathname } = useLocation();
+  const isHome = pathname === '/';
   const close = () => setOpen(false);
 
   return (
     <>
-      <nav className="relative z-50 flex items-center justify-between px-4 py-4 sm:px-6 md:px-12 md:py-6">
-        <a href="#" className="animate-blur-fade-up flex items-center gap-2" style={{ animationDelay: '0ms' }}>
-          <img src="/logo.png" alt="Gennetex" className="h-8 w-auto md:h-10" />
+      <nav
+        className={`relative z-50 flex items-center justify-between px-4 py-4 sm:px-6 md:px-12 md:py-6 ${
+          isHome ? '' : 'border-b border-white/10 bg-black/80 backdrop-blur-md'
+        }`}
+      >
+        <Link to="/" className="animate-blur-fade-up flex items-center gap-2" style={{ animationDelay: '0ms' }}>
+          <img src="/logo.png" alt="ЖЕННЕТЕКС" className="h-8 w-auto md:h-10" />
           <span className="text-lg font-semibold tracking-tight md:text-xl">ЖЕННЕТЕКС</span>
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-8 lg:flex">
           {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="animate-blur-fade-up text-sm text-white/90 transition-colors hover:text-gray-300"
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`animate-blur-fade-up text-sm transition-colors ${
+                pathname === link.to ? 'text-white font-medium' : 'text-white/90 hover:text-gray-300'
+              }`}
               style={{ animationDelay: `${link.delay}ms` }}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <Link
+            to="/careers"
             className="animate-blur-fade-up liquid-glass hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-medium sm:flex md:px-6"
             style={{ animationDelay: '350ms' }}
-            onClick={() => document.getElementById('careers')?.scrollIntoView({ behavior: 'smooth' })}
           >
             <Search size={18} />
             <span>Ажилд орох</span>
-          </button>
+          </Link>
 
-          <button
-            type="button"
+          <Link
+            to="/contact"
             className="animate-blur-fade-up liquid-glass hidden h-10 w-10 items-center justify-center rounded-full sm:flex"
             style={{ animationDelay: '400ms' }}
-            onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           >
             <User size={18} />
-          </button>
+          </Link>
 
           <button
             type="button"
@@ -87,9 +93,9 @@ export default function Navbar() {
       >
         <div className="flex flex-col px-4 py-4">
           {NAV_LINKS.map((link, i) => (
-            <a
-              key={link.href}
-              href={link.href}
+            <Link
+              key={link.to}
+              to={link.to}
               onClick={close}
               className="rounded-lg px-3 py-3 text-sm transition-all hover:bg-gray-800/50"
               style={{
@@ -99,30 +105,24 @@ export default function Navbar() {
               }}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
           <div className="mt-4 flex gap-3 border-t border-gray-800 pt-4 sm:hidden">
-            <button
-              type="button"
+            <Link
+              to="/careers"
               className="liquid-glass flex flex-1 items-center justify-center gap-2 rounded-full py-2.5 text-sm"
-              onClick={() => {
-                close();
-                document.getElementById('careers')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={close}
             >
               <Search size={18} />
               Ажилд орох
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              to="/contact"
               className="liquid-glass flex h-10 w-10 items-center justify-center rounded-full"
-              onClick={() => {
-                close();
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-              }}
+              onClick={close}
             >
               <User size={18} />
-            </button>
+            </Link>
           </div>
         </div>
       </div>
