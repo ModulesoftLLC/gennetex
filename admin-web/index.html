@@ -2,7 +2,7 @@
 <html lang="mn">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="admin-build-version" content="0.7.8"/>
+  <meta name="admin-build-version" content="0.7.9"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ЖЕННЕТЕКС — Админ самбар</title>
   <link rel="icon" href="/gennetex/admin/logo.png"/>
@@ -434,7 +434,8 @@
     .x:hover{background:var(--primary-soft)}
     .row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:min(100%,200px)}
     .qrbox{text-align:center}
-    .qrbox img{background:var(--card);padding:10px;border:1px solid var(--line);border-radius:12px}
+    .qrbox .qr-code-img{background:var(--card);padding:10px;border:1px solid var(--line);border-radius:12px}
+    .qrbox .mn-plate__soy,.qrbox .mn-plate__mgl,.qrbox .mn-plate__car{background:none;padding:0;border:none;border-radius:0;box-shadow:none}
     .pill.on{background:rgba(16,185,129,.15);color:#047857}.dark .pill.on{background:rgba(52,211,153,.2);color:#6ee7b7}
     .pill.off{background:var(--primary-soft);color:var(--muted)}
     .pill.in{background:rgba(16,185,129,.15);color:#047857}.dark .pill.in{background:rgba(52,211,153,.2);color:#6ee7b7}
@@ -652,7 +653,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.8</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.9</span>
         </div>
       </aside>
       <div class="main">
@@ -3817,15 +3818,15 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
     };
     window.qrModal = (v)=>{
       const url='https://api.qrserver.com/v1/create-qr-code/?size=420x420&data='+encodeURIComponent(v.code);
-      openModal('Машины QR код',`<div class="qrbox">${mongoliaPlateHtml(v.plate_number,'lg')}
+      openModal('Машины QR код',`<div class="qrbox">${mongoliaPlateHtml(v.plate_number,'lg',false)}
         <p class="muted" style="margin:6px 0 14px">${v.code} · ${v.liters_per_100km} л/100км</p>
-        <img src="${url}" width="420" height="420" style="max-width:100%;height:auto"><p class="muted" style="font-size:13px;margin-top:12px">Хэвлээд машин дээр наана. Ажилтан уншиж аялал эхлүүлнэ.</p></div>`,
+        <img class="qr-code-img" src="${url}" width="420" height="420" style="max-width:100%;height:auto"><p class="muted" style="font-size:13px;margin-top:12px">Хэвлээд машин дээр наана. Ажилтан уншиж аялал эхлүүлнэ.</p></div>`,
         'Хэвлэх',()=>{ printImg(url,v); return false; });
     };
     function printImg(url,v){
       const w=window.open('','_blank');
       const base=location.href.replace(/[^/]*$/,'');
-      const plateHtml=mongoliaPlateHtml(v.plate_number,'lg');
+      const plateHtml=mongoliaPlateHtml(v.plate_number,'lg',false);
       const plateCss=`.mn-plate-wrap{display:inline-flex;align-items:center;gap:12px}.mn-plate__car{width:110px;height:auto;object-fit:contain}.mn-plate{display:inline-flex;align-items:center;background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:7px 14px;gap:8px;font-family:system-ui,sans-serif}.mn-plate__text{color:#111;font-weight:900;font-size:24px;letter-spacing:.5px}.mn-plate__soy{width:12px;height:auto}.mn-plate__mgl{width:38px;height:auto;margin-left:6px}`;
       w.document.write(`<html><head><style>${plateCss}</style></head><body style="text-align:center;font-family:sans-serif;padding:24px">${plateHtml}<p style="margin-top:12px">${v.code}</p><img src="${url}" style="width:420px;height:420px"></body></html>`);
       w.document.close(); setTimeout(()=>w.print(),400);
