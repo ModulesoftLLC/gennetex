@@ -26,13 +26,21 @@ export async function fetchSiteContent() {
   try {
     const { data, error } = await supabase
       .from('public_site_content')
-      .select('content')
+      .select('content, updated_at')
       .eq('id', 'main')
       .maybeSingle();
-    if (error || !data?.content) return DEFAULT_SITE_CONTENT;
-    return mergeSiteContent(data.content);
-  } catch {
-    return DEFAULT_SITE_CONTENT;
+    if (error) {
+      console.warn('[siteContent]', error.message);
+      return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+    }
+    if (!data) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+    return {
+      content: mergeSiteContent(data.content || {}),
+      updatedAt: data.updated_at || null,
+    };
+  } catch (e) {
+    console.warn('[siteContent]', e);
+    return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
   }
 }
 
