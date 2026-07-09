@@ -41,9 +41,18 @@ export function parseMongoliaPlate(raw) {
 
   const [digits = '', letters = ''] = formatted.split(' ');
   const display = letters ? `${digits} ${letters}` : digits;
+  const compact = `${digits}${letters}`;
   const valid = digits.length === 4 && letters.length === 3;
 
-  return { digits, letters, display, valid };
+  return { digits, letters, display, compact, valid };
+}
+
+/** Дугаарын дэлгэцийн текст (5394УКК). */
+export function plateCompactText(raw) {
+  const { digits, letters, compact } = parseMongoliaPlate(raw);
+  if (!digits && !letters) return '····';
+  if (digits.length === 4 && !letters) return `${digits}···`;
+  return compact || digits || '····';
 }
 
 export function normalizePlateNumber(raw) {

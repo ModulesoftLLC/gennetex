@@ -441,22 +441,22 @@
     .pill.admin{background:#e2dfff;color:#3730b4}.dark .pill.admin{background:rgba(94,90,219,.35);color:#c3c1ff}
     .pill.emp{background:#dae2fd;color:#453fc1}.dark .pill.emp{background:rgba(94,90,219,.25);color:#c3c1ff}
     .plate{display:inline-block;border:2px solid var(--primary);border-radius:8px;padding:6px 14px;font-weight:900;font-size:20px;letter-spacing:1px}
-    .mn-plate{display:inline-flex;align-items:stretch;background:#fff;border:3px solid #111;border-radius:3px;overflow:hidden;vertical-align:middle;font-family:system-ui,-apple-system,sans-serif;line-height:1}
-    .mn-plate--sm{width:132px;height:66px;border-width:2px}
-    .mn-plate--md{width:180px;height:90px}
-    .mn-plate--lg{width:240px;height:120px}
-    .mn-plate__band{width:32px;background:#003DA5;border-right:2px solid #111;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .mn-plate--sm .mn-plate__band{width:24px}
-    .mn-plate--lg .mn-plate__band{width:40px}
-    .mn-plate__band span{color:#fff;font-weight:900;font-size:9px;letter-spacing:.5px;writing-mode:vertical-rl;transform:rotate(180deg)}
-    .mn-plate--lg .mn-plate__band span{font-size:11px}
-    .mn-plate__body{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px;min-width:0}
-    .mn-plate__digits{color:#111;font-weight:900;font-size:30px;letter-spacing:2px;font-variant-numeric:tabular-nums}
-    .mn-plate--sm .mn-plate__digits{font-size:22px}
-    .mn-plate--lg .mn-plate__digits{font-size:40px}
-    .mn-plate__letters{color:#111;font-weight:900;font-size:24px;letter-spacing:3px}
-    .mn-plate--sm .mn-plate__letters{font-size:18px}
-    .mn-plate--lg .mn-plate__letters{font-size:32px}
+    .mn-plate{display:inline-flex;align-items:center;background:#fff;border:1px solid #dee2e6;border-radius:8px;vertical-align:middle;font-family:system-ui,-apple-system,sans-serif;line-height:1}
+    .mn-plate--sm{padding:4px 10px;gap:5px}
+    .mn-plate--md{padding:5px 12px;gap:6px}
+    .mn-plate--lg{padding:7px 14px;gap:8px}
+    .mn-plate__text{color:#111;font-weight:900;letter-spacing:.5px;white-space:nowrap}
+    .mn-plate--sm .mn-plate__text{font-size:15px}
+    .mn-plate--md .mn-plate__text{font-size:18px}
+    .mn-plate--lg .mn-plate__text{font-size:24px}
+    .mn-plate__soy{display:block;flex-shrink:0}
+    .mn-plate--sm .mn-plate__soy{width:8px;height:auto}
+    .mn-plate--md .mn-plate__soy{width:10px;height:auto}
+    .mn-plate--lg .mn-plate__soy{width:12px;height:auto}
+    .mn-plate__mgl{display:block;flex-shrink:0;margin-left:4px}
+    .mn-plate--sm .mn-plate__mgl{width:24px;height:auto}
+    .mn-plate--md .mn-plate__mgl{width:30px;height:auto}
+    .mn-plate--lg .mn-plate__mgl{width:38px;height:auto}
     .mn-plate-preview{display:flex;justify-content:center;margin:10px 0 4px}
     .toast{position:fixed;bottom:24px;right:24px;background:#302f38;color:#f3effa;padding:14px 20px;border-radius:12px;z-index:3000;display:none;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
     .chk{display:flex;align-items:center;gap:10px;padding:8px 0}
@@ -1826,12 +1826,16 @@
       const p=display.split(' ');
       return {digits:p[0]||'',letters:p[1]||'',display};
     }
+    function plateCompactText(raw){
+      const {digits,letters}=parseMongoliaPlate(raw);
+      if(!digits&&!letters) return '····';
+      if(digits.length===4&&!letters) return `${digits}···`;
+      return `${digits}${letters||''}`;
+    }
     function mongoliaPlateHtml(plate,size='md'){
-      const {digits,letters}=parseMongoliaPlate(plate);
       const sz=size==='sm'?'mn-plate--sm':size==='lg'?'mn-plate--lg':'mn-plate--md';
-      const d=digits||'····';
-      const l=letters||(digits.length===4?'···':'');
-      return `<span class="mn-plate ${sz}"><span class="mn-plate__band"><span>MGL</span></span><span class="mn-plate__body"><span class="mn-plate__digits">${d}</span>${l?`<span class="mn-plate__letters">${l}</span>`:''}</span></span>`;
+      const text=plateCompactText(plate);
+      return `<span class="mn-plate ${sz}"><img class="mn-plate__soy" src="plate-soymbo.svg" alt="" width="10" height="19"><span class="mn-plate__text">${text}</span><img class="mn-plate__mgl" src="plate-mgl.svg" alt="MGL" width="30" height="16"></span>`;
     }
     function bindPlateInputPreview(){
       const inp=$('v_plate'), prev=$('v_plate_preview');
@@ -3803,8 +3807,10 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
     };
     function printImg(url,v){
       const w=window.open('','_blank');
-      const plateCss=`.mn-plate{display:inline-flex;align-items:stretch;background:#fff;border:3px solid #111;border-radius:3px;overflow:hidden;font-family:system-ui,sans-serif}.mn-plate--lg{width:240px;height:120px}.mn-plate__band{width:40px;background:#003DA5;border-right:2px solid #111;display:flex;align-items:center;justify-content:center}.mn-plate__band span{color:#fff;font-weight:900;font-size:11px;writing-mode:vertical-rl;transform:rotate(180deg)}.mn-plate__body{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px}.mn-plate__digits{color:#111;font-weight:900;font-size:40px;letter-spacing:2px}.mn-plate__letters{color:#111;font-weight:900;font-size:32px;letter-spacing:3px}`;
-      w.document.write(`<html><head><style>${plateCss}</style></head><body style="text-align:center;font-family:sans-serif;padding:24px">${mongoliaPlateHtml(v.plate_number,'lg')}<p style="margin-top:12px">${v.code}</p><img src="${url}" style="width:420px;height:420px"></body></html>`);
+      const base=location.href.replace(/[^/]*$/,'');
+      const plateHtml=mongoliaPlateHtml(v.plate_number,'lg').replace(/src="plate-/g,`src="${base}plate-`);
+      const plateCss=`.mn-plate{display:inline-flex;align-items:center;background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:7px 14px;gap:8px;font-family:system-ui,sans-serif}.mn-plate__text{color:#111;font-weight:900;font-size:24px;letter-spacing:.5px}.mn-plate__soy{width:12px;height:auto}.mn-plate__mgl{width:38px;height:auto;margin-left:6px}`;
+      w.document.write(`<html><head><style>${plateCss}</style></head><body style="text-align:center;font-family:sans-serif;padding:24px">${plateHtml}<p style="margin-top:12px">${v.code}</p><img src="${url}" style="width:420px;height:420px"></body></html>`);
       w.document.close(); setTimeout(()=>w.print(),400);
     }
     window.delVeh = async (id,plate)=>{ if(!confirm(plate+'машиныг устгах уу?'))return; await sb.from('vehicles').delete().eq('id',id); toast('Устгагдлаа'); loadAll(); };
