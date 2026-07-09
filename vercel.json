@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "echo \"Static site — no npm install\"",
+  "installCommand": "cd public-web && npm install",
   "buildCommand": "node scripts/build-web.js",
   "outputDirectory": "dist-web",
   "framework": null,
