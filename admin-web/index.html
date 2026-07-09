@@ -152,7 +152,7 @@
   <div id="app">
     <div class="layout">
       <aside class="side">
-        <div class="brand"><img src="logo.png" style="height:28px"/> <span>Gennetex</span></div>
+        <div class="brand"><img src="logo.png" style="height:28px"/> <span>ЖЕННЕТЕКС</span></div>
         <nav class="nav" id="nav">
           <div class="grp">Үндсэн</div>
           <a data-view="dashboard" class="active"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="12" width="8" height="9" rx="1.5"/><rect x="3" y="15" width="8" height="6" rx="1.5"/></svg></span><span class="t">Хяналт</span></a>
@@ -187,7 +187,7 @@
           <div class="grp">Excel</div>
           <a data-view="excelarchive"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="t">Excel архив</span></a>
         </nav>
-        <div class="foot">Gennetex ERP v0.4.9</div>
+        <div class="foot">Gennetex ERP v0.4.10</div>
       </aside>
       <div class="main">
         <div class="topbar">
@@ -1772,21 +1772,69 @@
       const esc=v=>String(v??'').replace(/</g,'&lt;');
       const list=data.jobApplications||[];
       const opt=cur=>Object.keys(APP_STATUS).map(k=>`<option value="${k}" ${cur===k?'selected':''}>${APP_STATUS[k]}</option>`).join('');
-      const rowHtml=r=>`<tr>
-        <td><b>${esc(r.name||'—')} ${esc(r.last_name||'')}</b></td>
-        <td>${esc(r.position||'—')}</td>
-        <td>${r.phone?`<a href="tel:${esc(r.phone)}">${esc(r.phone)}</a>`:'—'}</td>
+      const rowHtml=r=>{
+        const fd=r.form_data;
+        const full=!!(fd&&typeof fd==='object'&&fd.general);
+        const displayName=full?`${fd.general?.clanName||''} ${fd.general?.fatherName||''} ${fd.general?.firstName||''}`.trim():(`${r.name||''} ${r.last_name||''}`.trim()||'—');
+        const pos=full?(fd.jobInterest?.position||'—'):(r.position||'—');
+        const phone=full?(fd.general?.phoneMobile||'—'):(r.phone||'—');
+        return `<tr>
+        <td><b>${esc(displayName)}</b>${full?'<span class="pill on" style="margin-left:6px;font-size:10px">Бүрэн</span>':''}</td>
+        <td>${esc(pos)}</td>
+        <td>${phone&&phone!=='—'?`<a href="tel:${esc(phone)}">${esc(phone)}</a>`:'—'}</td>
         <td>${r.email?`<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>`:'—'}</td>
-        <td style="max-width:280px">${esc(r.message||'')}</td>
-        <td>${r.cv_url?`<a href="${esc(r.cv_url)}" target="_blank">CV</a>`:'—'}</td>
         <td class=muted>${new Date(r.created_at).toLocaleString('mn-MN')}</td>
         <td><select onchange="setAppStatus('${r.id}',this.value)" style="padding:6px 8px">${opt(r.status)}</select></td>
+        <td><button class="btn btn-primary btn-sm" onclick='viewJobApplication(${JSON.stringify(r.id)})'>Харах</button></td>
       </tr>`;
+      };
       c.innerHTML=`<div class="card"><div class="card-h"><h3>Ажлын байрны анкет (${list.length})</h3>
         <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
-        <div class="card-b" style="padding:0"><table><thead><tr><th>Нэр</th><th>Албан тушаал</th><th>Утас</th><th>Имэйл</th><th>Тэмдэглэл</th><th>CV</th><th>Огноо</th><th>Төлөв</th></tr></thead>
-        <tbody>${list.map(rowHtml).join('')||'<tr><td colspan=8 class=empty>Анкет алга</td></tr>'}</tbody></table></div></div>`;
+        <div class="card-b" style="padding:12px 16px"><p class="muted" style="margin:0;font-size:13px">Бүрэн анкет ирсэн бол «Бүрэн» гэж харагдана. «Харах» дарж дэлгэрэнгүй.</p></div></div>
+        <div class="card"><div class="card-b" style="padding:0"><table><thead><tr><th>Нэр</th><th>Албан тушаал</th><th>Утас</th><th>Имэйл</th><th>Огноо</th><th>Төлөв</th><th></th></tr></thead>
+        <tbody>${list.map(rowHtml).join('')||'<tr><td colspan=7 class=empty>Анкет алга</td></tr>'}</tbody></table></div></div>`;
     }
+    function viewJobApplication(id){
+      const r=(data.jobApplications||[]).find(x=>x.id===id);
+      if(!r){ toast('Олдсонгүй'); return; }
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const fd=r.form_data;
+      let body='';
+      if(fd&&fd.general){
+        const g=fd.general;
+        body=`<div style="max-height:70vh;overflow:auto;font-size:13px;line-height:1.6">
+          ${g.photoDataUrl?`<img src="${g.photoDataUrl}" style="float:right;width:100px;height:130px;object-fit:cover;border:1px solid #ddd;border-radius:8px;margin:0 0 8px 12px"/>`:''}
+          <h4 style="margin:12px 0 6px">1. Ерөнхий мэдээлэл</h4>
+          <p><b>Нэр:</b> ${esc(g.clanName)} ${esc(g.fatherName)} ${esc(g.firstName)}</p>
+          <p><b>Төрсөн:</b> ${esc(g.birthYear)}.${esc(g.birthMonth)}.${esc(g.birthDay)} · ${esc(g.birthProvince)} ${esc(g.birthDistrict)}</p>
+          <p><b>РД:</b> ${esc(g.registrationNo)} · <b>Утас:</b> ${esc(g.phoneMobile)} · <b>Имэйл:</b> ${esc(g.email)}</p>
+          <p><b>Хаяг:</b> ${esc(g.address)} · <b>Цус:</b> ${esc(g.bloodType)}</p>
+          <h4 style="margin:16px 0 6px">2. Гэр бүл</h4>
+          <p>Гэрлэсэн: ${esc(fd.family?.married||'—')}</p>
+          <ul>${(fd.family?.members||[]).filter(m=>m.fullName).map(m=>`<li>${esc(m.fullName)} (${esc(m.relation)}) — ${esc(m.phone)}</li>`).join('')||'<li>—</li>'}</ul>
+          <h4 style="margin:16px 0 6px">3. Боловсрол</h4>
+          <ul>${(fd.education||[]).filter(e=>e.schoolName||e.location).map(e=>`<li>${esc(e.location)} ${esc(e.schoolName)} (${esc(e.enteredYear)}–${esc(e.graduatedYear)})</li>`).join('')||'<li>—</li>'}</ul>
+          <h4 style="margin:16px 0 6px">4. Ажлын туршлага</h4>
+          <ul>${(fd.workExperience||[]).filter(w=>w.companyName).map(w=>`<li>${esc(w.companyName)} — ${esc(w.position)} (${esc(w.startDate)}–${esc(w.endDate)})</li>`).join('')||'<li>—</li>'}</ul>
+          <h4 style="margin:16px 0 6px">5–7. Хувийн / Ажил</h4>
+          <p><b>Давуу:</b> ${esc(fd.personal?.strengths)}</p>
+          <p><b>Сул:</b> ${esc(fd.personal?.weaknesses)}</p>
+          <p><b>Сонирхож буй:</b> ${esc(fd.jobInterest?.position)} · <b>Цалин:</b> ${esc(fd.jobInterest?.desiredSalary)}</p>
+          <h4 style="margin:16px 0 6px">8. Яаралтай холбоо</h4>
+          <ul>${(fd.emergencyContacts||[]).filter(e=>e.name).map(e=>`<li>${esc(e.name)} (${esc(e.relation)}) — ${esc(e.phone)}</li>`).join('')||'<li>—</li>'}</ul>
+          ${r.signature_svg?`<h4 style="margin:16px 0 6px">Гарын үсэг</h4><div>${r.signature_svg}</div>`:''}
+        </div>`;
+      } else {
+        body=`<div style="font-size:14px;line-height:1.7">
+          <p><b>Нэр:</b> ${esc(r.name)} ${esc(r.last_name||'')}</p>
+          <p><b>Утас:</b> ${esc(r.phone)} · <b>Имэйл:</b> ${esc(r.email)}</p>
+          <p><b>Албан тушаал:</b> ${esc(r.position)}</p>
+          <p><b>Тэмдэглэл:</b> ${esc(r.message)}</p>
+        </div>`;
+      }
+      openModal('Ажлын байрны анкет',body,'Хаах',()=>true);
+    }
+    window.viewJobApplication=viewJobApplication;
     async function setAppStatus(id,status){
       const {error}=await sb.from('job_applications').update({status}).eq('id',id);
       if(error) toast('Алдаа: '+error.message); else { toast('Төлөв шинэчиллээ'); loadAll(); }

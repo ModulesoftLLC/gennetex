@@ -6,21 +6,19 @@ import ProjectsSection from './components/ProjectsSection';
 import CareersSection from './components/CareersSection';
 import ContactSection from './components/ContactSection';
 import Footer from './components/Footer';
-import { VIDEO_URL } from './lib/supabase';
+import { HERO_IMAGE_URL } from './lib/supabase';
 
 export default function App() {
   return (
     <div className="bg-black text-white">
-      {/* Cinematic full-viewport hero */}
       <header className="relative min-h-screen overflow-hidden">
-        <video
-          className="fixed inset-0 z-0 h-full w-full object-cover"
-          src={VIDEO_URL}
-          autoPlay
-          muted
-          loop
-          playsInline
+        <div
+          className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${HERO_IMAGE_URL})` }}
+          role="img"
+          aria-label="Технологийн дэд бүтэц"
         />
+        <div className="pointer-events-none fixed inset-0 z-[1] bg-black/25" aria-hidden />
         <div
           className="pointer-events-none fixed inset-0 z-[1] backdrop-blur-xl bottom-blur-mask"
           aria-hidden
