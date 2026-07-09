@@ -347,7 +347,7 @@ export default function VehiclesAdminScreen() {
           <View style={styles.qrCard}>
             {qrItem && (
               <>
-                <MongoliaPlate plate={qrItem.plate_number} size="lg" style={styles.qrPlateWrap} />
+                <MongoliaPlate plate={qrItem.plate_number} size="lg" showCar={false} style={styles.qrPlateWrap} />
                 <Text style={styles.qrCode}>{qrItem.code}</Text>
                 <View style={styles.qrBox}>
                   <QRCode value={qrItem.code} size={340} />
