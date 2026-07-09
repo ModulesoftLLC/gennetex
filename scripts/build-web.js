@@ -7,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { syncAdminEnv } = require('./sync-admin-env');
 
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist-web');
@@ -70,6 +71,7 @@ if (fs.existsSync(logo) && !fs.existsSync(path.join(dist, 'logo.png'))) {
 const adminDest = path.join(dist, 'gennetex', 'admin');
 console.log('[build-web] Админ самбар (admin-web → gennetex/admin)');
 copyDir(adminWeb, adminDest);
+syncAdminEnv(path.join(adminDest, 'index.html'));
 
 // Лого fallback — /gennetex/logo.png (relative path алдаа гарвал)
 if (fs.existsSync(logo)) {
