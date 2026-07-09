@@ -2,8 +2,17 @@ import * as Location from 'expo-location';
 import { supabase } from '../lib/supabase';
 import * as vehicleApi from './vehicleService';
 import * as notifyApi from './notificationService';
+import { isCallCancelled, isCallRescheduled } from '../lib/callPermissions';
 
 const TABLE = 'field_site_sessions';
+const CLOSED_CALL_STATUSES = new Set(['Дууссан', 'Татгалзсан', 'Дахимдах']);
+
+export function isActiveCallForSite(call) {
+  if (!call?.id || call.latitude == null || call.longitude == null) return false;
+  if (CLOSED_CALL_STATUSES.has(call.status)) return false;
+  if (isCallCancelled(call) || isCallRescheduled(call)) return false;
+  return true;
+}
 
 function todayStartIso() {
   const d = new Date();

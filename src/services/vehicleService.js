@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { parseEmployeeBadge } from '../lib/employeeBadge';
+import { normalizePlateNumber } from '../lib/mongoliaPlate';
 
 // Машины давтагдашгүй код (QR-д хадгалагдана)
 export function generateVehicleCode() {
@@ -16,13 +17,15 @@ export async function fetchVehicles() {
   return data || [];
 }
 
-export async function insertVehicle({ code, plate_number, liters_per_100km, driver_name, driver_id }) {
+export async function insertVehicle({ code, plate_number, liters_per_100km, tank_capacity_liters, driver_name, driver_id }) {
   const { data, error } = await supabase
     .from('vehicles')
     .insert({
       code: code.trim(),
-      plate_number: plate_number.trim(),
+      plate_number: normalizePlateNumber(plate_number),
       liters_per_100km: Number(liters_per_100km) || 12,
+      tank_capacity_liters: Number(tank_capacity_liters) || 60,
+      fuel_level_percent: 100,
       driver_name: driver_name?.trim() || null,
       driver_id: driver_id || null,
     })
@@ -136,6 +139,13 @@ export async function updateTrip(id, { distanceKm, liters, cost, idleSeconds }) 
 }
 
 export async function endTrip(id, { distanceKm, liters, cost, idleSeconds }) {
+  const { data: trip, error: tripErr } = await supabase
+    .from('trips')
+    .select('vehicle_id')
+    .eq('id', id)
+    .maybeSingle();
+  if (tripErr) throw tripErr;
+
   const { error } = await supabase
     .from('trips')
     .update({
@@ -148,6 +158,40 @@ export async function endTrip(id, { distanceKm, liters, cost, idleSeconds }) {
     })
     .eq('id', id);
   if (error) throw error;
+
+  const usedLiters = Number(liters) || 0;
+  if (trip?.vehicle_id && usedLiters > 0) {
+    try {
+      const { data: v } = await supabase
+        .from('vehicles')
+        .select('fuel_level_percent,tank_capacity_liters')
+        .eq('id', trip.vehicle_id)
+        .maybeSingle();
+      if (v) {
+        const tank = Number(v.tank_capacity_liters) || 60;
+        const drain = (usedLiters / tank) * 100;
+        const next = Math.max(0, Math.min(100, Number(v.fuel_level_percent ?? 100) - drain));
+        await supabase
+          .from('vehicles')
+          .update({ fuel_level_percent: Math.round(next * 10) / 10 })
+          .eq('id', trip.vehicle_id);
+      }
+    } catch (e) {}
+  }
+}
+
+export async function refillVehicleFuel(vehicleId) {
+  const { data, error } = await supabase
+    .from('vehicles')
+    .update({
+      fuel_level_percent: 100,
+      fuel_refilled_at: new Date().toISOString(),
+    })
+    .eq('id', vehicleId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 export async function fetchTrips(limit = 30) {

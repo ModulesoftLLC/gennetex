@@ -385,6 +385,14 @@
     .fuel-gauge-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;flex-wrap:wrap}
     .fuel-gauge-bar{height:10px;border-radius:999px;background:var(--primary-soft);overflow:hidden}
     .fuel-gauge-fill{height:100%;border-radius:999px;transition:width .35s ease}
+    .fuel-fleet-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+    .fuel-fleet-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--bg)}
+    .fuel-fleet-top{display:flex;gap:16px;align-items:flex-start}
+    .fuel-tank-viz{width:52px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+    .fuel-tank-cap{width:26px;height:8px;border-radius:4px 4px 0 0;background:var(--line);margin-bottom:2px}
+    .fuel-tank-body{width:100%;height:110px;border:2px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;background:var(--primary-soft);position:relative}
+    .fuel-tank-level{width:100%;transition:height .35s ease}
+    .fuel-tank-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45)}
     .timeline-line{position:absolute;left:16px;top:8px;bottom:8px;width:1px;background:var(--line)}
     .timeline-item{position:relative;padding-left:36px;margin-bottom:16px}
     .timeline-dot{position:absolute;left:10px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--card)}
@@ -433,6 +441,23 @@
     .pill.admin{background:#e2dfff;color:#3730b4}.dark .pill.admin{background:rgba(94,90,219,.35);color:#c3c1ff}
     .pill.emp{background:#dae2fd;color:#453fc1}.dark .pill.emp{background:rgba(94,90,219,.25);color:#c3c1ff}
     .plate{display:inline-block;border:2px solid var(--primary);border-radius:8px;padding:6px 14px;font-weight:900;font-size:20px;letter-spacing:1px}
+    .mn-plate{display:inline-flex;align-items:stretch;background:#fff;border:3px solid #111;border-radius:3px;overflow:hidden;vertical-align:middle;font-family:system-ui,-apple-system,sans-serif;line-height:1}
+    .mn-plate--sm{width:132px;height:66px;border-width:2px}
+    .mn-plate--md{width:180px;height:90px}
+    .mn-plate--lg{width:240px;height:120px}
+    .mn-plate__band{width:32px;background:#003DA5;border-right:2px solid #111;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .mn-plate--sm .mn-plate__band{width:24px}
+    .mn-plate--lg .mn-plate__band{width:40px}
+    .mn-plate__band span{color:#fff;font-weight:900;font-size:9px;letter-spacing:.5px;writing-mode:vertical-rl;transform:rotate(180deg)}
+    .mn-plate--lg .mn-plate__band span{font-size:11px}
+    .mn-plate__body{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px;min-width:0}
+    .mn-plate__digits{color:#111;font-weight:900;font-size:30px;letter-spacing:2px;font-variant-numeric:tabular-nums}
+    .mn-plate--sm .mn-plate__digits{font-size:22px}
+    .mn-plate--lg .mn-plate__digits{font-size:40px}
+    .mn-plate__letters{color:#111;font-weight:900;font-size:24px;letter-spacing:3px}
+    .mn-plate--sm .mn-plate__letters{font-size:18px}
+    .mn-plate--lg .mn-plate__letters{font-size:32px}
+    .mn-plate-preview{display:flex;justify-content:center;margin:10px 0 4px}
     .toast{position:fixed;bottom:24px;right:24px;background:#302f38;color:#f3effa;padding:14px 20px;border-radius:12px;z-index:3000;display:none;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
     .chk{display:flex;align-items:center;gap:10px;padding:8px 0}
     .bar-row{display:flex;gap:8px;align-items:flex-end}
@@ -597,6 +622,7 @@
           <a data-view="visits"><span class="material-symbols-outlined">home_pin</span><span class="t">Очсон лог</span></a>
           <div class="grp">Тээвэр</div>
           <a data-view="vehicles"><span class="material-symbols-outlined">directions_car</span><span class="t">Машин / QR</span></a>
+          <a data-view="fuelconsumption"><span class="material-symbols-outlined">local_gas_station</span><span class="t">Бензин зарцуулалт</span></a>
           <a data-view="trips"><span class="material-symbols-outlined">route</span><span class="t">Аялал</span></a>
           <a data-view="companions"><span class="material-symbols-outlined">groups</span><span class="t">Хамт яваа багууд</span></a>
           <a data-view="servicecalls"><span class="material-symbols-outlined">call</span><span class="t">Дуудлага</span></a>
@@ -618,7 +644,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.2</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.4</span>
         </div>
       </aside>
       <div class="main">
@@ -1046,7 +1072,7 @@
 
     // ===== Navigation =====
     document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
-    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',publicsite:'Вэб сайт',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
+    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',publicsite:'Вэб сайт',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',fuelconsumption:'Бензин зарцуулалт',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
     let activityFilter={year:new Date().getFullYear(),month:0,day:0,user:''};
     const ACTION_LABEL={login:'Нэвтрэлт',leave_request:'Чөлөө хүсэлт',screen:'Дэлгэц нээсэн',tap:'Даралт',location:'Байршил',face_enroll:'Царай бүртгэл',attendance:'Ирц',inventory:'Бараа/багаж',visit:'Айлд очсон',site_work:'Ажлын байр',service_call:'Дуудлага',other:'Бусад'};
     const fmtLogTime=ts=>{
@@ -1055,7 +1081,7 @@
       const p=n=>String(n).padStart(2,'0');
       return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
     };
-    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',publicsite:'Public вэбсайтын текст засварлах',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'Машин, QR код',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
+    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',publicsite:'Public вэбсайтын текст засварлах',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'Машин, QR код',fuelconsumption:'Машинаар км · бензиний түвшин (%)',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
     function go(v){
       view=v;
       document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
@@ -1251,6 +1277,7 @@
       if(view==='sitework') return renderSiteWork(c);
       if(view==='servicecalls') return renderServiceCalls(c);
       if(view==='vehicles') return renderVehicles(c);
+      if(view==='fuelconsumption') return renderFuelConsumption(c);
       if(view==='inventory') return renderInventory(c);
       if(view==='usage') return renderUsage(c);
       if(view==='feedposts') return renderFeedPosts(c);
@@ -1776,33 +1803,102 @@
     function findVehicleForTrip(t){
       return (data.vehicles||[]).find(v=>v.id===t.vehicle_id)||(data.vehicles||[]).find(v=>v.plate_number===t.plate_number)||null;
     }
+    function fuelLevelColor(pct){
+      const p=Number(pct)||0;
+      if(p<=15) return '#ef4444';
+      if(p<=35) return '#f59e0b';
+      return '#22c55e';
+    }
+    const MN_CYR='АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯӨҮ';
+    const MN_LATIN={A:'А',B:'В',C:'С',D:'Д',E:'Е',F:'Ф',G:'Г',H:'Х',I:'И',J:'Ж',K:'К',L:'Л',M:'М',N:'Н',O:'О',P:'П',Q:'К',R:'Р',S:'С',T:'Т',U:'У',V:'В',W:'В',X:'Х',Y:'Ы',Z:'З'};
+    function mnToCyr(ch){ const u=String(ch||'').toUpperCase(); return MN_CYR.includes(u)?u:(MN_LATIN[u]||u); }
+    function formatPlateInput(v){
+      let digits='',letters='';
+      for(const ch of String(v||'').toUpperCase()){
+        if(/\d/.test(ch)&&digits.length<4&&!letters) digits+=ch;
+        else if(/[A-ZА-ЯӨҮЁ]/.test(ch)&&digits.length&&letters.length<3) letters+=mnToCyr(ch);
+      }
+      return letters?`${digits} ${letters}`:digits;
+    }
+    function parseMongoliaPlate(raw){
+      const display=formatPlateInput(raw);
+      if(!display) return {digits:'',letters:'',display:''};
+      const p=display.split(' ');
+      return {digits:p[0]||'',letters:p[1]||'',display};
+    }
+    function mongoliaPlateHtml(plate,size='md'){
+      const {digits,letters}=parseMongoliaPlate(plate);
+      const sz=size==='sm'?'mn-plate--sm':size==='lg'?'mn-plate--lg':'mn-plate--md';
+      const d=digits||'····';
+      const l=letters||(digits.length===4?'···':'');
+      return `<span class="mn-plate ${sz}"><span class="mn-plate__band"><span>MGL</span></span><span class="mn-plate__body"><span class="mn-plate__digits">${d}</span>${l?`<span class="mn-plate__letters">${l}</span>`:''}</span></span>`;
+    }
+    function bindPlateInputPreview(){
+      const inp=$('v_plate'), prev=$('v_plate_preview');
+      if(!inp||!prev) return;
+      const upd=()=>{ inp.value=formatPlateInput(inp.value); prev.innerHTML=mongoliaPlateHtml(inp.value||'····','md'); };
+      inp.oninput=upd; upd();
+    }
     function fuelStatsByVehicle(days=30){
       const cutoff=Date.now()-days*86400000;
       const map={};
       (data.vehicles||[]).forEach(v=>{
-        map[v.plate_number]={plate:v.plate_number,vehicle:v,liters:0,cost:0,km:0,trips:0,activeLiters:0,active:false};
+        map[v.id||v.plate_number]={plate:v.plate_number,vehicle:v,driver:v.driver_name||'—',liters:0,cost:0,km:0,trips:0,activeLiters:0,activeKm:0,active:false,tank:vehicleTankLiters(v),baseLevel:Number(v.fuel_level_percent??100)};
       });
       (data.trips||[]).forEach(t=>{
         const plate=t.plate_number||'—';
-        if(!map[plate]) map[plate]={plate,vehicle:findVehicleForTrip(t),liters:0,cost:0,km:0,trips:0,activeLiters:0,active:false};
+        const veh=findVehicleForTrip(t);
+        const key=veh?.id||plate;
+        if(!map[key]) map[key]={plate,vehicle:veh,driver:t.driver_name||veh?.driver_name||'—',liters:0,cost:0,km:0,trips:0,activeLiters:0,activeKm:0,active:false,tank:vehicleTankLiters(veh),baseLevel:Number(veh?.fuel_level_percent??100)};
+        const row=map[key];
         if(t.status==='active'){
-          map[plate].active=true;
-          map[plate].activeLiters=Number(t.liters||0);
+          row.active=true;
+          row.activeLiters=Number(t.liters||0);
+          row.activeKm=tripKm(t);
+          if(t.driver_name) row.driver=t.driver_name;
           return;
         }
         if(!t.started_at||new Date(t.started_at)<cutoff) return;
-        map[plate].liters+=Number(t.liters||0);
-        map[plate].cost+=Number(t.cost||0);
-        map[plate].km+=tripKm(t);
-        map[plate].trips+=1;
+        row.liters+=Number(t.liters||0);
+        row.cost+=Number(t.cost||0);
+        row.km+=tripKm(t);
+        row.trips+=1;
+        if(t.driver_name) row.driver=t.driver_name;
       });
       return Object.values(map).map(r=>{
-        const tank=vehicleTankLiters(r.vehicle);
-        const usedLiters=r.active?r.activeLiters:r.liters;
-        const fuelPct=tank>0?Math.min(100,Math.round((usedLiters/tank)*1000)/10):0;
-        return {...r,tank,fuelPct,usedLiters};
-      }).filter(r=>r.liters>0||r.active).sort((a,b)=>b.fuelPct-a.fuelPct);
+        const tank=r.tank;
+        const activeDrain=r.active&&tank>0?(r.activeLiters/tank)*100:0;
+        const currentLevel=Math.max(0,Math.min(100,Math.round((r.baseLevel-activeDrain)*10)/10));
+        const remainingLiters=Math.max(0,Math.round(((currentLevel/100)*tank)*10)/10);
+        const totalKm=Math.round((r.km+(r.active?r.activeKm:0))*100)/100;
+        const periodLiters=r.active?r.activeLiters:r.liters;
+        return {...r,currentLevel,remainingLiters,totalKm,periodLiters,levelColor:fuelLevelColor(currentLevel)};
+      }).sort((a,b)=>{ if(a.active!==b.active) return a.active?-1:1; return b.totalKm-a.totalKm; });
     }
+    function fuelTankVizHtml(level,color,tank,remain){
+      const pct=Math.min(100,Math.max(0,Number(level)||0));
+      return `<div class="fuel-tank-viz"><div class="fuel-tank-cap"></div><div class="fuel-tank-body"><div class="fuel-tank-level" style="height:${pct}%;background:${color}"></div><div class="fuel-tank-pct">${pct}%</div></div><div class="muted" style="font-size:11px;margin-top:6px;text-align:center">${remain.toFixed(1)} / ${tank}л</div></div>`;
+    }
+    function renderFuelConsumption(c){
+      const rows=fuelStatsByVehicle(30);
+      const active=rows.filter(r=>r.active).length;
+      const totalKm=rows.reduce((s,r)=>s+r.totalKm,0);
+      const cards=rows.length?`<div class="fuel-fleet-grid">${rows.map(r=>`<div class="fuel-fleet-card"><div class="fuel-fleet-top">${fuelTankVizHtml(r.currentLevel,r.levelColor,r.tank,r.remainingLiters)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${mongoliaPlateHtml(r.plate,'sm')}${r.active?'<span class="pill on">Явж байна</span>':''}</div><div class="muted" style="font-size:13px;margin-top:4px">Жолооч: ${r.driver}</div><div style="margin-top:8px;font-size:14px"><b>${r.totalKm.toFixed(1)} км</b> · ${r.periodLiters.toFixed(1)} л зарцуулалт</div><div style="margin-top:4px;font-size:13px;color:${r.levelColor}"><b>${r.currentLevel}%</b> бензин үлдсэн (${r.remainingLiters.toFixed(1)} / ${r.tank} л)</div>${r.cost?`<div class="muted" style="font-size:12px;margin-top:4px">Зардал: ${money(r.cost)}</div>`:''}${r.vehicle?.id?`<button class="btn btn-ghost btn-sm" type="button" style="margin-top:10px" onclick="refillVehicleFuel('${r.vehicle.id}','${String(r.plate).replace(/'/g,"\\'")}')">Сав дүүргэх (100%)</button>`:''}</div></div><div class="fuel-gauge-bar" style="margin-top:12px"><div class="fuel-gauge-fill" style="width:${r.currentLevel}%;background:${r.levelColor}"></div></div></div>`).join('')}</div>`:'<div class="empty" style="padding:32px">Машин эсвэл аяллын бүртгэл алга</div>';
+      c.innerHTML=`<div class="stats" style="margin-bottom:16px"><div class="stat stat-card"><span class="material-symbols-outlined" style="color:#f59e0b">local_gas_station</span><div><div class="v">${rows.length}</div><div class="l">Машин</div></div></div><div class="stat stat-card"><span class="material-symbols-outlined" style="color:#22c55e">speed</span><div><div class="v">${active}</div><div class="l">Явж байна</div></div></div><div class="stat stat-card"><span class="material-symbols-outlined" style="color:#3b82f6">route</span><div><div class="v">${totalKm.toFixed(0)}</div><div class="l">Нийт км (30 хоног)</div></div></div></div>
+        <div class="grid2" style="margin-bottom:20px">
+          <div class="card"><div class="card-h"><h3>Бензин зарцуулалт (7 хоног)</h3></div><div class="card-b"><div class="dash-chart-wrap" style="height:260px"><canvas id="dashFuelChart"></canvas></div></div></div>
+          <div class="card"><div class="card-h"><h3>Машинаар түлш үлдэгдэл (%)</h3></div><div class="card-b"><div class="dash-chart-wrap" style="height:260px"><canvas id="dashFuelPctChart"></canvas></div></div></div>
+        </div>
+        <div class="card"><div class="card-h"><h3>Машин бүрээр</h3><button class="btn btn-ghost btn-sm" type="button" onclick="loadAll()">Шинэчлэх</button></div><div class="card-b">${cards}</div></div>`;
+      initDashboardCharts();
+    }
+    window.refillVehicleFuel=async(id,plate)=>{
+      if(!confirm((plate||'Машин')+' — сав 100% болгох уу?')) return;
+      const {error}=await sb.from('vehicles').update({fuel_level_percent:100,fuel_refilled_at:new Date().toISOString()}).eq('id',id);
+      if(error){ toast('Алдаа: '+error.message); return; }
+      toast('Бензин '+plate+' — 100%');
+      loadAll();
+    };
     function fuelByDayLast7(){
       const counts=Array(7).fill(0);
       const now=new Date();
@@ -1850,11 +1946,11 @@
     function fuelGaugeHtml(){
       const rows=fuelStatsByVehicle(30);
       if(!rows.length) return '<div class="empty" style="padding:24px">Түлшийн мэдээлэл алга — аялал эхлүүлсний дараа харагдана</div>';
-      return rows.map(r=>{
-        const pct=Math.min(100,r.fuelPct);
-        const col=pct>=80?'#ef4444':pct>=50?'#f59e0b':'#22c55e';
+      return rows.slice(0,6).map(r=>{
+        const pct=r.currentLevel;
+        const col=r.levelColor;
         const tag=r.active?'<span class="pill on" style="font-size:10px;margin-left:6px">Явж байна</span>':'';
-        return `<div class="fuel-gauge-row"><div class="fuel-gauge-meta"><b>${r.plate}</b><span class="muted">${r.usedLiters.toFixed(1)}л / ${r.tank}л · <b style="color:${col}">${pct}%</b>${tag}</span></div><div class="fuel-gauge-bar"><div class="fuel-gauge-fill" style="width:${pct}%;background:${col}"></div></div></div>`;
+        return `<div class="fuel-gauge-row"><div class="fuel-gauge-meta">${mongoliaPlateHtml(r.plate,'sm')}<span class="muted">${r.totalKm.toFixed(1)} км · ${r.remainingLiters.toFixed(1)}л үлдсэн · <b style="color:${col}">${pct}%</b>${tag}</span></div><div class="fuel-gauge-bar"><div class="fuel-gauge-fill" style="width:${pct}%;background:${col}"></div></div></div>`;
       }).join('');
     }
 
@@ -3663,38 +3759,52 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
 
     // ===== Машин / QR =====
     function renderVehicles(c){
+      const rows=fuelStatsByVehicle(30);
+      const fuelCards=rows.length?`<div class="fuel-fleet-grid" style="margin-top:16px">${rows.map(r=>`<div class="fuel-fleet-card"><div class="fuel-fleet-top">${fuelTankVizHtml(r.currentLevel,r.levelColor,r.tank,r.remainingLiters)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${mongoliaPlateHtml(r.plate,'sm')}${r.active?'<span class="pill on">Явж байна</span>':''}</div><div class="muted" style="font-size:13px;margin-top:4px">${r.driver}</div><div style="margin-top:8px"><b>${r.totalKm.toFixed(1)} км</b> · ${r.periodLiters.toFixed(1)} л</div><div style="margin-top:4px;color:${r.levelColor}"><b>${r.currentLevel}%</b> үлдсэн (${r.remainingLiters.toFixed(1)} / ${r.tank} л)</div></div></div><div class="fuel-gauge-bar" style="margin-top:10px"><div class="fuel-gauge-fill" style="width:${r.currentLevel}%;background:${r.levelColor}"></div></div></div>`).join('')}</div>`:'';
       c.innerHTML=`<div class="card"><div class="card-h"><h3>Машин (${data.vehicles.length})</h3>
-        <button class="btn btn-primary btn-sm" onclick="vehModal()"> Машин нэмэх</button></div>
-        <div class="card-b" style="padding:0"><table><thead><tr><th>Улсын дугаар</th><th>Код</th><th>100км/л</th><th>Сав (л)</th><th>Жолооч</th><th></th></tr></thead>
-        <tbody>${data.vehicles.map(v=>`<tr><td><b>${v.plate_number}</b></td><td>${v.code}</td><td>${v.liters_per_100km} л</td><td>${vehicleTankLiters(v)} л</td><td>${v.driver_name||'—'}</td>
+        <div class="card-h-actions"><button class="btn btn-ghost btn-sm" type="button" onclick="go('fuelconsumption')">Дэлгэрэнгүй</button>
+        <button class="btn btn-primary btn-sm" onclick="vehModal()"> Машин нэмэх</button></div></div>
+        <div class="card-b" style="padding:0"><table><thead><tr><th>Улсын дугаар</th><th>Код</th><th>100км/л</th><th>Сав (л)</th><th>Км (30х)</th><th>Бензин %</th><th>Жолооч</th><th></th></tr></thead>
+        <tbody>${data.vehicles.map(v=>{
+          const stat=rows.find(r=>r.vehicle?.id===v.id)||null;
+          const lvl=stat?.currentLevel??Number(v.fuel_level_percent??100);
+          const col=stat?.levelColor??fuelLevelColor(lvl);
+          const km=stat?.totalKm??0;
+          return `<tr><td>${mongoliaPlateHtml(v.plate_number,'sm')}${stat?.active?' <span class="pill on" style="font-size:10px">Явж</span>':''}</td><td>${v.code}</td><td>${v.liters_per_100km} л</td><td>${vehicleTankLiters(v)} л</td><td><b>${km.toFixed(1)}</b> км</td><td><b style="color:${col}">${lvl}%</b></td><td>${v.driver_name||'—'}</td>
           <td><button class="btn btn-ghost btn-sm" onclick='qrModal(${JSON.stringify(v).replace(/'/g,"&#39;")})'>QR</button>
-          <button class="btn btn-danger btn-sm" onclick="delVeh('${v.id}','${v.plate_number}')">Устгах</button></td></tr>`).join('')||'<tr><td colspan=6 class=empty>Машин алга</td></tr>'}</tbody></table></div></div>`;
+          <button class="btn btn-ghost btn-sm" onclick="refillVehicleFuel('${v.id}','${String(v.plate_number).replace(/'/g,"\\'")}')">Сав</button>
+          <button class="btn btn-danger btn-sm" onclick="delVeh('${v.id}','${v.plate_number}')">Устгах</button></td></tr>`;
+        }).join('')||'<tr><td colspan=8 class=empty>Машин алга</td></tr>'}</tbody></table></div>
+        <div class="card-b" style="border-top:1px solid var(--line)"><h4 style="margin:0 0 12px;font-size:15px">Бензин зарцуулалт · түвшин</h4>${fuelCards||'<div class="empty" style="padding:20px">Аяллын бүртгэл байхгүй</div>'}</div></div>`;
     }
     window.vehModal = ()=>{
       const code='VH-'+Math.floor(1000+Math.random()*9000);
       openModal('Шинэ машин нэмэх',`
-        <label>Улсын дугаар</label><input id="v_plate" placeholder="1234 УБА">
+        <label>Улсын дугаар</label><input id="v_plate" placeholder="1234 УБА" autocomplete="off">
+        <div class="mn-plate-preview" id="v_plate_preview"></div>
         <div class="row"><div><label>100км-т литр</label><input id="v_lit" value="12"></div><div><label>Бензиний сав (л)</label><input id="v_tank" value="60" type="number" min="10" step="1"></div></div>
         <label>Жолооч</label><input id="v_drv">
         <label>QR код</label><input id="v_code" value="${code}">
         <div class="err" id="m_err"></div>`,
         'Үүсгэх + QR', async ()=>{
-          const plate=$('v_plate').value.trim(); if(!plate){ mErr('Улсын дугаар оруулна уу'); return false; }
+          const plate=formatPlateInput($('v_plate').value.trim()); if(!plate){ mErr('Улсын дугаар оруулна уу'); return false; }
           const { data:saved, error } = await sb.from('vehicles').insert({code:$('v_code').value.trim(),plate_number:plate,liters_per_100km:Number($('v_lit').value)||12,tank_capacity_liters:Number($('v_tank').value)||60,driver_name:$('v_drv').value.trim()||null}).select().single();
           if(error){ mErr(error.message); return false; }
           closeModal(); loadAll(); qrModal(saved); return false;
         });
+      bindPlateInputPreview();
     };
     window.qrModal = (v)=>{
       const url='https://api.qrserver.com/v1/create-qr-code/?size=420x420&data='+encodeURIComponent(v.code);
-      openModal('Машины QR код',`<div class="qrbox"><div class="plate">${v.plate_number}</div>
+      openModal('Машины QR код',`<div class="qrbox">${mongoliaPlateHtml(v.plate_number,'lg')}
         <p class="muted" style="margin:6px 0 14px">${v.code} · ${v.liters_per_100km} л/100км</p>
         <img src="${url}" width="420" height="420" style="max-width:100%;height:auto"><p class="muted" style="font-size:13px;margin-top:12px">Хэвлээд машин дээр наана. Ажилтан уншиж аялал эхлүүлнэ.</p></div>`,
         'Хэвлэх',()=>{ printImg(url,v); return false; });
     };
     function printImg(url,v){
       const w=window.open('','_blank');
-      w.document.write(`<div style="text-align:center;font-family:sans-serif"><h2>${v.plate_number}</h2><p>${v.code}</p><img src="${url}" style="width:420px;height:420px"></div>`);
+      const plateCss=`.mn-plate{display:inline-flex;align-items:stretch;background:#fff;border:3px solid #111;border-radius:3px;overflow:hidden;font-family:system-ui,sans-serif}.mn-plate--lg{width:240px;height:120px}.mn-plate__band{width:40px;background:#003DA5;border-right:2px solid #111;display:flex;align-items:center;justify-content:center}.mn-plate__band span{color:#fff;font-weight:900;font-size:11px;writing-mode:vertical-rl;transform:rotate(180deg)}.mn-plate__body{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 8px}.mn-plate__digits{color:#111;font-weight:900;font-size:40px;letter-spacing:2px}.mn-plate__letters{color:#111;font-weight:900;font-size:32px;letter-spacing:3px}`;
+      w.document.write(`<html><head><style>${plateCss}</style></head><body style="text-align:center;font-family:sans-serif;padding:24px">${mongoliaPlateHtml(v.plate_number,'lg')}<p style="margin-top:12px">${v.code}</p><img src="${url}" style="width:420px;height:420px"></body></html>`);
       w.document.close(); setTimeout(()=>w.print(),400);
     }
     window.delVeh = async (id,plate)=>{ if(!confirm(plate+'машиныг устгах уу?'))return; await sb.from('vehicles').delete().eq('id',id); toast('Устгагдлаа'); loadAll(); };
@@ -4292,13 +4402,13 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       const fuelPctRows=fuelStatsByVehicle(30).slice(0,8);
       const fuelPctCtx=$('dashFuelPctChart');
       if(fuelPctCtx&&fuelPctRows.length){
-        const pctColors=fuelPctRows.map(r=>r.fuelPct>=80?'#ef4444':r.fuelPct>=50?'#f59e0b':'#22c55e');
+        const pctColors=fuelPctRows.map(r=>r.levelColor||fuelLevelColor(r.currentLevel));
         dashCharts.fuelPct=new Chart(fuelPctCtx.getContext('2d'),{
           type:'bar',
-          data:{labels:fuelPctRows.map(r=>r.plate),datasets:[{label:'Савны %',data:fuelPctRows.map(r=>r.fuelPct),backgroundColor:pctColors,borderRadius:8,maxBarThickness:28}]},
+          data:{labels:fuelPctRows.map(r=>r.plate),datasets:[{label:'Үлдэгдэл %',data:fuelPctRows.map(r=>r.currentLevel),backgroundColor:pctColors,borderRadius:8,maxBarThickness:28}]},
           options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
             const row=fuelPctRows[ctx.dataIndex];
-            return `${row.fuelPct}% · ${row.usedLiters.toFixed(1)}л / ${row.tank}л${row.active?' (явж байна)':''}`;
+            return `${row.currentLevel}% үлдсэн · ${row.totalKm.toFixed(1)} км · ${row.remainingLiters.toFixed(1)}л / ${row.tank}л${row.active?' (явж байна)':''}`;
           }}}},scales:{x:{max:100,grid:{color:chartGridColor()},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}
         });
       }
