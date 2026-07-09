@@ -4,9 +4,11 @@ import { useApp } from '../context/AppContext';
 import VideoCallModal from './VideoCallModal';
 import * as callApi from '../services/callService';
 import { startIncomingCallAlert, stopIncomingCallAlert } from '../services/callAlertService';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 
 export default function IncomingCallManager() {
+  const styles = useStyles(makeStyles);
   const { isCloud, currentUser } = useApp();
   const [incoming, setIncoming] = useState(null);
   const [inCall, setInCall] = useState(null);
@@ -96,7 +98,7 @@ export default function IncomingCallManager() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#000000dd', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   card: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.xl, alignItems: 'center', width: '100%'},
   avatar: {

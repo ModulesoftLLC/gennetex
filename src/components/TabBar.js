@@ -1,22 +1,42 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import NavIcon from './NavIcon';
 
 const ICONS = {
   Home: 'home',
   Attendance: 'attendance',
+  Feed: 'feed',
   Chat: 'chat',
   Profile: 'profile',
 };
 
 export default function TabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
+  const { colors, isDark } = useTheme();
 
   return (
     <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-      <View style={styles.bar}>
+      <View
+        style={[
+          styles.bar,
+          {
+            backgroundColor: isDark ? 'rgba(18,33,49,0.92)' : 'rgba(255,255,255,0.95)',
+            borderColor: colors.outlineVariant + '55',
+          },
+          Platform.select({
+            android: { elevation: 6 },
+            ios: {
+              shadowColor: colors.glowShadow,
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: isDark ? 0.15 : 0.06,
+              shadowRadius: 16,
+            },
+          }),
+        ]}
+      >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label = options.title ?? route.name;
@@ -47,10 +67,10 @@ export default function TabBar({ state, descriptors, navigation }) {
                 onPress={onPress}
                 onLongPress={onLongPress}
                 activeOpacity={0.85}
-                style={styles.itemActive}
+                style={[styles.itemActive, { backgroundColor: colors.primaryContainer + '1a' }]}
               >
-                <NavIcon name={icon} size={20} color={colors.primary} active />
-                <Text style={styles.labelActive} numberOfLines={1}>
+                <NavIcon name={icon} size={20} color={colors.primaryContainer} active activeColor={colors.primaryContainer} />
+                <Text style={[styles.labelActive, { color: colors.primaryContainer }]} numberOfLines={1}>
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -67,7 +87,7 @@ export default function TabBar({ state, descriptors, navigation }) {
               activeOpacity={0.7}
               style={styles.item}
             >
-              <NavIcon name={icon} size={22} color={colors.textFaint} />
+              <NavIcon name={icon} size={22} color={colors.onSurfaceVariant} />
             </TouchableOpacity>
           );
         })}
@@ -88,23 +108,12 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.surface,
     borderRadius: 24,
     paddingHorizontal: 8,
     paddingVertical: 8,
     marginHorizontal: spacing.lg,
     gap: 4,
     borderWidth: 1,
-    borderColor: colors.border,
-    ...Platform.select({
-      android: { elevation: 4 },
-      ios: {
-        shadowColor: '#111827',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 10,
-      },
-    }),
   },
   item: {
     width: 52,
@@ -120,7 +129,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 48,
     borderRadius: radius.lg,
-    backgroundColor: colors.primarySoft,
   },
-  labelActive: { color: colors.primary, fontWeight: '800', fontSize: 14 },
+  labelActive: { fontWeight: '800', fontSize: 14 },
 });

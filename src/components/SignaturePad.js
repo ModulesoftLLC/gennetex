@@ -1,7 +1,8 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { View, PanResponder, StyleSheet, Text } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 
 const VIEW_W = 600;
 const VIEW_H = 220;
@@ -22,6 +23,8 @@ export default function SignaturePad({ onChange }) {
   const current = useRef([]);
   const pathsRef = useRef([]);
   const layout = useRef({ width: 300, height: 220 });
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
 
   const scalePoint = useCallback((x, y) => {
     const { width, height } = layout.current;
@@ -106,7 +109,7 @@ export default function SignaturePad({ onChange }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   label: { color: colors.textMuted, fontSize: 13, fontWeight: '600', marginBottom: spacing.sm },
   pad: {
     height: VIEW_H,

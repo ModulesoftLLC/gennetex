@@ -17,10 +17,22 @@ import QRCode from '../components/QRCode';
 import { formatEmployeeBadge } from '../lib/employeeBadge';
 import * as vehicleApi from '../services/vehicleService';
 import { roleLabel } from '../lib/roles';
-import { colors, spacing, radius } from '../theme';
+import { DEVELOPER_LABEL, SUPERADMIN_EMAIL, HAS_DEVELOPER_EMAIL } from '../lib/developerConfig';
+import { useNavigation } from '@react-navigation/native';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+
+const THEME_OPTIONS = [
+  { key: 'light', label: 'Цайвар', icon: '☀' },
+  { key: 'dark', label: 'Бараан', icon: '☾' },
+  { key: 'system', label: 'Систем', icon: '⚙' },
+];
 
 export default function ProfileScreen() {
-  const { authProfile, profile, isAdmin, isCloud, signOut, updateMyProfile } = useApp();
+  const navigation = useNavigation();
+  const { colors, mode, setMode } = useTheme();
+  const styles = useStyles(makeStyles);
+  const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, signOut, updateMyProfile } = useApp();
   const canEdit = isAdmin;
   const canEditAvatar = !!authProfile;
   const [editing, setEditing] = useState(false);
@@ -176,7 +188,9 @@ export default function ProfileScreen() {
         {authProfile && !isAdmin ? (
           <Card style={{ marginTop: spacing.lg, alignItems: 'center'}}>
             <SectionTitle>Миний QR</SectionTitle>
-            <Text style={styles.qrHint}>Жолооч таныг хамт яваа хүн болгохын тулд энэ QR-ыг уншуулна</Text>
+            <Text style={styles.qrHint}>
+              Жолооч хамт яваа хүн болгох эсвэл ганцаараа аялал эхлүүлэхэд энэ QR-ыг уншуулна
+            </Text>
             <View style={styles.qrBox}>
               <QRCode value={formatEmployeeBadge(authProfile.id)} size={200} />
             </View>
@@ -225,6 +239,47 @@ export default function ProfileScreen() {
           <Text style={styles.note}>Нэвтэрсэн хэрэглэгчийн мэдээлэл энд харагдана.</Text>
         )}
 
+        {authProfile ? (
+          <Card style={{ marginTop: spacing.lg }}>
+            <SectionTitle>{DEVELOPER_LABEL}тэй холбогдох</SectionTitle>
+            <InfoRow label="Холбоо барих имэйл" value={HAS_DEVELOPER_EMAIL ? SUPERADMIN_EMAIL : 'Тохируулаагүй'} />
+            <Button
+              title="Мэдээ илгээх"
+              variant="ghost"
+              style={{ marginTop: spacing.sm }}
+              onPress={() => navigation.navigate('DeveloperContact')}
+            />
+            {isSuperAdmin ? (
+              <Button
+                title="Над руу ирсэн мэдээ"
+                style={{ marginTop: spacing.sm }}
+                onPress={() => navigation.navigate('DeveloperInbox')}
+              />
+            ) : null}
+          </Card>
+        ) : null}
+
+        <Card style={{ marginTop: spacing.lg }}>
+          <SectionTitle>Харагдац</SectionTitle>
+          <Text style={styles.themeHint}>Апп-ын өнгө горимыг сонгоно уу.</Text>
+          <View style={styles.themeRow}>
+            {THEME_OPTIONS.map((opt) => {
+              const active = mode === opt.key;
+              return (
+                <TouchableOpacity
+                  key={opt.key}
+                  style={[styles.themeOption, active && styles.themeOptionActive]}
+                  onPress={() => setMode(opt.key)}
+                  activeOpacity={0.85}
+                >
+                  <Text style={[styles.themeIcon, active && styles.themeIconActive]}>{opt.icon}</Text>
+                  <Text style={[styles.themeLabel, active && styles.themeLabelActive]}>{opt.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </Card>
+
         <Button title="Системээс гарах" variant="danger" size="lg" style={{ marginTop: spacing.lg }} onPress={confirmSignOut} />
       </ScrollView>
     </View>
@@ -232,6 +287,7 @@ export default function ProfileScreen() {
 }
 
 function InfoRow({ label, value, last }) {
+  const styles = useStyles(makeStyles);
   return (
     <View style={[styles.infoRow, !last && styles.infoBorder]}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -240,8 +296,8 @@ function InfoRow({ label, value, last }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
+const makeStyles = ({ colors }) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   hero: { alignItems: 'center', paddingVertical: spacing.xl },
   avatar: {
     width: 88,
@@ -299,4 +355,24 @@ const styles = StyleSheet.create({
   withDriverLabel: { color: colors.textMuted, fontSize: 12, marginTop: spacing.sm },
   withDriverName: { color: colors.text, fontSize: 18, fontWeight: '800', marginTop: 2 },
   withDriverSub: { color: colors.primary, fontSize: 13, marginTop: 4, fontWeight: '600' },
+  themeHint: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md },
+  themeRow: { flexDirection: 'row', gap: spacing.sm },
+  themeOption: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.outlineVariant,
+    backgroundColor: colors.surfaceContainerLow,
+    gap: 4,
+  },
+  themeOptionActive: {
+    borderColor: colors.primaryContainer,
+    backgroundColor: colors.primarySoft,
+  },
+  themeIcon: { fontSize: 20, color: colors.textMuted },
+  themeIconActive: { color: colors.primary },
+  themeLabel: { fontSize: 12, fontWeight: '600', color: colors.textMuted },
+  themeLabelActive: { color: colors.primary },
 });

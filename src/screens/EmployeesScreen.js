@@ -13,12 +13,15 @@ import {
 } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Field, Badge, ScreenHeader, HeaderButton, EmptyState } from '../components/ui';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import { ROLES, roleLabel, canManageProfile, canAssignRoles } from '../lib/roles';
 
-const EMPTY = { name: '', last_name: '', email: '', password: '', position: '', phone: '', address: '', role: 'employee'};
+const EMPTY = { name: '', last_name: '', email: '', password: '', position: '', phone: '', address: '', role: 'employee' };
 
 export default function EmployeesScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const { isAdmin, isSuperAdmin: isSuperAdminUser, authProfile, fetchEmployees, adminCreateEmployee, adminUpdateEmployee, adminResetUserPassword } = useApp();
   const mayAssignRoles = canAssignRoles(authProfile?.role);
   const [list, setList] = useState([]);
@@ -248,7 +251,7 @@ function mapError(msg = '') {
   return msg;
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   avatar: {

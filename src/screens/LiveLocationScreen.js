@@ -4,7 +4,8 @@ import MapView, { Marker, PROVIDER_GOOGLE } from '../components/Map';
 import { Badge, ScreenHeader, EmptyState } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { CALL_TYPES } from '../data/mockData';
-import { colors, spacing, radius, shadow } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import * as tracking from '../services/trackingService';
 
 function callTypeLabel(key) {
@@ -38,6 +39,7 @@ function timeAgo(ts) {
 }
 
 function WorkerMarker({ worker, color, visit, onPress }) {
+  const styles = useStyles(makeStyles);
   const [tracks, setTracks] = useState(!!worker.avatar_url);
 
   return (
@@ -72,6 +74,8 @@ function WorkerMarker({ worker, color, visit, onPress }) {
 }
 
 export default function LiveLocationScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const { isCloud, isAdmin, trackingState } = useApp();
   const [workers, setWorkers] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -229,6 +233,7 @@ export default function LiveLocationScreen() {
 }
 
 function Tab({ active, label, onPress }) {
+  const styles = useStyles(makeStyles);
   return (
     <TouchableOpacity
       style={[styles.tab, active && styles.tabActive]}
@@ -240,7 +245,7 @@ function Tab({ active, label, onPress }) {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   map: { flex: 1 },
   panel: {

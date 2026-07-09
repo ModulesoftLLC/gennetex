@@ -3,6 +3,15 @@ import * as notifyApi from './notificationService';
 
 const TABLE = 'service_calls';
 
+export const SITE_KINDS = [
+  { key: 'ail', label: 'Айл' },
+  { key: 'baiguulga', label: 'Байгууллага' },
+];
+
+export function siteKindMeta(key) {
+  return SITE_KINDS.find((s) => s.key === (key || 'ail')) || SITE_KINDS[0];
+}
+
 export function mapServiceCallRow(r) {
   if (!r) return null;
   return {
@@ -12,12 +21,22 @@ export function mapServiceCallRow(r) {
     address: r.address || '',
     problem: r.problem || '',
     type: r.call_type || 'other',
+    site_kind: r.site_kind || 'ail',
     engineer: r.engineer_name || '',
     engineer_id: r.engineer_id,
+    partner_engineer_id: r.partner_engineer_id || null,
+    partner_engineer_name: r.partner_engineer_name || null,
+    team_name: r.team_name || null,
     latitude: r.latitude,
     longitude: r.longitude,
     status: r.status || 'Хүлээгдэж буй',
+    close_meta: r.close_meta || null,
+    scheduled_at: r.scheduled_at || null,
+    sla_deadline: r.sla_deadline || null,
+    created_by: r.created_by || null,
+    created_by_name: r.created_by_name || null,
     created_at: r.created_at,
+    updated_at: r.updated_at || null,
   };
 }
 
@@ -101,9 +120,24 @@ export async function updateServiceCallStatus(id, status) {
   return mapServiceCallRow(data);
 }
 
+/** Дурын багана шинэчлэх (status, close_meta, scheduled_at гэх мэт) */
+export async function updateServiceCall(id, patch) {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return mapServiceCallRow(data);
+}
+
 export function subscribeServiceCalls(onChange) {
+  // Суваг бүр өвөрмөц нэртэй — олон дэлгэц/context зэрэг subscribe хийхэд
+  // "cannot add postgres_changes callbacks after subscribe()" алдаа гарахгүй.
+  const topic = `service-calls-sync-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const channel = supabase
-    .channel('service-calls-sync')
+    .channel(topic)
     .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => onChange())
     .subscribe();
   return () => supabase.removeChannel(channel);

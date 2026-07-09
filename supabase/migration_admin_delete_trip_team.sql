@@ -33,3 +33,4 @@ revoke all on function public.admin_delete_trip_team(uuid) from public;
 grant execute on function public.admin_delete_trip_team(uuid) to authenticated;
 
 notify pgrst, 'reload schema';
+

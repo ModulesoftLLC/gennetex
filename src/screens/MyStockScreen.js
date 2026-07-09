@@ -22,10 +22,13 @@ import InventoryThumb from '../components/InventoryThumb';
 import BarcodeScanner from '../components/BarcodeScanner';
 import { movementTypeLabel } from '../lib/stockBalance';
 import * as invApi from '../services/inventoryService';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
 
 export default function MyStockScreen() {
   const route = useRoute();
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
   const category = route.params?.category === 'tool' ? 'tool' : 'material';
   const isTool = category === 'tool';
   const { inventory, isCloud, currentUser, consumeItem, fetchMyStock, getItemByBarcode } = useApp();
@@ -131,13 +134,16 @@ export default function MyStockScreen() {
               </Text>
             </View>
           }
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+            const invItem = inventory.find((it) => it.id === item.item_id);
+            return (
             <Card style={styles.card}>
               <View style={styles.row}>
                 <InventoryThumb
                   name={item.item_name}
                   category={item.category || category}
                   size={46}
+                  imageUrl={invItem?.image_url}
                 />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.name}>{item.item_name}</Text>
@@ -155,9 +161,10 @@ export default function MyStockScreen() {
                 onPress={() => openConsume(item)}
               />
             </Card>
-          )}
+            );
+          }}
           ListEmptyComponent={
-            <EmptyState text={isTool ? 'Танд багажийн үлдэгдэл алга.' : 'Танд бараа материалын үлдэгдэл алга.\nАгуулахаас бар код уншуулж авна уу.'}
+            <EmptyState text={isTool ? 'Танд багажийн үлдэгдэл алга.' : 'Танд бараа материалын үлдэгдэл алга.\nАгуулахаас жагсаалтаас сонгон авна уу.'}
             />
           }
         />
@@ -201,8 +208,8 @@ export default function MyStockScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
+const makeStyles = ({ colors }) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   banner: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,

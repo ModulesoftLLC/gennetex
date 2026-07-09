@@ -159,6 +159,9 @@
           <a data-view="employees"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M4 19c0-3 2.5-5 5-5s5 2 5 5M14 19c0-2 1.5-3.5 3.5-3.5"/></svg></span><span class="t">Ажилчид</span></a>
           <a data-view="reports"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="t">Тайлан</span></a>
           <a data-view="feedback"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg></span><span class="t">Санал гомдол</span></a>
+          <a data-view="applications"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 3h6l1 3H8z"/><rect x="4" y="6" width="16" height="15" rx="2"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="t">Ажлын байрны анкет</span></a>
+          <a data-view="contracts"><span class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><path d="M8 16l2 2 4-4"/></svg></span><span class="t">Хөдөлмөрийн гэрээ</span></a>
+          <a data-view="devices"><span class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg></span><span class="t">Төхөөрөмж зөвшөөрөл</span></a>
           <a data-view="aiappusage"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="14" y2="12"/></svg></span><span class="t">AI апп хэрэглээ</span></a>
           <a data-view="aiperformance"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><span class="t">AI гүйцэтгэл</span></a>
           <a data-view="attendance"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><circle cx="12" cy="12" r="3"/></svg></span><span class="t">Ирц</span></a>
@@ -184,7 +187,7 @@
           <div class="grp">Excel</div>
           <a data-view="excelarchive"><span class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span><span class="t">Excel архив</span></a>
         </nav>
-        <div class="foot">Gennetex ERP v0.2.0</div>
+        <div class="foot">Gennetex ERP v0.4.8</div>
       </aside>
       <div class="main">
         <div class="topbar">
@@ -233,6 +236,8 @@
       return list.filter(w=>w.role!=='superadmin');
     };
     const fieldWorkers=()=>visibleWorkers().filter(w=>w.role==='employee');
+    // Дуудлага авах: ажилтан болон админ admin эрхээрээ; системийн админ (Хөгжүүлэгч) хамаарахгүй
+    const callTakers=()=>visibleWorkers().filter(w=>w.role!=='superadmin');
 
     const INV_IMG_RULES=[
       [/router|чиглүүлэгч/i,'router'],[/switch/i,'switch'],[/оптик кабель(?!.*патч)(?!.*адаптер)/i,'fiber-cable'],
@@ -517,7 +522,7 @@
 
     // ===== Navigation =====
     document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
-    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
+    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
     let activityFilter={year:new Date().getFullYear(),month:0,day:0,user:''};
     const ACTION_LABEL={login:'Нэвтрэлт',leave_request:'Чөлөө хүсэлт',screen:'Дэлгэц нээсэн',tap:'Даралт',location:'Байршил',face_enroll:'Царай бүртгэл',attendance:'Ирц',inventory:'Бараа/багаж',visit:'Айлд очсон',site_work:'Ажлын байр',service_call:'Дуудлага',other:'Бусад'};
     const fmtLogTime=ts=>{
@@ -540,7 +545,7 @@
       const [w,a,v,tr,sw,sc,inv,veh,mov,rep,sh,al,br,alogs,posts,lives,meetings,lr]=await Promise.all([
         sb.from('profiles').select('id,name,last_name,role,latitude,longitude,last_seen,email,position,phone,address,avatar_url').order('name'),
         sb.from('attendance').select('*').order('created_at',{ascending:false}).limit(200),
-        sb.from('visit_logs').select('*').order('arrived_at',{ascending:false}).limit(200),
+        sb.from('visit_logs').select('*').order('arrived_at',{ascending:false}).limit(5000),
         sb.from('trips').select('*').order('started_at',{ascending:false}).limit(200),
         sb.from('field_site_sessions').select('*').order('created_at',{ascending:false}).limit(200),
         sb.from('service_calls').select('*').order('created_at',{ascending:false}).limit(200),
@@ -591,9 +596,25 @@
       const tripGroupsArchive=allTripGroups.filter(t=>new Date(t.started_at)<todayMs);
       const tripGroups=tripGroupsToday;
       let feedbackRows=[], aiReports=[], aiUsageReports=[];
+      let jobApplications=[], jobContracts=[], deviceApprovals=[];
       try{
         const fb=await sb.from('employee_feedback').select('*').order('created_at',{ascending:false}).limit(200);
         if(!fb.error) feedbackRows=fb.data||[];
+      }catch(e){}
+      try{
+        const ja=await sb.from('job_applications').select('*').order('created_at',{ascending:false}).limit(300);
+        if(!ja.error) jobApplications=ja.data||[];
+        else if(String(ja.error.message).includes('job_applications')) toast('Ажлын байрны анкет: migration_job_applications.sql ажиллуулна уу');
+      }catch(e){}
+      try{
+        const jc=await sb.from('job_contracts').select('*').order('created_at',{ascending:false}).limit(300);
+        if(!jc.error) jobContracts=jc.data||[];
+        else if(String(jc.error.message).includes('job_contracts')) toast('Хөдөлмөрийн гэрээ: migration_job_contracts.sql ажиллуулна уу');
+      }catch(e){}
+      try{
+        const da=await sb.from('device_approvals').select('*').order('requested_at',{ascending:false}).limit(300);
+        if(!da.error) deviceApprovals=da.data||[];
+        else if(String(da.error.message).includes('device_approvals')) toast('Төхөөрөмж зөвшөөрөл: migration_device_approvals.sql ажиллуулна уу');
       }catch(e){}
       try{
         const ar=await sb.from('ai_performance_reports').select('*').order('created_at',{ascending:false}).limit(50);
@@ -617,6 +638,9 @@
         feedback:feedbackRows,
         aiReports:aiReports,
         aiUsageReports:aiUsageReports,
+        jobApplications:jobApplications,
+        jobContracts:jobContracts,
+        deviceApprovals:deviceApprovals,
         leaveRequests:lr.error?[]:(lr.data||[])};
       // Interval үед газрын зураг байвал зөвхөн marker шинэчилнэ (zoom тогтвортой)
       if(silent && (view==='dashboard' ||view==='location') && map && document.body.contains($('map'))){
@@ -632,6 +656,9 @@
       if(view==='employees') return renderEmployees(c);
       if(view==='reports') return renderReports(c);
       if(view==='feedback') return renderFeedback(c);
+      if(view==='applications') return renderApplications(c);
+      if(view==='contracts') return renderContracts(c);
+      if(view==='devices') return renderDevices(c);
       if(view==='aiappusage') return renderAiAppUsage(c);
       if(view==='aiperformance') return renderAiPerformance(c);
       if(view==='attendance') return renderAttendance(c);
@@ -1306,6 +1333,22 @@
       ]));
       return rows;
     }
+    function visitsSummary(){
+      const byPerson={};
+      (data.visits||[]).forEach(x=>{
+        const name=x.user_name||'Тодорхойгүй';
+        if(!byPerson[name]) byPerson[name]={name,total:0,places:new Set(),last:null};
+        byPerson[name].total+=1;
+        byPerson[name].places.add(String(x.customer||x.location_name||'—').trim());
+        if(x.arrived_at&&(!byPerson[name].last||new Date(x.arrived_at)>new Date(byPerson[name].last))) byPerson[name].last=x.arrived_at;
+      });
+      return Object.values(byPerson).map(p=>({...p,distinct:p.places.size})).sort((a,b)=>b.total-a.total);
+    }
+    function buildVisitsSummarySheet(){
+      const rows=[['Ажилтан','Нийт очсон удаа','Ялгаатай айл/газар','Сүүлд очсон']];
+      visitsSummary().forEach(p=>rows.push([p.name,p.total,p.distinct,p.last?new Date(p.last).toLocaleString('mn-MN'):'—']));
+      return rows;
+    }
     function buildSiteWorkSheet(){
       const rows=[prependYmd(['Байршил','Хаяг','Жолооч','Баг','Ирсэн','Явсан','Хугацаа','Төлөв','Тайлбар','Зураг URL','Бүртгэсэн'])];
       (data.siteSessions||[]).forEach(s=>pushYmdRow(rows,s.arrived_at||s.created_at,[
@@ -1365,7 +1408,10 @@
       category:'irts',title:'Ирц',filename:'irts',sheets:[{name:'Ирц',rows:buildAttendanceSheet()}],
     });
     window.exportVisits=()=>exportAndArchive({
-      category:'ocson_log',title:'Очсон лог',filename:'ocson_log',sheets:[{name:'Очсон лог',rows:buildVisitsSheet()}],
+      category:'ocson_log',title:'Очсон лог',filename:'ocson_log',sheets:[
+        {name:'Хүн бүрийн нэгтгэл',rows:buildVisitsSummarySheet()},
+        {name:'Дэлгэрэнгүй',rows:buildVisitsSheet()},
+      ],
     });
     window.exportSiteWork=()=>exportAndArchive({
       category:'ajlyn_bair',title:'Ажлын байр',filename:'ajlyn_bair',sheets:[{name:'Ажлын байр',rows:buildSiteWorkSheet()}],
@@ -1719,6 +1765,87 @@
         <div class="card"><div class="card-h"><h3>📛 Гомдол (${gomdol.length})</h3></div><div class="card-b" style="padding:0">${table(gomdol,'Гомдол алга')}</div></div>
         <div class="card"><div class="card-h"><h3>💡 Санал (${sanal.length})</h3></div><div class="card-b" style="padding:0">${table(sanal,'Санал алга')}</div></div>`;
     }
+
+    // ===== Ажлын байрны анкет =====
+    const APP_STATUS={new:'Шинэ',reviewing:'Хянаж буй',contacted:'Холбогдсон',hired:'Ажилд авсан',rejected:'Татгалзсан'};
+    function renderApplications(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const list=data.jobApplications||[];
+      const opt=cur=>Object.keys(APP_STATUS).map(k=>`<option value="${k}" ${cur===k?'selected':''}>${APP_STATUS[k]}</option>`).join('');
+      const rowHtml=r=>`<tr>
+        <td><b>${esc(r.name||'—')} ${esc(r.last_name||'')}</b></td>
+        <td>${esc(r.position||'—')}</td>
+        <td>${r.phone?`<a href="tel:${esc(r.phone)}">${esc(r.phone)}</a>`:'—'}</td>
+        <td>${r.email?`<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>`:'—'}</td>
+        <td style="max-width:280px">${esc(r.message||'')}</td>
+        <td>${r.cv_url?`<a href="${esc(r.cv_url)}" target="_blank">CV</a>`:'—'}</td>
+        <td class=muted>${new Date(r.created_at).toLocaleString('mn-MN')}</td>
+        <td><select onchange="setAppStatus('${r.id}',this.value)" style="padding:6px 8px">${opt(r.status)}</select></td>
+      </tr>`;
+      c.innerHTML=`<div class="card"><div class="card-h"><h3>Ажлын байрны анкет (${list.length})</h3>
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
+        <div class="card-b" style="padding:0"><table><thead><tr><th>Нэр</th><th>Албан тушаал</th><th>Утас</th><th>Имэйл</th><th>Тэмдэглэл</th><th>CV</th><th>Огноо</th><th>Төлөв</th></tr></thead>
+        <tbody>${list.map(rowHtml).join('')||'<tr><td colspan=8 class=empty>Анкет алга</td></tr>'}</tbody></table></div></div>`;
+    }
+    async function setAppStatus(id,status){
+      const {error}=await sb.from('job_applications').update({status}).eq('id',id);
+      if(error) toast('Алдаа: '+error.message); else { toast('Төлөв шинэчиллээ'); loadAll(); }
+    }
+    window.setAppStatus=setAppStatus;
+
+    // ===== Хөдөлмөрийн гэрээ =====
+    function renderContracts(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const list=data.jobContracts||[];
+      const money=n=>n==null?'—':new Intl.NumberFormat('mn-MN').format(Math.round(n))+'₮';
+      const rowHtml=r=>`<tr>
+        <td><b>${esc(r.employee_name||'—')}</b></td>
+        <td>${esc(r.position||'—')}</td>
+        <td>${money(r.salary)}</td>
+        <td class=muted>${esc(r.start_date||'—')}${r.end_date?' → '+esc(r.end_date):''}</td>
+        <td>${esc(r.created_by_name||'—')}</td>
+        <td><span class="pill ${r.status==='signed'?'on':'off'}">${r.status==='signed'?'Гарын үсэгтэй':'Хүлээгдэж буй'}</span></td>
+        <td class=muted>${r.signed_at?new Date(r.signed_at).toLocaleString('mn-MN'):'—'}</td>
+        <td>${r.pdf_url?`<a href="${esc(r.pdf_url)}" target="_blank">PDF</a>`:'—'}</td>
+      </tr>`;
+      c.innerHTML=`<div class="card"><div class="card-h"><h3>Хөдөлмөрийн гэрээ (${list.length})</h3>
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
+        <div class="card-b" style="padding:12px 16px"><p class="muted" style="margin:0;font-size:13px">Гэрээг админ ажилтан үүсгэнэ. Нөхцлийг зөвхөн системийн админ засна. Ажилтан аппаас гарын үсэг зурна.</p></div></div>
+        <div class="card"><div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Албан тушаал</th><th>Цалин</th><th>Хугацаа</th><th>Үүсгэсэн</th><th>Төлөв</th><th>Гарын үсэг</th><th>PDF</th></tr></thead>
+        <tbody>${list.map(rowHtml).join('')||'<tr><td colspan=8 class=empty>Гэрээ алга</td></tr>'}</tbody></table></div></div>`;
+    }
+
+    // ===== Төхөөрөмж зөвшөөрөл =====
+    const DEV_STATUS={pending:'Хүлээгдэж буй',approved:'Зөвшөөрсөн',rejected:'Татгалзсан'};
+    function renderDevices(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
+      const list=data.deviceApprovals||[];
+      const isSuper=isSuperAdmin(me?.role);
+      const rowHtml=r=>`<tr>
+        <td><b>${esc(r.user_name||'Ажилтан')}</b></td>
+        <td>${esc(((r.device_brand||'')+' '+(r.device_model||'')).trim()||'—')}</td>
+        <td class=muted>${esc(((r.os||'')+' '+(r.os_version||'')).trim()||'—')}</td>
+        <td>${esc(r.public_ip||'—')}</td>
+        <td class=muted>${esc(r.local_ip||'—')}</td>
+        <td class=muted>${esc(r.mac||'—')}</td>
+        <td class=muted>${new Date(r.requested_at).toLocaleString('mn-MN')}</td>
+        <td><span class="pill ${r.status==='approved'?'on':r.status==='rejected'?'off':'admin'}">${DEV_STATUS[r.status]||r.status}</span></td>
+        <td>${isSuper?`<div style="display:flex;gap:6px">
+          ${r.status!=='approved'?`<button class="btn btn-success btn-sm" onclick="decideDevice('${r.id}','approved','${r.user_id}')">Зөвшөөрөх</button>`:''}
+          ${r.status!=='rejected'?`<button class="btn btn-danger btn-sm" onclick="decideDevice('${r.id}','rejected','${r.user_id}')">Татгалзах</button>`:''}
+        </div>`:'<span class=muted>Зөвхөн систем админ</span>'}</td>
+      </tr>`;
+      c.innerHTML=`<div class="card"><div class="card-h"><h3>Төхөөрөмж зөвшөөрөл (${list.length})</h3>
+        <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div>
+        <div class="card-b" style="padding:12px 16px"><p class="muted" style="margin:0;font-size:13px">Ажилтан шинэ төхөөрөмжөөр нэвтрэхэд энд харагдана. Зөвшөөрснөөр л апп нээгдэнэ. (MAC хаягийг OS хязгаарлалтаас болж бүрэн авах боломжгүй.)</p></div></div>
+        <div class="card"><div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Төхөөрөмж</th><th>Систем</th><th>IP</th><th>Дотоод IP</th><th>MAC</th><th>Огноо</th><th>Төлөв</th><th>Үйлдэл</th></tr></thead>
+        <tbody>${list.map(rowHtml).join('')||'<tr><td colspan=9 class=empty>Хүсэлт алга</td></tr>'}</tbody></table></div></div>`;
+    }
+    async function decideDevice(id,status,userId){
+      const {error}=await sb.from('device_approvals').update({status,decided_at:new Date().toISOString(),decided_by:me?.id||null,decided_by_name:me?.name||null}).eq('id',id);
+      if(error) toast('Алдаа: '+error.message); else { toast(status==='approved'?'Зөвшөөрлөө':'Татгалзлаа'); loadAll(); }
+    }
+    window.decideDevice=decideDevice;
 
 
     function renderAiAppUsage(c){
@@ -2237,6 +2364,7 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       return '<span class=muted>—</span>';
     }
     function renderVisits(c){
+      const esc=v=>String(v??'').replace(/</g,'&lt;');
       const rows=data.visits.map((x,i)=>`<tr>
         <td><b>${x.customer||x.location_name||'Айл'}</b>${x.location_name&&x.location_name!==x.customer?`<br><span class=muted style="font-size:12px">${x.location_name}</span>`:''}</td>
         <td>${x.user_name||'—'}</td>
@@ -2245,9 +2373,19 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
         <td class=muted>${new Date(x.arrived_at).toLocaleString('mn-MN')}</td>
         <td>${visitProofCell(x,i)}</td>
       </tr>`).join('');
-      c.innerHTML=`<div class="card"><div class="card-h"><h3>Айлд очсон лог (${data.visits.length})</h3>
-        <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="exportVisits()">Excel</button>
+      const summary=visitsSummary();
+      const sumRows=summary.map(p=>`<tr>
+        <td><b>${esc(p.name)}</b></td>
+        <td><b style="color:var(--primary)">${p.total}</b></td>
+        <td>${p.distinct}</td>
+        <td class=muted>${p.last?new Date(p.last).toLocaleString('mn-MN'):'—'}</td>
+      </tr>`).join('');
+      c.innerHTML=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Хүн бүрийн нэгтгэл — хэн хэдэн айлд очсон (${summary.length})</h3>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="exportVisits()">Excel татах</button>
         <button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div></div>
+        <div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Нийт очсон</th><th>Ялгаатай айл/газар</th><th>Сүүлд очсон</th></tr></thead>
+        <tbody>${sumRows||'<tr><td colspan=4 class=empty>Мэдээлэл алга</td></tr>'}</tbody></table></div></div>
+        <div class="card"><div class="card-h"><h3>Айлд очсон дэлгэрэнгүй лог (${data.visits.length})</h3></div>
         <div class="card-b" style="padding:0"><table><thead><tr><th>Байршил</th><th>Ажилтан</th><th>Төрөл</th><th>Асуудал</th><th>Огноо</th><th>Баталгаа</th></tr></thead>
         <tbody>${rows||'<tr><td colspan=6 class=empty>Мэдээлэл алга — апп дээр «Очсон бүртгэх» эсвэл ажлын байр дээр ирэх</td></tr>'}</tbody></table></div></div>`;
     }
@@ -2826,8 +2964,9 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       <p class="muted" style="margin:0;font-size:13px">Админ дуудлагыг Айл эсвэл Байгууллага гэж бүртгэж инженерт онооно. Утас, хаяг, «юу болохгүй байгаа» бүгд харагдана.</p>`;
     }
     window.serviceCallModal=()=>{
-      const engOpts=fieldWorkers().map(w=>{
-        const label=[w.last_name,w.name].filter(Boolean).join(' ')||w.name||w.email;
+      const engOpts=callTakers().map(w=>{
+        const nm=[w.last_name,w.name].filter(Boolean).join(' ')||w.name||w.email;
+        const label=w.role!=='employee' ? `${nm} (${roleLabel(w.role)})` : nm;
         return `<option value="${w.id}"data-name="${(w.name||'').replace(/"/g,'&quot;')}">${label}</option>`;
       }).join('');
       const typeOpts=CALL_TYPES.map(t=>`<option value="${t.key}">${t.label}</option>`).join('');

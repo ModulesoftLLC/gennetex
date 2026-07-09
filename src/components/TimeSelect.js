@@ -9,10 +9,12 @@ import {
   Pressable,
 } from 'react-native';
 import { TIME_OPTIONS } from '../lib/timeOptions';
-import { colors, spacing, radius } from '../theme';
+import { spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
 
 export default function TimeSelect({ label, value, onChange, placeholder = 'Сонгох', allowClear = true }) {
   const [open, setOpen] = useState(false);
+  const styles = useStyles(makeStyles);
 
   const pick = (t) => {
     onChange(t);
@@ -53,7 +55,7 @@ export default function TimeSelect({ label, value, onChange, placeholder = 'Со
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   wrap: { flex: 1 },
   label: { color: colors.textMuted, fontSize: 11, fontWeight: '700', marginBottom: 4 },
   box: {

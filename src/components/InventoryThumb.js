@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, Image } from 'react-native';
 import Svg, { Rect, Circle, Line, Path, Ellipse, Text as SvgText } from 'react-native-svg';
 import { getInventoryImageKey } from '../data/inventoryImages';
 
@@ -209,7 +209,14 @@ function Shape({ shape, stroke }) {
   }
 }
 
-export default function InventoryThumb({ name, category = 'material', size = 46 }) {
+export default function InventoryThumb({ name, category = 'material', size = 46, imageUrl }) {
+  if (imageUrl) {
+    return (
+      <View style={{ width: size, height: size, borderRadius: 10, overflow: 'hidden', backgroundColor: '#f1f3f7' }}>
+        <Image source={{ uri: imageUrl }} style={{ width: size, height: size }} resizeMode="cover" />
+      </View>
+    );
+  }
   const key = getInventoryImageKey(name, category);
   const item = META[key] || META['default-material'];
   return (

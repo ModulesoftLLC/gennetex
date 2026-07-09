@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Button } from './ui';
-import { colors, spacing } from '../theme';
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
 
 // Дэмжих зураасан кодын төрлүүд
 const BARCODE_TYPES = [
@@ -21,6 +22,7 @@ const BARCODE_TYPES = [
 export default function BarcodeScanner({ visible, onClose, onScanned, title, hint, frameWidth = 280, frameHeight = 180 }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const styles = useStyles(makeStyles);
 
   useEffect(() => {
     if (visible) setScanned(false);
@@ -85,7 +87,7 @@ export default function BarcodeScanner({ visible, onClose, onScanned, title, hin
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000'},
   center: {
     flex: 1,
