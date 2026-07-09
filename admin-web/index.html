@@ -2,7 +2,7 @@
 <html lang="mn">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="admin-build-version" content="0.7.7"/>
+  <meta name="admin-build-version" content="0.7.8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ЖЕННЕТЕКС — Админ самбар</title>
   <link rel="icon" href="/gennetex/admin/logo.png"/>
@@ -458,6 +458,13 @@
     .mn-plate--sm .mn-plate__mgl{width:24px;height:auto}
     .mn-plate--md .mn-plate__mgl{width:30px;height:auto}
     .mn-plate--lg .mn-plate__mgl{width:38px;height:auto}
+    .mn-plate-wrap{display:inline-flex;align-items:center;gap:10px;vertical-align:middle}
+    .mn-plate-wrap--sm{gap:8px}
+    .mn-plate-wrap--lg{gap:12px}
+    .mn-plate__car{display:block;object-fit:contain;flex-shrink:0}
+    .mn-plate-wrap--sm .mn-plate__car{width:52px;height:auto}
+    .mn-plate-wrap--md .mn-plate__car{width:72px;height:auto}
+    .mn-plate-wrap--lg .mn-plate__car{width:110px;height:auto}
     .mn-plate-preview{display:flex;justify-content:center;margin:10px 0 4px}
     .toast{position:fixed;bottom:24px;right:24px;background:#302f38;color:#f3effa;padding:14px 20px;border-radius:12px;z-index:3000;display:none;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
     .chk{display:flex;align-items:center;gap:10px;padding:8px 0}
@@ -645,7 +652,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.7</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.8</span>
         </div>
       </aside>
       <div class="main">
@@ -1835,10 +1842,17 @@
       if(digits.length===4&&!letters) return `${digits}···`;
       return `${digits}${letters||''}`;
     }
-    function mongoliaPlateHtml(plate,size='md'){
+    function plateCarSrc(){
+      if(typeof PLATE_CAR_DATA!=='undefined'&&PLATE_CAR_DATA) return PLATE_CAR_DATA;
+      return ADMIN_ASSET('plate-car.png');
+    }
+    function mongoliaPlateHtml(plateNum,size='md',withCar=true){
       const sz=size==='sm'?'mn-plate--sm':size==='lg'?'mn-plate--lg':'mn-plate--md';
-      const text=plateCompactText(plate);
-      return `<span class="mn-plate ${sz}"><img class="mn-plate__soy" src="${PLATE_SOY_DATA}" alt="" width="10" height="19"><span class="mn-plate__text">${text}</span><img class="mn-plate__mgl" src="${PLATE_MGL_DATA}" alt="MGL" width="30" height="16"></span>`;
+      const wrapSz=size==='sm'?'mn-plate-wrap--sm':size==='lg'?'mn-plate-wrap--lg':'mn-plate-wrap--md';
+      const text=plateCompactText(plateNum);
+      const badge=`<span class="mn-plate ${sz}"><img class="mn-plate__soy" src="${PLATE_SOY_DATA}" alt="" width="10" height="19"><span class="mn-plate__text">${text}</span><img class="mn-plate__mgl" src="${PLATE_MGL_DATA}" alt="MGL" width="30" height="16"></span>`;
+      if(!withCar) return badge;
+      return `<span class="mn-plate-wrap ${wrapSz}"><img class="mn-plate__car" src="${plateCarSrc()}" alt="Машин">${badge}</span>`;
     }
     function bindPlateInputPreview(){
       const inp=$('v_plate'), prev=$('v_plate_preview');
@@ -3812,7 +3826,7 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       const w=window.open('','_blank');
       const base=location.href.replace(/[^/]*$/,'');
       const plateHtml=mongoliaPlateHtml(v.plate_number,'lg');
-      const plateCss=`.mn-plate{display:inline-flex;align-items:center;background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:7px 14px;gap:8px;font-family:system-ui,sans-serif}.mn-plate__text{color:#111;font-weight:900;font-size:24px;letter-spacing:.5px}.mn-plate__soy{width:12px;height:auto}.mn-plate__mgl{width:38px;height:auto;margin-left:6px}`;
+      const plateCss=`.mn-plate-wrap{display:inline-flex;align-items:center;gap:12px}.mn-plate__car{width:110px;height:auto;object-fit:contain}.mn-plate{display:inline-flex;align-items:center;background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:7px 14px;gap:8px;font-family:system-ui,sans-serif}.mn-plate__text{color:#111;font-weight:900;font-size:24px;letter-spacing:.5px}.mn-plate__soy{width:12px;height:auto}.mn-plate__mgl{width:38px;height:auto;margin-left:6px}`;
       w.document.write(`<html><head><style>${plateCss}</style></head><body style="text-align:center;font-family:sans-serif;padding:24px">${plateHtml}<p style="margin-top:12px">${v.code}</p><img src="${url}" style="width:420px;height:420px"></body></html>`);
       w.document.close(); setTimeout(()=>w.print(),400);
     }
