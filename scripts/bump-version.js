@@ -72,6 +72,16 @@ function syncAdminHtml(version) {
     /(<div class="foot">Gennetex ERP )v[\d.]+(<\/div>)/,
     `$1v${version}$2`,
   );
+  html = html.replace(
+    /<meta name="admin-build-version" content="[^"]*"\/>/,
+    `<meta name="admin-build-version" content="${version}"/>`,
+  );
+  if (!html.includes('admin-build-version')) {
+    html = html.replace(
+      '<meta name="viewport"',
+      `<meta name="admin-build-version" content="${version}"/>\n  <meta name="viewport"`,
+    );
+  }
   fs.writeFileSync(ADMIN_HTML, html);
 }
 
