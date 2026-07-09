@@ -65,6 +65,10 @@ function syncPackageLock(version) {
 function syncAdminHtml(version) {
   let html = fs.readFileSync(ADMIN_HTML, 'utf8');
   html = html.replace(
+    /(<span id="appVersionFoot">ЖЕННЕТЕКС )v[\d.]+(<\/span>)/,
+    `$1v${version}$2`,
+  );
+  html = html.replace(
     /(<div class="foot">Gennetex ERP )v[\d.]+(<\/div>)/,
     `$1v${version}$2`,
   );

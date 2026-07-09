@@ -8,6 +8,10 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false },
 });
 
-/** Технологийн hero зураг — сүлжээ, шилэн кабель */
-export const HERO_IMAGE_URL =
-  'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=2400&q=85';
+/** Hero — сүлжээний GIF + статик poster (Vite public/) */
+export const HERO_GIF_URL = '/hero-network.gif';
+export const HERO_POSTER_URL = '/hero-network-poster.jpg';
+
+/** @deprecated GIF ашиглана */
+export const HERO_IMAGE_URL = HERO_GIF_URL;
+export const HERO_VIDEO_URL = HERO_GIF_URL;

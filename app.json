@@ -3,7 +3,7 @@
     "name": "Gennetex ERP",
     "slug": "gennetex-erp",
     "scheme": "gennetex-erp",
-    "version": "0.4.10",
+    "version": "0.5.6",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/logo.png",

@@ -9,12 +9,16 @@ const SERVICES = [
   { icon: Wrench, title: 'Техник үйлчилгээ', text: '24/7 хяналт, урьдчилан сэргийлэх засвар, шуурхай дэмжлэг.' },
 ];
 
-export default function ServicesSection() {
+export default function ServicesSection({ embedded = false }) {
   return (
-    <section id="services" className="relative z-20 border-t border-white/10 bg-black px-4 py-20 sm:px-6 md:px-12 md:py-28">
+    <section className={`relative z-20 border-t border-white/10 bg-black px-4 sm:px-6 md:px-12 ${embedded ? 'py-12 md:py-16' : 'py-20 md:py-28'}`}>
       <div className="mx-auto max-w-6xl">
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-white/50">Үйлчилгээ</p>
-        <h2 className="mb-12 text-3xl font-normal tracking-tightest md:text-5xl">Бидний санал болгодог шийдлүүд</h2>
+        {!embedded ? (
+          <>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-white/50">Үйлчилгээ</p>
+            <h2 className="mb-12 text-3xl font-normal tracking-tightest md:text-5xl">Бидний санал болгодог шийдлүүд</h2>
+          </>
+        ) : null}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((s) => (
             <div key={s.title} className="section-glass group p-6 transition-all hover:border-white/20 hover:bg-white/[0.05]">

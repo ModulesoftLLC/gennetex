@@ -1,29 +1,113 @@
 import { supabase } from './supabase';
 import type { JobApplicationFormData } from '../types/jobApplication';
 
+const FORM_MARKER = '[[GENNETEX_FORM]]';
+
+/** Илгээх JSON — base64 зураг хэт том болохоос сэргийлнэ */
+export function sanitizeFormData(data: JobApplicationFormData) {
+  const hasPhoto = Boolean(data.general.photoDataUrl?.startsWith('data:'));
+  return {
+    ...data,
+    general: {
+      ...data.general,
+      photoDataUrl: '',
+      photoAttached: hasPhoto,
+    },
+  };
+}
+
+function buildMessage(data: JobApplicationFormData, sanitized: ReturnType<typeof sanitizeFormData>) {
+  const g = data.general;
+  const summary = [
+    g.fatherName && `Эцэг/эх: ${g.fatherName}`,
+    g.clanName && `Ургийн овог: ${g.clanName}`,
+    data.personal.strengths && `Давуу: ${data.personal.strengths.slice(0, 120)}`,
+    data.jobInterest.position && `Сонирхол: ${data.jobInterest.position}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  try {
+    const json = JSON.stringify(sanitized);
+    if (json.length < 45000) {
+      return (summary ? `${summary}\n` : '') + `${FORM_MARKER}${json}`;
+    }
+  } catch {
+    /* ignore */
+  }
+  return summary || null;
+}
+
+function friendlyError(error: { message?: string; code?: string }) {
+  const msg = error.message || 'Илгээхэд алдаа гарлаа.';
+  if (/form_data|signature_svg|signed_at|photo_url|schema cache/i.test(msg)) {
+    return 'Серверийн тохиргоо дутуу байна. Үндсэн мэдээлэл хадгалагдах болно — дахин оролдоно уу.';
+  }
+  if (/row-level security|permission|policy/i.test(msg)) {
+    return 'Зөвшөөрөлгүй хүсэлт. Дахин оролдоно уу.';
+  }
+  if (/job_applications/i.test(msg) && /does not exist|байхгүй/i.test(msg)) {
+    return 'Анкетын хүснэгт байхгүй байна. Админ migration_job_applications.sql ажиллуулна уу.';
+  }
+  return msg;
+}
+
+function missingExtendedColumns(error: { message?: string }) {
+  return /form_data|signature_svg|signed_at|photo_url|schema cache/i.test(error.message || '');
+}
+
 export async function submitJobApplication(data: JobApplicationFormData) {
   const g = data.general;
-  const row = {
-    name: g.firstName.trim(),
+  const name = g.firstName.trim();
+  if (!name) throw new Error('Өөрийн нэрээ оруулна уу.');
+
+  const sanitized = sanitizeFormData(data);
+  const signedAt = data.signedAt || new Date().toISOString();
+
+  const baseRow = {
+    name,
     last_name: g.clanName.trim() || null,
     phone: g.phoneMobile.trim() || null,
     email: g.email.trim() || null,
     position: data.jobInterest.position.trim() || null,
-    message: [
-      g.fatherName && `Эцэг/эх: ${g.fatherName}`,
-      data.personal.strengths && `Давуу: ${data.personal.strengths.slice(0, 80)}`,
-    ]
-      .filter(Boolean)
-      .join(' · ') || null,
+    message: buildMessage(data, sanitized),
     source: 'web',
     status: 'new',
-    form_data: data,
-    signature_svg: data.signatureSvg || null,
-    signed_at: data.signedAt || new Date().toISOString(),
+  };
+
+  const fullRow = {
+    ...baseRow,
+    form_data: sanitized,
+    signature_svg: data.signatureSvg?.trim() || null,
+    signed_at: signedAt,
     photo_url: g.photoDataUrl?.startsWith('http') ? g.photoDataUrl : null,
   };
 
-  const { data: inserted, error } = await supabase.from('job_applications').insert(row).select('id').single();
-  if (error) throw error;
-  return inserted;
+  // .select() ашиглахгүй — anon SELECT эрхгүй тул RETURNING алдаа гардаг
+  let { error } = await supabase.from('job_applications').insert(fullRow);
+  if (error && missingExtendedColumns(error)) {
+    ({ error } = await supabase.from('job_applications').insert(baseRow));
+  }
+
+  if (error) throw new Error(friendlyError(error));
+}
+
+/** Админ / харах талд — form_data эсвэл message доторх JSON */
+export function parseStoredForm(row: {
+  form_data?: JobApplicationFormData | null;
+  message?: string | null;
+}): JobApplicationFormData | null {
+  const fd = row.form_data;
+  if (fd && typeof fd === 'object' && fd.general) return fd as JobApplicationFormData;
+
+  const msg = row.message || '';
+  const idx = msg.indexOf(FORM_MARKER);
+  if (idx < 0) return null;
+  try {
+    const parsed = JSON.parse(msg.slice(idx + FORM_MARKER.length)) as JobApplicationFormData;
+    if (parsed?.general) return parsed;
+  } catch {
+    /* ignore */
+  }
+  return null;
 }

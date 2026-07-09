@@ -94,7 +94,7 @@ export default function SignaturePad({ onChange }: Props) {
         ref={canvasRef}
         width={W}
         height={H}
-        className="w-full cursor-crosshair rounded-xl border border-white/20 bg-white touch-none"
+        className="w-full cursor-crosshair rounded-lg border border-slate-200 bg-white touch-none"
         onMouseDown={start}
         onMouseMove={move}
         onMouseUp={end}
@@ -103,9 +103,9 @@ export default function SignaturePad({ onChange }: Props) {
         onTouchMove={move}
         onTouchEnd={end}
       />
-      <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
-        <span>{hasInk ? 'Гарын үсэг зурсан' : 'Энд гарын үсгээ зурна уу'}</span>
-        <button type="button" onClick={clear} className="text-blue-400 hover:text-blue-300">
+      <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
+        <span>{hasInk ? 'Зурсан' : 'Энд зурна уу'}</span>
+        <button type="button" onClick={clear} className="text-[#453fc1] hover:underline">
           Цэвэрлэх
         </button>
       </div>

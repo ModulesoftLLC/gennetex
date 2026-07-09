@@ -56,6 +56,22 @@ Deploy дууссаны дараа:
 - 🏠 Очсон лог — хэн хэзээ айлд очсон
 - 🚗 Аялал — машин, зам (км), түлш, зардал
 
+## Лого
+
+| Файл | Зориулалт |
+|------|-----------|
+| `assets/logo.png` | Үндсэн эх сурвалж (апп + вэб) |
+| `admin-web/logo.png` | Админ самбар — нэвтрэх, sidebar, favicon |
+| `admin-web/report-logo.png` | Тайлан, PDF modal дээрх лого |
+
+Deploy хийхэд `npm run build` (`scripts/build-web.js`) автоматаар `assets/logo.png`-ийг `admin-web/` болон `dist-web/gennetex/admin/` руу хуулна.
+
+Production URL: `https://adiya.site/gennetex/admin/logo.png`
+
+## Гэрэл / Харанхуй горим
+
+Баруун дээд буланд 🌙/☀️ товч — нэвтрэх хуудас болон самбар хоёуланд ажиллана. Сонголт `localStorage.theme`-д хадгалагдана.
+
 ## Тохиргоо
 `index.html` доторх `SUPABASE_URL`, `SUPABASE_ANON_KEY` нь аппын `.env`-тэй ижил байна.
 Төслөө сольвол эдгээрийг шинэчил.
