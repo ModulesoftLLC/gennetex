@@ -56,6 +56,28 @@ function missingExtendedColumns(error: { message?: string }) {
   return /form_data|signature_svg|signed_at|photo_url|schema cache/i.test(error.message || '');
 }
 
+function dataUrlToUpload(dataUrl: string) {
+  const m = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+  if (!m) return null;
+  const mime = m[1];
+  const bin = atob(m[2]);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  const ext = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
+  return { bytes, mime, ext };
+}
+
+async function uploadApplicationPhoto(dataUrl: string) {
+  const parsed = dataUrlToUpload(dataUrl);
+  if (!parsed) return null;
+  const path = `web/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${parsed.ext}`;
+  const { error } = await supabase.storage
+    .from('job-applications')
+    .upload(path, parsed.bytes, { contentType: parsed.mime, upsert: false });
+  if (error) return null;
+  return supabase.storage.from('job-applications').getPublicUrl(path).data.publicUrl;
+}
+
 export async function submitJobApplication(data: JobApplicationFormData) {
   const g = data.general;
   const name = g.firstName.trim();
@@ -63,6 +85,12 @@ export async function submitJobApplication(data: JobApplicationFormData) {
 
   const sanitized = sanitizeFormData(data);
   const signedAt = data.signedAt || new Date().toISOString();
+  let photoUrl: string | null = null;
+  if (g.photoDataUrl?.startsWith('data:')) {
+    photoUrl = await uploadApplicationPhoto(g.photoDataUrl);
+  } else if (g.photoDataUrl?.startsWith('http')) {
+    photoUrl = g.photoDataUrl;
+  }
 
   const baseRow = {
     name,
@@ -80,7 +108,7 @@ export async function submitJobApplication(data: JobApplicationFormData) {
     form_data: sanitized,
     signature_svg: data.signatureSvg?.trim() || null,
     signed_at: signedAt,
-    photo_url: g.photoDataUrl?.startsWith('http') ? g.photoDataUrl : null,
+    photo_url: photoUrl,
   };
 
   // .select() ашиглахгүй — anon SELECT эрхгүй тул RETURNING алдаа гардаг

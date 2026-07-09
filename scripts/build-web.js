@@ -31,7 +31,7 @@ console.log('[build-web] Цэвэрлэж байна:', dist);
 rimraf(dist);
 fs.mkdirSync(dist, { recursive: true });
 
-// Лого — Vite public + dist-web root + admin-web
+// Copy logos to deploy paths (admin + fallback)
 if (fs.existsSync(logo)) {
   fs.mkdirSync(publicWebPublic, { recursive: true });
   fs.copyFileSync(logo, path.join(publicWebPublic, 'logo.png'));
@@ -70,5 +70,13 @@ if (fs.existsSync(logo) && !fs.existsSync(path.join(dist, 'logo.png'))) {
 const adminDest = path.join(dist, 'gennetex', 'admin');
 console.log('[build-web] Админ самбар (admin-web → gennetex/admin)');
 copyDir(adminWeb, adminDest);
+
+// Лого fallback — /gennetex/logo.png (relative path алдаа гарвал)
+if (fs.existsSync(logo)) {
+  fs.copyFileSync(logo, path.join(dist, 'gennetex', 'logo.png'));
+  if (fs.existsSync(reportLogo)) {
+    fs.copyFileSync(reportLogo, path.join(dist, 'gennetex', 'report-logo.png'));
+  }
+}
 
 console.log('[build-web] Бэлэн. Гаралт:', dist);

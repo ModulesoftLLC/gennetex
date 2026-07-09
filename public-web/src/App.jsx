@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { SiteContentProvider } from './context/SiteContentContext';
 import SiteLayout from './layouts/SiteLayout';
 import HomePage from './pages/HomePage';
 import AboutPage from './pages/AboutPage';
@@ -9,6 +10,7 @@ import CareersPage from './pages/CareersPage';
 
 export default function App() {
   return (
+    <SiteContentProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/careers" element={<CareersPage />} />
@@ -21,5 +23,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </SiteContentProvider>
   );
 }

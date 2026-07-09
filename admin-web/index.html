@@ -4,8 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ЖЕННЕТЕКС — Админ самбар</title>
-  <link rel="icon" href="logo.png"/>
+  <link rel="icon" href="/gennetex/admin/logo.png"/>
   <script>
+    window.ADMIN_ASSET = function (f) {
+      return (location.pathname.indexOf('/gennetex/admin') >= 0 ? '/gennetex/admin/' : '') + f;
+    };
     (function () {
       var t = localStorage.theme;
       var dark = t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -16,42 +19,56 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            'inverse-on-surface': '#f3effa',
-            'primary-container': '#5e5adb',
-            'inverse-surface': '#302f38',
-            'on-surface-variant': '#464554',
-            'error': '#ba1a1a',
-            'secondary-container': '#dae2fd',
-            'outline-variant': '#c7c4d6',
-            'surface-container-high': '#eae6f2',
-            'outline': '#777585',
+            graphite: {
+              50: '#fafafa',
+              100: '#f4f4f5',
+              200: '#e4e4e7',
+              300: '#d4d4d8',
+              400: '#a1a1aa',
+              500: '#71717a',
+              600: '#52525b',
+              700: '#3f3f46',
+              800: '#27272a',
+              900: '#18181b',
+              950: '#09090b',
+            },
+            'inverse-on-surface': '#fafafa',
+            'primary-container': '#3b82f6',
+            'inverse-surface': '#18181b',
+            'on-surface-variant': '#71717a',
+            'error': '#dc2626',
+            'secondary-container': '#e4e4e7',
+            'outline-variant': '#e4e4e7',
+            'surface-container-high': '#f4f4f5',
+            'outline': '#d4d4d8',
             'on-primary': '#ffffff',
-            'surface-variant': '#e4e1ec',
-            'surface-container': '#f0ecf8',
-            'primary': '#453fc1',
-            'on-primary-container': '#efebff',
-            'surface-bright': '#fcf8ff',
-            'background': '#fcf8ff',
-            'surface-container-low': '#f6f2fd',
-            'surface': '#fcf8ff',
-            'primary-fixed-dim': '#c3c1ff',
+            'surface-variant': '#f4f4f5',
+            'surface-container': '#ffffff',
+            'primary': '#18181b',
+            'on-primary-container': '#ffffff',
+            'surface-bright': '#ffffff',
+            'background': '#fafafa',
+            'surface-container-low': '#f4f4f5',
+            'surface': '#ffffff',
+            'primary-fixed-dim': '#3b82f6',
             'surface-container-lowest': '#ffffff',
-            'error-container': '#ffdad6',
-            'inverse-primary': '#c3c1ff',
-            'surface-container-highest': '#e4e1ec',
-            'tertiary-container': '#a55700',
-            'on-surface': '#1b1b23',
-            'on-background': '#1b1b23',
-            'success': '#10b981',
-            'warning': '#f59e0b',
-            'danger': '#ef4444'
+            'error-container': '#fef2f2',
+            'inverse-primary': '#60a5fa',
+            'surface-container-highest': '#e4e4e7',
+            'tertiary-container': '#71717a',
+            'on-surface': '#09090b',
+            'on-background': '#09090b',
+            'success': '#16a34a',
+            'warning': '#d97706',
+            'danger': '#dc2626',
+            'accent': '#3b82f6'
           },
           borderRadius: { '2xl': '1rem' },
           spacing: {
@@ -60,7 +77,7 @@
             'sidebar-width': '260px'
           },
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
+            sans: ['Geist', 'Inter', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace']
           },
           fontSize: {
@@ -77,23 +94,28 @@
   </script>
   <style>
     :root{
-      --bg:#fcf8ff;--card:#ffffff;--line:#c7c4d6;--text:#1b1b23;--muted:#464554;
-      --primary:#453fc1;--primary-soft:#efebff;--success:#10b981;--warning:#f59e0b;--danger:#ba1a1a;
+      --bg:#fafafa;--card:#ffffff;--line:#e4e4e7;--text:#09090b;--muted:#71717a;
+      --primary:#18181b;--primary-soft:#f4f4f5;--accent:#2563eb;--success:#16a34a;--warning:#d97706;--danger:#dc2626;
     }
     .dark{
-      --bg:#1b1b23;--card:#302f38;--line:#777585;--text:#f3effa;--muted:#c7c4d6;
-      --primary:#c3c1ff;--primary-soft:rgba(94,90,219,.25);--success:#34d399;--warning:#fbbf24;--danger:#ff6b6b;
+      --bg:#09090b;--card:#18181b;--line:#27272a;--text:#fafafa;--muted:#a1a1aa;
+      --primary:#fafafa;--primary-soft:#27272a;--accent:#3b82f6;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444;
     }
     *{box-sizing:border-box}
-    body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s}
+    body{
+      margin:0;font-family:Geist,Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;
+      background-image:linear-gradient(to right,rgba(0,0,0,.025) 1px,transparent 1px),linear-gradient(to bottom,rgba(0,0,0,.025) 1px,transparent 1px);
+      background-size:32px 32px;
+    }
+    html.dark body{background-image:linear-gradient(to right,rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.03) 1px,transparent 1px)}
     html{color-scheme:light}
     html.dark{color-scheme:dark}
     button{cursor:pointer;border:none;font-weight:600;font-family:inherit}
     input,select,textarea{font-family:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);width:100%;transition:border-color .15s,box-shadow .15s}
-    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(69,63,193,.15)}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
     .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
-    .glass-panel{background:rgba(255,255,255,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-    .dark .glass-panel{background:rgba(48,47,56,.82)}
+    .glass-panel{background:rgba(255,255,255,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid var(--line)}
+    .dark .glass-panel{background:rgba(24,24,27,.88)}
     .stat-card{transition:all .3s ease}
     .stat-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(0,0,0,.08)}
     @keyframes chart-fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -102,16 +124,16 @@
     .btn{border-radius:10px;padding:10px 16px;font-size:14px;transition:opacity .15s,transform .1s,background .15s}
     .btn:hover{opacity:.94}
     .btn:active{transform:scale(.98)}
-    .btn-primary{background:var(--primary);color:#fff}
-    .dark .btn-primary{color:#0e006a}
+    .btn-primary{background:var(--accent);color:#fff}
+    .dark .btn-primary{background:var(--accent);color:#fff}
     .btn-success{background:var(--success);color:#fff}
     .btn-danger{background:var(--danger);color:#fff}
     .btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--muted)}
     .btn-sm{padding:6px 10px;font-size:13px;border-radius:8px}
 
-    #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#f6f2fd 0%,#fcf8ff 50%,#e2dfff 100%)}
-    .dark #login{background:linear-gradient(135deg,#1b1b23 0%,#302f38 100%)}
-    .login-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 24px 48px rgba(69,63,193,.08)}
+    #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#f4f4f5 0%,#fafafa 50%,#e4e4e7 100%)}
+    .dark #login{background:linear-gradient(135deg,#09090b 0%,#18181b 100%)}
+    .login-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 24px 48px rgba(0,0,0,.08)}
     .login-card h1{margin:0 0 6px;font-size:26px;color:var(--text);font-weight:800;letter-spacing:-.3px}
     .login-card p{margin:0 0 28px;color:var(--muted);font-size:14px}
     #login label{display:block;font-size:13px;color:var(--muted);margin:16px 0 8px;font-weight:600}
@@ -132,13 +154,13 @@
     .nav .grp{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 10px 6px}
     .nav a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:600;margin-bottom:2px;transition:background .15s,color .15s}
     .nav a:hover{background:var(--primary-soft);color:var(--primary)}
-    .nav a.active{background:var(--primary-soft);color:var(--primary);font-weight:700;border-left:4px solid var(--primary);padding-left:8px}
+    .nav a.active{background:var(--primary-soft);color:var(--accent);font-weight:700;border-left:4px solid var(--accent);padding-left:8px}
     .nav a .material-symbols-outlined{font-size:20px;flex:0 0 22px;width:22px}
     .nav .ic svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .side .foot{padding:14px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
     .main{flex:1;margin-left:260px;background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
-    .topbar{background:rgba(252,248,255,.75);backdrop-filter:blur(12px);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line)}
-    .dark .topbar{background:rgba(48,47,56,.75)}
+    .topbar{background:rgba(250,250,250,.8);backdrop-filter:blur(12px);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line)}
+    .dark .topbar{background:rgba(24,24,27,.85)}
     .topbar h2{margin:0;font-size:20px;font-weight:700;letter-spacing:-.2px}
     .user{display:flex;align-items:center;gap:10px}
     .avatar{width:38px;height:38px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;border:1px solid var(--line)}
@@ -190,10 +212,37 @@
     .dash-chart-wrap{height:300px;position:relative}
     .timeline-line{position:absolute;left:16px;top:8px;bottom:8px;width:1px;background:var(--line)}
     .timeline-item{position:relative;padding-left:36px;margin-bottom:16px}
-    .timeline-dot{position:absolute;left:10px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 4px var(--card)}
+    .timeline-dot{position:absolute;left:10px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--card)}
+
+    .jv-shell{display:grid;grid-template-columns:280px 1fr;min-height:min(72vh,720px)}
+    @media(max-width:768px){.jv-shell{grid-template-columns:1fr}}
+    .jv-aside{border-right:1px solid var(--line);padding:24px;background:var(--primary-soft)}
+    .jv-main{padding:24px;max-height:72vh;overflow:auto}
+    .jv-photo{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:16px;border:1px solid var(--line);background:var(--card);margin-bottom:16px}
+    .jv-name{font-size:20px;font-weight:800;letter-spacing:-.02em;margin:0 0 4px}
+    .jv-role{color:var(--muted);font-size:13px;margin:0 0 16px}
+    .jv-meta{display:flex;flex-direction:column;gap:10px;font-size:13px}
+    .jv-meta a{color:var(--accent);text-decoration:none}
+    .jv-meta a:hover{text-decoration:underline}
+    .jv-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:700;background:var(--card);border:1px solid var(--line);margin-bottom:16px}
+    .jv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .jv-section{border:1px solid var(--line);border-radius:16px;background:var(--card);overflow:hidden}
+    .jv-section-title{margin:0;padding:14px 16px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);background:var(--primary-soft);text-transform:uppercase;letter-spacing:.04em}
+    .jv-section-title .material-symbols-outlined{font-size:18px;color:var(--accent)}
+    .jv-section-body{padding:16px;font-size:13px;line-height:1.65}
+    .jv-field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+    .jv-field:last-child{margin-bottom:0}
+    .jv-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .jv-value{font-size:14px;font-weight:500;color:var(--text);word-break:break-word}
+    .jv-list{margin:0;padding-left:18px}
+    .jv-list li{margin-bottom:6px}
+    .jv-sig{margin-top:8px;padding:12px;border:1px dashed var(--line);border-radius:12px;background:var(--primary-soft)}
+    .jv-sig svg{max-width:100%;height:auto;display:block}
 
     .overlay{position:fixed;inset:0;background:rgba(27,27,35,.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
     .modal{background:var(--card);border-radius:20px;width:100%;max-width:460px;max-height:92vh;overflow:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);border:1px solid var(--line)}
+    .modal.modal-wide{max-width:min(1040px,96vw)}
+    .modal.modal-app-view .modal-b{padding:0}
     .modal-h{padding:18px 22px;border-bottom:1px solid var(--line);font-size:17px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
     .modal-b{padding:22px}
     .modal-f{padding:16px 22px;border-top:1px solid var(--line);display:flex;gap:10px;justify-content:flex-end}
@@ -244,7 +293,7 @@
   <!-- Нэвтрэх -->
   <div id="login">
     <div class="login-card">
-      <div style="text-align:center;margin-bottom:20px"><img src="logo.png" alt="ЖЕННЕТЕКС" style="height:72px"/></div>
+      <div style="text-align:center;margin-bottom:20px"><img data-admin-asset="logo.png" alt="ЖЕННЕТЕКС" style="height:72px;object-fit:contain"/></div>
       <h1 style="text-align:center">ЖЕННЕТЕКС</h1>
       <p style="text-align:center">Админ самбарт нэвтрэх</p>
       <label>Имэйл</label>
@@ -263,7 +312,7 @@
     <div class="layout">
       <aside class="side glass-panel" id="sidebar">
         <div class="brand">
-          <img src="logo.png" style="height:32px" alt="ЖЕННЕТЕКС"/>
+          <img data-admin-asset="logo.png" style="height:36px;object-fit:contain" alt="ЖЕННЕТЕКС"/>
           <div>
             <div style="font-size:16px;font-weight:800;line-height:1.1">ЖЕННЕТЕКС</div>
             <div class="muted" style="font-size:11px;font-weight:500">Админ самбар</div>
@@ -276,6 +325,7 @@
           <a data-view="reports"><span class="material-symbols-outlined">description</span><span class="t">Тайлан</span></a>
           <a data-view="feedback"><span class="material-symbols-outlined">forum</span><span class="t">Санал гомдол</span></a>
           <a data-view="applications"><span class="material-symbols-outlined">assignment</span><span class="t">Ажлын байрны анкет</span></a>
+          <a data-view="publicsite"><span class="material-symbols-outlined">language</span><span class="t">Вэб сайт</span></a>
           <a data-view="contracts"><span class="material-symbols-outlined">contract</span><span class="t">Хөдөлмөрийн гэрээ</span></a>
           <a data-view="devices"><span class="material-symbols-outlined">smartphone</span><span class="t">Төхөөрөмж зөвшөөрөл</span></a>
           <a data-view="aiappusage"><span class="material-symbols-outlined">computer</span><span class="t">AI апп хэрэглээ</span></a>
@@ -307,7 +357,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.5.6</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.6.0</span>
         </div>
       </aside>
       <div class="main">
@@ -351,6 +401,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="job-application-paper.js"></script>
+  <script src="public-site-content.js"></script>
   <script>
     const SUPABASE_URL = 'https://xhxyrzzgmksjlibfrmlx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeHlyenpnbWtzamxpYmZybWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODEwMjYsImV4cCI6MjA5ODQ1NzAyNn0.nYWs_N09RLHvhmEUCdbS6M8yvthsKJ5TkXjdRv4VMag';
@@ -662,7 +714,7 @@
 
     // ===== Navigation =====
     document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
-    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
+    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',publicsite:'Вэб сайт',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
     let activityFilter={year:new Date().getFullYear(),month:0,day:0,user:''};
     const ACTION_LABEL={login:'Нэвтрэлт',leave_request:'Чөлөө хүсэлт',screen:'Дэлгэц нээсэн',tap:'Даралт',location:'Байршил',face_enroll:'Царай бүртгэл',attendance:'Ирц',inventory:'Бараа/багаж',visit:'Айлд очсон',site_work:'Ажлын байр',service_call:'Дуудлага',other:'Бусад'};
     const fmtLogTime=ts=>{
@@ -671,7 +723,7 @@
       const p=n=>String(n).padStart(2,'0');
       return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
     };
-    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'Машин, QR код',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
+    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',publicsite:'Public вэбсайтын текст засварлах',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'Машин, QR код',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
     function go(v){
       view=v;
       document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
@@ -740,6 +792,7 @@
       const tripGroups=tripGroupsToday;
       let feedbackRows=[], aiReports=[], aiUsageReports=[];
       let jobApplications=[], jobContracts=[], deviceApprovals=[];
+      let publicSiteContent=mergePublicSiteContent(null), publicSiteUpdatedAt=null;
       try{
         const fb=await sb.from('employee_feedback').select('*').order('created_at',{ascending:false}).limit(200);
         if(!fb.error) feedbackRows=fb.data||[];
@@ -748,6 +801,15 @@
         const ja=await sb.from('job_applications').select('*').order('created_at',{ascending:false}).limit(300);
         if(!ja.error) jobApplications=ja.data||[];
         else if(String(ja.error.message).includes('job_applications')) toast('Ажлын байрны анкет: migration_job_applications.sql ажиллуулна уу');
+      }catch(e){}
+      try{
+        const sc=await sb.from('public_site_content').select('content,updated_at').eq('id','main').maybeSingle();
+        if(!sc.error&&sc.data){
+          publicSiteContent=mergePublicSiteContent(sc.data.content);
+          publicSiteUpdatedAt=sc.data.updated_at;
+        }else if(sc.error&&String(sc.error.message).includes('public_site_content')){
+          toast('Вэб текст: migration_public_site_content.sql ажиллуулна уу');
+        }
       }catch(e){}
       try{
         const jc=await sb.from('job_contracts').select('*').order('created_at',{ascending:false}).limit(300);
@@ -784,6 +846,8 @@
         jobApplications:jobApplications,
         jobContracts:jobContracts,
         deviceApprovals:deviceApprovals,
+        publicSiteContent:publicSiteContent,
+        publicSiteUpdatedAt:publicSiteUpdatedAt,
         leaveRequests:lr.error?[]:(lr.data||[])};
       // Interval үед газрын зураг байвал зөвхөн marker шинэчилнэ (zoom тогтвортой)
       if(silent && (view==='dashboard' ||view==='location') && map && document.body.contains($('map'))){
@@ -800,6 +864,7 @@
       if(view==='reports') return renderReports(c);
       if(view==='feedback') return renderFeedback(c);
       if(view==='applications') return renderApplications(c);
+      if(view==='publicsite') return renderPublicSite(c);
       if(view==='contracts') return renderContracts(c);
       if(view==='devices') return renderDevices(c);
       if(view==='aiappusage') return renderAiAppUsage(c);
@@ -1864,14 +1929,14 @@
       if(r.pdf_url){
         openModal(r.title,`
           <div style="text-align:center;margin-bottom:12px">
-            <img src="report-logo.png" alt="Gennetex" style="height:56px;object-fit:contain;margin-bottom:8px"/>
+            <img src="${ADMIN_ASSET('report-logo.png')}" alt="Gennetex" style="height:56px;object-fit:contain;margin-bottom:8px"/>
             <div><a href="${r.pdf_url}"target="_blank" rel="noopener" class="btn btn-primary btn-sm">PDF татах</a></div>
           </div>
           <iframe src="${r.pdf_url}"title="PDF тайлан" style="width:100%;height:58vh;border:1px solid var(--line);border-radius:12px;background:#fff"></iframe>
         `,'Хаах',()=>true);
         return;
       }
-      const logo=`<div style="text-align:center;margin-bottom:8px"><img src="report-logo.png" alt="Gennetex" style="height:64px;object-fit:contain"/></div>`;
+      const logo=`<div style="text-align:center;margin-bottom:8px"><img src="${ADMIN_ASSET('report-logo.png')}" alt="Gennetex" style="height:64px;object-fit:contain"/></div>`;
       openModal(r.title,`<div style="max-height:65vh;overflow:auto">${logo}${r.body_html||'<p class=muted>Агуулга алга</p>'}</div>`,'Хаах',()=>true);
     };
 
@@ -1924,6 +1989,37 @@
 
     // ===== Ажлын байрны анкет =====
     const APP_STATUS={new:'Шинэ',reviewing:'Хянаж буй',contacted:'Холбогдсон',hired:'Ажилд авсан',rejected:'Татгалзсан'};
+    function renderPublicSite(c){
+      const content=data.publicSiteContent||mergePublicSiteContent(null);
+      c.innerHTML='<div class="card"><div class="card-h"><h3>Public вэбсайтын текст</h3><button class="btn btn-ghost btn-sm" type="button" onclick="loadAll()">Шинэчлэх</button></div><div class="card-b">'+renderPublicSiteEditorHtml(content,data.publicSiteUpdatedAt)+'</div></div>';
+      initPublicSiteEditorTabs();
+      const saveBtn=document.getElementById('pscSaveBtn');
+      const resetBtn=document.getElementById('pscResetBtn');
+      if(saveBtn) saveBtn.onclick=savePublicSiteContent;
+      if(resetBtn) resetBtn.onclick=()=>{
+        if(!confirm('Бүх талбарыг анхны утга руу буцаах уу? (Хадгалах хүртэл вэб дээр өөрчлөгдөхгүй)')) return;
+        data.publicSiteContent=mergePublicSiteContent(null);
+        data.publicSiteUpdatedAt=null;
+        renderPublicSite(c);
+        toast('Анхны утга ачааллаа — Хадгалах дарж баталгаажуулна уу');
+      };
+    }
+    async function savePublicSiteContent(){
+      const base=data.publicSiteContent||mergePublicSiteContent(null);
+      const content=collectPublicSiteContentFromForm(base);
+      const row={id:'main',content:content,updated_at:new Date().toISOString()};
+      const {error}=await sb.from('public_site_content').upsert(row,{onConflict:'id'});
+      if(error){
+        toast('Хадгалахад алдаа: '+error.message);
+        if(String(error.message).includes('public_site_content')) toast('migration_public_site_content.sql ажиллуулна уу');
+        return;
+      }
+      data.publicSiteContent=mergePublicSiteContent(content);
+      data.publicSiteUpdatedAt=row.updated_at;
+      toast('Вэб текст хадгалагдлаа');
+      if(view==='publicsite') renderPublicSite($('content'));
+    }
+    window.savePublicSiteContent=savePublicSiteContent;
     function renderApplications(c){
       const esc=v=>String(v??'').replace(/</g,'&lt;');
       const list=data.jobApplications||[];
@@ -1963,46 +2059,59 @@
       }catch(e){}
       return null;
     }
+    function enrichJobForm(r,fd){
+      if(!fd) return fd;
+      const url=r.photo_url||'';
+      if(url&&fd.general&&!fd.general.photoDataUrl){
+        return Object.assign({},fd,{general:Object.assign({},fd.general,{photoDataUrl:url})});
+      }
+      return fd;
+    }
+    function rowToMinimalFd(r){
+      return {
+        company:'ЖЕННЕТЕКС ХХК',
+        title:'Ажилд орохыг хүсэгчийн анкет',
+        general:{clanName:'',fatherName:r.last_name||'',firstName:r.name||'',birthYear:'',birthMonth:'',birthDay:'',birthProvince:'',birthDistrict:'',ethnicity:'',gender:'',registrationNo:'',email:r.email||'',paysSocialInsurance:'',phoneMobile:r.phone||'',phoneHome:'',driverLicenseNo:'',driverLicenseClass:'',bloodType:'',address:'',housingType:'',bodySize:'',clothingSize:'',shoeSize:'',univisionContractNo:'',photoDataUrl:r.photo_url||''},
+        family:{married:'',members:[]},
+        education:[],workExperience:[],languages:[],
+        personal:{strengths:'',weaknesses:''},
+        jobInterest:{position:r.position||'',desiredSalary:''},
+        emergencyContacts:[],
+        consent:false,signatureSvg:'',signedAt:''
+      };
+    }
+    window._jobPaperCache=window._jobPaperCache||{};
+    function printJobAppCached(id){
+      const html=window._jobPaperCache[id];
+      if(html) printJobApplicationPaper(html);
+      else toast('Анкет ачаалагдаагүй байна');
+    }
+    window.printJobAppCached=printJobAppCached;
     function viewJobApplication(id){
       const r=(data.jobApplications||[]).find(x=>x.id===id);
       if(!r){ toast('Олдсонгүй'); return; }
-      const esc=v=>String(v??'').replace(/</g,'&lt;');
-      const fd=parseJobForm(r);
-      let body='';
-      if(fd&&fd.general){
-        const g=fd.general;
-        body=`<div style="max-height:70vh;overflow:auto;font-size:13px;line-height:1.6">
-          ${g.photoAttached?'<p class="muted"><i>Зураг хавсаргасан (серверт бүрэн хадгалагдаагүй)</i></p>':''}
-          ${g.photoDataUrl?`<img src="${g.photoDataUrl}" style="float:right;width:100px;height:130px;object-fit:cover;border:1px solid #ddd;border-radius:8px;margin:0 0 8px 12px"/>`:''}
-          <h4 style="margin:12px 0 6px">1. Ерөнхий мэдээлэл</h4>
-          <p><b>Нэр:</b> ${esc(g.clanName)} ${esc(g.fatherName)} ${esc(g.firstName)}</p>
-          <p><b>Төрсөн:</b> ${esc(g.birthYear)}.${esc(g.birthMonth)}.${esc(g.birthDay)} · ${esc(g.birthProvince)} ${esc(g.birthDistrict)}</p>
-          <p><b>РД:</b> ${esc(g.registrationNo)} · <b>Утас:</b> ${esc(g.phoneMobile)} · <b>Имэйл:</b> ${esc(g.email)}</p>
-          <p><b>Хаяг:</b> ${esc(g.address)} · <b>Цус:</b> ${esc(g.bloodType)}</p>
-          <h4 style="margin:16px 0 6px">2. Гэр бүл</h4>
-          <p>Гэрлэсэн: ${esc(fd.family?.married||'—')}</p>
-          <ul>${(fd.family?.members||[]).filter(m=>m.fullName).map(m=>`<li>${esc(m.fullName)} (${esc(m.relation)}) — ${esc(m.phone)}</li>`).join('')||'<li>—</li>'}</ul>
-          <h4 style="margin:16px 0 6px">3. Боловсрол</h4>
-          <ul>${(fd.education||[]).filter(e=>e.schoolName||e.location).map(e=>`<li>${esc(e.location)} ${esc(e.schoolName)} (${esc(e.enteredYear)}–${esc(e.graduatedYear)})</li>`).join('')||'<li>—</li>'}</ul>
-          <h4 style="margin:16px 0 6px">4. Ажлын туршлага</h4>
-          <ul>${(fd.workExperience||[]).filter(w=>w.companyName).map(w=>`<li>${esc(w.companyName)} — ${esc(w.position)} (${esc(w.startDate)}–${esc(w.endDate)})</li>`).join('')||'<li>—</li>'}</ul>
-          <h4 style="margin:16px 0 6px">5–7. Хувийн / Ажил</h4>
-          <p><b>Давуу:</b> ${esc(fd.personal?.strengths)}</p>
-          <p><b>Сул:</b> ${esc(fd.personal?.weaknesses)}</p>
-          <p><b>Сонирхож буй:</b> ${esc(fd.jobInterest?.position)} · <b>Цалин:</b> ${esc(fd.jobInterest?.desiredSalary)}</p>
-          <h4 style="margin:16px 0 6px">8. Яаралтай холбоо</h4>
-          <ul>${(fd.emergencyContacts||[]).filter(e=>e.name).map(e=>`<li>${esc(e.name)} (${esc(e.relation)}) — ${esc(e.phone)}</li>`).join('')||'<li>—</li>'}</ul>
-          ${r.signature_svg?`<h4 style="margin:16px 0 6px">Гарын үсэг</h4><div>${r.signature_svg}</div>`:(fd.signatureSvg?`<h4 style="margin:16px 0 6px">Гарын үсэг</h4><div>${fd.signatureSvg}</div>`:'')}
-        </div>`;
-      } else {
-        body=`<div style="font-size:14px;line-height:1.7">
-          <p><b>Нэр:</b> ${esc(r.name)} ${esc(r.last_name||'')}</p>
-          <p><b>Утас:</b> ${esc(r.phone)} · <b>Имэйл:</b> ${esc(r.email)}</p>
-          <p><b>Албан тушаал:</b> ${esc(r.position)}</p>
-          <p><b>Тэмдэглэл:</b> ${esc(r.message)}</p>
-        </div>`;
-      }
-      openModal('Ажлын байрны анкет',body,'Хаах',()=>true);
+      const fd=enrichJobForm(r,parseJobForm(r)||rowToMinimalFd(r));
+      const html=buildJobApplicationPaperHtml(fd,{
+        logoUrl:typeof ADMIN_ASSET==='function'?ADMIN_ASSET('logo.png'):'logo.png',
+        signatureSvg:r.signature_svg||fd.signatureSvg||'',
+        signedAt:r.signed_at||fd.signedAt||''
+      });
+      window._jobPaperCache[id]=html;
+      const body=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <button class="btn btn-primary btn-sm" type="button" onclick="printJobAppCached('${String(r.id).replace(/'/g,"\\'")}')">
+          <span class="material-symbols-outlined" style="font-size:17px;vertical-align:middle">picture_as_pdf</span> PDF / Хэвлэх
+        </button>
+        <span class="muted" style="font-size:12px">Цаасан анкетын загвар — 3×4 цээж зураг цагаан дэвсгэртэй</span>
+      </div>
+      <iframe id="jobPaperPreview" title="Ажлын байрны анкет" style="width:100%;height:min(75vh,920px);border:1px solid var(--line);border-radius:12px;background:#d4d4d4"></iframe>`;
+      openModal('Ажлын байрны анкет',body,'Хаах',()=>true,{wide:true,appView:true});
+      setTimeout(()=>{
+        const f=document.getElementById('jobPaperPreview');
+        if(!f) return;
+        const u=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+        f.src=u;
+        f.onload=()=>URL.revokeObjectURL(u);
+      },60);
     }
     window.viewJobApplication=viewJobApplication;
     async function setAppStatus(id,status){
@@ -3556,14 +3665,17 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
         <div class="modal-f"><button class="btn btn-primary" onclick="closeModal()">Хаах</button></div></div>`;
       $('overlay').style.display='flex';
     }
-    function openModal(title,body,okText,onOk){
+    function openModal(title,body,okText,onOk,opts){
       modalConfirm=onOk;
-      $('overlay').innerHTML=`<div class="modal"><div class="modal-h">${title}<button class="x" onclick="closeModal()"></button></div>
+      const wide=opts&&opts.wide;
+      const appView=opts&&opts.appView;
+      const hideCancel=okText==='Хаах';
+      $('overlay').innerHTML=`<div class="modal${wide?' modal-wide':''}${appView?' modal-app-view':''}"><div class="modal-h">${title}<button class="x" onclick="closeModal()">×</button></div>
         <div class="modal-b">${body}</div><div class="modal-f">
-        <button class="btn btn-ghost" onclick="closeModal()">Болих</button>
+        ${hideCancel?'':`<button class="btn btn-ghost" onclick="closeModal()">Болих</button>`}
         <button class="btn btn-primary" id="okBtn">${okText}</button></div></div>`;
       $('overlay').style.display='flex';
-      $('okBtn').onclick=async()=>{ if(modalConfirm){ const r=await modalConfirm(); if(r===true) closeModal(); } };
+      $('okBtn').onclick=async()=>{ if(modalConfirm){ const r=await modalConfirm(); if(r===true) closeModal(); } else closeModal(); };
     }
     function closeModal(){ $('overlay').style.display='none'; $('overlay').innerHTML=''; modalConfirm=null; }
     window.closeModal=closeModal;
@@ -3606,16 +3718,16 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       if(typeof Chart==='undefined') return;
       Chart.defaults.font.family="'Inter',sans-serif";
       Chart.defaults.color=chartTextColor();
-      const primary='#453fc1';
+      const primary='#3b82f6';
       const attCtx=$('dashAttendanceChart');
       if(attCtx){
         const g=attCtx.getContext('2d');
         const grad=g.createLinearGradient(0,0,0,280);
-        grad.addColorStop(0,'rgba(69,63,193,.35)');
-        grad.addColorStop(1,'rgba(69,63,193,0)');
+        grad.addColorStop(0,'rgba(59,130,246,.35)');
+        grad.addColorStop(1,'rgba(59,130,246,0)');
         dashCharts.att=new Chart(g,{
           type:'line',
-          data:{labels:last7DayLabels(),datasets:[{label:'Ирц',data:attendanceByDay(),borderColor:primary,backgroundColor:grad,borderWidth:2,tension:.4,fill:true,pointRadius:3,pointBackgroundColor:isDark()?'#302f38':'#fff',pointBorderColor:primary}]},
+          data:{labels:last7DayLabels(),datasets:[{label:'Ирц',data:attendanceByDay(),borderColor:primary,backgroundColor:grad,borderWidth:2,tension:.4,fill:true,pointRadius:3,pointBackgroundColor:isDark()?'#18181b':'#fff',pointBorderColor:primary}]},
           options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:chartGridColor()},ticks:{precision:0}}}}
         });
       }
@@ -3623,7 +3735,7 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       if(callCtx){
         dashCharts.calls=new Chart(callCtx.getContext('2d'),{
           type:'doughnut',
-          data:{labels:['Нээлттэй','Явж байгаа','Дууссан'],datasets:[{data:callsByStatus(),backgroundColor:[primary,'#5e5adb','#10b981'],borderWidth:0}]},
+          data:{labels:['Нээлттэй','Явж байгаа','Дууссан'],datasets:[{data:callsByStatus(),backgroundColor:[primary,'#71717a','#22c55e'],borderWidth:0}]},
           options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:12,font:{size:11}}}}}
         });
       }
@@ -3658,7 +3770,13 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       if(back) back.classList.toggle('open',open);
     }
     window.toggleSidebar=toggleSidebar;
+    function applyAdminAssets(){
+      document.querySelectorAll('[data-admin-asset]').forEach(el=>{
+        el.src=ADMIN_ASSET(el.getAttribute('data-admin-asset'));
+      });
+    }
     function initShellUi(){
+      applyAdminAssets();
       initTheme();
       const menu=$('menuBtn');
       if(menu){

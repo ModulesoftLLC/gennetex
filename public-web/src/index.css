@@ -94,5 +94,5 @@
 }
 
 .section-glass {
-  @apply rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md;
+  @apply rounded-2xl border border-graphite-800 bg-graphite-900/40 backdrop-blur-md;
 }
