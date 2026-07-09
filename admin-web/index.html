@@ -17,7 +17,7 @@
     })();
   </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script>
@@ -113,6 +113,11 @@
     button{cursor:pointer;border:none;font-weight:600;font-family:inherit}
     input,select,textarea{font-family:inherit;font-size:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);width:100%;transition:border-color .15s,box-shadow .15s}
     input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.18)}
+    /* Tailwind CDN forms plugin цагаан input-ийг дарж, харанхуй горимд уншигдахуйц болгоно */
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+    select,textarea{background-color:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important;-webkit-text-fill-color:var(--text)}
+    html.dark input::placeholder,html.dark textarea::placeholder{color:var(--muted);opacity:1}
+    .psc-field input,.psc-field textarea{background-color:var(--card)!important;color:var(--text)!important;border:1px solid var(--line)!important}
     .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
     .glass-panel{background:rgba(255,255,255,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid var(--line)}
     .dark .glass-panel{background:rgba(24,24,27,.88)}
@@ -357,7 +362,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.6.3</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.6.4</span>
         </div>
       </aside>
       <div class="main">

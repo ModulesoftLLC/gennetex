@@ -1,6 +1,6 @@
 {
   "name": "gennetex-erp",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client",
