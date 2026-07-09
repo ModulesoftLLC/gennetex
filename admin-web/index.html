@@ -357,7 +357,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.6.2</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.6.3</span>
         </div>
       </aside>
       <div class="main">
@@ -737,8 +737,8 @@
     // ===== Data =====
     function startRefresh(){ loadAll(); if(timer)clearInterval(timer); timer=setInterval(()=>loadAll(true),15000); }
     async function loadAll(silent){
-      const [w,a,v,tr,sw,sc,inv,veh,mov,rep,sh,al,br,alogs,posts,lives,meetings,lr]=await Promise.all([
-        sb.from('profiles').select('id,name,last_name,role,latitude,longitude,last_seen,email,position,phone,address,avatar_url').order('name'),
+      const [w,a,v,tr,sw,serviceCallsRes,inv,veh,mov,rep,sh,al,br,alogs,posts,lives,meetings,lr]=await Promise.all([
+        loadProfilesOrdered(),
         sb.from('attendance').select('*').order('created_at',{ascending:false}).limit(200),
         sb.from('visit_logs').select('*').order('arrived_at',{ascending:false}).limit(5000),
         sb.from('trips').select('*').order('started_at',{ascending:false}).limit(200),
@@ -746,7 +746,7 @@
         sb.from('service_calls').select('*').order('created_at',{ascending:false}).limit(200),
         sb.from('inventory').select('*').order('name'),
         sb.from('vehicles').select('*').order('created_at',{ascending:false}),
-        sb.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(1000),
+        sb.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(5000),
         sb.from('employee_reports').select('*').order('created_at',{ascending:false}).limit(200),
         sb.from('employee_shifts').select('*,attendance_locations(name)').order('shift_date',{ascending:false}).limit(200),
         sb.from('attendance_locations').select('*').eq('active',true).order('name'),
@@ -758,9 +758,11 @@
         sb.from('leave_requests').select('*').order('created_at',{ascending:false}).limit(200)
       ]);
       if(rep.error){ console.error('employee_reports:', rep.error); toast('Тайлан ачаалахад алдаа: '+rep.error.message); }
+      if(w.error){ console.error('profiles:', w.error); toast('Ажилчид ачаалахад алдаа: '+w.error.message); }
+      if(mov.error){ console.error('stock_movements:', mov.error); toast('Барааны бүртгэл ачаалахад алдаа: '+mov.error.message); }
       if(sw.error && String(sw.error.message).includes('field_site_sessions')) toast('Ажлын байр: migration_field_work.sql ажиллуулна уу');
       if(v.error && String(v.error.message).includes('visit_logs')) toast('Очсон лог: schema.sql эсвэл migration_visit_logs.sql ажиллуулна уу');
-      if(sc.error && String(sc.error.message).includes('service_calls')) toast('Дуудлага: migration_service_calls.sql ажиллуулна уу');
+      if(serviceCallsRes.error && String(serviceCallsRes.error.message).includes('service_calls')) toast('Дуудлага: migration_service_calls.sql ажиллуулна уу');
       if(sh.error && String(sh.error.message).includes('employee_shifts')) toast('Хуваарь: migration_shifts.sql ажиллуулна уу');
       if(br.error && String(br.error.message).includes('employee_break_schedules')) toast('Амралт: migration_break_schedules.sql ажиллуулна уу');
       if(alogs.error && String(alogs.error.message).includes('activity_logs')) toast('Нийт лог: migration_activity_logs.sql ажиллуулна уу');
@@ -803,11 +805,11 @@
         else if(String(ja.error.message).includes('job_applications')) toast('Ажлын байрны анкет: migration_job_applications.sql ажиллуулна уу');
       }catch(e){}
       try{
-        const sc=await sb.from('public_site_content').select('content,updated_at').eq('id','main').maybeSingle();
-        if(!sc.error&&sc.data){
-          publicSiteContent=mergePublicSiteContent(sc.data.content);
-          publicSiteUpdatedAt=sc.data.updated_at;
-        }else if(sc.error&&String(sc.error.message).includes('public_site_content')){
+        const siteContentRes=await sb.from('public_site_content').select('content,updated_at').eq('id','main').maybeSingle();
+        if(!siteContentRes.error&&siteContentRes.data){
+          publicSiteContent=mergePublicSiteContent(siteContentRes.data.content);
+          publicSiteUpdatedAt=siteContentRes.data.updated_at;
+        }else if(siteContentRes.error&&String(siteContentRes.error.message).includes('public_site_content')){
           toast('Вэб текст: migration_public_site_content.sql ажиллуулна уу');
         }
       }catch(e){}
@@ -827,13 +829,15 @@
         const aur=await sb.from('ai_performance_reports').select('*').eq('report_type','app_usage').order('created_at',{ascending:false}).limit(50);
         if(!aur.error) aiUsageReports=aur.data||[];
       }catch(e){}
-      data={workers:dropSampleRows(w.data,['name']),attendance:dropSampleRows(a.data,['staff_name','user_name']),
+      const workers=dropSampleRows(w.data,['name']);
+      const movements=enrichMovements(mov.data||[],workers);
+      data={workers:workers,attendance:dropSampleRows(a.data,['staff_name','user_name']),
         visits:dropSampleRows(v.data,['customer','user_name']),trips:(tr.data||[]).map(t=>({...t,driver_name:isSampleName(t.driver_name)?null:t.driver_name})),
         tripGroups,tripGroupsToday,tripGroupsArchive,
         siteSessions:sw.data||[],
-        serviceCalls:sc.data||[],
+        serviceCalls:serviceCallsRes.data||[],
         inventory:inv.data||[],vehicles:(veh.data||[]).map(v=>({...v,driver_name:isSampleName(v.driver_name)?null:v.driver_name})),
-        movements:dropSampleRows(mov.data,['user_name','staff_name']),reports:dropSampleRows(rep.data,['user_name']),
+        movements:movements,reports:dropSampleRows(rep.data,['user_name']),
         shifts:dropSampleRows((sh.data||[]).map(s=>({...s,location_name:s.attendance_locations?.name||null})),['user_name']),
         attLocations:al.data||[],breakSchedules:dropSampleRows(br.data,['user_name']),
         activityLogs:dropSampleRows(alogs.data||[],['user_name']),
@@ -848,6 +852,7 @@
         deviceApprovals:deviceApprovals,
         publicSiteContent:publicSiteContent,
         publicSiteUpdatedAt:publicSiteUpdatedAt,
+        loadErrors:{workers:w.error?.message||null,movements:mov.error?.message||null},
         leaveRequests:lr.error?[]:(lr.data||[])};
       // Interval үед газрын зураг байвал зөвхөн marker шинэчилнэ (zoom тогтвортой)
       if(silent && (view==='dashboard' ||view==='location') && map && document.body.contains($('map'))){
@@ -2979,7 +2984,22 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
     };
 
     // ===== Ажилчид =====
-    function empDisplayName(w){ return [w.last_name,w.name].filter(Boolean).join(' ')||w.name||'—'; }
+    function empDisplayName(w){ return [w.last_name,w.name].filter(Boolean).join(' ')||w.name||w.email||'—'; }
+    function enrichMovements(rows, workers){
+      const names={};
+      (workers||[]).forEach(w=>{ if(w.id) names[w.id]=empDisplayName(w); });
+      return (rows||[]).map(m=>{
+        const fromProfile=m.user_id?names[m.user_id]:'';
+        const label=(m.user_name||m.staff_name||fromProfile||'').trim();
+        return {...m,user_name:label||'Тодорхойгүй'};
+      });
+    }
+    async function loadProfilesOrdered(){
+      const full=await sb.from('profiles').select('*').order('name');
+      if(!full.error) return full;
+      console.error('profiles:',full.error);
+      return sb.from('profiles').select('id,name,last_name,email,role,position,phone,address,avatar_url,latitude,longitude,last_seen').order('name');
+    }
     function empRolePill(w){
       if(w.role==='superadmin') return '<span class="pill admin">Хөгжүүлэгч</span>';
       if(w.role==='admin') return '<span class="pill admin">Админ</span>';
@@ -2987,12 +3007,14 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
     }
     function renderEmployees(c){
       const list=visibleWorkers();
+      const loadErr=data.loadErrors?.workers;
       c.innerHTML=`<div class="card"><div class="card-h"><h3>Ажилчид (${list.length})</h3>
         <button class="btn btn-primary btn-sm" onclick="empModal()"> Ажилтан нэмэх</button></div>
+        ${loadErr?`<div class="card-b" style="padding:12px 16px"><p class="err" style="margin:0">Ажилчид ачаалахад алдаа: ${String(loadErr).replace(/</g,'&lt;')}</p></div>`:''}
         <div class="card-b" style="padding:0"><table><thead><tr><th>Ажилтан</th><th>Имэйл</th><th>Утас</th><th>Хаяг</th><th>Эрх</th><th></th></tr></thead>
         <tbody>${list.map(w=>`<tr><td><div style="display:flex;align-items:center;gap:8px">${w.avatar_url?`<img class="av-id" src="${w.avatar_url}" alt="">`:`<span class="av-sm av-ph">${(w.name||' ?').charAt(0).toUpperCase()}</span>`}<div><b>${empDisplayName(w)}</b>${w.position?`<br><span class=muted style="font-size:12px">${w.position}</span>`:''}</div></div></td><td class=muted>${w.email||'—'}</td><td class=muted>${w.phone||'—'}</td><td class=muted>${w.address||'—'}</td>
           <td>${empRolePill(w)}</td>
-          <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick='openEmpStockModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Бараа</button><button class="btn btn-ghost btn-sm" onclick='editEmpModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Засах</button>${isSuperAdmin(me.role)?`<button class="btn btn-ghost btn-sm" onclick='resetPwModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Нууц үг</button>`:''}${isSuperAdmin(me.role)&&w.id!==me.id&&w.role!=='superadmin' ?`<button class="btn btn-ghost btn-sm" onclick="toggleRole('${w.id}','${w.role}')">${w.role==='admin' ?'→ Ажилтан':w.role==='employee' ?'→ Админ':'Эрх'}</button>`:''}${w.id===me.id?'<span class=muted>та</span>':''}</div></td></tr>`).join('')||'<tr><td colspan=6 class=empty>Ажилтан алга</td></tr>'}</tbody></table></div></div>`;
+          <td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick='openEmpStockModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Бараа</button><button class="btn btn-ghost btn-sm" onclick='editEmpModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Засах</button>${isSuperAdmin(me.role)?`<button class="btn btn-ghost btn-sm" onclick='resetPwModal(${JSON.stringify(w).replace(/'/g,"&#39;")})'>Нууц үг</button>`:''}${isSuperAdmin(me.role)&&w.id!==me.id&&w.role!=='superadmin' ?`<button class="btn btn-ghost btn-sm" onclick="toggleRole('${w.id}','${w.role}')">${w.role==='admin' ?'→ Ажилтан':w.role==='employee' ?'→ Админ':'Эрх'}</button>`:''}${w.id===me.id?'<span class=muted>та</span>':''}</div></td></tr>`).join('')||`<tr><td colspan=6 class=empty>${loadErr?'Дээрх алдааг шалгана уу':'Ажилтан алга'}</td></tr>`}</tbody></table></div></div>`;
     }
     window.openEmpStockModal=(w)=>{
       const items=computeStockBalances(data.movements,{userId:w.id});
@@ -3495,10 +3517,12 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
         </tr></thead><tbody>${takeRows(list)}</tbody></table></div></div>`;
 
       if(usageTab==='log'){
+        const movErr=data.loadErrors?.movements;
         c.innerHTML=`<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>Авсан бүртгэл</h3>
           <div style="display:flex;gap:8px;flex-wrap:wrap">${tab('balances','Үлдэгдэл ('+totalItems+')')}${tab('log','Авсан ('+withdraws.length+')')}
           <button class="btn btn-primary btn-sm" onclick="exportUsage()">Excel</button></div></div>
-          <div class="card-b"><p class="muted" style="margin:0;font-size:13px">Ажилтан бар код уншуулж, хэдэн ширхэг авснаа зургаар баталгаажуулбал энд <b>автоматаар</b> бүртгэгдэнэ. «Зураг харах» дарвал баталгаа зураг нээгдэнэ.</p></div></div>
+          <div class="card-b"><p class="muted" style="margin:0;font-size:13px">Ажилтан бар код уншуулж, хэдэн ширхэг авснаа зургаар баталгаажуулбал энд <b>автоматаар</b> бүртгэгдэнэ. «Зураг харах» дарвал баталгаа зураг нээгдэнэ.</p>
+          ${movErr?`<p class="err" style="margin:10px 0 0;font-size:13px">Барааны бүртгэл ачаалахад алдаа: ${String(movErr).replace(/</g,'&lt;')}</p>`:''}</div></div>
           ${takeTable('Бараа материал авсан', materialTakes)}
           ${takeTable('Багаж авсан', toolTakes)}`;
         return;
