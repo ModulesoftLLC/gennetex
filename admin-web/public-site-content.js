@@ -150,8 +150,11 @@
     '.psc-field{display:flex;flex-direction:column;gap:6px}' +
     '.psc-label{font-size:12px;font-weight:600;color:var(--muted)}' +
     '.psc-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}' +
-    '.psc-field input,.psc-field textarea{width:100%;padding:11px 13px;border-radius:11px;border:1px solid var(--line);background:var(--card)!important;color:var(--text)!important;-webkit-text-fill-color:var(--text);font:inherit;font-size:14px;transition:border-color .15s,box-shadow .15s}' +
+    '.psc-field input,.psc-field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)!important;color:var(--text)!important;-webkit-text-fill-color:var(--text);font:inherit;font-size:14px;line-height:1.5;transition:border-color .15s,box-shadow .15s}' +
+    '.psc-field input{min-height:44px}' +
+    '.psc-field textarea{min-height:110px;resize:vertical;line-height:1.55}' +
     '.psc-field input:focus,.psc-field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15)}' +
+    '.psc-field-wide{grid-column:1/-1}' +
     '.psc-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card);margin-bottom:12px}' +
     '.psc-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}' +
     '.psc-item-title{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.02em}' +
@@ -196,14 +199,17 @@
     opts = opts || {};
     var val = esc(value);
     var hint = opts.hint ? '<span class="psc-hint">' + esc(opts.hint) + '</span>' : '';
+    var wide = opts.wide ? ' psc-field-wide' : '';
     if (opts.area) {
       return (
-        '<label class="psc-field"><span class="psc-label">' +
+        '<label class="psc-field' +
+        wide +
+        '"><span class="psc-label">' +
         esc(label) +
         '</span><textarea id="' +
         id +
         '" rows="' +
-        (opts.rows || 3) +
+        (opts.rows || 4) +
         '">' +
         val +
         '</textarea>' +
@@ -212,7 +218,9 @@
       );
     }
     return (
-      '<label class="psc-field"><span class="psc-label">' +
+      '<label class="psc-field' +
+      wide +
+      '"><span class="psc-label">' +
       esc(label) +
       '</span><input id="' +
       id +
@@ -236,7 +244,7 @@
       (pathLabel ? '<span class="psc-item-path">' + esc(pathLabel) + '</span>' : '') +
       '</div><div class="psc-grid">' +
       field('Гарчиг', prefix + '_title_' + i, title) +
-      field('Тайлбар', prefix + '_text_' + i, text, { area: true, rows: 2 }) +
+      field('Тайлбар', prefix + '_text_' + i, text, { area: true, rows: 3, wide: true }) +
       '</div></div>'
     );
   }
@@ -294,7 +302,7 @@
     }).join('');
     var highlights = (pj.highlights || [])
       .map(function (line, i) {
-        return field('Мөр #' + (i + 1), 'proj_highlight_' + i, line, { area: true, rows: 2 });
+        return field('Мөр #' + (i + 1), 'proj_highlight_' + i, line, { area: true, rows: 3, wide: true });
       })
       .join('');
     var navLinks = (nb.links || [])
@@ -355,7 +363,7 @@
         '<div class="psc-grid">' +
           field('Гарчиг — эхний мөр', 'hero_title1', h.title1) +
           field('Гарчиг — хоёр дахь мөр', 'hero_title2', h.title2) +
-          field('Тайлбар', 'hero_description', h.description, { area: true, rows: 4 }) +
+          field('Тайлбар', 'hero_description', h.description, { area: true, rows: 5, wide: true }) +
           '</div>',
       ) +
       block(
@@ -385,7 +393,7 @@
         '<div class="psc-grid">' +
           field('Дээд шошго', 'about_label', ab.label) +
           field('Гарчиг', 'about_title', ab.title) +
-          field('Танилцуулга', 'about_intro', ab.intro, { area: true, rows: 4 }) +
+          field('Танилцуулга', 'about_intro', ab.intro, { area: true, rows: 5, wide: true }) +
           '</div>',
       ) +
       block('Гол цэгүүд', aboutItems) +
@@ -423,7 +431,7 @@
       block(
         'Холбоо',
         '<div class="psc-grid">' +
-          field('Хаяг', 'contact_address', ct.address, { area: true, rows: 2 }) +
+          field('Хаяг', 'contact_address', ct.address, { area: true, rows: 3, wide: true }) +
           field('Утас', 'contact_phone', ct.phone, { hint: 'Жишээ: +976 9911-2233' }) +
           field('Имэйл', 'contact_email', ct.email) +
           field('Вэбсайт', 'contact_website', ct.website, { hint: 'Жишээ: adiya.site' }) +
@@ -436,7 +444,7 @@
           field('Даваа – Баасан', 'contact_hoursWeekday', ct.hoursWeekday) +
           field('Бямба', 'contact_hoursSaturday', ct.hoursSaturday) +
           field('Ням', 'contact_hoursSunday', ct.hoursSunday) +
-          field('Тэмдэглэл', 'contact_hoursNote', ct.hoursNote, { area: true, rows: 2 }) +
+          field('Тэмдэглэл', 'contact_hoursNote', ct.hoursNote, { area: true, rows: 3, wide: true }) +
           '</div>',
       ) +
       '</div>' +
@@ -446,11 +454,11 @@
         '<div class="psc-grid">' +
           field('Дээд шошго', 'careers_label', cr.label) +
           field('Гарчиг', 'careers_title', cr.title) +
-          field('Танилцуулга (нүүр)', 'careers_intro', cr.intro, { area: true, rows: 3 }) +
-          field('Танилцуулга (анкет)', 'careers_pageIntro', cr.pageIntro, { area: true, rows: 3 }) +
+          field('Танилцуулга (нүүр)', 'careers_intro', cr.intro, { area: true, rows: 4, wide: true }) +
+          field('Танилцуулга (анкет)', 'careers_pageIntro', cr.pageIntro, { area: true, rows: 4, wide: true }) +
           '</div>',
       ) +
-      block('Хажуугийн мэдээлэл', '<div class="psc-grid">' + field('Гарчиг', 'careers_perksTitle', cr.perksTitle) + perks + field('Тэмдэглэл', 'careers_sidebarNote', cr.sidebarNote, { area: true, rows: 3 }) + '</div>') +
+      block('Хажуугийн мэдээлэл', '<div class="psc-grid">' + field('Гарчиг', 'careers_perksTitle', cr.perksTitle) + perks + field('Тэмдэглэл', 'careers_sidebarNote', cr.sidebarNote, { area: true, rows: 4, wide: true }) + '</div>') +
       block(
         'Бусад',
         '<div class="psc-grid">' +
@@ -477,7 +485,8 @@
           field('Брэнд', 'footer_brand', ft.brand) +
           field('Зохиогчийн эрх', 'footer_copyright', ft.copyright, {
             area: true,
-            rows: 2,
+            rows: 3,
+            wide: true,
             hint: '{year} гэж бичвэл автоматаар солигдоно',
           }) +
           '</div>',
