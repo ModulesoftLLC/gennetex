@@ -16,10 +16,9 @@ const STEPS = [
   { id: 'finish', num: '4', title: 'Баталгаажуулах', short: 'Дуусгах' },
 ];
 
-const inputCls =
-  'w-full rounded-lg border border-graphite-700 bg-graphite-950/80 px-3 py-2.5 text-sm text-graphite-50 outline-none transition-colors placeholder:text-graphite-600 focus:border-accent focus:ring-2 focus:ring-accent/20';
-const labelCls = 'mb-1.5 block text-xs font-medium uppercase tracking-wide text-graphite-400';
-const sectionCls = 'rounded-xl border border-graphite-700/80 bg-graphite-800/40 p-4 sm:p-5';
+const inputCls = 'job-input';
+const labelCls = 'job-label';
+const sectionCls = 'job-section';
 
 function Field({
   children,
@@ -531,7 +530,7 @@ export default function JobApplicationForm({ embedded = false }: { embedded?: bo
               <div
                 ref={onRulesRef}
                 onScroll={onRulesScroll}
-                className="max-h-52 overflow-y-auto rounded-xl border border-graphite-700 bg-graphite-950/60 p-4 text-sm leading-relaxed text-graphite-300 sm:max-h-60"
+                className="max-h-52 overflow-y-auto rounded-xl border border-graphite-700 bg-graphite-900/80 p-4 text-sm leading-relaxed text-graphite-200 sm:max-h-60"
               >
                 <ol className="list-decimal space-y-3 pl-5">
                   {JOB_APPLICATION_RULES.map((rule, i) => (

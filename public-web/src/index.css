@@ -96,3 +96,51 @@
 .section-glass {
   @apply rounded-2xl border border-graphite-800 bg-graphite-900/40 backdrop-blur-md;
 }
+
+/* Ажилд орох анкет — input/select/textarea (Tailwind-ээс үл хамааран тод харагдана) */
+@layer components {
+  .job-label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-graphite-300;
+  }
+
+  .job-input {
+    @apply w-full rounded-xl border border-graphite-600 bg-graphite-900 px-3.5 py-2.5 text-sm outline-none transition-colors;
+    color: #fafafa !important;
+    -webkit-text-fill-color: #fafafa;
+    background-color: #18181b !important;
+    caret-color: #fafafa;
+  }
+
+  .job-input::placeholder {
+    color: #71717a;
+    opacity: 1;
+  }
+
+  .job-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+  }
+
+  .job-input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .job-input option {
+    color: #fafafa;
+    background-color: #18181b;
+  }
+
+  .job-section {
+    @apply rounded-xl border border-graphite-700/80 bg-graphite-900/60 p-4 sm:p-5;
+  }
+}
+
+/* Chrome autofill — харанхуй талбарт цагаан текст */
+.job-input:-webkit-autofill,
+.job-input:-webkit-autofill:hover,
+.job-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fafafa !important;
+  box-shadow: 0 0 0 1000px #18181b inset !important;
+  transition: background-color 9999s ease-out 0s;
+}

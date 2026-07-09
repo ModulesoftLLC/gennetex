@@ -127,44 +127,6 @@
     footer: { label: 'Footer', icon: 'bottom_panel_close', preview: '/', desc: 'Доод хэсгийн текст' },
   };
 
-  var PSC_STYLES =
-    '.psc-editor{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:min(72vh,720px);border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}' +
-    '.psc-sidebar{border-right:1px solid var(--line);background:var(--primary-soft);padding:12px 10px;display:flex;flex-direction:column;gap:4px}' +
-    '.psc-sidebar-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 10px 6px}' +
-    '.psc-nav-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}' +
-    '.psc-nav-btn:hover{background:var(--card);color:var(--text)}' +
-    '.psc-nav-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.06);font-weight:700}' +
-    '.psc-nav-btn .material-symbols-outlined{font-size:20px;flex-shrink:0}' +
-    '.psc-main{display:flex;flex-direction:column;min-width:0}' +
-    '.psc-toolbar{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--card)}' +
-    '.psc-toolbar h4{margin:0 0 4px;font-size:17px;font-weight:800;letter-spacing:-.2px}' +
-    '.psc-toolbar p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}' +
-    '.psc-updated{font-size:12px;color:var(--muted);white-space:nowrap}' +
-    '.psc-body{flex:1;padding:20px;overflow:auto}' +
-    '.psc-panel{display:none;animation:psc-fade .25s ease}' +
-    '.psc-panel.active{display:block}' +
-    '@keyframes psc-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}' +
-    '.psc-block{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px;background:var(--bg)}' +
-    '.psc-block-title{margin:0 0 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:8px}' +
-    '.psc-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}' +
-    '.psc-field{display:flex;flex-direction:column;gap:6px}' +
-    '.psc-label{font-size:12px;font-weight:600;color:var(--muted)}' +
-    '.psc-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}' +
-    '.psc-field input,.psc-field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)!important;color:var(--text)!important;-webkit-text-fill-color:var(--text);font:inherit;font-size:14px;line-height:1.5;transition:border-color .15s,box-shadow .15s}' +
-    '.psc-field input{min-height:44px}' +
-    '.psc-field textarea{min-height:110px;resize:vertical;line-height:1.55}' +
-    '.psc-field input:focus,.psc-field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15)}' +
-    '.psc-field-wide{grid-column:1/-1}' +
-    '.psc-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card);margin-bottom:12px}' +
-    '.psc-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}' +
-    '.psc-item-title{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.02em}' +
-    '.psc-item-path{font-size:11px;color:var(--muted);font-family:JetBrains Mono,monospace}' +
-    '.psc-actions{position:sticky;bottom:0;padding:14px 20px;border-top:1px solid var(--line);background:rgba(250,250,250,.92);backdrop-filter:blur(10px);display:flex;gap:10px;flex-wrap:wrap;align-items:center}' +
-    '.dark .psc-actions{background:rgba(24,24,27,.92)}' +
-    '.psc-preview-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card)}' +
-    '.psc-preview-link:hover{background:var(--primary-soft)}' +
-    '@media(max-width:768px){.psc-editor{grid-template-columns:1fr}.psc-sidebar{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);padding:8px}.psc-sidebar-title{display:none}.psc-nav-btn{flex:0 0 auto;white-space:nowrap;padding:8px 12px}.psc-nav-btn span:last-child{display:none}.psc-body{padding:14px}.psc-actions{padding:12px 14px}}';
-
   function deepMerge(base, patch) {
     if (!patch || typeof patch !== 'object') return base;
     if (Array.isArray(patch)) {
@@ -185,7 +147,10 @@
   }
 
   function mergePublicSiteContent(partial) {
-    return deepMerge(DEFAULT_PUBLIC_SITE_CONTENT, partial || {});
+    if (!partial || typeof partial !== 'object' || Array.isArray(partial)) {
+      return deepMerge(DEFAULT_PUBLIC_SITE_CONTENT, {});
+    }
+    return deepMerge(DEFAULT_PUBLIC_SITE_CONTENT, partial);
   }
 
   function esc(v) {
@@ -237,6 +202,8 @@
   }
 
   function itemPairFields(prefix, title, text, i, pathLabel) {
+    title = title == null ? '' : title;
+    text = text == null ? '' : text;
     return (
       '<div class="psc-item"><div class="psc-item-head"><span class="psc-item-title">#' +
       (i + 1) +
@@ -269,7 +236,7 @@
   }
 
   function renderPublicSiteEditorHtml(content, updatedAt) {
-    var c = content || DEFAULT_PUBLIC_SITE_CONTENT;
+    var c = mergePublicSiteContent(content && !Array.isArray(content) ? content : null);
     var h = c.hero || {};
     var hm = c.home || {};
     var ab = c.about || {};
@@ -282,15 +249,19 @@
     var updated = updatedAt ? new Date(updatedAt).toLocaleString('mn-MN') : 'Хэзээ ч хадгалаагүй';
 
     var aboutItems = (ab.items || []).map(function (it, i) {
+      if (!it || typeof it !== 'object') it = {};
       return itemPairFields('about', it.title, it.text, i);
     }).join('');
     var serviceItems = (sv.items || []).map(function (it, i) {
+      if (!it || typeof it !== 'object') it = {};
       return itemPairFields('service', it.title, it.text, i);
     }).join('');
     var homeLinks = (hm.links || []).map(function (it, i) {
+      if (!it || typeof it !== 'object') it = {};
       return itemPairFields('home_link', it.title, it.text, i, it.to || '');
     }).join('');
     var stats = (pj.stats || []).map(function (s, i) {
+      if (!s || typeof s !== 'object') s = {};
       return (
         '<div class="psc-item"><div class="psc-item-head"><span class="psc-item-title">Статистик #' +
         (i + 1) +
@@ -302,11 +273,12 @@
     }).join('');
     var highlights = (pj.highlights || [])
       .map(function (line, i) {
-        return field('Мөр #' + (i + 1), 'proj_highlight_' + i, line, { area: true, rows: 3, wide: true });
+        return field('Мөр #' + (i + 1), 'proj_highlight_' + i, line == null ? '' : line, { area: true, rows: 3, wide: true });
       })
       .join('');
     var navLinks = (nb.links || [])
       .map(function (l, i) {
+        if (!l || typeof l !== 'object') l = {};
         return (
           '<div class="psc-item"><div class="psc-item-head"><span class="psc-item-title">Цэс #' +
           (i + 1) +
@@ -320,7 +292,7 @@
       .join('');
     var perks = (cr.perks || [])
       .map(function (p, i) {
-        return field('Мөр #' + (i + 1), 'career_perk_' + i, p);
+        return field('Мөр #' + (i + 1), 'career_perk_' + i, p == null ? '' : p);
       })
       .join('');
 
@@ -494,9 +466,6 @@
       '</div>';
 
     return (
-      '<style>' +
-      PSC_STYLES +
-      '</style>' +
       '<div class="psc-editor">' +
       '<aside class="psc-sidebar" id="pscTabs"><div class="psc-sidebar-title">Хуудас</div>' +
       navHtml +
@@ -657,6 +626,8 @@
   }
 
   function initPublicSiteEditorTabs() {
+    var body = document.querySelector('.psc-body');
+    if (body) body.classList.add('psc-ready');
     document.querySelectorAll('[data-psc-tab]').forEach(function (btn) {
       btn.onclick = function () {
         var tab = btn.getAttribute('data-psc-tab');

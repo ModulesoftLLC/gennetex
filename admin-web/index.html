@@ -14,6 +14,11 @@
       var dark = t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.classList.toggle('dark', dark);
       document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      if (location.pathname.indexOf('/gennetex/admin') >= 0) {
+        var base = document.createElement('base');
+        base.href = '/gennetex/admin/';
+        document.head.appendChild(base);
+      }
     })();
   </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -121,10 +126,45 @@
     input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
     select,textarea{background-color:var(--card)!important;color:var(--text)!important;border-color:var(--line)!important;-webkit-text-fill-color:var(--text)}
     html.dark input::placeholder,html.dark textarea::placeholder{color:var(--muted);opacity:1}
-    .psc-field input,.psc-field textarea{background-color:var(--card)!important;color:var(--text)!important;border:1px solid var(--line)!important;box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
+    /* Public site CMS editor */
+    .psc-editor{display:grid;grid-template-columns:220px 1fr;gap:0;min-height:min(72vh,720px);border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
+    .psc-sidebar{border-right:1px solid var(--line);background:var(--primary-soft);padding:12px 10px;display:flex;flex-direction:column;gap:4px}
+    .psc-sidebar-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 10px 6px}
+    .psc-nav-btn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+    .psc-nav-btn:hover{background:var(--card);color:var(--text)}
+    .psc-nav-btn.active{background:var(--card);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.06);font-weight:700}
+    .psc-nav-btn .material-symbols-outlined{font-size:20px;flex-shrink:0}
+    .psc-main{display:flex;flex-direction:column;min-width:0;min-height:0}
+    .psc-toolbar{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--card);color:var(--text)}
+    .psc-toolbar h4{margin:0 0 4px;font-size:17px;font-weight:800;letter-spacing:-.2px;color:var(--text)}
+    .psc-toolbar p{margin:0;font-size:13px;color:var(--muted);line-height:1.45}
+    .psc-updated{font-size:12px;color:var(--muted);white-space:nowrap}
+    .psc-body{flex:1;padding:20px;overflow:auto;min-height:200px}
+    .psc-panel{display:block}
+    .psc-body.psc-ready .psc-panel{display:none;animation:psc-fade .25s ease}
+    .psc-body.psc-ready .psc-panel.active{display:block}
+    @keyframes psc-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .psc-block{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px;background:var(--bg)}
+    .psc-block-title{margin:0 0 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:8px}
+    .psc-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}
+    .psc-field{display:flex;flex-direction:column;gap:6px}
+    .psc-label{font-size:12px;font-weight:600;color:var(--muted)}
+    .psc-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+    .psc-field input,.psc-field textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card)!important;color:var(--text)!important;-webkit-text-fill-color:var(--text);font:inherit;font-size:14px;line-height:1.5;transition:border-color .15s,box-shadow .15s;box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
     .dark .psc-field input,.dark .psc-field textarea{box-shadow:inset 0 1px 2px rgba(0,0,0,.2)}
-    .psc-field textarea{min-height:110px;resize:vertical}
+    .psc-field input{min-height:44px}
+    .psc-field textarea{min-height:110px;resize:vertical;line-height:1.55}
+    .psc-field input:focus,.psc-field textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
     .psc-field-wide{grid-column:1/-1}
+    .psc-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card);margin-bottom:12px}
+    .psc-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+    .psc-item-title{font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.02em}
+    .psc-item-path{font-size:11px;color:var(--muted);font-family:JetBrains Mono,monospace}
+    .psc-actions{position:sticky;bottom:0;padding:14px 20px;border-top:1px solid var(--line);background:rgba(250,250,250,.92);backdrop-filter:blur(10px);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .dark .psc-actions{background:rgba(24,24,27,.92)}
+    .psc-preview-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card)}
+    .psc-preview-link:hover{background:var(--primary-soft)}
+    @media(max-width:768px){.psc-editor{grid-template-columns:1fr}.psc-sidebar{flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line);padding:8px}.psc-sidebar-title{display:none}.psc-nav-btn{flex:0 0 auto;white-space:nowrap;padding:8px 12px}.psc-nav-btn span:last-child{display:none}.psc-body{padding:14px}.psc-actions{padding:12px 14px}}
     .login-input-wrap input{min-height:48px;font-size:15px}
     .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:20px;line-height:1}
     .glass-panel{background:rgba(255,255,255,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-right:1px solid var(--line)}
@@ -268,6 +308,7 @@
     label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px;font-weight:600}
     .err{color:#93000a;background:#ffdad6;padding:10px;border-radius:8px;margin-top:12px;font-size:13px;display:none}
     .dark .err{color:#fecaca;background:rgba(186,26,26,.25)}
+    .card-b>.err,.card-b .err.show{display:block}
     .theme-fab{position:fixed;top:16px;right:16px;z-index:9999;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);box-shadow:0 4px 14px rgba(0,0,0,.08);cursor:pointer;transition:background .2s,color .2s}
     .theme-fab:hover{color:var(--primary);background:var(--primary-soft)}
 
@@ -340,6 +381,10 @@
     .muted{color:var(--muted)}
     .empty{text-align:center;color:var(--muted);padding:40px}
     .dash-chart-wrap{height:300px;position:relative}
+    .fuel-gauge-row{margin-bottom:14px}
+    .fuel-gauge-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;flex-wrap:wrap}
+    .fuel-gauge-bar{height:10px;border-radius:999px;background:var(--primary-soft);overflow:hidden}
+    .fuel-gauge-fill{height:100%;border-radius:999px;transition:width .35s ease}
     .timeline-line{position:absolute;left:16px;top:8px;bottom:8px;width:1px;background:var(--line)}
     .timeline-item{position:relative;padding-left:36px;margin-bottom:16px}
     .timeline-dot{position:absolute;left:10px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--card)}
@@ -573,7 +618,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.6.10</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.2</span>
         </div>
       </aside>
       <div class="main">
@@ -663,8 +708,12 @@
       return sb.from('profiles').select('id,name,last_name,email,role,position,phone,address,avatar_url,latitude,longitude,last_seen').order('name');
     }
     function safeMergeSiteContent(partial){
-      if(typeof mergePublicSiteContent==='function') return mergePublicSiteContent(partial);
-      return partial&&typeof partial==='object'?partial:{};
+      if(typeof mergePublicSiteContent==='function'){
+        const merged=mergePublicSiteContent(partial);
+        if(merged&&typeof merged==='object'&&!Array.isArray(merged)&&merged.navbar) return merged;
+        return mergePublicSiteContent(null);
+      }
+      return partial&&typeof partial==='object'&&!Array.isArray(partial)?partial:{};
     }
     function pickSbResult(result,fallbackMsg){
       if(result&&result.status==='fulfilled') return result.value||{data:null,error:null};
@@ -1722,6 +1771,93 @@
       return `<div class="stats animate-chart-entry">${s.map(x=>`<div class="stat stat-card">${x.ic}<div><div class="v">${x.v}</div><div class="l">${x.l}</div></div></div>`).join('')}</div>`;
     }
 
+    const DEFAULT_TANK_L=60;
+    function vehicleTankLiters(v){ return Number(v?.tank_capacity_liters)||DEFAULT_TANK_L; }
+    function findVehicleForTrip(t){
+      return (data.vehicles||[]).find(v=>v.id===t.vehicle_id)||(data.vehicles||[]).find(v=>v.plate_number===t.plate_number)||null;
+    }
+    function fuelStatsByVehicle(days=30){
+      const cutoff=Date.now()-days*86400000;
+      const map={};
+      (data.vehicles||[]).forEach(v=>{
+        map[v.plate_number]={plate:v.plate_number,vehicle:v,liters:0,cost:0,km:0,trips:0,activeLiters:0,active:false};
+      });
+      (data.trips||[]).forEach(t=>{
+        const plate=t.plate_number||'—';
+        if(!map[plate]) map[plate]={plate,vehicle:findVehicleForTrip(t),liters:0,cost:0,km:0,trips:0,activeLiters:0,active:false};
+        if(t.status==='active'){
+          map[plate].active=true;
+          map[plate].activeLiters=Number(t.liters||0);
+          return;
+        }
+        if(!t.started_at||new Date(t.started_at)<cutoff) return;
+        map[plate].liters+=Number(t.liters||0);
+        map[plate].cost+=Number(t.cost||0);
+        map[plate].km+=tripKm(t);
+        map[plate].trips+=1;
+      });
+      return Object.values(map).map(r=>{
+        const tank=vehicleTankLiters(r.vehicle);
+        const usedLiters=r.active?r.activeLiters:r.liters;
+        const fuelPct=tank>0?Math.min(100,Math.round((usedLiters/tank)*1000)/10):0;
+        return {...r,tank,fuelPct,usedLiters};
+      }).filter(r=>r.liters>0||r.active).sort((a,b)=>b.fuelPct-a.fuelPct);
+    }
+    function fuelByDayLast7(){
+      const counts=Array(7).fill(0);
+      const now=new Date();
+      (data.trips||[]).forEach(t=>{
+        if(!t.started_at) return;
+        const d=new Date(t.started_at);
+        const diff=Math.floor((now-d)/86400000);
+        if(diff>=0&&diff<7) counts[6-diff]+=Number(t.liters||0);
+      });
+      return counts.map(v=>Math.round(v*10)/10);
+    }
+    function employeePerformanceTop(limit=8,days=30){
+      const cutoff=Date.now()-days*86400000;
+      const scores={};
+      visibleWorkers().filter(w=>w.role==='employee').forEach(w=>{
+        scores[w.id]={name:empDisplayName(w),calls:0,done:0,visits:0,attendance:0,score:0};
+      });
+      (data.serviceCalls||[]).forEach(c=>{
+        if(!c.created_at||new Date(c.created_at)<cutoff) return;
+        [c.engineer_id,c.partner_engineer_id].filter(Boolean).forEach(id=>{
+          if(!scores[id]) return;
+          scores[id].calls++;
+          if(['done','closed','Дууссан'].includes(c.status)) scores[id].done++;
+        });
+      });
+      (data.visits||[]).forEach(v=>{
+        if(!v.arrived_at||new Date(v.arrived_at)<cutoff||!v.user_id||!scores[v.user_id]) return;
+        scores[v.user_id].visits++;
+      });
+      const attDays={};
+      (data.attendance||[]).forEach(a=>{
+        if(a.type!=='check_in'||!a.created_at||new Date(a.created_at)<cutoff) return;
+        const uid=a.staff_id||a.user_id;
+        if(!uid||!scores[uid]) return;
+        const dk=new Date(a.created_at).toDateString();
+        if(!attDays[uid]) attDays[uid]=new Set();
+        attDays[uid].add(dk);
+      });
+      Object.entries(attDays).forEach(([id,set])=>{ if(scores[id]) scores[id].attendance=set.size; });
+      return Object.values(scores).map(r=>{
+        r.score=Math.min(100,Math.round(r.done*8+r.visits*4+r.attendance*3+Math.min(r.calls,20)));
+        return r;
+      }).sort((a,b)=>b.score-a.score).slice(0,limit);
+    }
+    function fuelGaugeHtml(){
+      const rows=fuelStatsByVehicle(30);
+      if(!rows.length) return '<div class="empty" style="padding:24px">Түлшийн мэдээлэл алга — аялал эхлүүлсний дараа харагдана</div>';
+      return rows.map(r=>{
+        const pct=Math.min(100,r.fuelPct);
+        const col=pct>=80?'#ef4444':pct>=50?'#f59e0b':'#22c55e';
+        const tag=r.active?'<span class="pill on" style="font-size:10px;margin-left:6px">Явж байна</span>':'';
+        return `<div class="fuel-gauge-row"><div class="fuel-gauge-meta"><b>${r.plate}</b><span class="muted">${r.usedLiters.toFixed(1)}л / ${r.tank}л · <b style="color:${col}">${pct}%</b>${tag}</span></div><div class="fuel-gauge-bar"><div class="fuel-gauge-fill" style="width:${pct}%;background:${col}"></div></div></div>`;
+      }).join('');
+    }
+
     function recentActivityHtml(){
       const logs=(data.activityLogs||[]).slice(0,5);
       if(!logs.length) return '<div class="empty" style="padding:24px">Лог алга</div>';
@@ -1736,6 +1872,26 @@
         <div class="card animate-chart-entry" style="margin-bottom:20px;animation-delay:.1s">
           <div class="card-h"><h3>Ирцийн график (7 хоног)</h3></div>
           <div class="card-b"><div class="dash-chart-wrap"><canvas id="dashAttendanceChart"></canvas></div></div>
+        </div>
+        <div class="grid2 animate-chart-entry" style="animation-delay:.12s;margin-bottom:20px">
+          <div class="card">
+            <div class="card-h"><h3>Бензин зарцуулалт (7 хоног)</h3><button class="btn btn-ghost btn-sm" onclick="go('trips')">Аялал</button></div>
+            <div class="card-b"><div class="dash-chart-wrap" style="height:260px"><canvas id="dashFuelChart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><h3>Машинаар түлш (%)</h3><span class="muted" style="font-size:12px">Сүүлийн 30 хоног · савны хувь</span></div>
+            <div class="card-b"><div class="dash-chart-wrap" style="height:260px"><canvas id="dashFuelPctChart"></canvas></div></div>
+          </div>
+        </div>
+        <div class="grid2 animate-chart-entry" style="animation-delay:.14s;margin-bottom:20px">
+          <div class="card">
+            <div class="card-h"><h3>Ажилтны гүйцэтгэл (30 хоног)</h3><button class="btn btn-ghost btn-sm" onclick="go('aiperformance')">Дэлгэрэнгүй</button></div>
+            <div class="card-b"><div class="dash-chart-wrap" style="height:280px"><canvas id="dashPerfChart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><h3>Машины бензин — одоогийн %</h3><span class="muted" style="font-size:12px">Идэвхтэй аялал эсвэл сүүлийн зарцуулалт</span></div>
+            <div class="card-b">${fuelGaugeHtml()}</div>
+          </div>
         </div>
         <div class="grid2 animate-chart-entry" style="animation-delay:.15s">
           <div class="card"><div class="card-h"><h3>Ажилчдын байршил</h3><span class="muted" id="onl"></span></div><div class="card-b" style="padding:12px"><div id="map"></div></div></div>
@@ -2326,12 +2482,20 @@
     // ===== Ажлын байрны анкет =====
     const APP_STATUS={new:'Шинэ',reviewing:'Хянаж буй',contacted:'Холбогдсон',hired:'Ажилд авсан',rejected:'Татгалзсан'};
     function renderPublicSite(c){
-      const content=data.publicSiteContent||safeMergeSiteContent(null);
+      const content=safeMergeSiteContent(data.publicSiteContent);
       if(typeof renderPublicSiteEditorHtml!=='function'){
         c.innerHTML='<div class="card"><div class="card-b"><p class="err">public-site-content.js ачаалагдаагүй. Хуудсыг дахин ачаална уу.</p></div></div>';
         return;
       }
-      c.innerHTML='<div class="card"><div class="card-h"><h3>Вэбсайтын текст</h3><button class="btn btn-ghost btn-sm" type="button" onclick="loadAll()"><span class="material-symbols-outlined" style="font-size:17px;vertical-align:middle">refresh</span> Шинэчлэх</button></div><div class="card-b" style="padding:0">'+renderPublicSiteEditorHtml(content,data.publicSiteUpdatedAt)+'</div></div>';
+      let editorHtml;
+      try{
+        editorHtml=renderPublicSiteEditorHtml(content,data.publicSiteUpdatedAt);
+      }catch(err){
+        console.error('renderPublicSiteEditorHtml',err);
+        c.innerHTML='<div class="card"><div class="card-b"><p class="err">Вэб текст засварлагч ачаалахад алдаа: '+String(err&&err.message||err)+'</p><button class="btn btn-primary btn-sm" type="button" onclick="loadAll()">Дахин оролдох</button></div></div>';
+        return;
+      }
+      c.innerHTML='<div class="card"><div class="card-h"><h3>Вэбсайтын текст</h3><button class="btn btn-ghost btn-sm" type="button" onclick="loadAll()"><span class="material-symbols-outlined" style="font-size:17px;vertical-align:middle">refresh</span> Шинэчлэх</button></div><div class="card-b" style="padding:0">'+editorHtml+'</div></div>';
       if(typeof initPublicSiteEditorTabs==='function') initPublicSiteEditorTabs();
       const saveBtn=document.getElementById('pscSaveBtn');
       const resetBtn=document.getElementById('pscResetBtn');
@@ -3501,21 +3665,22 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
     function renderVehicles(c){
       c.innerHTML=`<div class="card"><div class="card-h"><h3>Машин (${data.vehicles.length})</h3>
         <button class="btn btn-primary btn-sm" onclick="vehModal()"> Машин нэмэх</button></div>
-        <div class="card-b" style="padding:0"><table><thead><tr><th>Улсын дугаар</th><th>Код</th><th>100км/л</th><th>Жолооч</th><th></th></tr></thead>
-        <tbody>${data.vehicles.map(v=>`<tr><td><b>${v.plate_number}</b></td><td>${v.code}</td><td>${v.liters_per_100km} л</td><td>${v.driver_name||'—'}</td>
+        <div class="card-b" style="padding:0"><table><thead><tr><th>Улсын дугаар</th><th>Код</th><th>100км/л</th><th>Сав (л)</th><th>Жолооч</th><th></th></tr></thead>
+        <tbody>${data.vehicles.map(v=>`<tr><td><b>${v.plate_number}</b></td><td>${v.code}</td><td>${v.liters_per_100km} л</td><td>${vehicleTankLiters(v)} л</td><td>${v.driver_name||'—'}</td>
           <td><button class="btn btn-ghost btn-sm" onclick='qrModal(${JSON.stringify(v).replace(/'/g,"&#39;")})'>QR</button>
-          <button class="btn btn-danger btn-sm" onclick="delVeh('${v.id}','${v.plate_number}')">Устгах</button></td></tr>`).join('')||'<tr><td colspan=5 class=empty>Машин алга</td></tr>'}</tbody></table></div></div>`;
+          <button class="btn btn-danger btn-sm" onclick="delVeh('${v.id}','${v.plate_number}')">Устгах</button></td></tr>`).join('')||'<tr><td colspan=6 class=empty>Машин алга</td></tr>'}</tbody></table></div></div>`;
     }
     window.vehModal = ()=>{
       const code='VH-'+Math.floor(1000+Math.random()*9000);
       openModal('Шинэ машин нэмэх',`
         <label>Улсын дугаар</label><input id="v_plate" placeholder="1234 УБА">
-        <div class="row"><div><label>100км-т литр</label><input id="v_lit" value="12"></div><div><label>Жолооч</label><input id="v_drv"></div></div>
+        <div class="row"><div><label>100км-т литр</label><input id="v_lit" value="12"></div><div><label>Бензиний сав (л)</label><input id="v_tank" value="60" type="number" min="10" step="1"></div></div>
+        <label>Жолооч</label><input id="v_drv">
         <label>QR код</label><input id="v_code" value="${code}">
         <div class="err" id="m_err"></div>`,
         'Үүсгэх + QR', async ()=>{
           const plate=$('v_plate').value.trim(); if(!plate){ mErr('Улсын дугаар оруулна уу'); return false; }
-          const { data:saved, error } = await sb.from('vehicles').insert({code:$('v_code').value.trim(),plate_number:plate,liters_per_100km:Number($('v_lit').value)||12,driver_name:$('v_drv').value.trim()||null}).select().single();
+          const { data:saved, error } = await sb.from('vehicles').insert({code:$('v_code').value.trim(),plate_number:plate,liters_per_100km:Number($('v_lit').value)||12,tank_capacity_liters:Number($('v_tank').value)||60,driver_name:$('v_drv').value.trim()||null}).select().single();
           if(error){ mErr(error.message); return false; }
           closeModal(); loadAll(); qrModal(saved); return false;
         });
@@ -4109,6 +4274,45 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
           type:'doughnut',
           data:{labels:['Нээлттэй','Явж байгаа','Дууссан'],datasets:[{data:callsByStatus(),backgroundColor:[primary,'#71717a','#22c55e'],borderWidth:0}]},
           options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:12,font:{size:11}}}}}
+        });
+      }
+      const fuelCtx=$('dashFuelChart');
+      if(fuelCtx){
+        const fuelColor='#f59e0b';
+        const fg=fuelCtx.getContext('2d');
+        const fgrad=fg.createLinearGradient(0,0,0,260);
+        fgrad.addColorStop(0,'rgba(245,158,11,.35)');
+        fgrad.addColorStop(1,'rgba(245,158,11,0)');
+        dashCharts.fuel=new Chart(fg,{
+          type:'line',
+          data:{labels:last7DayLabels(),datasets:[{label:'Түлш (л)',data:fuelByDayLast7(),borderColor:fuelColor,backgroundColor:fgrad,borderWidth:2,tension:.35,fill:true,pointRadius:3}]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:chartGridColor()},ticks:{callback:v=>v+'л'}}}}
+        });
+      }
+      const fuelPctRows=fuelStatsByVehicle(30).slice(0,8);
+      const fuelPctCtx=$('dashFuelPctChart');
+      if(fuelPctCtx&&fuelPctRows.length){
+        const pctColors=fuelPctRows.map(r=>r.fuelPct>=80?'#ef4444':r.fuelPct>=50?'#f59e0b':'#22c55e');
+        dashCharts.fuelPct=new Chart(fuelPctCtx.getContext('2d'),{
+          type:'bar',
+          data:{labels:fuelPctRows.map(r=>r.plate),datasets:[{label:'Савны %',data:fuelPctRows.map(r=>r.fuelPct),backgroundColor:pctColors,borderRadius:8,maxBarThickness:28}]},
+          options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{
+            const row=fuelPctRows[ctx.dataIndex];
+            return `${row.fuelPct}% · ${row.usedLiters.toFixed(1)}л / ${row.tank}л${row.active?' (явж байна)':''}`;
+          }}}},scales:{x:{max:100,grid:{color:chartGridColor()},ticks:{callback:v=>v+'%'}},y:{grid:{display:false}}}}
+        });
+      }
+      const perfRows=employeePerformanceTop(8,30);
+      const perfCtx=$('dashPerfChart');
+      if(perfCtx&&perfRows.length){
+        dashCharts.perf=new Chart(perfCtx.getContext('2d'),{
+          type:'bar',
+          data:{labels:perfRows.map(r=>r.name),datasets:[
+            {label:'Дууссан дуудлага',data:perfRows.map(r=>r.done),backgroundColor:'#3b82f6',borderRadius:6},
+            {label:'Очсон лог',data:perfRows.map(r=>r.visits),backgroundColor:'#10b981',borderRadius:6},
+            {label:'Ирц (өдөр)',data:perfRows.map(r=>r.attendance),backgroundColor:'#8b5cf6',borderRadius:6}
+          ]},
+          options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:chartGridColor()},ticks:{precision:0}}}}
         });
       }
     }
