@@ -124,7 +124,7 @@ function AddBtn({ onClick, children }: { onClick: () => void; children: React.Re
   );
 }
 
-export default function JobApplicationForm() {
+export default function JobApplicationForm({ embedded = false }: { embedded?: boolean }) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<JobApplicationFormData>(emptyForm);
   const [loading, setLoading] = useState(false);
@@ -224,18 +224,62 @@ export default function JobApplicationForm() {
     }
   };
 
+  const StepNav = ({ className = '' }: { className?: string }) => (
+    <div className={`flex flex-col-reverse gap-3 sm:flex-row sm:justify-between ${className}`}>
+      {step > 0 ? (
+        <button
+          type="button"
+          onClick={back}
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-graphite-700 py-3 text-sm font-medium text-graphite-200 transition-colors hover:bg-graphite-800 sm:max-w-[200px] sm:flex-none"
+        >
+          <ChevronLeft size={18} />
+          Буцах
+        </button>
+      ) : (
+        <div className="hidden sm:block sm:w-[200px]" />
+      )}
+      {step < STEPS.length - 1 ? (
+        <button
+          type="button"
+          onClick={next}
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-opacity hover:opacity-90 sm:ml-auto sm:max-w-[240px] sm:flex-none"
+        >
+          Дараах
+          <ChevronRight size={18} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={submit}
+          disabled={loading}
+          className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition-opacity hover:opacity-90 disabled:opacity-50 sm:ml-auto sm:max-w-[240px] sm:flex-none"
+        >
+          <Send size={16} />
+          {loading ? 'Илгээж байна...' : 'Анкет илгээх'}
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex flex-col">
-      {/* Загварын толгой */}
-      <div className="border-b border-graphite-800 bg-graphite-900/80 px-4 py-6 text-center sm:px-8 sm:py-8">
-        <img src="/logo.png" alt="" className="mx-auto mb-4 h-12 object-contain sm:h-14" />
-        <p className="text-xs font-bold uppercase tracking-[0.25em] text-graphite-500">{form.company}</p>
-        <h2 className="mt-2 text-lg font-semibold text-graphite-50 sm:text-xl">{form.title}</h2>
-        <p className="mt-1 text-sm text-graphite-400">{STEPS[step].title}</p>
-      </div>
+      {!embedded ? (
+        <div className="border-b border-graphite-800 bg-graphite-900/80 px-4 py-6 text-center sm:px-8 sm:py-8">
+          <img src="/logo.png" alt="" className="mx-auto mb-4 h-12 object-contain sm:h-14" />
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-graphite-500">{form.company}</p>
+          <h2 className="mt-2 text-lg font-semibold text-graphite-50 sm:text-xl">{form.title}</h2>
+          <p className="mt-1 text-sm text-graphite-400">{STEPS[step].title}</p>
+        </div>
+      ) : null}
 
       {/* Алхам — mobile scroll + desktop row */}
       <div className="border-b border-graphite-800 px-4 py-4 sm:px-6">
+        {embedded ? (
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-graphite-500">{form.company}</p>
+            <p className="text-sm text-graphite-400">{STEPS[step].title}</p>
+          </div>
+        ) : null}
         <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-graphite-800">
           <div
             className="h-full rounded-full bg-accent transition-all duration-300"
@@ -268,6 +312,7 @@ export default function JobApplicationForm() {
             </button>
           ))}
         </div>
+        <StepNav className="mt-4 border-t border-graphite-800 pt-4" />
       </div>
 
       {/* Агуулга */}
@@ -549,42 +594,9 @@ export default function JobApplicationForm() {
         ) : null}
       </div>
 
-      {/* Товчлуурууд — sticky mobile */}
-      <div className="sticky bottom-0 border-t border-graphite-800 bg-graphite-950/95 px-4 py-4 backdrop-blur-md sm:px-6 lg:px-8">
-        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-          {step > 0 ? (
-            <button
-              type="button"
-              onClick={back}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-graphite-700 py-3 text-sm font-medium text-graphite-200 transition-colors hover:bg-graphite-800 sm:max-w-[200px] sm:flex-none"
-            >
-              <ChevronLeft size={18} />
-              Буцах
-            </button>
-          ) : (
-            <div className="hidden sm:block sm:w-[200px]" />
-          )}
-          {step < STEPS.length - 1 ? (
-            <button
-              type="button"
-              onClick={next}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 sm:ml-auto sm:max-w-[240px] sm:flex-none"
-            >
-              Үргэлжлүүлэх
-              <ChevronRight size={18} />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={submit}
-              disabled={loading}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:ml-auto sm:max-w-[240px] sm:flex-none"
-            >
-              <Send size={16} />
-              {loading ? 'Илгээж байна...' : 'Анкет илгээх'}
-            </button>
-          )}
-        </div>
+      {/* Доод товчлуурууд */}
+      <div className="border-t border-graphite-800 bg-graphite-900/95 px-4 py-4 sm:px-6 lg:px-8">
+        <StepNav />
       </div>
     </div>
   );
