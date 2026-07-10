@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { darkColors } from '../theme/tokens';
+import { reportSystemError } from '../services/alertingService';
 
 // Апп даяарх render алдааг барьж, цагаан дэлгэц (crash)-аас сэргийлнэ.
 // Theme context ажиллахгүй байх магадлалтай тул статик dark палитр ашиглав.
@@ -20,6 +21,9 @@ export default class ErrorBoundary extends React.Component {
     if (__DEV__) {
       console.error('[ErrorBoundary]', error, info?.componentStack);
     }
+    try {
+      reportSystemError(error, { title: 'Render crash', context: info?.componentStack || '' });
+    } catch (_) {}
   }
 
   handleReset = () => {

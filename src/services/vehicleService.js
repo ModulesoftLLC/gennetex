@@ -35,6 +35,23 @@ export async function insertVehicle({ code, plate_number, liters_per_100km, tank
   return data;
 }
 
+export async function updateVehicle(id, { plate_number, liters_per_100km, tank_capacity_liters, driver_name, driver_id }) {
+  const patch = {};
+  if (plate_number != null) patch.plate_number = normalizePlateNumber(plate_number);
+  if (liters_per_100km != null) patch.liters_per_100km = Number(liters_per_100km) || 12;
+  if (tank_capacity_liters != null) patch.tank_capacity_liters = Number(tank_capacity_liters) || 60;
+  if (driver_name !== undefined) patch.driver_name = driver_name?.trim() || null;
+  if (driver_id !== undefined) patch.driver_id = driver_id || null;
+  const { data, error } = await supabase
+    .from('vehicles')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export async function deleteVehicle(id) {
   const { error } = await supabase.from('vehicles').delete().eq('id', id);
   if (error) throw error;

@@ -95,4 +95,86 @@ if (fs.existsSync(logo)) {
   }
 }
 
+// 3) Апп татах хуудас → dist-web/app/index.html (adiya.site/app)
+try {
+  const versionSrc = fs.readFileSync(path.join(root, 'src/version.js'), 'utf8');
+  const major = /major:\s*(\d+)/.exec(versionSrc);
+  const minor = /minor:\s*(\d+)/.exec(versionSrc);
+  const patch = /patch:\s*(\d+)/.exec(versionSrc);
+  const appVer = major && minor && patch ? `${major[1]}.${minor[1]}.${patch[1]}` : '';
+  const appDir = path.join(dist, 'app');
+  fs.mkdirSync(appDir, { recursive: true });
+  const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/latest/download/gennetex.apk';
+  const page = buildAppDownloadPage(appVer, apkUrl);
+  fs.writeFileSync(path.join(appDir, 'index.html'), page);
+  if (fs.existsSync(logo)) fs.copyFileSync(logo, path.join(appDir, 'logo.png'));
+  console.log('[build-web] Апп татах хуудас: /app');
+} catch (e) {
+  console.warn('[build-web] /app хуудас үүсгэж чадсангүй:', e.message);
+}
+
 console.log('[build-web] Бэлэн. Гаралт:', dist);
+
+function buildAppDownloadPage(version, apkUrl) {
+  const v = version ? `v${version}` : '';
+  return `<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gennetex апп татах</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(160deg, #0b1220 0%, #101a2e 100%);
+    color: #e8eefc; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .card {
+    width: 100%; max-width: 440px; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 24px;
+    padding: 40px 28px; text-align: center; backdrop-filter: blur(10px);
+  }
+  .logo { width: 96px; height: 80px; object-fit: contain; margin-bottom: 20px; }
+  h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .ver { color: #7c93b8; font-size: 13px; margin-bottom: 24px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 16px; border-radius: 14px; text-decoration: none;
+    background: #2563eb; color: #fff; font-size: 17px; font-weight: 700;
+    transition: transform .1s, background .2s;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn:hover { background: #1d4ed8; }
+  .steps { text-align: left; margin-top: 28px; }
+  .steps h2 { font-size: 14px; color: #9db2d6; margin-bottom: 12px; font-weight: 700; }
+  .steps ol { padding-left: 20px; color: #c3d1ea; font-size: 14px; line-height: 1.9; }
+  .note { margin-top: 20px; font-size: 12px; color: #6b81a6; line-height: 1.6; }
+  .os { margin-top: 22px; font-size: 12px; color: #7c93b8; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <img class="logo" src="./logo.png" alt="Gennetex" onerror="this.style.display='none'" />
+    <h1>Gennetex апп</h1>
+    <div class="ver">${v ? 'Хувилбар ' + v : 'Android аппликейшн'}</div>
+    <a class="btn" href="${apkUrl}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Android APK татах
+    </a>
+    <div class="steps">
+      <h2>СУУЛГАХ ЗААВАР</h2>
+      <ol>
+        <li>Дээрх товч дарж APK татна</li>
+        <li>Татсан файл дээр дарна</li>
+        <li>«Unknown sources / Тодорхойгүй эх сурвалж» гарвал зөвшөөрнө</li>
+        <li>Суулгасны дараа нэвтэрч орно</li>
+      </ol>
+    </div>
+    <div class="os">📱 Зөвхөн Android (7.0+). iOS удахгүй.</div>
+    <div class="note">Modulesoft LLC · Gennetex ERP</div>
+  </div>
+</body>
+</html>`;
+}

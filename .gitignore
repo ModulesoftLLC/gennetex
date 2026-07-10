@@ -13,6 +13,7 @@ npm-debug.*
 .DS_Store
 .env
 fcm-service-account.json
+supabase/.temp/
 .cursor/
 public-web/node_modules/
 public-web/dist/

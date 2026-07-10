@@ -55,6 +55,19 @@ export function plateCompactText(raw) {
   return compact || digits || '····';
 }
 
+/** Autobox.mn URL-д ашиглах (5394 УКК → 5394укк). */
+export function plateToAutoboxQuery(raw) {
+  const { digits, letters } = parseMongoliaPlate(raw);
+  if (!digits) return '';
+  return digits + (letters || '').toLowerCase();
+}
+
+export function autoboxPageUrl(raw) {
+  const q = plateToAutoboxQuery(raw);
+  return q ? `https://www.autobox.mn/Autobox?plateNo=${encodeURIComponent(q)}` : '';
+}
+
+/** Хадгалах/хайлтын нэгдсэн дугаар (1234 УБА). */
 export function normalizePlateNumber(raw) {
   const { display } = parseMongoliaPlate(raw);
   return display || String(raw || '').trim();

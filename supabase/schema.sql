@@ -21,6 +21,9 @@ create table if not exists public.profiles (
 -- Хуучин DB дээр багана нэмэх (аль хэдийн байвал алгасна)
 alter table public.profiles add column if not exists must_change_password boolean default false;
 alter table public.profiles add column if not exists report_signature_url text;
+alter table public.profiles add column if not exists telegram_user_id bigint;
+alter table public.profiles add column if not exists telegram_username text;
+alter table public.profiles add column if not exists telegram_linked_at timestamptz;
 
 alter table public.profiles enable row level security;
 
