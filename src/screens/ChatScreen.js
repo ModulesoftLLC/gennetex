@@ -266,6 +266,16 @@ export default function ChatScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.personCard}
+                onPress={() => navigation.navigate('TelegramChat')}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.personAvatar, { backgroundColor: '#229ED9' }]}>
+                  <Ionicons name="paper-plane" size={26} color="#fff" />
+                </View>
+                <Text style={styles.personName} numberOfLines={2}>Telegram</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.personCard}
                 onPress={() => navigation.navigate('NewGroup')}
                 activeOpacity={0.8}
               >

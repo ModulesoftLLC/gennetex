@@ -15,6 +15,7 @@
   ],
   "rewrites": [
     { "source": "/gennetex/admin", "destination": "/gennetex/admin/index.html" },
+    { "source": "/app", "destination": "/app/index.html" },
     { "source": "/about", "destination": "/index.html" },
     { "source": "/services", "destination": "/index.html" },
     { "source": "/projects", "destination": "/index.html" },

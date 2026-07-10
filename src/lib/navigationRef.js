@@ -61,7 +61,11 @@ export function navigateFromNotification(data) {
         openMeetingKind: 'meeting',
       });
       break;
-    default:
+    case 'telegram_chat':
+      navigationRef.navigate('TelegramChat');
+      break;
+    case 'telegram_broadcast':
+      navigationRef.navigate('MainTabs', { screen: 'Chat' });
       break;
   }
 }

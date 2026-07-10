@@ -139,10 +139,14 @@ export function Badge({ text, color }) {
 }
 
 // Blur толгой — Synthetic Horizon
-export function ScreenHeader({ title, subtitle, right, icon, back }) {
+export function ScreenHeader({ title, subtitle, right, icon, back, onBackPress }) {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const showBack = back === undefined ? navigation.canGoBack() : back;
+  const handleBack = () => {
+    if (onBackPress) onBackPress();
+    else navigation.goBack();
+  };
   return (
     <View
       style={[
@@ -156,7 +160,7 @@ export function ScreenHeader({ title, subtitle, right, icon, back }) {
             {showBack ? (
               <TouchableOpacity
                 style={[styles.backBtn, { backgroundColor: colors.surfaceContainerHigh, borderColor: colors.outlineVariant }]}
-                onPress={() => navigation.goBack()}
+                onPress={handleBack}
                 hitSlop={8}
               >
                 <Text style={[styles.backIcon, { color: colors.text }]}>‹</Text>

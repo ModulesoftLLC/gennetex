@@ -31,11 +31,15 @@ import FeedProfileScreen from './src/screens/FeedProfileScreen';
 import FeedSearchScreen from './src/screens/FeedSearchScreen';
 import FeedPostScreen from './src/screens/FeedPostScreen';
 import ConversationScreen from './src/screens/ConversationScreen';
+import TelegramChatScreen from './src/screens/TelegramChatScreen';
+import MyTelegramScreen from './src/screens/MyTelegramScreen';
+import TelegramDialogScreen from './src/screens/TelegramDialogScreen';
 import NewGroupScreen from './src/screens/NewGroupScreen';
 import EmployeesScreen from './src/screens/EmployeesScreen';
 import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
 import VehicleScreen from './src/screens/VehicleScreen';
 import VehiclesAdminScreen from './src/screens/VehiclesAdminScreen';
+import VehicleSpecsScreen from './src/screens/VehicleSpecsScreen';
 import StockLogScreen from './src/screens/StockLogScreen';
 import MyStockScreen from './src/screens/MyStockScreen';
 import ToolAllocationScreen from './src/screens/ToolAllocationScreen';
@@ -136,7 +140,11 @@ function AppStack() {
       <Stack.Screen name="CallDetail" component={CallDetailScreen} />
       <Stack.Screen name="Vehicle" component={VehicleScreen} />
       <Stack.Screen name="VehiclesAdmin" component={VehiclesAdminScreen} />
+      <Stack.Screen name="VehicleSpecs" component={VehicleSpecsScreen} />
       <Stack.Screen name="Conversation" component={ConversationScreen} />
+      <Stack.Screen name="TelegramChat" component={TelegramChatScreen} options={{ title: 'Telegram чат' }} />
+      <Stack.Screen name="MyTelegram" component={MyTelegramScreen} options={{ title: 'Миний Telegram' }} />
+      <Stack.Screen name="TelegramDialog" component={TelegramDialogScreen} options={{ title: 'Telegram чат' }} />
       <Stack.Screen name="NewGroup" component={NewGroupScreen} />
       <Stack.Screen name="Employees" component={EmployeesScreen} />
       <Stack.Screen name="StockLog" component={StockLogScreen} />

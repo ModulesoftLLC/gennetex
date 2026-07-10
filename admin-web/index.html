@@ -2,7 +2,7 @@
 <html lang="mn">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="admin-build-version" content="0.7.9"/>
+  <meta name="admin-build-version" content="0.10.6"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ЖЕННЕТЕКС — Админ самбар</title>
   <link rel="icon" href="/gennetex/admin/logo.png"/>
@@ -480,6 +480,24 @@
     .excel-sheet-pills{display:flex;flex-wrap:wrap;gap:6px}
     .excel-sheet-pill{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;color:var(--muted)}
     #qr-reader{border-radius:12px;overflow:hidden;min-height:260px}
+    .veh-scan-grid{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:20px;align-items:start}
+  .veh-qr-reader{border-radius:12px;overflow:hidden;min-height:240px;background:#0a0a0c}
+  .veh-edit-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  .veh-edit-form{display:grid;gap:12px;margin-bottom:20px}
+  .veh-edit-form .row{align-items:flex-end}
+  .abox-block{margin-top:18px}
+  .abox-block h4{margin:0 0 10px;font-size:15px;font-weight:800}
+  .abox-status{font-size:12px;color:var(--muted);margin-bottom:12px}
+  .abox-link{font-size:12px;margin-left:8px}
+  .abox-wrap{overflow:visible}
+  .abox-wrap table.table,.abox-wrap table{width:100%;border-collapse:collapse;font-size:13px;margin:0}
+  .abox-wrap table th,.abox-wrap table td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  .abox-wrap table thead th,.abox-wrap table tbody th{background:var(--bg);font-weight:700}
+  .abox-wrap .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700}
+  .abox-wrap .badge-success{color:#15803d;background:#dcfce7}
+  .abox-wrap .badge-warning{color:#a16207;background:#fef9c3}
+  .abox-wrap .badge-danger{color:#b91c1c;background:#fee2e2}
+  @media(max-width:900px){.veh-scan-grid{grid-template-columns:1fr}}
     #sidebarBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:45}
     #sidebarBackdrop.open{display:block}
     body.logged-in .theme-fab{display:none}
@@ -630,7 +648,7 @@
           <a data-view="location"><span class="material-symbols-outlined">location_on</span><span class="t">Байршил</span></a>
           <a data-view="visits"><span class="material-symbols-outlined">home_pin</span><span class="t">Очсон лог</span></a>
           <div class="grp">Тээвэр</div>
-          <a data-view="vehicles"><span class="material-symbols-outlined">directions_car</span><span class="t">Машин / QR</span></a>
+          <a data-view="vehicles"><span class="material-symbols-outlined">qr_code_scanner</span><span class="t">Машины мэдээлэл солих</span></a>
           <a data-view="fuelconsumption"><span class="material-symbols-outlined">local_gas_station</span><span class="t">Бензин зарцуулалт</span></a>
           <a data-view="trips"><span class="material-symbols-outlined">route</span><span class="t">Аялал</span></a>
           <a data-view="companions"><span class="material-symbols-outlined">groups</span><span class="t">Хамт яваа багууд</span></a>
@@ -653,7 +671,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v0.7.9</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v0.10.6</span>
         </div>
       </aside>
       <div class="main">
@@ -1081,7 +1099,7 @@
 
     // ===== Navigation =====
     document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
-    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',publicsite:'Вэб сайт',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машин / QR',fuelconsumption:'Бензин зарцуулалт',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
+    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',publicsite:'Вэб сайт',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машины мэдээлэл солих',fuelconsumption:'Бензин зарцуулалт',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
     let activityFilter={year:new Date().getFullYear(),month:0,day:0,user:''};
     const ACTION_LABEL={login:'Нэвтрэлт',leave_request:'Чөлөө хүсэлт',screen:'Дэлгэц нээсэн',tap:'Даралт',location:'Байршил',face_enroll:'Царай бүртгэл',attendance:'Ирц',inventory:'Бараа/багаж',visit:'Айлд очсон',site_work:'Ажлын байр',service_call:'Дуудлага',other:'Бусад'};
     const fmtLogTime=ts=>{
@@ -1090,8 +1108,9 @@
       const p=n=>String(n).padStart(2,'0');
       return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
     };
-    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',publicsite:'Public вэбсайтын текст засварлах',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'Машин, QR код',fuelconsumption:'Машинаар км · бензиний түвшин (%)',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
+    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',publicsite:'Public вэбсайтын текст засварлах',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'QR уншуулж машины мэдээлэл засах · Autobox',fuelconsumption:'Машинаар км · бензиний түвшин (%)',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
     function go(v){
+      if(view==='vehicles'&&v!=='vehicles'){ stopVehicleQrScan(); stopAutoboxPoll(); }
       view=v;
       document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('active',a.dataset.view===v));
       $('pageTitle').textContent=TITLES[v];
@@ -3780,10 +3799,172 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
     function genPw(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let o=''; for(let i=0;i<8;i++)o+=c[Math.floor(Math.random()*c.length)]; return o; }
 
     // ===== Машин / QR =====
+    let vehQrScanner=null, autoboxPollTimer=null, autoboxLastHash='';
+    function plateToAutoboxQuery(raw){
+      const {digits,letters}=parseMongoliaPlate(raw);
+      if(!digits) return '';
+      return digits+(letters||'').toLowerCase();
+    }
+    function autoboxPageUrl(plate){
+      const q=plateToAutoboxQuery(plate);
+      return q?`https://www.autobox.mn/Autobox?plateNo=${encodeURIComponent(q)}`:'';
+    }
+    async function fetchAutoboxVehicle(plate){
+      const q=plateToAutoboxQuery(plate);
+      if(!q) throw new Error('Улсын дугаар буруу');
+      const urls=[
+        `${location.origin.replace(/\/$/,'')}/api/autobox?plateNo=${encodeURIComponent(q)}`,
+        `${SUPABASE_URL}/functions/v1/autobox-vehicle?plateNo=${encodeURIComponent(q)}`,
+      ];
+      let lastErr='Autobox татахад алдаа';
+      for(const url of urls){
+        try{
+          const res=await fetch(url,{headers:{apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`}});
+          const json=await res.json().catch(()=>({}));
+          if(res.ok&&json.ok!==false) return json;
+          lastErr=json.error||`Алдаа (${res.status})`;
+          if(res.status===404) continue;
+        }catch(e){ lastErr=e.message||String(e); }
+      }
+      throw new Error(lastErr);
+    }
+    function stopVehicleQrScan(){
+      if(!vehQrScanner) return;
+      const scanner=vehQrScanner;
+      vehQrScanner=null;
+      scanner.stop().then(()=>{ try{scanner.clear();}catch(e){} }).catch(()=>{ try{scanner.clear();}catch(e){} });
+    }
+    async function startVehicleQrScan(){
+      if(vehQrScanner||view!=='vehicles') return;
+      const el=$('veh-qr-reader');
+      if(!el) return;
+      try{
+        vehQrScanner=new Html5Qrcode('veh-qr-reader');
+        await vehQrScanner.start({facingMode:'environment'},{fps:8,qrbox:{width:220,height:220}},
+          (code)=>onVehicleCodeScanned(code), ()=>{});
+      }catch(e){ console.warn('veh qr',e); }
+    }
+    function stopAutoboxPoll(){
+      if(autoboxPollTimer){ clearInterval(autoboxPollTimer); autoboxPollTimer=null; }
+      autoboxLastHash='';
+    }
+    function startAutoboxPoll(plate){
+      stopAutoboxPoll();
+      if(!plate) return;
+      autoboxPollTimer=setInterval(()=>loadAutoboxForVehicle(plate,true),45000);
+    }
+    function onVehicleCodeScanned(raw){
+      const code=String(raw||'').trim();
+      if(!code) return;
+      const v=(data.vehicles||[]).find(x=>x.code===code)
+        ||(data.vehicles||[]).find(x=>x.plate_number===code)
+        ||(data.vehicles||[]).find(x=>String(x.barcode||'')===code);
+      if(!v){ toast('Машин олдсонгүй: '+code); return; }
+      selectVehicleForEdit(v);
+      toast('Машин: '+v.plate_number);
+    }
+    window.manualVehicleCodeLookup=()=>{
+      const code=prompt('Машины QR код эсвэл улсын дугаар оруулна уу');
+      if(code) onVehicleCodeScanned(code);
+    };
+    function vehicleEditPanelHtml(v){
+      const esc=v=>String(v??'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+      const abUrl=autoboxPageUrl(v.plate_number);
+      return `<div class="veh-edit-head">
+          ${mongoliaPlateHtml(v.plate_number,'lg')}
+          <div><div style="font-size:13px;color:var(--muted)">Улсын дугаар (лиценз)</div><div style="font-size:18px;font-weight:800">${esc(v.plate_number)}</div><div class="muted" style="font-size:13px;margin-top:4px">QR код: <b>${esc(v.code)}</b></div></div>
+        </div>
+        <div class="veh-edit-form">
+          <label>Улсын дугаар</label><input id="veh_e_plate" value="${esc(v.plate_number)}" autocomplete="off">
+          <div class="mn-plate-preview" id="veh_e_plate_preview"></div>
+          <div class="row"><div><label>100км-т литр</label><input id="veh_e_lit" type="number" value="${v.liters_per_100km??12}"></div>
+          <div><label>Бензиний сав (л)</label><input id="veh_e_tank" type="number" value="${vehicleTankLiters(v)}"></div></div>
+          <label>Жолооч</label><input id="veh_e_drv" value="${esc(v.driver_name||'')}">
+          <label>QR код</label><input id="veh_e_code" value="${esc(v.code)}" readonly style="opacity:.75">
+          <button class="btn btn-primary btn-sm" type="button" onclick="saveVehicleEdit('${v.id}')">Мэдээлэл хадгалах</button>
+        </div>
+        <div style="border-top:1px solid var(--line);padding-top:16px">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+            <h4 style="margin:0;font-size:16px">Autobox.mn — оншилгоо · мэдээлэл</h4>
+            ${abUrl?`<a class="abox-link muted" href="${abUrl}" target="_blank" rel="noopener">autobox.mn нээх ↗</a>`:''}
+          </div>
+          <div class="abox-status" id="aboxStatus">Autobox.mn уншиж байна...</div>
+          <div class="abox-wrap">
+            <div class="abox-block"><h4>Ерөнхий мэдээлэл</h4><div id="aboxGeneral"><p class="muted">...</p></div></div>
+            <div class="abox-block"><h4>Техникийн мэдээлэл</h4><div id="aboxTech"><p class="muted">...</p></div></div>
+            <div class="abox-block"><h4>Техникийн хяналтын үзлэг</h4><div id="aboxDiagnosis"><p class="muted">...</p></div></div>
+            <div class="abox-block"><h4>Торгууль</h4><div id="aboxFines"><p class="muted">...</p></div></div>
+          </div>
+        </div>`;
+    }
+    function bindVehicleEditForm(){
+      const inp=$('veh_e_plate'), prev=$('veh_e_plate_preview');
+      if(!inp||!prev) return;
+      const upd=()=>{ inp.value=formatPlateInput(inp.value); prev.innerHTML=mongoliaPlateHtml(inp.value||'····','md'); };
+      inp.oninput=upd; upd();
+    }
+    window.selectVehicleForEdit=(v)=>{
+      window._vehEdit=v;
+      const panel=$('vehEditPanel');
+      if(panel){
+        panel.innerHTML=vehicleEditPanelHtml(v);
+        bindVehicleEditForm();
+        loadAutoboxForVehicle(v.plate_number);
+        startAutoboxPoll(v.plate_number);
+        return;
+      }
+      if(view==='vehicles') render();
+    };
+    async function loadAutoboxForVehicle(plate,silent){
+      const st=$('aboxStatus'), g=$('aboxGeneral'), t=$('aboxTech'), d=$('aboxDiagnosis'), f=$('aboxFines');
+      if(!g) return;
+      if(!silent&&st) st.textContent='Autobox.mn уншиж байна...';
+      try{
+        const json=await fetchAutoboxVehicle(plate);
+        if(silent&&json.hash&&json.hash===autoboxLastHash) return;
+        autoboxLastHash=json.hash||'';
+        const tbl=(html,empty)=>html||`<p class="muted">${empty}</p>`;
+        if(g) g.innerHTML=tbl(json.general,'Ерөнхий мэдээлэл алга');
+        if(t) t.innerHTML=tbl(json.technical,'Техникийн мэдээлэл алга');
+        if(d) d.innerHTML=tbl(json.diagnosis,'Техникийн үзлэгийн бүртгэл алга');
+        if(f) f.innerHTML=tbl(json.fines,'Торгуулийн бүртгэл алга');
+        if(st) st.textContent='Сүүлд шинэчлэгдсэн: '+new Date().toLocaleTimeString('mn-MN')+(json.url?` · ${json.url}`:'');
+      }catch(e){
+        autoboxLastHash='';
+        const msg=e.message||String(e);
+        if(st) st.textContent=msg;
+        if(g&&!silent) g.innerHTML=`<p class="muted">${msg}</p>`;
+      }
+    }
+    window.saveVehicleEdit=async(id)=>{
+      const plate=formatPlateInput($('veh_e_plate').value.trim());
+      if(!plate){ toast('Улсын дугаар оруулна уу'); return; }
+      const patch={
+        plate_number:plate,
+        liters_per_100km:Number($('veh_e_lit').value)||12,
+        tank_capacity_liters:Number($('veh_e_tank').value)||60,
+        driver_name:$('veh_e_drv').value.trim()||null,
+      };
+      const {error}=await sb.from('vehicles').update(patch).eq('id',id);
+      if(error){ toast(error.message); return; }
+      toast('Хадгалагдлаа');
+      window._vehEdit={...(window._vehEdit||{}),...patch,id};
+      await loadAll(true);
+      const fresh=(data.vehicles||[]).find(x=>x.id===id)||window._vehEdit;
+      selectVehicleForEdit(fresh);
+    };
     function renderVehicles(c){
+      stopVehicleQrScan();
+      const sel=window._vehEdit||null;
       const rows=fuelStatsByVehicle(30);
       const fuelCards=rows.length?`<div class="fuel-fleet-grid" style="margin-top:16px">${rows.map(r=>`<div class="fuel-fleet-card"><div class="fuel-fleet-top">${fuelTankVizHtml(r.currentLevel,r.levelColor,r.tank,r.remainingLiters)}<div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${mongoliaPlateHtml(r.plate,'sm')}${r.active?'<span class="pill on">Явж байна</span>':''}</div><div class="muted" style="font-size:13px;margin-top:4px">${r.driver}</div><div style="margin-top:8px"><b>${r.totalKm.toFixed(1)} км</b> · ${r.periodLiters.toFixed(1)} л</div><div style="margin-top:4px;color:${r.levelColor}"><b>${r.currentLevel}%</b> үлдсэн (${r.remainingLiters.toFixed(1)} / ${r.tank} л)</div></div></div><div class="fuel-gauge-bar" style="margin-top:10px"><div class="fuel-gauge-fill" style="width:${r.currentLevel}%;background:${r.levelColor}"></div></div></div>`).join('')}</div>`:'';
-      c.innerHTML=`<div class="card"><div class="card-h"><h3>Машин (${data.vehicles.length})</h3>
+      const scanCard=`<div class="card" style="margin-bottom:20px"><div class="card-h"><h3>Машины мэдээлэл солих</h3>
+        <div class="card-h-actions"><button class="btn btn-ghost btn-sm" type="button" onclick="manualVehicleCodeLookup()">Код гараар</button></div></div>
+        <div class="card-b"><div class="veh-scan-grid">
+          <div><div id="veh-qr-reader" class="veh-qr-reader"></div><p class="muted" style="font-size:13px;margin-top:8px">Машины QR уншуулна — тухайн машины мэдээллийг засна</p></div>
+          <div id="vehEditPanel">${sel?vehicleEditPanelHtml(sel):'<div class="empty" style="padding:28px 12px">QR уншуулж эсвэл доорх жагсаалтаас «Засах» дарна уу</div>'}</div>
+        </div></div></div>`;
+      c.innerHTML=scanCard+`<div class="card"><div class="card-h"><h3>Машин (${data.vehicles.length})</h3>
         <div class="card-h-actions"><button class="btn btn-ghost btn-sm" type="button" onclick="go('fuelconsumption')">Дэлгэрэнгүй</button>
         <button class="btn btn-primary btn-sm" onclick="vehModal()"> Машин нэмэх</button></div></div>
         <div class="card-b" style="padding:0"><table><thead><tr><th>Улсын дугаар</th><th>Код</th><th>100км/л</th><th>Сав (л)</th><th>Км (30х)</th><th>Бензин %</th><th>Жолооч</th><th></th></tr></thead>
@@ -3793,11 +3974,20 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
           const col=stat?.levelColor??fuelLevelColor(lvl);
           const km=stat?.totalKm??0;
           return `<tr><td>${mongoliaPlateHtml(v.plate_number,'sm')}${stat?.active?' <span class="pill on" style="font-size:10px">Явж</span>':''}</td><td>${v.code}</td><td>${v.liters_per_100km} л</td><td>${vehicleTankLiters(v)} л</td><td><b>${km.toFixed(1)}</b> км</td><td><b style="color:${col}">${lvl}%</b></td><td>${v.driver_name||'—'}</td>
-          <td><button class="btn btn-ghost btn-sm" onclick='qrModal(${JSON.stringify(v).replace(/'/g,"&#39;")})'>QR</button>
+          <td><button class="btn btn-ghost btn-sm" onclick='selectVehicleForEdit(${JSON.stringify(v).replace(/'/g,"&#39;")})'>Засах</button>
+          <button class="btn btn-ghost btn-sm" onclick='qrModal(${JSON.stringify(v).replace(/'/g,"&#39;")})'>QR</button>
           <button class="btn btn-ghost btn-sm" onclick="refillVehicleFuel('${v.id}','${String(v.plate_number).replace(/'/g,"\\'")}')">Сав</button>
           <button class="btn btn-danger btn-sm" onclick="delVeh('${v.id}','${v.plate_number}')">Устгах</button></td></tr>`;
         }).join('')||'<tr><td colspan=8 class=empty>Машин алга</td></tr>'}</tbody></table></div>
         <div class="card-b" style="border-top:1px solid var(--line)"><h4 style="margin:0 0 12px;font-size:15px">Бензин зарцуулалт · түвшин</h4>${fuelCards||'<div class="empty" style="padding:20px">Аяллын бүртгэл байхгүй</div>'}</div></div>`;
+      setTimeout(()=>{
+        if(sel){
+          bindVehicleEditForm();
+          loadAutoboxForVehicle(sel.plate_number);
+          startAutoboxPoll(sel.plate_number);
+        }
+        startVehicleQrScan();
+      },80);
     }
     window.vehModal = ()=>{
       const code='VH-'+Math.floor(1000+Math.random()*9000);
