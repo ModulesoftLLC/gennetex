@@ -23,6 +23,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useApp } from '../context/AppContext';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import VideoCallModal from '../components/VideoCallModal';
+import CallScreen from '../components/CallScreen';
+import ActiveTripsBanner from '../components/ActiveTripsBanner';
 import * as chatApi from '../services/chatService';
 import * as callApi from '../services/callService';
 import VoiceMessageButton from '../components/VoiceMessageButton';
@@ -152,6 +154,8 @@ export default function ConversationScreen() {
   const [text, setText] = useState('');
   const [error, setError] = useState(null);
   const [callVisible, setCallVisible] = useState(false);
+  const [outgoing, setOutgoing] = useState(null);
+  const outgoingUnsub = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [voiceActive, setVoiceActive] = useState(false);
   const [voicePreview, setVoicePreview] = useState('');
@@ -395,19 +399,51 @@ export default function ConversationScreen() {
       Alert.alert('Дуудлага', 'Хэн рүү залгахаа олсонгүй.');
       return;
     }
-    setCallVisible(true);
     try {
-      await callApi.startCall({
+      const call = await callApi.startCall({
         room,
         caller: { id: me.id, name: me.name },
         callee: { id: otherUser.id, name: otherUser.name },
       });
+      setOutgoing(call);
       await send('Видео дуудлага руу залгаж байна...');
+      if (call?.id) {
+        outgoingUnsub.current = callApi.subscribeCallUpdates(call.id, (updated) => {
+          if (updated.status === 'accepted') {
+            cleanupOutgoing();
+            setOutgoing(null);
+            setCallVisible(true);
+          } else if (updated.status === 'declined' || updated.status === 'ended') {
+            cleanupOutgoing();
+            setOutgoing(null);
+            Alert.alert('Дуудлага', 'Хэрэглэгч татгалзлаа.');
+          }
+        });
+      }
     } catch (e) {
-      setCallVisible(false);
+      setOutgoing(null);
       Alert.alert('Дуудлага', e.message || 'Залгахад алдаа гарлаа');
     }
   };
+
+  const cleanupOutgoing = () => {
+    if (outgoingUnsub.current) {
+      outgoingUnsub.current();
+      outgoingUnsub.current = null;
+    }
+  };
+
+  const cancelOutgoing = async () => {
+    cleanupOutgoing();
+    if (outgoing?.id) {
+      try {
+        await callApi.setCallStatus(outgoing.id, 'ended');
+      } catch (e) {}
+    }
+    setOutgoing(null);
+  };
+
+  useEffect(() => () => cleanupOutgoing(), []);
 
   const changeGroupAvatar = () => {
     if (!isGroup || !room) return;
@@ -530,6 +566,8 @@ export default function ConversationScreen() {
           </View>
         </View>
       </SafeAreaView>
+
+      {isGroup ? <ActiveTripsBanner /> : null}
 
       {error ? (
         <View style={styles.errorBar}>
@@ -773,6 +811,15 @@ export default function ConversationScreen() {
 
       <ChatImagePreview uri={previewImage} onClose={() => setPreviewImage(null)} />
       <ChatVideoPreview uri={previewVideo} onClose={() => setPreviewVideo(null)} />
+
+      <CallScreen
+        visible={!!outgoing}
+        mode="outgoing"
+        name={otherUser?.name || 'Ажилтан'}
+        video
+        status="Залгаж байна..."
+        onCancel={cancelOutgoing}
+      />
 
       <VideoCallModal
         visible={callVisible}

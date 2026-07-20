@@ -1,6 +1,6 @@
 {
   "name": "gennetex-erp",
-  "version": "0.10.6",
+  "version": "1.0.3",
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client",
@@ -12,11 +12,12 @@
     "version:bump": "node scripts/bump-version.js",
     "admin:sync-env": "node scripts/sync-admin-env.js",
     "admin:serve": "python3 -m http.server 5500 --directory admin-web",
-    "postinstall": "node scripts/patch-incoming-call-rn81.js",
-    "eas-build-post-install": "node scripts/patch-incoming-call-rn81.js"
+    "postinstall": "node scripts/patch-incoming-call-rn81.js && node scripts/sync-google-services.js",
+    "eas-build-post-install": "node scripts/patch-incoming-call-rn81.js && node scripts/sync-google-services.js"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",

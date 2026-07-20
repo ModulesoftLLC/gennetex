@@ -14,22 +14,36 @@ import {
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import * as tg from '../services/telegramUserService';
-import { formatTime } from '../lib/formatTime';
+import { formatConvTime } from '../lib/formatTime';
+import { avatarGradient, initials } from '../lib/telegram/avatarColor';
+
+const TG_BLUE = '#229ED9';
+const TG_BLUE_DARK = '#1C8CC2';
 
 function LoginView({ onDone }) {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const [step, setStep] = useState('phone'); // phone | code | password
+  const [step, setStep] = useState('phone');
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [phoneCodeHash, setPhoneCodeHash] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [via, setVia] = useState('app');
+  const [resending, setResending] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
 
   const submitPhone = async () => {
     const p = phone.trim();
@@ -40,13 +54,31 @@ function LoginView({ onDone }) {
     setBusy(true);
     setError(null);
     try {
-      const { phoneCodeHash: hash } = await tg.sendLoginCode(p);
+      const { phoneCodeHash: hash, viaApp } = await tg.sendLoginCode(p);
       setPhoneCodeHash(hash);
+      setVia(viaApp ? 'app' : 'sms');
       setStep('code');
+      setResendIn(30);
     } catch (e) {
       setError(e.message || 'Код илгээхэд алдаа гарлаа');
     } finally {
       setBusy(false);
+    }
+  };
+
+  const resend = async () => {
+    if (resending || resendIn > 0) return;
+    setResending(true);
+    setError(null);
+    try {
+      const { phoneCodeHash: hash, via: v } = await tg.resendLoginCode(phone.trim(), phoneCodeHash);
+      setPhoneCodeHash(hash);
+      setVia(v);
+      setResendIn(30);
+    } catch (e) {
+      setError(e.message || 'Дахин илгээхэд алдаа гарлаа');
+    } finally {
+      setResending(false);
     }
   };
 
@@ -56,16 +88,9 @@ function LoginView({ onDone }) {
     setBusy(true);
     setError(null);
     try {
-      const res = await tg.signInWithCode({
-        phoneNumber: phone.trim(),
-        phoneCodeHash,
-        phoneCode: c,
-      });
-      if (res.needPassword) {
-        setStep('password');
-      } else {
-        onDone();
-      }
+      const res = await tg.signInWithCode({ phoneNumber: phone.trim(), phoneCodeHash, phoneCode: c });
+      if (res.needPassword) setStep('password');
+      else onDone();
     } catch (e) {
       setError(e.message || 'Код буруу байна');
     } finally {
@@ -87,20 +112,42 @@ function LoginView({ onDone }) {
     }
   };
 
+  const codeHint =
+    via === 'sms'
+      ? 'Код SMS-ээр илгээгдлээ'
+      : via === 'call'
+      ? 'Автомат дуудлагаар код хэлнэ'
+      : 'Код таны Telegram апп дотор (777000 чат) ирсэн';
+  const stepMeta = {
+    phone: { title: 'Утасны дугаар', hint: 'Telegram танд нэвтрэх код илгээнэ' },
+    code: { title: 'Баталгаажуулах код', hint: codeHint },
+    password: { title: '2FA нууц үг', hint: 'Хоёр шатлалт баталгаажуулалтын нууц үг' },
+  }[step];
+
   return (
     <View style={styles.loginWrap}>
-      <View style={styles.loginIcon}>
-        <Ionicons name="paper-plane" size={40} color="#fff" />
+      <LinearGradient colors={[TG_BLUE, TG_BLUE_DARK]} style={styles.loginIcon}>
+        <Ionicons name="paper-plane" size={44} color="#fff" />
+      </LinearGradient>
+      <Text style={styles.loginTitle}>Telegram-аар нэвтрэх</Text>
+      <Text style={styles.loginSub}>Өөрийн акаунтаараа нэвтэрч бүх чатаа энд харна.</Text>
+
+      <View style={styles.dots}>
+        {['phone', 'code', 'password'].map((s) => (
+          <View
+            key={s}
+            style={[
+              styles.dot,
+              (s === step) && styles.dotActive,
+              (s === 'password' && step !== 'password') && styles.dotHidden,
+            ]}
+          />
+        ))}
       </View>
-      <Text style={styles.loginTitle}>Өөрийн Telegram-аар нэвтрэх</Text>
-      <Text style={styles.loginSub}>
-        Утасны дугаараа оруулбал Telegram танд код илгээнэ. Дараа нь бүх чат энд харагдана.
-      </Text>
 
-      {error ? <Text style={styles.loginErr}>{error}</Text> : null}
-
-      {step === 'phone' ? (
-        <>
+      <View style={styles.formCard}>
+        <Text style={styles.fieldLabel}>{stepMeta.title}</Text>
+        {step === 'phone' && (
           <TextInput
             style={styles.loginInput}
             placeholder="+976 99112233"
@@ -110,32 +157,20 @@ function LoginView({ onDone }) {
             onChangeText={setPhone}
             autoFocus
           />
-          <TouchableOpacity style={styles.loginBtn} onPress={submitPhone} disabled={busy}>
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginBtnText}>Код авах</Text>}
-          </TouchableOpacity>
-        </>
-      ) : null}
-
-      {step === 'code' ? (
-        <>
+        )}
+        {step === 'code' && (
           <TextInput
-            style={styles.loginInput}
-            placeholder="Telegram-аас ирсэн код"
+            style={[styles.loginInput, styles.codeInput]}
+            placeholder="- - - - -"
             placeholderTextColor={colors.textFaint}
             keyboardType="number-pad"
             value={code}
             onChangeText={setCode}
+            maxLength={6}
             autoFocus
           />
-          <TouchableOpacity style={styles.loginBtn} onPress={submitCode} disabled={busy}>
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginBtnText}>Нэвтрэх</Text>}
-          </TouchableOpacity>
-        </>
-      ) : null}
-
-      {step === 'password' ? (
-        <>
-          <Text style={styles.loginSub}>2FA нууц үгээ оруулна уу.</Text>
+        )}
+        {step === 'password' && (
           <TextInput
             style={styles.loginInput}
             placeholder="Нууц үг"
@@ -145,10 +180,53 @@ function LoginView({ onDone }) {
             onChangeText={setPassword}
             autoFocus
           />
-          <TouchableOpacity style={styles.loginBtn} onPress={submitPassword} disabled={busy}>
-            {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.loginBtnText}>Баталгаажуулах</Text>}
-          </TouchableOpacity>
-        </>
+        )}
+        <Text style={styles.fieldHint}>{stepMeta.hint}</Text>
+      </View>
+
+      {error ? (
+        <View style={styles.loginErrBox}>
+          <Ionicons name="alert-circle" size={16} color={colors.danger} />
+          <Text style={styles.loginErr}>{error}</Text>
+        </View>
+      ) : null}
+
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={step === 'phone' ? submitPhone : step === 'code' ? submitCode : submitPassword}
+        disabled={busy}
+        style={styles.btnWrap}
+      >
+        <LinearGradient colors={[TG_BLUE, TG_BLUE_DARK]} style={styles.loginBtn}>
+          {busy ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Text style={styles.loginBtnText}>
+                {step === 'phone' ? 'Код авах' : step === 'code' ? 'Нэвтрэх' : 'Баталгаажуулах'}
+              </Text>
+              <Ionicons name="arrow-forward" size={18} color="#fff" />
+            </>
+          )}
+        </LinearGradient>
+      </TouchableOpacity>
+
+      {step === 'code' ? (
+        <TouchableOpacity onPress={resend} disabled={resendIn > 0 || resending} style={styles.resendLink}>
+          {resending ? (
+            <ActivityIndicator size="small" color={colors.textMuted} />
+          ) : (
+            <Text style={[styles.resendText, resendIn > 0 && styles.resendDisabled]}>
+              {resendIn > 0 ? `Дахин илгээх (${resendIn}сек)` : 'Код ирсэнгүй юу? Дахин илгээх (SMS/дуудлага)'}
+            </Text>
+          )}
+        </TouchableOpacity>
+      ) : null}
+
+      {step !== 'phone' ? (
+        <TouchableOpacity onPress={() => { setStep('phone'); setError(null); }} style={styles.backLink}>
+          <Text style={styles.backLinkText}>← Дугаар өөрчлөх</Text>
+        </TouchableOpacity>
       ) : null}
     </View>
   );
@@ -156,23 +234,28 @@ function LoginView({ onDone }) {
 
 function DialogRow({ item, onPress }) {
   const styles = useStyles(makeStyles);
-  const { colors } = useTheme();
-  const initials = (item.title || '?').trim().charAt(0).toUpperCase();
+  const grad = avatarGradient(item.title);
   return (
-    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
-      <View style={[styles.avatar, item.isChannel && styles.avatarChannel, item.isGroup && styles.avatarGroup]}>
-        <Text style={styles.avatarText}>{initials}</Text>
-      </View>
+    <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.6}>
+      <LinearGradient colors={grad} style={styles.avatar}>
+        {item.isChannel ? (
+          <Ionicons name="megaphone" size={22} color="#fff" />
+        ) : item.isGroup ? (
+          <Ionicons name="people" size={22} color="#fff" />
+        ) : (
+          <Text style={styles.avatarText}>{initials(item.title)}</Text>
+        )}
+      </LinearGradient>
       <View style={styles.rowBody}>
         <View style={styles.rowTop}>
           <Text style={styles.rowTitle} numberOfLines={1}>{item.title}</Text>
-          {item.date ? <Text style={styles.rowTime}>{formatTime(item.date)}</Text> : null}
+          {item.date ? <Text style={styles.rowTime}>{formatConvTime(item.date)}</Text> : null}
         </View>
-        <View style={styles.rowTop}>
-          <Text style={styles.rowMsg} numberOfLines={1}>{item.lastMessage || ' '}</Text>
+        <View style={styles.rowBottom}>
+          <Text style={styles.rowMsg} numberOfLines={1}>{item.lastMessage || 'Мессеж алга'}</Text>
           {item.unreadCount > 0 ? (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{item.unreadCount}</Text>
+              <Text style={styles.badgeText}>{item.unreadCount > 99 ? '99+' : item.unreadCount}</Text>
             </View>
           ) : null}
         </View>
@@ -244,15 +327,32 @@ export default function MyTelegramScreen() {
     ]);
   };
 
+  const Header = ({ right }) => (
+    <LinearGradient colors={[TG_BLUE, TG_BLUE_DARK]} style={styles.header}>
+      <View style={styles.headerLeft}>
+        <View style={styles.headerLogo}>
+          <Ionicons name="paper-plane" size={20} color="#fff" />
+        </View>
+        <View>
+          <Text style={styles.title}>Миний Telegram</Text>
+          <Text style={styles.sub}>{authed ? `${dialogs.length} чат` : 'Хувийн акаунт'}</Text>
+        </View>
+      </View>
+      {right}
+    </LinearGradient>
+  );
+
   if (!configured) {
     return (
       <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <StatusBar barStyle="light-content" />
+        <Header />
         <View style={styles.center}>
-          <Ionicons name="warning-outline" size={40} color={colors.textMuted} />
+          <Ionicons name="construct-outline" size={44} color={colors.textMuted} />
           <Text style={styles.notice}>
             Telegram API тохируулаагүй байна.{'\n\n'}
-            my.telegram.org → API development tools-оос api_id, api_hash авч .env дотор
-            EXPO_PUBLIC_TELEGRAM_API_ID, EXPO_PUBLIC_TELEGRAM_API_HASH болгон нэмнэ үү.
+            my.telegram.org-оос api_id, api_hash авч .env дотор
+            EXPO_PUBLIC_TELEGRAM_API_ID / _HASH болгон нэмнэ үү.
           </Text>
         </View>
       </SafeAreaView>
@@ -262,20 +362,21 @@ export default function MyTelegramScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.header}>
-        <View style={styles.headerText}>
-          <Text style={styles.title}>Миний Telegram</Text>
-          <Text style={styles.sub}>Өөрийн акаунт · бүх чат</Text>
-        </View>
-        {authed ? (
-          <TouchableOpacity onPress={onLogout} style={styles.headerBtn}>
-            <Ionicons name="log-out-outline" size={22} color={colors.onPrimaryContainer} />
-          </TouchableOpacity>
-        ) : null}
-      </View>
+      <Header
+        right={
+          authed ? (
+            <TouchableOpacity onPress={onLogout} style={styles.headerBtn}>
+              <Ionicons name="log-out-outline" size={22} color="#fff" />
+            </TouchableOpacity>
+          ) : null
+        }
+      />
 
       {loading ? (
-        <ActivityIndicator style={{ marginTop: 40 }} color={colors.primary} />
+        <View style={styles.center}>
+          <ActivityIndicator color={TG_BLUE} size="large" />
+          <Text style={styles.loadingText}>Ачаалж байна...</Text>
+        </View>
       ) : authed ? (
         <FlatList
           data={dialogs}
@@ -286,18 +387,20 @@ export default function MyTelegramScreen() {
               onPress={() => navigation.navigate('TelegramDialog', { id: item.id, title: item.title })}
             />
           )}
+          ItemSeparatorComponent={() => <View style={styles.sep} />}
+          contentContainerStyle={dialogs.length ? null : styles.flexGrow}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                loadDialogs();
-              }}
-              tintColor={colors.primary}
+              onRefresh={() => { setRefreshing(true); loadDialogs(); }}
+              tintColor={TG_BLUE}
             />
           }
           ListEmptyComponent={
-            <Text style={styles.empty}>{error || 'Чат алга.'}</Text>
+            <View style={styles.center}>
+              <Ionicons name="chatbubbles-outline" size={48} color={colors.textFaint} />
+              <Text style={styles.empty}>{error || 'Чат алга байна.'}</Text>
+            </View>
           }
         />
       ) : (
@@ -312,100 +415,102 @@ export default function MyTelegramScreen() {
   );
 }
 
-const makeStyles = (colors) =>
+const makeStyles = ({ colors }) =>
   StyleSheet.create({
     safe: { flex: 1, backgroundColor: colors.background },
     flex: { flex: 1 },
+    flexGrow: { flexGrow: 1 },
     center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
+    loadingText: { color: colors.textMuted, marginTop: 12, fontSize: 13 },
     notice: { color: colors.textMuted, fontSize: 14, textAlign: 'center', marginTop: 16, lineHeight: 21 },
+
     header: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
       paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-      backgroundColor: colors.surface,
+      paddingVertical: 14,
     },
-    headerText: { flex: 1 },
-    title: { color: colors.text, fontSize: 18, fontWeight: '800' },
-    sub: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+    headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    headerLogo: {
+      width: 40, height: 40, borderRadius: 20,
+      backgroundColor: 'rgba(255,255,255,0.18)',
+      alignItems: 'center', justifyContent: 'center',
+    },
+    title: { color: '#fff', fontSize: 18, fontWeight: '800' },
+    sub: { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 1 },
     headerBtn: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: colors.primaryContainer,
-      alignItems: 'center',
-      justifyContent: 'center',
+      width: 40, height: 40, borderRadius: 20,
+      backgroundColor: 'rgba(255,255,255,0.18)',
+      alignItems: 'center', justifyContent: 'center',
     },
-    empty: { textAlign: 'center', color: colors.textMuted, marginTop: 48, fontSize: 14 },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      gap: 12,
-    },
+
+    empty: { textAlign: 'center', color: colors.textMuted, marginTop: 12, fontSize: 14 },
+    sep: { height: 1, backgroundColor: colors.border, marginLeft: 82 },
+
+    row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 11, gap: 14 },
     avatar: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
-      backgroundColor: '#229ED9',
-      alignItems: 'center',
-      justifyContent: 'center',
+      width: 54, height: 54, borderRadius: 27,
+      alignItems: 'center', justifyContent: 'center',
     },
-    avatarGroup: { backgroundColor: '#0f766e' },
-    avatarChannel: { backgroundColor: '#7c3aed' },
     avatarText: { color: '#fff', fontSize: 20, fontWeight: '700' },
-    rowBody: { flex: 1, borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 10 },
-    rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    rowBody: { flex: 1 },
+    rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 },
+    rowBottom: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     rowTitle: { color: colors.text, fontSize: 16, fontWeight: '700', flex: 1 },
     rowTime: { color: colors.textFaint, fontSize: 11, marginLeft: 8 },
-    rowMsg: { color: colors.textMuted, fontSize: 13, flex: 1, marginTop: 2 },
+    rowMsg: { color: colors.textMuted, fontSize: 14, flex: 1 },
     badge: {
-      minWidth: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: '#229ED9',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 6,
-      marginLeft: 8,
+      minWidth: 22, height: 22, borderRadius: 11,
+      backgroundColor: TG_BLUE,
+      alignItems: 'center', justifyContent: 'center',
+      paddingHorizontal: 7, marginLeft: 8,
     },
-    badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-    loginWrap: { padding: 24, alignItems: 'center' },
+    badgeText: { color: '#fff', fontSize: 12, fontWeight: '700' },
+
+    // Login
+    loginWrap: { padding: 24, alignItems: 'center', paddingTop: 36 },
     loginIcon: {
-      width: 84,
-      height: 84,
-      borderRadius: 42,
-      backgroundColor: '#229ED9',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 24,
-      marginBottom: 20,
+      width: 88, height: 88, borderRadius: 44,
+      alignItems: 'center', justifyContent: 'center', marginBottom: 22,
+      shadowColor: TG_BLUE, shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.4, shadowRadius: 16, elevation: 8,
     },
-    loginTitle: { color: colors.text, fontSize: 20, fontWeight: '800', textAlign: 'center' },
-    loginSub: { color: colors.textMuted, fontSize: 13, textAlign: 'center', marginTop: 8, lineHeight: 20 },
-    loginErr: { color: colors.danger, fontSize: 13, marginTop: 14, textAlign: 'center' },
-    loginInput: {
+    loginTitle: { color: colors.text, fontSize: 22, fontWeight: '800', textAlign: 'center' },
+    loginSub: { color: colors.textMuted, fontSize: 14, textAlign: 'center', marginTop: 8, lineHeight: 20 },
+    dots: { flexDirection: 'row', gap: 8, marginTop: 20, marginBottom: 8 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.border },
+    dotActive: { width: 24, backgroundColor: TG_BLUE },
+    dotHidden: { opacity: 0.4 },
+    formCard: {
       width: '100%',
-      height: 52,
-      borderRadius: 12,
-      paddingHorizontal: 16,
       backgroundColor: colors.surfaceContainerLow,
-      color: colors.text,
-      fontSize: 16,
-      marginTop: 20,
+      borderRadius: 18,
+      padding: 18,
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
+    fieldLabel: { color: colors.textMuted, fontSize: 12, fontWeight: '700', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
+    loginInput: {
+      width: '100%', height: 52, borderRadius: 12, paddingHorizontal: 16,
+      backgroundColor: colors.surface, color: colors.text, fontSize: 17,
+      borderWidth: 1, borderColor: colors.border,
+    },
+    codeInput: { textAlign: 'center', letterSpacing: 10, fontSize: 24, fontWeight: '700' },
+    fieldHint: { color: colors.textFaint, fontSize: 12, marginTop: 10, lineHeight: 17 },
+    loginErrBox: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14, paddingHorizontal: 4 },
+    loginErr: { color: colors.danger, fontSize: 13, flex: 1 },
+    btnWrap: { width: '100%', marginTop: 18 },
     loginBtn: {
-      width: '100%',
-      height: 52,
-      borderRadius: 12,
-      backgroundColor: '#229ED9',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 14,
+      width: '100%', height: 54, borderRadius: 14,
+      alignItems: 'center', justifyContent: 'center',
+      flexDirection: 'row', gap: 8,
     },
-    loginBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    loginBtnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+    resendLink: { marginTop: 18, padding: 8, minHeight: 24, justifyContent: 'center' },
+    resendText: { color: TG_BLUE, fontSize: 14, fontWeight: '600', textAlign: 'center' },
+    resendDisabled: { color: colors.textFaint },
+    backLink: { marginTop: 8, padding: 8 },
+    backLinkText: { color: TG_BLUE, fontSize: 14, fontWeight: '600' },
   });

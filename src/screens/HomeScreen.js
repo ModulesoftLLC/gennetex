@@ -13,6 +13,7 @@ import { countTodayCheckIns } from '../services/attendanceService';
 import * as ohaabApi from '../services/ohaabService';
 import * as meetingApi from '../services/meetingService';
 import { formatTime, formatDate } from '../lib/formatTime';
+import TodayDashboard from '../components/enhancements/TodayDashboard';
 
 const EMPLOYEE_MODULES = [
   { key: 'Ohaab', label: 'ХААБ заавар', icon: 'attendance', color: '#b45309' },
@@ -35,6 +36,12 @@ const EMPLOYEE_MODULES = [
   { key: 'EmployeeReport', label: 'Ажилтан тайлан', icon: 'report', color: '#1e3a5f'},
   { key: 'Feedback', label: 'Санал гомдол', icon: 'report', color: '#dc2626'},
   { key: 'Chat', label: 'Чат', icon: 'chat', color: '#7c3aed'},
+  // --- Enhancements (additive) ---
+  { key: 'RouteOptimize', label: 'Зам оновчлох', icon: 'location', color: '#0ea5e9' },
+  { key: 'KnowledgeBase', label: 'Мэдлэгийн сан', icon: 'report', color: '#6366f1' },
+  { key: 'ToolCheckIn', label: 'Багаж нөхцөл', icon: 'tools', color: '#ea580c' },
+  { key: 'BarcodeMode', label: 'Barcode горим', icon: 'qr', color: '#64748b' },
+  { key: 'OfflineQueue', label: 'Оффлайн queue', icon: 'clock', color: '#7c3aed' },
 ];
 
 const ADMIN_MODULES = [
@@ -56,6 +63,17 @@ const ADMIN_MODULES = [
   { key: 'Inventory', label: 'Бараа материал', icon: 'inventory', color: C.primary },
   { key: 'Tools', label: 'Багаж', icon: 'tools', color: '#ea580c'},
   { key: 'ToolAllocation', label: 'Ажилтны үлдэгдэл', icon: 'allocation', color: C.accent },
+  // --- Enhancements (additive) ---
+  { key: 'LiveOps', label: 'Live Ops', icon: 'location', color: '#ef4444' },
+  { key: 'SlaReport', label: 'SLA & KPI', icon: 'report', color: '#f59e0b' },
+  { key: 'AutoDispatch', label: 'Автомат оноолт', icon: 'calls', color: '#8b5cf6' },
+  { key: 'LowStock', label: 'Бага үлдэгдэл', icon: 'inventory', color: '#dc2626' },
+  { key: 'CallCost', label: 'Дуудлагын өртөг', icon: 'report', color: '#0d9488' },
+  { key: 'PayrollExport', label: 'Цалин export', icon: 'report', color: '#1e3a5f' },
+  { key: 'Predictive', label: 'Predictive', icon: 'location', color: '#db2777' },
+  { key: 'PublicTickets', label: 'Public tickets', icon: 'chat', color: '#0369a1' },
+  { key: 'BranchAdmin', label: 'Салбар', icon: 'location', color: '#64748b' },
+  { key: 'FeatureFlags', label: 'Feature flags', icon: 'ai', color: '#4f46e5' },
 ];
 
 // AI боломжуудыг тусад нь тод хэсэг болгож харуулна
@@ -235,6 +253,8 @@ export default function HomeScreen() {
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        <TodayDashboard />
+
         {isCloud && !ohaabSignedToday ? (
           <TouchableOpacity
             style={styles.ohaabBanner}

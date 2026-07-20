@@ -7,6 +7,11 @@ import { startIncomingCallAlert, stopIncomingCallAlert } from '../services/callA
 import { navigateFromNotification } from '../lib/navigationRef';
 import { getActiveChatRoom } from '../lib/chatFocus';
 import { supabase } from '../lib/supabase';
+import { registerBackgroundCallTask } from '../services/incomingCallBackgroundTask';
+import {
+  isNativeIncomingCallAvailable,
+  showNativeIncomingCallFromPush,
+} from '../services/nativeIncomingCallService';
 
 export default function PushNotificationManager() {
   const { isCloud, currentUser } = useApp();
@@ -28,6 +33,10 @@ export default function PushNotificationManager() {
         tokenRef.current = res.token;
       } catch (e) {}
     })();
+
+    // App хаалттай/background үед дуудлагын push ирвэл утасны native
+    // дуудлагын дэлгэц гаргах background task-ийг бүртгэнэ.
+    registerBackgroundCallTask();
 
     // Миний ярианууд — foreground чат мэдэгдэл
     (async () => {
@@ -155,7 +164,14 @@ export default function PushNotificationManager() {
     receivedSub.current = Notifications.addNotificationReceivedListener(async (notification) => {
       const data = notification.request.content.data;
       if (data?.type === 'call') {
-        await startIncomingCallAlert(data.callerName || notification.request.content.title);
+        // Апп идэвхтэй (foreground) үед Supabase realtime (IncomingCallManager)
+        // өөрөө дуудлагыг гаргана — давхардуулахгүй.
+        if (AppState.currentState === 'active') return;
+        if (isNativeIncomingCallAvailable()) {
+          showNativeIncomingCallFromPush({ ...data, type: 'call' });
+        } else {
+          await startIncomingCallAlert(data.callerName || notification.request.content.title);
+        }
       }
     });
 

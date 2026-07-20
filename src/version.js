@@ -7,9 +7,9 @@
 export const VERSION_SEGMENT_MAX = 10;
 
 export const APP_VERSION = {
-  major: 0,
-  minor: 10,
-  patch: 6,
+  major: 1,
+  minor: 0,
+  patch: 3,
 };
 
 export function formatAppVersion(v = APP_VERSION) {

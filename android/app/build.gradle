@@ -2,6 +2,12 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+// FCM (push мэдэгдэл) — google-services.json байгаа тохиолдолд л идэвхжинэ.
+// Файл байхгүй бол build хэвийн үргэлжилнэ.
+if (project.file("google-services.json").exists()) {
+    apply plugin: "com.google.gms.google-services"
+}
+
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**

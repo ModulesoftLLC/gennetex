@@ -74,6 +74,23 @@ import InventoryResultScreen from './src/screens/ai-inventory/InventoryResultScr
 import InventoryHistoryScreen from './src/screens/ai-inventory/InventoryHistoryScreen';
 import ProductTrainingScreen from './src/screens/ai-inventory/ProductTrainingScreen';
 import InventorySettingsScreen from './src/screens/ai-inventory/InventorySettingsScreen';
+import LiveOpsScreen from './src/screens/enhancements/LiveOpsScreen';
+import SlaReportScreen from './src/screens/enhancements/SlaReportScreen';
+import LowStockScreen from './src/screens/enhancements/LowStockScreen';
+import AutoDispatchScreen from './src/screens/enhancements/AutoDispatchScreen';
+import RouteOptimizeScreen from './src/screens/enhancements/RouteOptimizeScreen';
+import KnowledgeBaseScreen from './src/screens/enhancements/KnowledgeBaseScreen';
+import PayrollExportScreen from './src/screens/enhancements/PayrollExportScreen';
+import CallCostScreen from './src/screens/enhancements/CallCostScreen';
+import ToolCheckInScreen from './src/screens/enhancements/ToolCheckInScreen';
+import PredictiveScreen from './src/screens/enhancements/PredictiveScreen';
+import DigitalTwinScreen from './src/screens/enhancements/DigitalTwinScreen';
+import TodayDetailScreen from './src/screens/enhancements/TodayDetailScreen';
+import OfflineQueueScreen from './src/screens/enhancements/OfflineQueueScreen';
+import BranchAdminScreen from './src/screens/enhancements/BranchAdminScreen';
+import FeatureFlagsScreen from './src/screens/enhancements/FeatureFlagsScreen';
+import BarcodeModeScreen from './src/screens/enhancements/BarcodeModeScreen';
+import PublicTicketsScreen from './src/screens/enhancements/PublicTicketsScreen';
 import LocationTracker from './src/components/LocationTracker';
 import SiteVisitVerifier from './src/components/SiteVisitVerifier';
 import IncomingCallManager from './src/components/IncomingCallManager';
@@ -82,11 +99,17 @@ import PushNotificationManager from './src/components/PushNotificationManager';
 import ActivityLogger from './src/components/ActivityLogger';
 import ScreenLiveShare from './src/components/ScreenLiveShare';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import OfflineGate from './src/components/OfflineGate';
+import ForceUpdateModal from './src/components/enhancements/ForceUpdateModal';
+import OfflineSyncBanner from './src/components/enhancements/OfflineSyncBanner';
 import TabBar from './src/components/TabBar';
 import { navigationRef } from './src/lib/navigationRef';
 import { ONBOARDING_KEY } from './src/services/permissionsService';
 import * as ohaabApi from './src/services/ohaabService';
 import * as deviceApi from './src/services/deviceAuthService';
+import { loadFeatureFlagOverrides } from './src/lib/featureFlags';
+import { installGlobalCrashHandlers } from './src/services/crashReportService';
+import { startOfflineSyncWatcher } from './src/services/offlineQueueService';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -184,6 +207,24 @@ function AppStack() {
       <Stack.Screen name="InventoryHistory" component={InventoryHistoryScreen} />
       <Stack.Screen name="ProductTraining" component={ProductTrainingScreen} />
       <Stack.Screen name="InventorySettings" component={InventorySettingsScreen} />
+      {/* --- Enhancements (additive, existing modules unchanged) --- */}
+      <Stack.Screen name="LiveOps" component={LiveOpsScreen} />
+      <Stack.Screen name="SlaReport" component={SlaReportScreen} />
+      <Stack.Screen name="LowStock" component={LowStockScreen} />
+      <Stack.Screen name="AutoDispatch" component={AutoDispatchScreen} />
+      <Stack.Screen name="RouteOptimize" component={RouteOptimizeScreen} />
+      <Stack.Screen name="KnowledgeBase" component={KnowledgeBaseScreen} />
+      <Stack.Screen name="PayrollExport" component={PayrollExportScreen} />
+      <Stack.Screen name="CallCost" component={CallCostScreen} />
+      <Stack.Screen name="ToolCheckIn" component={ToolCheckInScreen} />
+      <Stack.Screen name="Predictive" component={PredictiveScreen} />
+      <Stack.Screen name="DigitalTwin" component={DigitalTwinScreen} />
+      <Stack.Screen name="TodayDetail" component={TodayDetailScreen} />
+      <Stack.Screen name="OfflineQueue" component={OfflineQueueScreen} />
+      <Stack.Screen name="BranchAdmin" component={BranchAdminScreen} />
+      <Stack.Screen name="FeatureFlags" component={FeatureFlagsScreen} />
+      <Stack.Screen name="BarcodeMode" component={BarcodeModeScreen} />
+      <Stack.Screen name="PublicTickets" component={PublicTicketsScreen} />
     </Stack.Navigator>
   );
 }
@@ -303,6 +344,7 @@ function Root({ shareRef }) {
   }
   return (
     <>
+      <OfflineSyncBanner />
       <LocationTracker />
       <SiteVisitVerifier />
       <IncomingCallManager />
@@ -311,6 +353,7 @@ function Root({ shareRef }) {
       <ActivityLogger />
       <ScreenLiveShare viewRef={shareRef} />
       <AppStack />
+      <ForceUpdateModal />
     </>
   );
 }
@@ -320,13 +363,28 @@ function ThemedRoot({ shareRef }) {
   return (
     <NavigationContainer ref={navigationRef} theme={buildNavTheme(colors)}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Root shareRef={shareRef} />
+      <OfflineGate>
+        <Root shareRef={shareRef} />
+      </OfflineGate>
     </NavigationContainer>
   );
 }
 
 export default function App() {
   const shareRef = useRef(null);
+
+  useEffect(() => {
+    loadFeatureFlagOverrides()
+      .then(() => {
+        installGlobalCrashHandlers();
+        startOfflineSyncWatcher();
+      })
+      .catch(() => {
+        installGlobalCrashHandlers();
+        startOfflineSyncWatcher();
+      });
+  }, []);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
