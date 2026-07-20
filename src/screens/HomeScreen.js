@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Animated, Easing, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
@@ -104,6 +104,7 @@ function greeting() {
 export default function HomeScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const styles = useStyles(makeStyles);
   const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees, currentUser } = useApp();
   const name = authProfile?.name || profile?.name || 'Ажилтан';
@@ -111,6 +112,13 @@ export default function HomeScreen() {
   const [stats, setStats] = useState({ employees: 0, online: 0, vehicles: 0, checkins: 0 });
   const [now, setNow] = useState(() => new Date());
   const [ohaabSignedToday, setOhaabSignedToday] = useState(true);
+
+  // Динамик хэмжээ тооцоолох (flex wrap болон gap тохируулахад багтахгүй байхаас сэргийлнэ)
+  const bodyPadding = 16; // spacing.lg
+  const tileGap = 12; // spacing.md
+  const availableWidth = SCREEN_WIDTH - bodyPadding * 2;
+  const tileWidth = Math.floor((availableWidth - tileGap * 2) - 1) / 3;
+  const aiCardWidth = Math.floor((availableWidth - tileGap) - 1) / 2;
 
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 30_000);
@@ -208,7 +216,7 @@ export default function HomeScreen() {
   const renderTile = (m, i) => (
     <TouchableOpacity
       key={`${m.key}-${i}`}
-      style={styles.tile}
+      style={[styles.tile, { width: tileWidth }]}
       activeOpacity={0.82}
       onPress={() => go(m)}
     >
@@ -222,7 +230,7 @@ export default function HomeScreen() {
   );
 
   const renderAiCard = (m, i) => (
-    <AiCard key={`${m.key}-${i}`} m={m} styles={styles} onPress={() => go(m)} />
+    <AiCard key={`${m.key}-${i}`} m={m} styles={styles} width={aiCardWidth} onPress={() => go(m)} />
   );
 
   return (
@@ -340,14 +348,14 @@ export default function HomeScreen() {
   );
 }
 
-function AiCard({ m, styles, onPress }) {
+function AiCard({ m, styles, width, onPress }) {
   const scale = useRef(new Animated.Value(1)).current;
   const pressIn = () =>
     Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
   const pressOut = () =>
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 6 }).start();
   return (
-    <Animated.View style={{ width: '48%', transform: [{ scale }] }}>
+    <Animated.View style={{ width, transform: [{ scale }] }}>
       <TouchableOpacity
         style={[styles.aiCard, { borderColor: m.color + '40', backgroundColor: m.color + '10' }]}
         activeOpacity={0.9}

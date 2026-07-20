@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -17,53 +18,56 @@ import { fetchLiveOpsSnapshot } from '../../services/liveOpsService';
 export default function LiveOpsScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const styles = useStyles(makeStyles);
   const [snap, setSnap] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Динамик хэмжээ тооцоолох
+  const bodyPadding = 16; // spacing.lg
+  const gap = 8; // spacing.sm
+  const availableWidth = SCREEN_WIDTH - bodyPadding * 2;
+  const statWidth = Math.floor((availableWidth - gap) - 1) / 2;
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setSnap(await fetchLiveOpsSnapshot());
-    } catch {
-      setSnap({ stats: {}, calls: [], red: [], yellow: [], unassigned: [] });
-    } finally {
-      setLoading(false);
-    }
+      const data = await fetchLiveOpsSnapshot();
+      setSnap(data);
+    } catch (e) {}
+    setLoading(false);
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       load();
-      const t = setInterval(load, 30000);
-      return () => clearInterval(t);
     }, [load])
   );
 
-  const s = snap?.stats || {};
+  const s = snap || {};
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>← Буцах</Text>
+          <Text style={styles.back}>‹ Буцах</Text>
         </TouchableOpacity>
         <Text style={styles.title}>Live Ops</Text>
-        <Text style={styles.sub}>Диспетчер · real-time хяналт</Text>
+        <Text style={styles.sub}>Системийн шууд хяналт</Text>
       </View>
 
       {loading && !snap ? (
-        <ActivityIndicator style={{ marginTop: 40 }} color={colors.primary} />
+        <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
       ) : (
         <ScrollView
           contentContainerStyle={styles.body}
           refreshControl={<RefreshControl refreshing={loading} onRefresh={load} tintColor={colors.primary} />}
         >
           <View style={styles.statGrid}>
-            <Stat label="Нээлттэй" value={s.openCalls ?? 0} color={colors.primary} styles={styles} />
-            <Stat label="Online" value={s.online ?? 0} color={colors.success} styles={styles} />
-            <Stat label="SLA 🔴" value={s.slaRed ?? 0} color={colors.danger} styles={styles} />
-            <Stat label="Оноогдоогүй" value={s.unassigned ?? 0} color={colors.warning} styles={styles} />
+            <Stat label="Нээлттэй" value={s.openCalls ?? 0} color={colors.primary} width={statWidth} styles={styles} />
+            <Stat label="Online" value={s.online ?? 0} color={colors.success} width={statWidth} styles={styles} />
+            <Stat label="SLA 🔴" value={s.slaRed ?? 0} color={colors.danger} width={statWidth} styles={styles} />
+            <Stat label="Оноогдоогүй" value={s.unassigned ?? 0} color={colors.warning} width={statWidth} styles={styles} />
           </View>
 
           <Section title="SLA хэтэрсэн" styles={styles}>
@@ -104,9 +108,9 @@ export default function LiveOpsScreen() {
   );
 }
 
-function Stat({ label, value, color, styles }) {
+function Stat({ label, value, color, width, styles }) {
   return (
-    <View style={[styles.stat, { borderColor: color + '44' }]}>
+    <View style={[styles.stat, { borderColor: color + '44', width }]}>
       <Text style={[styles.statVal, { color }]}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>

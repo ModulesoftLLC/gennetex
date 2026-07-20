@@ -8,6 +8,7 @@ import {
   RefreshControl,
   Share,
   ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -24,35 +25,43 @@ const PERIODS = [
 export default function SlaReportScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { width: SCREEN_WIDTH } = useWindowDimensions();
   const styles = useStyles(makeStyles);
   const [period, setPeriod] = useState('week');
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async (p = period) => {
+  // Динамик хэмжээ тооцоолох
+  const bodyPadding = 16; // spacing.lg
+  const gap = 8; // spacing.sm
+  const availableWidth = SCREEN_WIDTH - bodyPadding * 2;
+  const kpiWidth = Math.floor((availableWidth - gap) - 1) / 2;
+
+  const load = useCallback(async (p) => {
     setLoading(true);
     try {
-      setReport(await fetchSlaReport(p));
+      const data = await fetchSlaReport(p);
+      setReport(data);
     } catch {
-      setReport({ kpi: {}, period: p });
+      setReport({ stats: {}, byEngineer: [] });
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, []);
 
   React.useEffect(() => {
     load(period);
-  }, [period]);
+  }, [period, load]);
 
-  const k = report?.kpi || {};
+  const k = report?.stats || {};
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>← Буцах</Text>
+          <Text style={styles.back}>‹ Буцах</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>SLA & KPI</Text>
+        <Text style={styles.title}>SLA & KPI тайлан</Text>
       </View>
 
       <View style={styles.tabs}>
@@ -75,14 +84,14 @@ export default function SlaReportScreen() {
           refreshControl={<RefreshControl refreshing={loading} onRefresh={() => load(period)} tintColor={colors.primary} />}
         >
           <View style={styles.grid}>
-            <Kpi label="Нийт" value={k.total ?? 0} styles={styles} />
-            <Kpi label="Хаасан" value={k.closed ?? 0} styles={styles} />
-            <Kpi label="Нээлттэй" value={k.open ?? 0} styles={styles} />
-            <Kpi label="Compliance %" value={k.slaCompliancePct ?? '—'} styles={styles} />
-            <Kpi label="SLA 🔴 open" value={k.slaBreachedOpen ?? 0} styles={styles} />
-            <Kpi label="Avg хариу (мин)" value={k.avgFirstResponseMin ?? '—'} styles={styles} />
-            <Kpi label="Avg хаах (цаг)" value={k.avgCloseHours ?? '—'} styles={styles} />
-            <Kpi label="Revisit" value={k.revisitSites ?? 0} styles={styles} />
+            <Kpi label="Нийт" value={k.total ?? 0} width={kpiWidth} styles={styles} />
+            <Kpi label="Хаасан" value={k.closed ?? 0} width={kpiWidth} styles={styles} />
+            <Kpi label="Нээлттэй" value={k.open ?? 0} width={kpiWidth} styles={styles} />
+            <Kpi label="Compliance %" value={k.slaCompliancePct ?? '—'} width={kpiWidth} styles={styles} />
+            <Kpi label="SLA 🔴 open" value={k.slaBreachedOpen ?? 0} width={kpiWidth} styles={styles} />
+            <Kpi label="Avg хариу (мин)" value={k.avgFirstResponseMin ?? '—'} width={kpiWidth} styles={styles} />
+            <Kpi label="Avg хаах (цаг)" value={k.avgCloseHours ?? '—'} width={kpiWidth} styles={styles} />
+            <Kpi label="Revisit" value={k.revisitSites ?? 0} width={kpiWidth} styles={styles} />
           </View>
 
           <Text style={styles.section}>Инженерээр</Text>
@@ -107,9 +116,9 @@ export default function SlaReportScreen() {
   );
 }
 
-function Kpi({ label, value, styles }) {
+function Kpi({ label, value, width, styles }) {
   return (
-    <View style={styles.kpi}>
+    <View style={[styles.kpi, { width }]}>
       <Text style={styles.kpiVal}>{value}</Text>
       <Text style={styles.kpiLabel}>{label}</Text>
     </View>
