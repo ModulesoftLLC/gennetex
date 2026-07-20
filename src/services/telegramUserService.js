@@ -79,7 +79,31 @@ export async function sendLoginCode(phoneNumber) {
     { apiId: TG_API_ID, apiHash: TG_API_HASH },
     phoneNumber,
   );
-  return { phoneCodeHash: result.phoneCodeHash };
+  return {
+    phoneCodeHash: result.phoneCodeHash,
+    // Код Telegram апп дотор ирсэн үү, эсвэл SMS-ээр үү
+    viaApp: !!result.isCodeViaApp,
+  };
+}
+
+/**
+ * Кодыг дахин илгээх. Telegram энэ үед ихэвчлэн SMS эсвэл дуудлага руу
+ * шатлуулж илгээдэг (эхний код Telegram апп дотор ирсэн бол).
+ */
+export async function resendLoginCode(phoneNumber, phoneCodeHash) {
+  const c = await getClient();
+  const result = await c.invoke(
+    new Api.auth.ResendCode({ phoneNumber, phoneCodeHash }),
+  );
+  const t = result?.type?.className || '';
+  let via = 'app';
+  if (t.includes('Sms')) via = 'sms';
+  else if (t.includes('Call')) via = 'call';
+  else if (t.includes('FlashCall')) via = 'call';
+  return {
+    phoneCodeHash: result.phoneCodeHash || phoneCodeHash,
+    via,
+  };
 }
 
 /**

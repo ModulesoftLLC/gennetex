@@ -18,3 +18,5 @@ supabase/.temp/
 public-web/node_modules/
 public-web/dist/
 .aider*
+.vercel
+.env*

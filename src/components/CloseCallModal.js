@@ -14,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { searchEmptyText } from '../lib/erpMessages';
+import { suggestMaterialsForCall, estimateMaterialCost } from '../lib/materialSuggest';
+import { isFlagOn } from '../lib/featureFlags';
 
 export const CLOSE_TYPES = [
   { key: 'corp', label: 'Корп' },
@@ -25,6 +27,7 @@ export const CLOSE_TYPES = [
 export default function CloseCallModal({
   visible,
   callId,
+  callType,
   stockItems = [],
   catalogItems = [],
   onClose,
@@ -83,6 +86,33 @@ export default function CloseCallModal({
       .filter((s) => !q || s.name.toLowerCase().includes(q))
       .sort((a, b) => a.name.localeCompare(b.name, 'mn'));
   }, [stockItems, catalogItems, itemSearch]);
+
+  /** Call type-д тохирсон барааны санал (additive) */
+  const suggestions = useMemo(() => {
+    if (!isFlagOn('materialSuggest')) return [];
+    return suggestMaterialsForCall(callType || 'other', catalogItems, stockItems);
+  }, [callType, catalogItems, stockItems]);
+
+  const costEstimate = useMemo(
+    () => (isFlagOn('callCost') ? estimateMaterialCost(materials, catalogItems) : null),
+    [materials, catalogItems]
+  );
+
+  const applySuggestion = (s) => {
+    const available = getAvailableQty(s.id);
+    const qty = Math.max(1, Number(s.qty) || 1);
+    if (available > 0 && qty > available) {
+      Alert.alert('Хүрэлцэхгүй', `Таны үлдэгдэл ${available} ${s.unit || 'ширхэг'}`);
+      return;
+    }
+    setMaterials((prev) => {
+      const ex = prev.find((m) => m.id === s.id);
+      if (ex) {
+        return prev.map((m) => (m.id === s.id ? { ...m, qty: m.qty + qty, unit: s.unit } : m));
+      }
+      return [...prev, { id: s.id, name: s.name, qty, unit: s.unit, price: s.price }];
+    });
+  };
 
   const getAvailableQty = (itemId) => {
     const stock = (stockItems || []).find((s) => s.item_id === itemId);
