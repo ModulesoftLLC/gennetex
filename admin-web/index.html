@@ -2,9 +2,9 @@
 <html lang="mn">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="admin-build-version" content="1.0.4"/>
+  <meta name="admin-build-version" content="1.0.5"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ЖЕННЕТЕКС — Админ самбар</title>
+  <title>ЖЕННЕТЕКС — Admin Panel</title>
   <link rel="icon" href="/gennetex/admin/logo.png"/>
   <script>
     window.ADMIN_ASSET = function (f) {
@@ -467,7 +467,14 @@
     .mn-plate-wrap--md .mn-plate__car{width:72px;height:auto}
     .mn-plate-wrap--lg .mn-plate__car{width:110px;height:auto}
     .mn-plate-preview{display:flex;justify-content:center;margin:10px 0 4px}
-    .toast{position:fixed;bottom:24px;right:24px;background:#302f38;color:#f3effa;padding:14px 20px;border-radius:12px;z-index:3000;display:none;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px}
+    .toast{position:fixed;bottom:24px;right:24px;z-index:3000;display:flex;flex-direction:column;gap:10px;align-items:flex-end;pointer-events:none}
+    .toast-item{display:flex;align-items:flex-start;gap:10px;max-width:min(420px,calc(100vw - 32px));background:#302f38;color:#f3effa;padding:13px 16px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-size:14px;line-height:1.45;pointer-events:auto;border-left:4px solid #3b82f6;animation:toast-in .25s cubic-bezier(.16,1,.3,1)}
+    .toast-item .material-symbols-outlined{font-size:19px;flex-shrink:0;margin-top:1px;color:#60a5fa}
+    .toast-item.success{border-left-color:#22c55e}.toast-item.success .material-symbols-outlined{color:#4ade80}
+    .toast-item.error{border-left-color:#ef4444}.toast-item.error .material-symbols-outlined{color:#f87171}
+    .toast-item.leaving{animation:toast-out .2s ease forwards}
+    @keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+    @keyframes toast-out{to{opacity:0;transform:translateY(6px)}}
     .chk{display:flex;align-items:center;gap:10px;padding:8px 0}
     .bar-row{display:flex;gap:8px;align-items:flex-end}
     .bar-row>div{flex:1}
@@ -523,7 +530,7 @@
       .card-b{padding:16px}
       th,td{padding:10px 12px;font-size:13px}
       .excel-month-grid{grid-template-columns:repeat(2,1fr)}
-      .toast{bottom:16px;left:16px;right:16px}
+      .toast{bottom:16px;left:16px;right:16px;align-items:stretch}
       .overlay{padding:12px}
       #login{padding:16px}
       .login-shell{border-radius:20px}
@@ -541,6 +548,33 @@
       .modal{border-radius:16px}
       .modal-h,.modal-b,.modal-f{padding-left:16px;padding-right:16px}
     }
+
+    /* UX сайжруулалт: цэс хайлт, skeleton, хүснэгт хайлт, modal хөдөлгөөн */
+    .nav-search-wrap{padding:12px 12px 0}
+    .nav-search{display:flex;align-items:center;gap:8px;background:var(--primary-soft);border:1px solid var(--line);border-radius:10px;padding:0 10px;transition:border-color .15s,box-shadow .15s}
+    .nav-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.14)}
+    .nav-search .material-symbols-outlined{font-size:18px;color:var(--muted);flex-shrink:0}
+    .nav-search-wrap .nav-search input{background-color:transparent!important;border:none!important;box-shadow:none!important;min-height:0;padding:9px 0;font-size:13px;border-radius:0}
+    .nav-search-wrap .nav-search input:focus{outline:none;box-shadow:none!important}
+    .nav-empty{padding:14px 10px;font-size:13px;color:var(--muted);text-align:center}
+    .tbl-search{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:0 8px;transition:border-color .15s}
+    .tbl-search:focus-within{border-color:var(--accent)}
+    .tbl-search .material-symbols-outlined{font-size:17px;color:var(--muted);flex-shrink:0}
+    .card-h .tbl-search input{background-color:transparent!important;border:none!important;box-shadow:none!important;min-height:32px!important;width:150px;padding:5px 0;font-size:13px;border-radius:0}
+    .card-h .tbl-search input:focus{outline:none;box-shadow:none!important}
+    .sk{position:relative;overflow:hidden;background:var(--primary-soft);border-radius:8px}
+    .sk::after{content:'';position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:sk-shimmer 1.2s infinite}
+    .dark .sk::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent)}
+    @keyframes sk-shimmer{to{transform:translateX(100%)}}
+    .sk-ic{width:48px;height:48px;border-radius:14px;flex:0 0 48px}
+    .sk-line{height:12px}
+    td.empty::before{content:'inbox';font-family:'Material Symbols Outlined';display:block;font-size:32px;margin:0 auto 8px;opacity:.5;font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24}
+    @keyframes modal-pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+    .modal{animation:modal-pop .22s cubic-bezier(.16,1,.3,1)}
+    #refreshBtn.spinning .material-symbols-outlined{animation:spin-rt .8s linear infinite}
+    @keyframes spin-rt{to{transform:rotate(360deg)}}
+    .last-sync{font-size:11px;white-space:nowrap}
+    @media(max-width:900px){.last-sync{display:none}.card-h .tbl-search input{width:110px}}
   </style>
 </head>
 <body class="antialiased transition-colors duration-300">
@@ -631,7 +665,14 @@
             <div class="muted" style="font-size:11px;font-weight:500">Админ самбар</div>
           </div>
         </div>
+        <div class="nav-search-wrap">
+          <div class="nav-search">
+            <span class="material-symbols-outlined">search</span>
+            <input id="navSearch" type="search" placeholder="Цэс хайх...  ( / )" autocomplete="off"/>
+          </div>
+        </div>
         <nav class="nav" id="nav">
+          <div class="nav-empty" id="navEmpty" style="display:none">Илэрц олдсонгүй</div>
           <div class="grp">Үндсэн</div>
           <a data-view="dashboard" class="active"><span class="material-symbols-outlined">dashboard</span><span class="t">Хяналт</span></a>
           <a data-view="employees"><span class="material-symbols-outlined">group</span><span class="t">Ажилчид</span></a>
@@ -671,7 +712,7 @@
           <button class="btn btn-ghost btn-sm" id="logoutBtnSide" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <span class="material-symbols-outlined" style="font-size:18px">logout</span> Гарах
           </button>
-          <span id="appVersionFoot">ЖЕННЕТЕКС v1.0.4</span>
+          <span id="appVersionFoot">ЖЕННЕТЕКС v1.0.5</span>
         </div>
       </aside>
       <div class="main">
@@ -686,11 +727,12 @@
             </div>
           </div>
           <div class="user">
+            <span id="lastSync" class="muted last-sync"></span>
             <button type="button" class="btn btn-ghost btn-sm" id="themeToggle" title="Гэрэл/Харанхуй" style="padding:8px;border-radius:999px">
               <span class="material-symbols-outlined dark-icon" style="display:none">light_mode</span>
               <span class="material-symbols-outlined light-icon">dark_mode</span>
             </button>
-            <button type="button" class="btn btn-ghost btn-sm" onclick="loadAll()" title="Шинэчлэх" style="padding:8px;border-radius:999px">
+            <button type="button" class="btn btn-ghost btn-sm" id="refreshBtn" onclick="loadAll()" title="Шинэчлэх" style="padding:8px;border-radius:999px">
               <span class="material-symbols-outlined">refresh</span>
             </button>
             <div class="avatar" id="uAvatar">A</div>
@@ -873,7 +915,7 @@
     }
     function invThumb(it){ const src=it.image_url||invImg(it.name,it.category||'material'); return `<img class="inv-thumb" src="${String(src).replace(/"/g,'&quot;')}" alt="" loading="lazy" style="object-fit:cover">`; }
 
-    let me=null, map=null, markers=[], view='dashboard', timer=null;
+    let me=null, map=null, markers=[], view='dashboard', timer=null, dataLoaded=false;
     let data = {workers:[],attendance:[],visits:[],trips:[],tripGroups:[],tripGroupsToday:[],tripGroupsArchive:[],siteSessions:[],serviceCalls:[],inventory:[],vehicles:[],movements:[],reports:[],shifts:[],attLocations:[],breakSchedules:[],posts:[],lives:[],meetings:[]};
     let companionTab='today';
     let usageTab='balances';
@@ -1023,7 +1065,22 @@
       return {...t,passengers};
     }).filter(t=>t.driver_id||t.driver_name);
     window.setCompanionTab=(tab)=>{ companionTab=tab; render(); };
-    const toast = m => { const t=$('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',3000); };
+    const toast = (m, type) => {
+      const wrap=$('toast'); if(!wrap) return;
+      const msg=String(m??'');
+      const kind=type||(/алдаа|error|боломжгүй|ажиллуулна уу|дахин нэвтэр/i.test(msg)?'error'
+        :/амжилттай|хадгалагд|шинэчил|устгагд|дууслаа|илгээ|зөвшөөрл|болголоо|нэмэгд/i.test(msg)?'success':'info');
+      const el=document.createElement('div');
+      el.className='toast-item '+kind;
+      const ic=document.createElement('span');
+      ic.className='material-symbols-outlined';
+      ic.textContent=kind==='error'?'error':kind==='success'?'check_circle':'info';
+      const tx=document.createElement('span'); tx.textContent=msg;
+      el.append(ic,tx);
+      wrap.appendChild(el);
+      while(wrap.children.length>4) wrap.firstChild.remove();
+      setTimeout(()=>{ el.classList.add('leaving'); setTimeout(()=>el.remove(),200); },kind==='error'?5200:3200);
+    };
 
     // ===== Auth =====
     function showErr(m){
@@ -1116,6 +1173,7 @@
       $('pageTitle').textContent=TITLES[v];
       const sub=$('pageSubtitle'); if(sub) sub.textContent=SUBTITLES[v]||'';
       if(window.innerWidth<900) toggleSidebar(false);
+      window.scrollTo(0,0);
       render();
     }
     window.go=go;
@@ -1123,6 +1181,15 @@
     // ===== Data =====
     function startRefresh(){ loadAll(); if(timer)clearInterval(timer); timer=setInterval(()=>loadAll(true),15000); }
     async function loadAll(silent){
+      const rb=$('refreshBtn'); if(rb) rb.classList.add('spinning');
+      try{ await loadAllCore(silent); }
+      finally{
+        if(rb) rb.classList.remove('spinning');
+        const ls=$('lastSync');
+        if(ls) ls.textContent='Шинэчилсэн '+new Date().toLocaleTimeString('mn-MN',{hour:'2-digit',minute:'2-digit'});
+      }
+    }
+    async function loadAllCore(silent){
       try{
       if(me){
         const { data: sessData, error: sessErr } = await sb.auth.getSession();
@@ -1272,8 +1339,10 @@
         publicSiteUpdatedAt:publicSiteUpdatedAt,
         loadErrors:{workers:w.error?.message||null,movements:mov.error?.message||null},
         leaveRequests:lr.error?[]:(lr.data||[])};
+      dataLoaded=true;
       }catch(e){
         console.error('loadAll failed:', e);
+        dataLoaded=true;
         toast('Өгөгдөл ачаалахад алдаа: '+(e.message||e));
       }
       // Interval үед газрын зураг байвал зөвхөн marker шинэчилнэ (zoom тогтвортой)
@@ -1284,8 +1353,13 @@
     }
 
     // ===== Render =====
+    const renderSkeleton=()=>`<div class="stats">${Array(4).fill(
+        '<div class="stat"><div class="sk sk-ic"></div><div style="flex:1"><div class="sk sk-line" style="width:60%"></div><div class="sk sk-line" style="width:40%;margin-top:9px"></div></div></div>'
+      ).join('')}</div>
+      <div class="card"><div class="card-b">${Array(6).fill('<div class="sk sk-line" style="margin:16px 0"></div>').join('')}</div></div>`;
     function render(){
       const c=$('content');
+      if(!dataLoaded){ c.innerHTML=renderSkeleton(); return; }
       if(view==='dashboard') return renderDashboard(c);
       if(view==='employees') return renderEmployees(c);
       if(view==='reports') return renderReports(c);
@@ -2087,10 +2161,29 @@
 
     function renderTableCard(c,title,headers,rows,exportFn){
       const xbtn = exportFn?`<button class="btn btn-primary btn-sm" onclick="${exportFn}()">Excel татах</button>`:'';
-      c.innerHTML=`<div class="card"><div class="card-h"><h3>${title}</h3><div style="display:flex;gap:8px">${xbtn}<button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div></div>
+      const search = rows.length>5?`<div class="tbl-search"><span class="material-symbols-outlined">search</span><input type="search" placeholder="Хайх..." oninput="filterTableRows(this)"/></div>`:'';
+      c.innerHTML=`<div class="card"><div class="card-h"><h3>${title}</h3><div class="card-h-actions">${search}${xbtn}<button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div></div>
         <div class="card-b" style="padding:0"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
         <tbody>${rows.length?rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join(''):`<tr><td colspan=${headers.length} class=empty>Мэдээлэл алга</td></tr>`}</tbody></table></div></div>`;
     }
+    window.filterTableRows=(inp)=>{
+      const q=inp.value.trim().toLowerCase();
+      const body=inp.closest('.card')?.querySelector('tbody'); if(!body) return;
+      let shown=0;
+      [...body.rows].forEach(tr=>{
+        if(tr.classList.contains('tbl-nores')) return;
+        const hit=!q||tr.textContent.toLowerCase().includes(q);
+        tr.style.display=hit?'':'none';
+        if(hit) shown++;
+      });
+      let nores=body.querySelector('.tbl-nores');
+      if(!shown&&!nores){
+        nores=body.insertRow();
+        nores.className='tbl-nores';
+        const td=nores.insertCell();
+        td.colSpan=99; td.className='empty'; td.textContent='Хайлтад тохирох мөр алга';
+      } else if(shown&&nores) nores.remove();
+    };
 
     // ===== Excel экспорт + lifetime архив =====
     const EXCEL_YMD_HDR=['Он','Сар','Өдөр'];
@@ -4540,6 +4633,29 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
     }
     function closeModal(){ $('overlay').style.display='none'; $('overlay').innerHTML=''; modalConfirm=null; }
     window.closeModal=closeModal;
+    // Зургийн modal-ыг арын хэсэг дээр дарж хаана (формтой modal санамсаргүй хаагдахгүй)
+    $('overlay').addEventListener('click',e=>{
+      if(e.target!==e.currentTarget) return;
+      const m=e.currentTarget.querySelector('.modal');
+      if(m&&(m.classList.contains('modal-photo-wide')||m.classList.contains('modal-photo-id'))) closeModal();
+    });
+    document.addEventListener('keydown',e=>{
+      if(e.key==='Escape'){
+        const ov=$('overlay');
+        if(ov&&ov.style.display==='flex'){ closeModal(); return; }
+        const side=$('sidebar');
+        if(side&&side.classList.contains('open')&&window.innerWidth<900) toggleSidebar(false);
+        return;
+      }
+      if(e.key==='/'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+        const t=e.target, tag=(t&&t.tagName||'').toLowerCase();
+        if(tag==='input'||tag==='textarea'||tag==='select'||(t&&t.isContentEditable)) return;
+        if(!me) return;
+        e.preventDefault();
+        if(window.innerWidth<900) toggleSidebar(true);
+        const ns=$('navSearch'); if(ns){ ns.focus(); ns.select(); }
+      }
+    });
 
     // ===== Shell UI (theme, sidebar, charts) =====
     let dashCharts={};
@@ -4681,6 +4797,25 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
       document.querySelectorAll('#nav a').forEach(a=>{
         a.addEventListener('click',()=>{ if(window.innerWidth<900) toggleSidebar(false); });
       });
+      const navSearch=$('navSearch');
+      if(navSearch&&!navSearch._bound){
+        navSearch._bound=true;
+        navSearch.addEventListener('input',()=>{
+          const q=navSearch.value.trim().toLowerCase();
+          const links=[...document.querySelectorAll('#nav a')];
+          links.forEach(a=>{ a.style.display=!q||a.textContent.toLowerCase().includes(q)?'':'none'; });
+          document.querySelectorAll('#nav .grp').forEach(g=>{
+            let el=g.nextElementSibling, any=false;
+            while(el&&!el.classList.contains('grp')){
+              if(el.tagName==='A'&&el.style.display!=='none') any=true;
+              el=el.nextElementSibling;
+            }
+            g.style.display=!q||any?'':'none';
+          });
+          const empty=$('navEmpty');
+          if(empty) empty.style.display=q&&!links.some(a=>a.style.display!=='none')?'block':'none';
+        });
+      }
       if(!window._adminResizeBound){
         window._adminResizeBound=true;
         let resizeTimer;
