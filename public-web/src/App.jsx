@@ -7,6 +7,8 @@ import ServicesPage from './pages/ServicesPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ContactPage from './pages/ContactPage';
 import CareersPage from './pages/CareersPage';
+import BlogIndex from './pages/blog/index';
+import BlogPost from './pages/blog/[slug]';
 
 export default function App() {
   return (
@@ -18,6 +20,8 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/blog" element={<BlogIndex />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/careers" element={<CareersPage />} />
         </Route>

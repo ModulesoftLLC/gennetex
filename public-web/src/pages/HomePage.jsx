@@ -45,6 +45,56 @@ export default function HomePage() {
 
       <section className="relative z-20 border-t border-graphite-800 bg-graphite-950 px-4 py-16 sm:px-6 md:px-12 md:py-24">
         <div className="mx-auto max-w-6xl">
+          <div className="mb-10 text-center">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-graphite-500">Тусламж</p>
+            <h2 className="mx-auto max-w-3xl text-3xl font-semibold tracking-tightest text-graphite-50 md:text-4xl">
+              Бид сүлжээ, шилэн кабель, CCTV болон IT дэд бүтцийн шийдлийг нэг дор хүргэнэ.
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-graphite-400">
+              ЖЕННЕТЕКС нь Баталгаатай технологи, хурдан суурилуулалт, 24/7 дэмжлэг, урт хугацааны найдвартай байдалд төвлөрдөг. Танай байгууллагын өсөлтөд нийцсэн шийдлийг бид хамтдаа зүтгүүлнэ.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                title: 'Найдвартай архитектур',
+                text: 'Fiber, LAN/WAN болон өгөгдлийн төвийн инженерчлэлээр тогтвортой сүлжээ байгуулна.',
+                icon: Layers,
+              },
+              {
+                title: 'Бизнесийн хамгаалалт',
+                text: 'CCTV, хяналтын систем, аюулгүй байдлын шийдлүүдийг нэгтгэн суурилуулна.',
+                icon: Users,
+              },
+              {
+                title: 'Шуурхай дэмжлэг',
+                text: '24/7 цахим болон телефон дэмжлэгээр асуудлыг хурдан шийдвэрлэнэ.',
+                icon: Mail,
+              },
+              {
+                title: 'Төсөл бүрэн хэрэгжилт',
+                text: 'Төсөл төлөвлөлт, зураг төсөл, гүйцэтгэл, дараах үйлчилгээ хүртэл хамарна.',
+                icon: Briefcase,
+              },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.title} className="rounded-[28px] border border-graphite-800 bg-gradient-to-b from-graphite-900/75 to-graphite-950/80 p-6 text-graphite-200 shadow-[0_30px_60px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1 hover:border-graphite-700">
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-graphite-50">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <h3 className="mb-3 text-lg font-semibold text-white">{item.title}</h3>
+                  <p className="text-sm leading-6 text-graphite-400">{item.text}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-20 border-t border-graphite-800 bg-graphite-950 px-4 py-16 sm:px-6 md:px-12 md:py-24">
+        <div className="mx-auto max-w-6xl">
           <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.24em] text-graphite-500">{home.label}</p>

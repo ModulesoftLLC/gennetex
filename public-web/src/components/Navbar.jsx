@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Search, User } from 'lucide-react';
+import { Menu, X, Search, User, Moon, Sun } from 'lucide-react';
 import { useSiteContent } from '../context/SiteContentContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
   const { navbar } = useSiteContent();
+  const { theme, toggleTheme } = useTheme();
   const isHome = pathname === '/';
   const close = () => setOpen(false);
 
@@ -48,6 +50,16 @@ export default function Navbar() {
             <Search size={18} />
             <span>{navbar.ctaCareers}</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="animate-blur-fade-up liquid-glass flex h-10 w-10 items-center justify-center rounded-full"
+            style={{ animationDelay: '350ms' }}
+            aria-label="Сэдвийг солих"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
 
           <Link
             to="/contact"
