@@ -8,6 +8,10 @@
   }
   body {
     font-family: 'Inter', sans-serif;
+    background:
+      radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 35%),
+      linear-gradient(180deg, #09090b 0%, #111827 100%);
+    color: #f4f4f5;
   }
 }
 

@@ -14,7 +14,9 @@ export default function Navbar() {
     <>
       <nav
         className={`relative z-50 flex items-center justify-between px-4 py-4 sm:px-6 md:px-12 md:py-6 ${
-          isHome ? '' : 'border-b border-graphite-800 bg-graphite-950/90 backdrop-blur-md'
+          isHome
+            ? 'border-b border-white/10 bg-graphite-950/40 backdrop-blur-md'
+            : 'border-b border-graphite-800 bg-graphite-950/90 backdrop-blur-md'
         }`}
       >
         <Link to="/" className="animate-blur-fade-up flex items-center gap-2" style={{ animationDelay: '0ms' }}>
