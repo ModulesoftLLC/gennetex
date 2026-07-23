@@ -6,12 +6,56 @@
   html {
     scroll-behavior: smooth;
   }
+
   body {
     font-family: 'Inter', sans-serif;
     background:
       radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 35%),
       linear-gradient(180deg, #09090b 0%, #111827 100%);
     color: #f4f4f5;
+  }
+
+  html.light body {
+    background:
+      radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 35%),
+      linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #111827;
+  }
+
+  html.light .text-white,
+  html.light .text-graphite-50 {
+    color: #111827 !important;
+  }
+
+  html.light .text-graphite-100,
+  html.light .text-graphite-200,
+  html.light .text-graphite-300,
+  html.light .text-graphite-400,
+  html.light .text-graphite-500 {
+    color: #4b5563 !important;
+  }
+
+  html.light .bg-graphite-950,
+  html.light .bg-graphite-900,
+  html.light .bg-graphite-950\/90,
+  html.light .bg-graphite-900\/90,
+  html.light .bg-graphite-900\/80,
+  html.light .bg-graphite-950\/95,
+  html.light .bg-graphite-900\/60,
+  html.light .bg-graphite-900\/70,
+  html.light .bg-graphite-800 {
+    background-color: #f8fafc !important;
+  }
+
+  html.light .border-graphite-800,
+  html.light .border-graphite-900,
+  html.light .border-white\/10 {
+    border-color: #d1d5db !important;
+  }
+
+  html.light .liquid-glass {
+    background: rgba(255, 255, 255, 0.72);
+    box-shadow: inset 0 1px 1px rgba(15, 23, 42, 0.04);
   }
 }
 

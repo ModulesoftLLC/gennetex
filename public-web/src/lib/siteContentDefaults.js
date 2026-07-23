@@ -7,6 +7,7 @@ export const DEFAULT_SITE_CONTENT = {
       { to: '/about', label: 'Бидний тухай' },
       { to: '/services', label: 'Үйлчилгээ' },
       { to: '/projects', label: 'Төслүүд' },
+      { to: '/blog', label: 'Блог' },
       { to: '/careers', label: 'Ажлын байр' },
       { to: '/contact', label: 'Холбоо барих' },
     ],
