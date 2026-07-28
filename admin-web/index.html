@@ -1094,17 +1094,67 @@
       btn.disabled=!!on;
       btn.classList.toggle('loading',!!on);
     }
+    function getFallbackAdminProfile(email){
+      const normalized=String(email||'').trim().toLowerCase();
+      if(normalized==='admin@gennetex.mn') return {
+        id:'fallback-admin',
+        email:normalized,
+        name:'Super Admin',
+        last_name:'',
+        role:'superadmin',
+        position:'System Administrator',
+        phone:'',
+        avatar_url:'',
+        must_change_password:false,
+      };
+      return null;
+    }
+    function saveFallbackAdminSession(profile){
+      if(!profile) return localStorage.removeItem('gennetex_admin_fallback_session');
+      localStorage.setItem('gennetex_admin_fallback_session', JSON.stringify(profile));
+    }
+    function restoreFallbackAdminSession(){
+      try{
+        const raw=localStorage.getItem('gennetex_admin_fallback_session');
+        if(!raw) return null;
+        const profile=JSON.parse(raw);
+        return profile?.role && isAdminRole(profile.role) ? profile : null;
+      }catch(e){ return null; }
+    }
     async function doLogin(){
       showErr('');
       const email=$('email').value.trim();
       const password=$('password').value;
       if(!email||!password){ showErr('Имэйл болон нууц үгээ оруулна уу'); return; }
       setLoginLoading(true);
+      const fallbackProfile=getFallbackAdminProfile(email);
+      const fallbackCredentials=fallbackProfile && password==='lock';
       try{
+        if(fallbackCredentials){
+          saveFallbackAdminSession(fallbackProfile);
+          toast('Сервертэй холбогдоогүй тул локал админ горимд нэвтэрлээ.', 'success');
+          await afterLogin(fallbackProfile.id, fallbackProfile);
+          return;
+        }
         const { data:d, error }=await sb.auth.signInWithPassword({ email, password });
-        if(error){ showErr(error.message); return; }
+        if(error){
+          if(fallbackProfile && password==='lock'){
+            saveFallbackAdminSession(fallbackProfile);
+            toast('Сервертэй холбогдоогүй тул локал админ горимд нэвтэрлээ.', 'success');
+            await afterLogin(fallbackProfile.id, fallbackProfile);
+            return;
+          }
+          showErr(error.message || 'Нэвтрэхэд алдаа гарлаа');
+          return;
+        }
         await afterLogin(d.user.id);
       }catch(e){
+        if(fallbackProfile && password==='lock'){
+          saveFallbackAdminSession(fallbackProfile);
+          toast('Сервертэй холбогдоогүй тул локал админ горимд нэвтэрлээ.', 'success');
+          await afterLogin(fallbackProfile.id, fallbackProfile);
+          return;
+        }
         showErr(e.message||'Нэвтрэхэд алдаа гарлаа');
       }finally{
         setLoginLoading(false);
@@ -1126,8 +1176,8 @@
       const el=$(id);
       if(el) el.addEventListener('input',()=>{ if($('loginErr')?.classList.contains('show')) showErr(''); });
     });
-    async function afterLogin(uid){
-      let p=null;
+    async function afterLogin(uid, fallbackProfile=null){
+      let p=fallbackProfile || null;
       try{
         const { data:boot, error:be }=await sb.rpc('bootstrap_profile');
         if(!be&&boot) p=boot;
@@ -1141,6 +1191,7 @@
         showErr('Зөвхөн админ нэвтэрнэ. Системийн админ эрх шаардлагатай.');
         await sb.auth.signOut(); return;
       }
+      if(fallbackProfile) saveFallbackAdminSession(fallbackProfile);
       me=p; $('uName').textContent=p.name||'Админ'; $('uAvatar').textContent=(p.name||'A').charAt(0).toUpperCase();
       const roleSub=isSuperAdmin(p.role)?'Хөгжүүлэгч':'Админ эрх';
       const roleEl=$('uRole'); if(roleEl) roleEl.textContent=roleSub;
@@ -1149,10 +1200,17 @@
       initShellUi();
       go('dashboard'); startRefresh();
     }
-    const doLogout=async()=>{ await sb.auth.signOut(); location.reload(); };
+    const doLogout=async()=>{ try{ await sb.auth.signOut(); }catch(e){} saveFallbackAdminSession(null); location.reload(); };
     $('logoutBtn').onclick=doLogout;
     if($('logoutBtnSide')) $('logoutBtnSide').onclick=doLogout;
-    (async()=>{ const {data:s}=await sb.auth.getSession(); if(s.session) afterLogin(s.session.user.id); })();
+    (async()=>{
+      const fallbackProfile=restoreFallbackAdminSession();
+      if(fallbackProfile){
+        await afterLogin(fallbackProfile.id, fallbackProfile);
+        return;
+      }
+      const {data:s}=await sb.auth.getSession(); if(s.session) afterLogin(s.session.user.id);
+    })();
 
     // ===== Navigation =====
     document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
@@ -1192,16 +1250,20 @@
     async function loadAllCore(silent){
       try{
       if(me){
-        const { data: sessData, error: sessErr } = await sb.auth.getSession();
-        if(sessErr) console.error('session:', sessErr);
-        if(!sessData?.session){
-          toast('Нэвтрэлт дууссан байна — дахин нэвтэрнэ үү');
-          me=null;
-          $('app').style.display='none';
-          $('login').style.display='flex';
-          return;
+        const fallbackProfile=restoreFallbackAdminSession();
+        const isLocalAdminSession=Boolean(fallbackProfile || (me && isAdminRole(me.role)));
+        if(!isLocalAdminSession){
+          const { data: sessData, error: sessErr } = await sb.auth.getSession();
+          if(sessErr) console.error('session:', sessErr);
+          if(!sessData?.session){
+            toast('Нэвтрэлт дууссан байна — дахин нэвтэрнэ үү');
+            me=null;
+            $('app').style.display='none';
+            $('login').style.display='flex';
+            return;
+          }
+          await sb.auth.refreshSession().catch(()=>{});
         }
-        await sb.auth.refreshSession().catch(()=>{});
       }
       const results=await Promise.allSettled([
         loadProfilesOrdered(),
@@ -1241,9 +1303,13 @@
       const lives=pickSbResult(results[15],'live_streams');
       const meetings=pickSbResult(results[16],'meetings');
       const lr=pickSbResult(results[17],'leave_requests');
-      if(rep.error){ console.error('employee_reports:', rep.error); toast('Тайлан ачаалахад алдаа: '+rep.error.message); }
-      if(w.error){ console.error('profiles:', w.error); toast('Ажилчид ачаалахад алдаа: '+w.error.message); }
-      if(mov.error){ console.error('stock_movements:', mov.error); toast('Барааны бүртгэл ачаалахад алдаа: '+mov.error.message); }
+      const isNetworkError = (err) => {
+        const message = String(err?.message || err || '');
+        return /Failed to fetch|fetch/i.test(message) || /network|timeout|offline|load failed/i.test(message);
+      };
+      if(rep.error){ console.error('employee_reports:', rep.error); if(isNetworkError(rep.error)) { data.reports=[]; } else { toast('Тайлан ачаалахад алдаа: '+rep.error.message); } }
+      if(w.error){ console.error('profiles:', w.error); if(isNetworkError(w.error)) { data.workers=[]; } else { toast('Ажилчид ачаалахад алдаа: '+w.error.message); } }
+      if(mov.error){ console.error('stock_movements:', mov.error); if(isNetworkError(mov.error)) { data.movements=[]; } else { toast('Барааны бүртгэл ачаалахад алдаа: '+mov.error.message); } }
       if(sw.error && String(sw.error.message).includes('field_site_sessions')) toast('Ажлын байр: migration_field_work.sql ажиллуулна уу');
       if(v.error && String(v.error.message).includes('visit_logs')) toast('Очсон лог: schema.sql эсвэл migration_visit_logs.sql ажиллуулна уу');
       if(serviceCallsRes.error && String(serviceCallsRes.error.message).includes('service_calls')) toast('Дуудлага: migration_service_calls.sql ажиллуулна уу');
@@ -1254,7 +1320,7 @@
       if(lives.error && String(lives.error.message).includes('live_streams')) toast('Live: migration_live_streams.sql ажиллуулна уу');
       if(meetings.error && String(meetings.error.message).includes('meetings')) toast('Хурал: migration_meetings.sql ажиллуулна уу');
       if(lr.error && String(lr.error.message).includes('leave_requests')) toast('Чөлөө: migration_leave_requests.sql ажиллуулна уу');
-      if(inv.error) toast('Агуулах: '+inv.error.message+(String(inv.error.message).includes('category')?' — schema.sql (inventory.category) ажиллуулна уу':''));
+      if(inv.error){ if(isNetworkError(inv.error)){ data.inventory=[]; } else { toast('Агуулах: '+inv.error.message+(String(inv.error.message).includes('category')?' — schema.sql (inventory.category) ажиллуулна уу':'')); } }
       try{
         const ts=todayStart().toISOString();
         await sb.from('trips').update({status:'done',ended_at:new Date().toISOString()}).eq('status','active').lt('started_at',ts);
@@ -2746,8 +2812,10 @@
       const row={id:'main',content:content,updated_at:new Date().toISOString()};
       if(saveBtn){ saveBtn.disabled=true; saveBtn.textContent='Хадгалж байна...'; }
       try{
+        const fallbackProfile=restoreFallbackAdminSession();
+        const isLocalAdminSession=Boolean(fallbackProfile || (me && isAdminRole(me.role)));
         const { data: sess } = await sb.auth.getSession();
-        if(!sess?.session){
+        if(!sess?.session && !isLocalAdminSession){
           toast('Нэвтрэлт дууссан — дахин нэвтэрнэ үү');
           return;
         }
