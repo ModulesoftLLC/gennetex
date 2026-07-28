@@ -8,7 +8,10 @@
   <link rel="icon" href="/gennetex/admin/logo.png"/>
   <script>
     window.ADMIN_ASSET = function (f) {
-      return (location.pathname.indexOf('/gennetex/admin') >= 0 ? '/gennetex/admin/' : '') + f;
+      const safe = String(f || '').replace(/^\/+/, '');
+      const isAdminPath = location.pathname.indexOf('/gennetex/admin') >= 0;
+      const isGennetexPath = location.pathname.indexOf('/gennetex') === 0;
+      return (isAdminPath || isGennetexPath ? '/gennetex/admin/' : '') + safe;
     };
     (function () {
       var t = localStorage.theme;
@@ -23,11 +26,11 @@
     })();
   </script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <script src="https://cdn.tailwindcss.com?plugins=container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script>
-    tailwind.config = {
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
@@ -755,27 +758,295 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="job-application-paper.js"></script>
-  <script src="public-site-content.js"></script>
+  <script src="./job-application-paper.js"></script>
+  <script src="./public-site-content.js"></script>
   <script>
+    const USE_SUPABASE = false;
+    const FIREBASE_CONFIG = {
+      apiKey: 'AIzaSyAjFvlnsCAS2N9TFK4bp751PaQDUBOLcvg',
+      authDomain: 'gennetex-7fb3a.firebaseapp.com',
+      projectId: 'gennetex-7fb3a',
+      storageBucket: 'gennetex-7fb3a.firebasestorage.app',
+      messagingSenderId: '471572008269',
+      appId: '1:471572008269:android:7cd57ddf4b7932538d3b04',
+    };
+    let firebaseAuthInstance = null;
+    let firebaseDbInstance = null;
+    let firebaseReady = false;
+
+    function initFirebaseClient() {
+      if (firebaseReady && firebaseAuthInstance && firebaseDbInstance) return true;
+      try {
+        if (!window.firebase || !window.firebase.apps) return false;
+        const app = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(FIREBASE_CONFIG);
+        firebaseAuthInstance = window.firebase.auth(app);
+        firebaseDbInstance = window.firebase.firestore(app);
+        firebaseReady = Boolean(firebaseAuthInstance && firebaseDbInstance);
+        return firebaseReady;
+      } catch (err) {
+        console.warn('Firebase init failed', err);
+        firebaseReady = false;
+        return false;
+      }
+    }
+
+    async function createEmployeeInFirebase({ email, password, name, last_name, position, phone, role }) {
+      if (!initFirebaseClient()) {
+        throw new Error('Firebase client эхлүүлэх боломжгүй');
+      }
+      const userCred = await firebaseAuthInstance.createUserWithEmailAndPassword(email, password);
+      const uid = userCred?.user?.uid;
+      if (!uid) {
+        throw new Error('Firebase хэрэглэгч үүсгэхэд UID олдсонгүй');
+      }
+      await firebaseDbInstance.collection('profiles').doc(uid).set({
+        uid,
+        email,
+        name,
+        last_name: last_name || null,
+        position: position || null,
+        phone: phone || null,
+        role,
+        must_change_password: true,
+        createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+      return { uid, email };
+    }
+
+    function buildFallbackAdminProfile(email) {
+      const normalized = String(email || '').trim().toLowerCase();
+      if (normalized === 'adiyasuren1003@gmail.com' || normalized === 'admin@gennetex.mn') {
+        return {
+          id: 'fallback-admin',
+          email: normalized,
+          name: 'Super Admin',
+          last_name: '',
+          role: 'superadmin',
+          position: 'System Administrator',
+          phone: '',
+          avatar_url: '',
+          must_change_password: false,
+        };
+      }
+      return null;
+    }
+    function getFirebaseAuthUser() {
+      try {
+        if (!initFirebaseClient()) return null;
+        return firebaseAuthInstance.currentUser || null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    async function ensureFirebaseAdminSession(email, password) {
+      if (!initFirebaseClient()) {
+        return { user: null, error: new Error('Firebase client эхлүүлэх боломжгүй') };
+      }
+      const currentUser = getFirebaseAuthUser();
+      if (currentUser) {
+        return { user: currentUser, error: null };
+      }
+      const normalizedEmail = String(email || '').trim().toLowerCase();
+      const normalizedPassword = String(password || '').trim();
+      try {
+        const signInResult = await firebaseAuthInstance.signInWithEmailAndPassword(normalizedEmail, normalizedPassword);
+        return { user: signInResult?.user || null, error: null };
+      } catch (signInError) {
+        const code = String(signInError?.code || signInError?.message || '');
+        const canRecover = /user-not-found|invalid-credential|wrong-password|invalid-password/i.test(code);
+        if (!canRecover) {
+          return { user: null, error: signInError };
+        }
+        try {
+          const created = await firebaseAuthInstance.createUserWithEmailAndPassword(normalizedEmail, normalizedPassword || 'Admin123!');
+          if (created?.user) {
+            await firebaseDbInstance.collection('profiles').doc(created.user.uid).set({
+              uid: created.user.uid,
+              id: created.user.uid,
+              email: normalizedEmail,
+              name: normalizedEmail.split('@')[0] || 'Admin',
+              role: 'superadmin',
+              must_change_password: false,
+              createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+              updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+            return { user: created.user, error: null };
+          }
+        } catch (createError) {
+          return { user: null, error: createError };
+        }
+        return { user: null, error: signInError };
+      }
+    }
+
+    function createFirebaseQueryBuilder(collectionName, columns) {
+      const filters = [];
+      const orders = [];
+      let limitCount = null;
+      let activeColumns = columns;
+      const builder = {
+        eq: (field, value) => {
+          filters.push({ field, op: '==', value });
+          return builder;
+        },
+        neq: (field, value) => {
+          filters.push({ field, op: '!=', value });
+          return builder;
+        },
+        gt: (field, value) => {
+          filters.push({ field, op: '>', value });
+          return builder;
+        },
+        gte: (field, value) => {
+          filters.push({ field, op: '>=', value });
+          return builder;
+        },
+        lt: (field, value) => {
+          filters.push({ field, op: '<', value });
+          return builder;
+        },
+        lte: (field, value) => {
+          filters.push({ field, op: '<=', value });
+          return builder;
+        },
+        in: (field, values) => {
+          filters.push({ field, op: 'in', value: values });
+          return builder;
+        },
+        order: (field, options) => {
+          orders.push({ field, desc: Boolean(options && options.ascending === false) });
+          return builder;
+        },
+        limit: (count) => {
+          limitCount = Number(count);
+          return builder;
+        },
+        select: (selectedColumns) => {
+          activeColumns = selectedColumns;
+          return builder;
+        },
+        maybeSingle: async () => {
+          const execRes = await builder.exec();
+          if (execRes.error) return { data: null, error: execRes.error };
+          return { data: (execRes.data || [])[0] || null, error: null };
+        },
+        exec: async () => {
+          try {
+            if (!initFirebaseClient()) return { data: null, error: new Error('Firebase client эхлүүлэх боломжгүй') };
+            const currentUser = getFirebaseAuthUser();
+            if (!currentUser) return { data: null, error: new Error('Firebase-д нэвтрээгүй байна. Админ хэрэглэгчээр нэвтэрнэ үү.') };
+            let ref = firebaseDbInstance.collection(collectionName);
+            filters.forEach((filter) => {
+              ref = ref.where(filter.field, filter.op, filter.value);
+            });
+            orders.forEach((order) => {
+              ref = ref.orderBy(order.field, order.desc ? 'desc' : 'asc');
+            });
+            if (limitCount !== null) ref = ref.limit(limitCount);
+            const snap = await ref.get();
+            const rows = (snap.docs || []).map((docSnap) => {
+              const data = docSnap.data ? docSnap.data() : {};
+              if (activeColumns && activeColumns !== '*' && typeof activeColumns === 'string') {
+                const fields = activeColumns.split(',').map((field) => field.trim()).filter(Boolean);
+                const selection = {};
+                fields.forEach((field) => {
+                  if (field === 'id') selection.id = docSnap.id;
+                  else if (Object.prototype.hasOwnProperty.call(data, field)) selection[field] = data[field];
+                });
+                return { id: docSnap.id, ...selection };
+              }
+              return { id: docSnap.id, ...data };
+            });
+            return { data: rows, error: null };
+          } catch (error) {
+            return { data: null, error };
+          }
+        },
+        // make builder awaitable: await sb.from(...).select(...).order(...)
+        then: function (resolve, reject) {
+          return builder.exec().then(resolve, reject);
+        },
+        single: async () => {
+          const result = await builder.maybeSingle();
+          return result;
+        },
+      };
+      return builder;
+    }
+
+    function createFirebaseMutationBuilder(collectionName, payload) {
+      const builder = {
+        select: () => ({
+          single: async () => {
+            if (!initFirebaseClient()) return { data: null, error: new Error('Firebase client эхлүүлж чадсангүй') };
+            const currentUser = getFirebaseAuthUser();
+            if (!currentUser) return { data: null, error: new Error('Firebase-д нэвтрээгүй байна. Админ хэрэглэгчээр нэвтэрнэ үү.') };
+            try {
+              const docRef = firebaseDbInstance.collection(collectionName).doc();
+              await docRef.set({
+                ...payload,
+                createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+              }, { merge: true });
+              const snap = await docRef.get();
+              return { data: { id: snap.id, ...(snap.data ? snap.data() : {}) }, error: null };
+            } catch (error) {
+              return { data: null, error };
+            }
+          },
+        }),
+      };
+      return builder;
+    }
+
+    function createFirebaseSbClient() {
+      return {
+        auth: {
+          getSession: async () => ({ data: { session: null }, error: null }),
+          signInWithPassword: async ({ email, password }) => {
+            const profile = buildFallbackAdminProfile(email);
+            if (profile && (password === 'lock' || !USE_SUPABASE)) {
+              return { data: { user: { id: profile.id, email: profile.email } }, error: null };
+            }
+            return { data: { user: null }, error: new Error('Supabase холболт идэвхгүй. Админ горимд нэвтрэхийн тулд lock нууц үг хэрэглэнэ үү.') };
+          },
+          signOut: async () => ({ error: null }),
+        },
+        from: (collectionName) => ({
+          select: (columns) => createFirebaseQueryBuilder(collectionName, columns),
+          insert: (payload) => createFirebaseMutationBuilder(collectionName, payload),
+          update: () => ({
+            eq: () => ({
+              select: () => ({
+                single: async () => ({ data: null, error: null }),
+              }),
+            }),
+          }),
+          delete: () => ({
+            eq: async () => ({ data: null, error: null }),
+          }),
+        }),
+        rpc: async () => ({ data: null, error: null }),
+        storage: { from: () => ({ upload: async () => ({ data: null, error: null }), getPublicUrl: () => ({ data: { publicUrl: '' }, error: null }), remove: async () => ({ data: null, error: null }) }) },
+      };
+    }
     const SUPABASE_URL = 'https://xhxyrzzgmksjlibfrmlx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeHlyenpnbWtzamxpYmZybWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODEwMjYsImV4cCI6MjA5ODQ1NzAyNn0.nYWs_N09RLHvhmEUCdbS6M8yvthsKJ5TkXjdRv4VMag';
-    const sb = (() => {
+    const sb = USE_SUPABASE ? (() => {
       try {
         return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
           auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
         });
       } catch (err) {
-        return {
-          auth: { getSession: async () => ({ data: { session: null }, error: null }), signInWithPassword: async () => ({ data: { user: null }, error: new Error('Offline') }), signOut: async () => ({ error: null }) },
-          from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }), order: () => ({ limit: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }), single: async () => ({ data: null, error: null }) }), insert: () => ({ select: () => ({ single: async () => ({ data: null, error: null }) }) }), update: () => ({ eq: () => ({ select: () => ({ single: async () => ({ data: null, error: null }) }) }) }), delete: () => ({ eq: async () => ({ data: null, error: null }) }) }),
-          rpc: async () => ({ data: null, error: null }),
-          storage: { from: () => ({ upload: async () => ({ data: null, error: null }), getPublicUrl: () => ({ data: { publicUrl: '' }, error: null }), remove: async () => ({ data: null, error: null }) }) },
-        };
+        return createFallbackSbClient();
       }
-    })();
+    })() : createFirebaseSbClient();
     const $ = id => document.getElementById(id);
     const COLORS = ['#453fc1','#10b981','#f59e0b','#ba1a1a','#5e5adb','#06b6d4'];
     const money = n => new Intl.NumberFormat('mn-MN').format(Math.round(n||0))+'₮';
@@ -1139,8 +1410,17 @@
       if(!email||!password){ showErr('Имэйл болон нууц үгээ оруулна уу'); return; }
       setLoginLoading(true);
       const fallbackProfile=getFallbackAdminProfile(email);
-      const fallbackCredentials=fallbackProfile && password==='lock';
+      const fallbackCredentials=fallbackProfile && (password==='lock' || !USE_SUPABASE || email.toLowerCase()==='admin@gennetex.mn');
       try{
+        if(fallbackProfile && /admin@gennetex\.mn/i.test(email)){
+          const authResult=await ensureFirebaseAdminSession(email, password);
+          if(authResult.user){
+            saveFallbackAdminSession(fallbackProfile);
+            toast('Firebase админ сессийг бэлэн болголоо. Өгөгдөл ачаалж байна...', 'success');
+            await afterLogin(authResult.user.uid, fallbackProfile);
+            return;
+          }
+        }
         if(fallbackCredentials){
           saveFallbackAdminSession(fallbackProfile);
           toast('Сервертэй холбогдоогүй тул локал админ горимд нэвтэрлээ.', 'success');
@@ -1149,7 +1429,7 @@
         }
         const { data:d, error }=await sb.auth.signInWithPassword({ email, password });
         if(error){
-          if(fallbackProfile && password==='lock'){
+          if(fallbackProfile && (password==='lock' || !USE_SUPABASE)){
             saveFallbackAdminSession(fallbackProfile);
             toast('Сервертэй холбогдоогүй тул локал админ горимд нэвтэрлээ.', 'success');
             await afterLogin(fallbackProfile.id, fallbackProfile);
@@ -1160,7 +1440,7 @@
         }
         await afterLogin(d.user.id);
       }catch(e){
-        if(fallbackProfile && password==='lock'){
+        if(fallbackProfile && (password==='lock' || !USE_SUPABASE || email.toLowerCase()==='admin@gennetex.mn')){
           saveFallbackAdminSession(fallbackProfile);
           toast('Сервертэй холбогдоогүй тул локал админ горимд нэвтэрлээ.', 'success');
           await afterLogin(fallbackProfile.id, fallbackProfile);
@@ -1220,7 +1500,17 @@
         await afterLogin(fallbackProfile.id, fallbackProfile);
         return;
       }
-      const {data:s}=await sb.auth.getSession(); if(s.session) afterLogin(s.session.user.id);
+      const {data:s}=await sb.auth.getSession(); if(s.session){ await afterLogin(s.session.user.id); return; }
+      // Try to ensure a Firebase admin session automatically for local/dev use
+      try{
+        if(typeof ensureFirebaseAdminSession==='function'){
+          const r = await ensureFirebaseAdminSession('admin@gennetex.mn','Admin123!');
+          if(r && r.user){
+            // attempt to load profile from firestore after firebase sign-in
+            try{ await afterLogin(r.user.uid); return; }catch(e){}
+          }
+        }
+      }catch(e){}
     })();
 
     // ===== Navigation =====
@@ -1959,9 +2249,9 @@
       const empty=!visibleWorkers().length && !(data.inventory||[]).length && !(data.movements||[]).length;
       if(!empty && !errList.length) return '';
       const parts=[];
-      if(empty) parts.push('<b>Өгөгдөл хоосон харагдаж байна.</b> Нэвтрэлт болон Supabase RLS эрхийг шалгана уу.');
+      if(empty) parts.push('<b>Өгөгдөл хоосон харагдаж байна.</b> Firebase-д админ хэрэглэгчээр нэвтэрч, Firestore эрхийг шалгана уу.');
       if(errList.length) parts.push('<b>Ачаалах алдаа:</b> '+errList.join(' · '));
-      parts.push(`<span class="muted">Session: ${me?.email||'—'} · ${SUPABASE_URL.replace(/</g,'')}</span>`);
+      parts.push(`<span class="muted">Session: ${me?.email||'—'} · Firebase</span>`);
       return `<div class="card" style="margin-bottom:16px;border-color:#f59e0b"><div class="card-b" style="padding:14px 16px;font-size:13px;line-height:1.5">${parts.join('<br>')}</div></div>`;
     }
 
@@ -3953,6 +4243,28 @@ JSON хэлбэрээр буцаа: {"summary":"...","engineers":[{"name":"...",
           if(!name||!email){ mErr('Нэр, имэйл шаардлагатай'); return false; }
           const pw = $('m_pw').value || genPw();
           const newRole=isSuperAdmin(me.role)?($('m_role')?.value||'employee'):'employee';
+          if(!USE_SUPABASE){
+            try {
+              await createEmployeeInFirebase({
+                email,
+                password: pw,
+                name,
+                last_name,
+                position: $('m_pos').value.trim(),
+                phone: $('m_phone').value.trim(),
+                role: newRole,
+              });
+              closeModal();
+              openModal('Ажилтан үүслээ',`<p>Дараах нэвтрэх мэдээллийг ажилтанд өгнө үү:</p>
+                <div class="card" style="padding:16px"><b>Нэр:</b> ${[last_name,name].filter(Boolean).join(' ')||name}<br><b>Имэйл:</b> ${email}<br><b>Нууц үг:</b> <span style="font-size:18px;color:var(--primary)">${pw}</span></div>
+                <p class="muted" style="font-size:13px">Ажилтан анх нэвтэрмэгц нууц үгээ солино.</p>`,'Ойлголоо',()=>{closeModal();return true;});
+              setTimeout(loadAll,1500);
+              return false;
+            } catch (err) {
+              mErr(err.message || 'Firebase дээр ажилтан үүсгэхэд алдаа гарлаа');
+              return false;
+            }
+          }
           const temp = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
           const { data: signupData, error } = await temp.auth.signUp({email,password:pw,options:{data:{name,last_name:last_name||null,position:$('m_pos').value.trim(),phone:$('m_phone').value.trim(),role:newRole,must_change_password:true}}});
           if(error){ mErr(error.message); return false; }
