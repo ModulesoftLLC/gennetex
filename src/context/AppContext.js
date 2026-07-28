@@ -14,7 +14,7 @@ import * as fuelApi from '../services/fuelService';
 import * as serviceCallApi from '../services/serviceCallService';
 import { calculateFuel } from '../lib/fuelCalc';
 import { withoutSampleByName, withoutSampleCalls } from '../lib/sampleNames';
-import { isAdminRole, isSuperAdmin, canTakeServiceCalls } from '../lib/roles';
+import { isAdminRole, isSuperAdmin, canTakeServiceCalls, resolveRole } from '../lib/roles';
 
 const AppContext = createContext(null);
 
@@ -122,7 +122,7 @@ export function AppProvider({ children }) {
             id: sess.user.id,
             email: sess.user.email,
             name: meta.name || sess.user.email?.split('@')[0] || 'Хэрэглэгч',
-            role: meta.role === 'admin' || meta.role === 'superadmin' ? meta.role : 'employee',
+            role: resolveRole(meta.role, sess.user.email),
           };
         }
         if (mounted) setAuthProfile(p);
@@ -133,7 +133,7 @@ export function AppProvider({ children }) {
             id: sess.user.id,
             email: sess.user.email,
             name: meta.name || sess.user.email?.split('@')[0] || 'Хэрэглэгч',
-            role: meta.role === 'admin' || meta.role === 'superadmin' ? meta.role : 'employee',
+            role: resolveRole(meta.role, sess.user.email),
           });
         }
       }
@@ -158,13 +158,31 @@ export function AppProvider({ children }) {
   }, []);
 
   const signIn = async (email, password) => {
-    await authApi.signIn(email, password);
+    const result = await authApi.signIn(email, password);
+    const profile = result?.profile || null;
+    if (profile) {
+      const resolvedRole = resolveRole(profile.role, profile.email);
+      const nextProfile = { ...profile, role: resolvedRole };
+      setAuthProfile(nextProfile);
+      setSession({
+        user: {
+          id: nextProfile.id,
+          email: nextProfile.email,
+          user_metadata: { name: nextProfile.name, role: nextProfile.role },
+        },
+      });
+      setProfile({ id: nextProfile.id, name: nextProfile.name, email: nextProfile.email, role: nextProfile.role });
+      await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ id: nextProfile.id, name: nextProfile.name, email: nextProfile.email, role: nextProfile.role }));
+    }
+    setAuthLoading(false);
   };
 
   const signOut = async () => {
     await authApi.signOut();
     setAuthProfile(null);
     setSession(null);
+    setProfile(null);
+    await AsyncStorage.removeItem(PROFILE_KEY).catch(() => {});
   };
 
   const updateMyProfile = async (patch) => {
@@ -208,8 +226,9 @@ export function AppProvider({ children }) {
 
   const fetchEmployees = async () => authApi.fetchEmployees();
 
-  const isSuperAdminUser = isSuperAdmin(authProfile?.role);
-  const isAdmin = isAdminRole(authProfile?.role);
+  const effectiveRole = resolveRole(authProfile?.role || session?.user?.user_metadata?.role || profile?.role, authProfile?.email || session?.user?.email || profile?.email);
+  const isSuperAdminUser = isSuperAdmin(effectiveRole);
+  const isAdmin = isAdminRole(effectiveRole);
   const mustChangePassword = !!authProfile?.must_change_password;
   // Чат/ирцэд ашиглах нэгдсэн хэрэглэгч
   const currentUser = authProfile

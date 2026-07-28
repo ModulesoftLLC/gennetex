@@ -11,6 +11,18 @@ import {
 } from '../services/nativeIncomingCallService';
 import { incomingCallBridge } from '../lib/incomingCallBridge';
 
+function parseTimestamp(value) {
+  if (!value) return null;
+  if (typeof value === 'string' || typeof value === 'number') {
+    const time = new Date(value).getTime();
+    return Number.isFinite(time) ? time : null;
+  }
+  if (typeof value.toDate === 'function') {
+    return value.toDate().getTime();
+  }
+  return null;
+}
+
 export default function IncomingCallManager() {
   const { isCloud, currentUser } = useApp();
   const [incoming, setIncoming] = useState(null);
@@ -27,7 +39,8 @@ export default function IncomingCallManager() {
     if (!isCloud || !currentUser?.id) return;
     const unsub = callApi.subscribeIncomingCalls(currentUser.id, async (call) => {
       if (call.status !== 'ringing') return;
-      const fresh = Date.now() - new Date(call.created_at).getTime() < 60000;
+      const createdAtMs = parseTimestamp(call.created_at) || Date.now();
+      const fresh = Date.now() - createdAtMs < 60000;
       if (!fresh) return;
       setIncoming(call);
       if (useNative) {

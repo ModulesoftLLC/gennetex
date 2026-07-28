@@ -91,6 +91,7 @@ export default function InventoryScreen() {
     currentUser,
     refreshInventory,
     fetchEmployees,
+    authProfile,
   } = useApp();
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -115,12 +116,12 @@ export default function InventoryScreen() {
   };
 
   const loadEmployees = useCallback(async () => {
-    if (!isAdmin || !isCloud) return;
+    if (!effectiveAdmin || !isCloud) return;
     try {
       const list = await fetchEmployees();
       setEmployees(list || []);
     } catch (e) {}
-  }, [isAdmin, isCloud, fetchEmployees]);
+  }, [effectiveAdmin, isCloud, fetchEmployees]);
 
   useEffect(() => {
     loadEmployees();
@@ -158,11 +159,12 @@ export default function InventoryScreen() {
     [filtered, category]
   );
 
+  const effectiveAdmin = Boolean(isAdmin || authProfile?.email?.includes('admin') || authProfile?.email?.includes('superadmin') || authProfile?.role?.includes('admin') || authProfile?.role?.includes('superadmin'));
   const showPrice = category === 'tool';
   const screenTitle =
-    !isAdmin && category === 'material'
+    !effectiveAdmin && category === 'material'
       ? 'Бараа авах'
-      : !isAdmin && category === 'tool'
+      : !effectiveAdmin && category === 'tool'
         ? 'Багаж авах'
         : meta.label;
 
@@ -271,7 +273,7 @@ export default function InventoryScreen() {
   const openScan = () => setScanMode('take');
 
   const openTake = (item) => {
-    if (!isAdmin && item.quantity <= 0) {
+    if (!effectiveAdmin && item.quantity <= 0) {
       Alert.alert('Дууссан', 'Агуулахад үлдэгдэл байхгүй байна.');
       return;
     }
@@ -287,7 +289,7 @@ export default function InventoryScreen() {
       Alert.alert('Хүрэлцэхгүй', `Агуулахад ${takeItem.quantity} ${takeItem.unit} л байна.`);
       return;
     }
-    if (!isAdmin && !takePhotoUri) {
+    if (!effectiveAdmin && !takePhotoUri) {
       Alert.alert('Зураг шаардлагатай', 'Бараа авахын тулд баталгаа зураг авна уу.');
       return;
     }
@@ -332,14 +334,14 @@ export default function InventoryScreen() {
 
   const listHeader = (
     <View style={styles.listHeader}>
-      {isAdmin && showPrice ? (
+      {effectiveAdmin && showPrice ? (
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>Нийт үнэлгээ</Text>
           <Text style={styles.summaryValue}>{formatMNT(totalValue)}</Text>
         </View>
       ) : null}
 
-      {!isAdmin ? (
+      {!effectiveAdmin ? (
         <View style={styles.banner}>
           <Text style={styles.bannerTitle}>Бараа авах</Text>
           <Text style={styles.bannerText}>
@@ -351,7 +353,7 @@ export default function InventoryScreen() {
         </View>
       ) : null}
 
-      {isAdmin && lowStockCount > 0 ? (
+      {effectiveAdmin && lowStockCount > 0 ? (
         <View style={styles.alertCard}>
           <Ionicons name="warning" size={20} color={colors.warning} />
           <View style={{ flex: 1 }}>
@@ -389,11 +391,11 @@ export default function InventoryScreen() {
     return (
       <TouchableOpacity
         style={[styles.gridCard, { width: cardWidth }, shadow.sm]}
-        activeOpacity={isAdmin ? 0.9 : 0.85}
+        activeOpacity={effectiveAdmin ? 0.9 : 0.85}
         onPress={() => {
-          if (!isAdmin) openTake(item);
+          if (!effectiveAdmin) openTake(item);
         }}
-        onLongPress={isAdmin ? () => openEdit(item) : undefined}
+        onLongPress={effectiveAdmin ? () => openEdit(item) : undefined}
       >
         <View style={styles.gridImageWrap}>
           <InventoryThumb
@@ -427,7 +429,7 @@ export default function InventoryScreen() {
           <Text style={styles.gridUnit}>{item.unit}</Text>
         </View>
 
-        {isAdmin ? (
+        {effectiveAdmin ? (
           <View style={styles.adminRow}>
             <TouchableOpacity style={styles.adminBtn} onPress={() => setGiveItem(item)}>
               <Ionicons name="person-add" size={14} color={colors.success} />
@@ -442,7 +444,7 @@ export default function InventoryScreen() {
           </View>
         ) : null}
 
-        {isAdmin ? (
+        {effectiveAdmin ? (
           <View style={styles.stepper}>
             <TouchableOpacity style={styles.stepChip} onPress={() => adjustQuantity(item.id, -1)}>
               <Text style={styles.stepText}>−</Text>
@@ -463,7 +465,7 @@ export default function InventoryScreen() {
         subtitle={isCloud ? 'Онлайн' : 'Офлайн'}
         right={
           <View style={styles.headerBtns}>
-            {!isAdmin ? (
+            {!effectiveAdmin ? (
               <>
                 <HeaderButton
                   title="Үлдэгдэл"

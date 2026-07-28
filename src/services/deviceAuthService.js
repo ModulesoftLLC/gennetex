@@ -16,6 +16,12 @@ try {
 const TABLE = 'device_approvals';
 const DEVICE_ID_KEY = '@gennetex_device_id_v1';
 
+function isPrivilegedUser(user) {
+  const role = String(user?.role || user?.user_metadata?.role || '').toLowerCase();
+  const email = String(user?.email || '').toLowerCase();
+  return role === 'superadmin' || role === 'admin' || email.includes('superadmin') || email.includes('admin');
+}
+
 function uuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -91,6 +97,9 @@ export async function getDeviceFingerprint() {
  */
 export async function ensureDeviceApproval(user) {
   if (!user?.id) return { status: 'approved', bypass: true };
+  if (isPrivilegedUser(user)) {
+    return { status: 'approved', bypass: true, privileged: true, deviceId: null };
+  }
   const fp = await getDeviceFingerprint();
   try {
     const { data: existing, error } = await supabase

@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
-import { supabase } from '../lib/supabase';
 import { MOVEMENT_TYPES, computeBalances, movementDelta } from '../lib/stockBalance';
+import { firebaseUploadFile, firebaseList, firebaseGetOne, firebaseCreate, firebaseUpdate, firebaseDelete, firebaseSet } from '../lib/firebaseAdapter';
 
 const TABLE = 'inventory';
 const BUCKET = 'inventory';
@@ -11,12 +11,8 @@ async function uploadImage(uri, folder) {
     encoding: FileSystem.EncodingType.Base64,
   });
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, decode(base64), { contentType: 'image/jpeg', upsert: true });
-  if (error) throw error;
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  const bytes = decode(base64);
+  return firebaseUploadFile(path, bytes, 'image/jpeg');
 }
 
 export async function uploadInventoryImage(uri) {
@@ -28,65 +24,44 @@ export async function uploadMovementPhoto(uri) {
 }
 
 export async function fetchInventory() {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select('*')
-    .order('created_at', { ascending: false });
-  if (error) throw error;
+  const data = await firebaseList(TABLE, { order: { field: 'createdAt', direction: 'desc' } });
   return (data || []).map(normalize);
 }
 
 export async function fetchItemByBarcode(barcode) {
   const code = String(barcode || '').trim();
   if (!code) return null;
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select('*')
-    .eq('barcode', code)
-    .maybeSingle();
-  if (error) throw error;
-  return data ? normalize(data) : null;
+  const data = await firebaseList(TABLE, { whereClauses: [{ field: 'barcode', op: '==', value: code }] });
+  return data && data[0] ? normalize(data[0]) : null;
 }
 
 export async function insertInventory(item) {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .insert({
-      name: item.name,
-      unit: item.unit,
-      quantity: item.quantity,
-      price: item.price,
-      barcode: item.barcode || null,
-      image_url: item.image_url || null,
-      category: item.category || 'material',
-    })
-    .select()
-    .single();
-  if (error) throw error;
+  const data = await firebaseCreate(TABLE, {
+    name: item.name,
+    unit: item.unit,
+    quantity: item.quantity,
+    price: item.price,
+    barcode: item.barcode || null,
+    image_url: item.image_url || null,
+    category: item.category || 'material',
+  });
   return normalize(data);
 }
 
 export async function updateInventory(id, patch) {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .update(patch)
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
+  const data = await firebaseUpdate(TABLE, id, patch);
   return normalize(data);
 }
 
 export async function deleteInventory(id) {
-  const { error } = await supabase.from(TABLE).delete().eq('id', id);
-  if (error) throw error;
+  await firebaseDelete(TABLE, id);
 }
 
 // Бараа олгох: тоо хасаад олголтын лог үүсгэнэ
 export async function withdrawInventory({ item, userId, userName, qty, photoUrl }) {
   const newQty = Math.max(0, (Number(item.quantity) || 0) - qty);
   await updateInventory(item.id, { quantity: newQty });
-  const { error } = await supabase.from('stock_movements').insert({
+  await firebaseCreate('stock_movements', {
     item_id: item.id,
     item_name: item.name,
     unit: item.unit,
@@ -96,7 +71,6 @@ export async function withdrawInventory({ item, userId, userName, qty, photoUrl 
     movement_type: MOVEMENT_TYPES.WITHDRAW,
     photo_url: photoUrl || null,
   });
-  if (error) throw error;
   return newQty;
 }
 
@@ -109,7 +83,7 @@ export async function consumeInventory({ item, userId, userName, qty }) {
   if (q > balance) {
     throw new Error(`Үлдэгдэл хүрэлцэхгүй (${balance} ${item.unit || 'ширхэг'})`);
   }
-  const { error } = await supabase.from('stock_movements').insert({
+  await firebaseCreate('stock_movements', {
     item_id: item.id,
     item_name: item.name,
     unit: item.unit,
@@ -118,29 +92,19 @@ export async function consumeInventory({ item, userId, userName, qty }) {
     quantity: q,
     movement_type: MOVEMENT_TYPES.CONSUME,
   });
-  if (error) throw error;
   return balance - q;
 }
 
 export async function fetchMovements(limit = 300) {
-  const { data, error } = await supabase
-    .from('stock_movements')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data || [];
+  return firebaseList('stock_movements', { order: { field: 'createdAt', direction: 'desc' }, limitCount: limit });
 }
 
 export async function fetchMyMovements(userId, limit = 300) {
-  const { data, error } = await supabase
-    .from('stock_movements')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data || [];
+  return firebaseList('stock_movements', {
+    whereClauses: [{ field: 'user_id', op: '==', value: userId }],
+    order: { field: 'createdAt', direction: 'desc' },
+    limitCount: limit,
+  });
 }
 
 export async function fetchMyBalances(userId, inventory = []) {

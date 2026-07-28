@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 import NavIcon from '../components/NavIcon';
 import { spacing, radius, colors as C } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
-import { roleLabel, canTakeServiceCalls } from '../lib/roles';
+import { roleLabel, canTakeServiceCalls, resolveRole } from '../lib/roles';
 import * as tracking from '../services/trackingService';
 import * as vehicleApi from '../services/vehicleService';
 import { countTodayCheckIns } from '../services/attendanceService';
@@ -107,7 +107,13 @@ export default function HomeScreen() {
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const styles = useStyles(makeStyles);
   const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees, currentUser } = useApp();
-  const name = authProfile?.name || profile?.name || 'Ажилтан';
+  const name = authProfile?.name || profile?.name || currentUser?.name || 'Ажилтан';
+  const effectiveRole = resolveRole(
+    authProfile?.role || profile?.role || currentUser?.user_metadata?.role,
+    authProfile?.email || profile?.email || currentUser?.email
+  );
+  const effectiveAdmin = Boolean(isAdmin || effectiveRole === 'admin' || effectiveRole === 'superadmin');
+  const effectiveSuperAdmin = Boolean(isSuperAdmin || effectiveRole === 'superadmin');
 
   const [stats, setStats] = useState({ employees: 0, online: 0, vehicles: 0, checkins: 0 });
   const [now, setNow] = useState(() => new Date());
@@ -165,7 +171,7 @@ export default function HomeScreen() {
   const canTakeCalls = canTakeServiceCalls(authProfile);
   const serviceModules = useMemo(
     () =>
-      isAdmin
+      effectiveAdmin
         ? EMPLOYEE_MODULES.filter(
             (m) =>
               !ADMIN_KEYS.has(m.key) &&
@@ -175,10 +181,10 @@ export default function HomeScreen() {
     [isAdmin, canTakeCalls]
   );
 
-  const aiModules = isAdmin ? AI_MODULES_ADMIN : AI_MODULES_EMPLOYEE;
+  const aiModules = effectiveAdmin ? AI_MODULES_ADMIN : AI_MODULES_EMPLOYEE;
   const adminModules = useMemo(
     () =>
-      isSuperAdmin
+      effectiveSuperAdmin
         ? [...ADMIN_MODULES, { key: 'AdminDevices', label: 'Төхөөрөмж зөвшөөрөл', icon: 'employees', color: '#b45309' }]
         : ADMIN_MODULES,
     [isSuperAdmin]
@@ -240,9 +246,9 @@ export default function HomeScreen() {
           <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>{greeting()},</Text>
             <Text style={styles.name}>{name}</Text>
-            <View style={[styles.roleChip, isAdmin && styles.roleChipAdmin]}>
-              <Text style={[styles.roleChipText, isAdmin && styles.roleChipTextAdmin]}>
-                {roleLabel(authProfile?.role || (isAdmin ? 'admin' : 'employee'))}
+            <View style={[styles.roleChip, effectiveAdmin && styles.roleChipAdmin]}>
+              <Text style={[styles.roleChipText, effectiveAdmin && styles.roleChipTextAdmin]}>
+                {roleLabel(effectiveRole || (effectiveAdmin ? 'admin' : 'employee'))}
               </Text>
             </View>
             <Text style={styles.date}>{dateStr}</Text>
@@ -306,12 +312,12 @@ export default function HomeScreen() {
           <View style={styles.aiGrid}>{aiModules.map(renderAiCard)}</View>
         </Animated.View>
 
-        {isAdmin ? (
+        {effectiveAdmin ? (
           <>
             <View style={styles.adminHeaderRow}>
               <Text style={styles.sectionTitle}>Админ удирдлага</Text>
               <View style={styles.adminTag}>
-                <Text style={styles.adminTagText}>{isSuperAdmin ? 'SUPER ADMIN' : 'ADMIN'}</Text>
+                <Text style={styles.adminTagText}>{effectiveSuperAdmin ? 'SUPER ADMIN' : 'ADMIN'}</Text>
               </View>
             </View>
 

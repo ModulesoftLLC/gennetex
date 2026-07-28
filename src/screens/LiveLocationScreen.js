@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 import { CALL_TYPES } from '../data/mockData';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
+import { isSupabaseApiConfigured } from '../lib/supabase';
 import * as tracking from '../services/trackingService';
 
 function callTypeLabel(key) {
@@ -118,7 +119,7 @@ export default function LiveLocationScreen() {
   return (
     <View style={styles.container}>
       <ScreenHeader title={isAdmin ? 'Ажилчдын хяналт' : 'Байршил'}
-        subtitle={`${isCloud ? 'Supabase' : 'Локал'} · ${located.length} online`}
+        subtitle={`${isCloud ? (isSupabaseApiConfigured ? 'Supabase' : 'Firebase') : 'Локал'} · ${located.length} online`}
         right={
           <Badge
             text={trackingState?.active ? 'Илгээж байна' : 'Идэвхгүй'}

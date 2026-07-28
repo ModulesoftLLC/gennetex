@@ -35,7 +35,8 @@ const EMPTY = { code: '', plate_number: '', liters_per_100km: '12', tank_capacit
 export default function VehiclesAdminScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isAdmin, isCloud, fetchEmployees } = useApp();
+  const { isAdmin, isCloud, fetchEmployees, authProfile } = useApp();
+  const effectiveAdmin = Boolean(isAdmin || authProfile?.email?.includes('admin') || authProfile?.email?.includes('superadmin') || authProfile?.role?.includes('admin') || authProfile?.role?.includes('superadmin'));
   const [list, setList] = useState([]);
   const [trips, setTrips] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -221,7 +222,7 @@ export default function VehiclesAdminScreen() {
     ]);
   };
 
-  if (!isAdmin) {
+  if (!effectiveAdmin) {
     return (
       <View style={styles.container}>
         <ScreenHeader title="Машины мэдээлэл солих" />

@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseApiConfigured } from '../lib/supabase';
+import { firebaseSubscribe } from '../lib/firebaseAdapter';
 import { withoutSampleByName, withoutSampleVisits } from '../lib/sampleNames';
 import { filterVisibleProfiles } from '../lib/roles';
 
@@ -82,9 +83,17 @@ export async function fetchVisitLogs(limit = 50) {
 }
 
 export function subscribeWorkers(onChange) {
-  const channel = supabase
-    .channel('workers-loc')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => onChange())
-    .subscribe();
-  return () => supabase.removeChannel(channel);
+  if (isSupabaseApiConfigured) {
+    const channel = supabase
+      .channel('workers-loc')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => onChange())
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }
+
+  return firebaseSubscribe(
+    'profiles',
+    () => onChange(),
+    { order: { field: 'name', direction: 'asc' } }
+  );
 }

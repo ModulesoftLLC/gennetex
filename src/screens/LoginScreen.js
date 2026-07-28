@@ -94,9 +94,16 @@ export default function LoginScreen() {
 }
 
 function mapError(msg = '') {
-  if (/invalid login credentials/i.test(msg)) return 'Имэйл эсвэл нууц үг буруу байна.';
-  if (/email not confirmed/i.test(msg)) return 'Имэйл баталгаажаагүй байна.';
-  return msg;
+  const message = String(msg || '').trim();
+  if (/invalid login credentials/i.test(message) || /invalid-credential/i.test(message)) {
+    return 'Имэйл эсвэл нууц үг буруу байна. Хэрэглэгчийн мэдээллээ шалгана уу.';
+  }
+  if (/email not confirmed/i.test(message)) return 'Имэйл баталгаажаагүй байна.';
+  if (/operation-not-allowed/i.test(message)) {
+    return 'Firebase Authentication-д Email/Password нэвтрэлт идэвхгүй байна. Firebase Console -> Authentication -> Sign-in method -> Email/Password-г enable хийнэ үү.';
+  }
+  if (/network-request-failed/i.test(message)) return 'Сүлжээний холболт муу байна. Дахин оролдоно уу.';
+  return message || 'Нэвтрэх үед алдаа гарлаа.';
 }
 
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({

@@ -243,7 +243,7 @@ function Splash() {
 }
 
 function Root({ shareRef }) {
-  const { isCloud, authLoading, session, mustChangePassword, currentUser, authProfile, isSuperAdmin } = useApp();
+  const { isCloud, authLoading, session, mustChangePassword, currentUser, authProfile, isSuperAdmin, isAdmin } = useApp();
   const [onboarded, setOnboarded] = useState(null);
   const [ohaabOk, setOhaabOk] = useState(null);
   const [deviceOk, setDeviceOk] = useState(null);
@@ -270,7 +270,7 @@ function Root({ shareRef }) {
       setDeviceOk(true);
       return;
     }
-    if (isSuperAdmin) {
+    if (isSuperAdmin || isAdmin) {
       setDeviceOk(true);
       return;
     }
@@ -281,6 +281,8 @@ function Root({ shareRef }) {
         const res = await deviceApi.ensureDeviceApproval({
           id: currentUser.id,
           name: authProfile?.name || currentUser?.name,
+          email: authProfile?.email || currentUser?.email,
+          role: authProfile?.role || currentUser?.user_metadata?.role,
         });
         if (!active) return;
         setDeviceInfo(res);

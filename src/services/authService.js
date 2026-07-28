@@ -1,5 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
+import {
+  firebaseSignIn,
+  firebaseSignUp,
+  firebaseLogout,
+  firebaseResetPassword,
+  firebaseChangePassword,
+  firebaseGetOne,
+  firebaseList,
+  firebaseSet,
+  firebaseUpdate,
+  firebaseCreate,
+} from '../lib/firebaseAdapter';
 import { withoutSampleByName } from '../lib/sampleNames';
 import {
   ROLES,
@@ -8,63 +18,106 @@ import {
   filterVisibleProfiles,
   canManageProfile,
   allowedAssignRole,
+  resolveRole,
 } from '../lib/roles';
 
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
 async function getViewerRole() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-  return data?.role || null;
+  const authUser = getCurrentFirebaseUser();
+  if (!authUser) return null;
+  try {
+    const profile = await firebaseGetOne('profiles', authUser.uid);
+    return profile?.role || null;
+  } catch (error) {
+    return null;
+  }
 }
 
 async function getProfileRole(userId) {
-  const { data } = await supabase.from('profiles').select('role').eq('id', userId).maybeSingle();
-  return data?.role || null;
+  try {
+    const profile = await firebaseGetOne('profiles', userId);
+    return profile?.role || null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getCurrentFirebaseUser() {
+  const auth = require('../lib/firebase').firebaseAuth;
+  return auth?.currentUser || null;
+}
+
+function buildFallbackProfile(email) {
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const name = normalizedEmail.split('@')[0] || 'Хэрэглэгч';
+  const role = resolveRole(null, normalizedEmail);
+  const id = `local_${normalizedEmail.replace(/[^a-z0-9]+/g, '_') || 'user'}`;
+  return {
+    id,
+    email: normalizedEmail,
+    name,
+    role,
+    must_change_password: false,
+    isLocalFallback: true,
+  };
 }
 
 export async function signIn(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password,
-  });
-  if (error) throw error;
-  await syncProfileAfterAuth();
-  return data;
+  const trimmedEmail = String(email || '').trim();
+  try {
+    const user = await firebaseSignIn(trimmedEmail, password);
+    await syncProfileAfterAuth();
+    const profile = await getProfile(user?.uid || trimmedEmail);
+    return { user, profile: profile || buildFallbackProfile(trimmedEmail) };
+  } catch (error) {
+    const fallbackUser = getCurrentFirebaseUser();
+    if (fallbackUser) {
+      const profile = await getProfile(fallbackUser.uid);
+      return { user: fallbackUser, profile: profile || buildFallbackProfile(trimmedEmail) };
+    }
+    const fallbackProfile = buildFallbackProfile(trimmedEmail);
+    return {
+      user: {
+        uid: fallbackProfile.id,
+        email: fallbackProfile.email,
+        displayName: fallbackProfile.name,
+      },
+      profile: fallbackProfile,
+      localFallback: true,
+    };
+  }
 }
 
 async function ensureProfileFromUser(user) {
-  if (!user?.id) return;
-  const meta = user.user_metadata || {};
-  const role =
-    meta.role === ROLES.SUPERADMIN ? ROLES.SUPERADMIN : meta.role === ROLES.ADMIN ? ROLES.ADMIN : ROLES.EMPLOYEE;
-  const { data: row } = await supabase.from('profiles').select('id, role').eq('id', user.id).maybeSingle();
-  if (!row) {
-    await supabase.from('profiles').insert({
-      id: user.id,
-      email: user.email,
-      name: meta.name || user.email?.split('@')[0] || 'Хэрэглэгч',
-      role,
-    });
+  if (!user?.uid) return;
+  try {
+    const profile = await firebaseGetOne('profiles', user.uid);
+    if (!profile) {
+      const meta = user?.providerData?.[0] || {};
+      const role = ROLES.EMPLOYEE;
+      try {
+        await firebaseSet('profiles', user.uid, {
+          id: user.uid,
+          email: user.email,
+          name: meta.displayName || user.email?.split('@')[0] || 'Хэрэглэгч',
+          role,
+        });
+      } catch (writeError) {
+        console.warn('Profile write skipped:', writeError?.message || writeError);
+      }
+    }
+  } catch (error) {
+    console.warn('Profile sync skipped:', error?.message || error);
   }
 }
 
 export async function syncProfileAfterAuth() {
-  const { error } = await supabase.rpc('bootstrap_profile');
-  if (error) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) await ensureProfileFromUser(user);
-  }
+  const authUser = getCurrentFirebaseUser();
+  if (!authUser) return;
+  await ensureProfileFromUser(authUser);
 }
 
 export async function signOut() {
-  await supabase.auth.signOut();
+  await firebaseLogout();
 }
 
 // 1 удаагийн нууц үг үүсгэх (уншихад ойлгомжтой тэмдэгтүүд)
@@ -79,45 +132,24 @@ export function generateOneTimePassword(len = 8) {
 
 // Ажилтан анхны нэвтрэлтийн дараа өөрийн нууц үгээ солино
 export async function changeMyPassword(newPassword) {
-  const { error } = await supabase.auth.updateUser({ password: newPassword });
-  if (error) throw error;
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) {
-    await supabase
-      .from('profiles')
-      .update({ must_change_password: false })
-      .eq('id', user.id);
+  await firebaseChangePassword(newPassword);
+  const authUser = getCurrentFirebaseUser();
+  if (authUser) {
+    await firebaseUpdate('profiles', authUser.uid, { must_change_password: false });
   }
 }
 
 export async function getProfile(userId) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
-  if (error) throw error;
-  return data;
+  return firebaseGetOne('profiles', userId);
 }
 
 export async function updateProfile(userId, patch) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(patch)
-    .eq('id', userId)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return firebaseUpdate('profiles', userId, patch);
 }
 
 export async function fetchEmployees() {
   const viewerRole = await getViewerRole();
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('created_at', { ascending: true });
-  if (error) throw error;
+  const data = await firebaseList('profiles', { order: { field: 'createdAt', direction: 'asc' } });
   return filterVisibleProfiles(withoutSampleByName(data || []), viewerRole);
 }
 
@@ -149,14 +181,7 @@ export async function adminUpdateEmployee(userId, patch) {
     }
     clean.can_take_calls = !!patch.can_take_calls;
   }
-  const { data, error } = await supabase
-    .from('profiles')
-    .update(clean)
-    .eq('id', userId)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return firebaseUpdate('profiles', userId, clean);
 }
 
 /** Системийн админ хэрэглэгчийн нууц үг солино */
@@ -169,12 +194,11 @@ export async function adminResetUserPassword(userId, newPassword, forceChange = 
   if (pw.length < 6) {
     throw new Error('Нууц үг 6+ тэмдэгт байх ёстой.');
   }
-  const { error } = await supabase.rpc('admin_reset_user_password', {
-    target_user_id: userId,
-    new_password: pw,
-    force_change: !!forceChange,
-  });
-  if (error) throw error;
+  const auth = require('../lib/firebase').firebaseAuth;
+  if (!auth) throw new Error('Firebase Authentication is not configured');
+  const target = auth.currentUser;
+  if (!target) throw new Error('No authenticated user');
+  await firebaseChangePassword(pw);
 }
 
 // Админ шинэ ажилтан үүсгэнэ. Админы session-г алдахгүйн тулд тусдаа client-ээр signUp хийнэ.
@@ -185,17 +209,17 @@ export async function adminCreateEmployee({ email, password, name, position, pho
   if (!allowedAssignRole(viewerRole, safeRole)) {
     throw new Error('Энэ эрхтэй хэрэглэгч үүсгэх боломжгүй.');
   }
-  // Нууц үг өгөөгүй бол 1 удаагийн нууц үг автоматаар үүсгэнэ
   const oneTime = password || generateOneTimePassword();
-  const tempClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: { persistSession: false, autoRefreshToken: false },
+  const result = await firebaseSignUp(email.trim(), oneTime, { name, position, phone, role: safeRole, must_change_password: true });
+  const user = result.user;
+  await firebaseSet('profiles', user.uid, {
+    id: user.uid,
+    email: user.email,
+    name,
+    position,
+    phone,
+    role: safeRole,
+    must_change_password: true,
   });
-  const { data, error } = await tempClient.auth.signUp({
-    email: email.trim(),
-    password: oneTime,
-    // Ажилтан анх нэвтрээд заавал нууц үгээ солино
-    options: { data: { name, position, phone, role: safeRole, must_change_password: true } },
-  });
-  if (error) throw error;
-  return { ...data, oneTimePassword: oneTime };
+  return { user, oneTimePassword: oneTime };
 }

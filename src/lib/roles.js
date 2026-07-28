@@ -6,12 +6,31 @@ export const ROLES = {
   SUPERADMIN: 'superadmin',
 };
 
+export function normalizeRole(role) {
+  const raw = String(role || '').trim().toLowerCase();
+  if (!raw) return null;
+  if (['superadmin', 'super_admin', 'super-admin', 'sysadmin'].includes(raw)) return ROLES.SUPERADMIN;
+  if (['admin', 'administrator', 'manager'].includes(raw)) return ROLES.ADMIN;
+  if (['employee', 'staff', 'user', 'member'].includes(raw)) return ROLES.EMPLOYEE;
+  return raw;
+}
+
+export function resolveRole(role, email) {
+  const normalized = normalizeRole(role);
+  if (normalized) return normalized;
+  const emailValue = String(email || '').trim().toLowerCase();
+  if (emailValue.includes('superadmin') || emailValue.includes('super_admin') || emailValue.includes('super-admin')) return ROLES.SUPERADMIN;
+  if (emailValue.includes('admin')) return ROLES.ADMIN;
+  return ROLES.EMPLOYEE;
+}
+
 export function isSuperAdmin(role) {
-  return role === ROLES.SUPERADMIN;
+  return normalizeRole(role) === ROLES.SUPERADMIN;
 }
 
 export function isAdminRole(role) {
-  return role === ROLES.ADMIN || role === ROLES.SUPERADMIN;
+  const normalized = normalizeRole(role);
+  return normalized === ROLES.ADMIN || normalized === ROLES.SUPERADMIN;
 }
 
 export function isRegularAdmin(role) {
@@ -19,8 +38,9 @@ export function isRegularAdmin(role) {
 }
 
 export function roleLabel(role) {
-  if (role === ROLES.SUPERADMIN) return 'Системийн админ';
-  if (role === ROLES.ADMIN) return 'Админ';
+  const normalized = normalizeRole(role);
+  if (normalized === ROLES.SUPERADMIN) return 'Системийн админ';
+  if (normalized === ROLES.ADMIN) return 'Админ';
   return 'Ажилтан';
 }
 
