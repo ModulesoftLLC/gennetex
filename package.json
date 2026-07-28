@@ -11,7 +11,7 @@
     "eas": "eas-cli",
     "version:bump": "node scripts/bump-version.js",
     "admin:sync-env": "node scripts/sync-admin-env.js",
-    "admin:serve": "python3 -m http.server 5500 --directory admin-web",
+    "admin:serve": "python -m http.server 5500 --directory admin-web",
     "postinstall": "node scripts/patch-incoming-call-rn81.js && node scripts/sync-google-services.js",
     "eas-build-post-install": "node scripts/patch-incoming-call-rn81.js && node scripts/sync-google-services.js"
   },

@@ -13,7 +13,10 @@ npm-debug.*
 .DS_Store
 .env
 fcm-service-account.json
+firebase-debug.log
 supabase/.temp/
+supabase/supabase/
+supabase/full_import.sql
 .cursor/
 public-web/node_modules/
 public-web/dist/
