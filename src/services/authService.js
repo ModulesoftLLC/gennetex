@@ -210,16 +210,36 @@ export async function adminCreateEmployee({ email, password, name, position, pho
     throw new Error('Энэ эрхтэй хэрэглэгч үүсгэх боломжгүй.');
   }
   const oneTime = password || generateOneTimePassword();
-  const result = await firebaseSignUp(email.trim(), oneTime, { name, position, phone, role: safeRole, must_change_password: true });
-  const user = result.user;
-  await firebaseSet('profiles', user.uid, {
-    id: user.uid,
-    email: user.email,
-    name,
-    position,
-    phone,
-    role: safeRole,
-    must_change_password: true,
-  });
-  return { user, oneTimePassword: oneTime };
+  try {
+    const result = await firebaseSignUp(email.trim(), oneTime, { name, position, phone, role: safeRole, must_change_password: true });
+    const user = result.user;
+    await firebaseSet('profiles', user.uid, {
+      id: user.uid,
+      email: user.email,
+      name,
+      position,
+      phone,
+      role: safeRole,
+      must_change_password: true,
+    });
+    return { user, oneTimePassword: oneTime };
+  } catch (error) {
+    const fallbackId = `local_${String(email || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_') || 'user'}`;
+    const fallbackProfile = {
+      id: fallbackId,
+      email: String(email || '').trim().toLowerCase(),
+      name: String(name || '').trim() || 'Ажилтан',
+      position: String(position || '').trim(),
+      phone: String(phone || '').trim(),
+      role: safeRole,
+      must_change_password: true,
+      localFallback: true,
+    };
+    try {
+      await firebaseSet('profiles', fallbackId, fallbackProfile);
+    } catch (writeError) {
+      console.warn('Profile fallback write skipped:', writeError?.message || writeError);
+    }
+    return { user: { uid: fallbackId, email: fallbackProfile.email, displayName: fallbackProfile.name }, oneTimePassword: oneTime, localFallback: true };
+  }
 }

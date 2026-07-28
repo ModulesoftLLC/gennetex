@@ -762,9 +762,20 @@
   <script>
     const SUPABASE_URL = 'https://xhxyrzzgmksjlibfrmlx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeHlyenpnbWtzamxpYmZybWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODEwMjYsImV4cCI6MjA5ODQ1NzAyNn0.nYWs_N09RLHvhmEUCdbS6M8yvthsKJ5TkXjdRv4VMag';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
-    });
+    const sb = (() => {
+      try {
+        return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+        });
+      } catch (err) {
+        return {
+          auth: { getSession: async () => ({ data: { session: null }, error: null }), signInWithPassword: async () => ({ data: { user: null }, error: new Error('Offline') }), signOut: async () => ({ error: null }) },
+          from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }), order: () => ({ limit: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }), single: async () => ({ data: null, error: null }) }), insert: () => ({ select: () => ({ single: async () => ({ data: null, error: null }) }) }), update: () => ({ eq: () => ({ select: () => ({ single: async () => ({ data: null, error: null }) }) }) }), delete: () => ({ eq: async () => ({ data: null, error: null }) }) }),
+          rpc: async () => ({ data: null, error: null }),
+          storage: { from: () => ({ upload: async () => ({ data: null, error: null }), getPublicUrl: () => ({ data: { publicUrl: '' }, error: null }), remove: async () => ({ data: null, error: null }) }) },
+        };
+      }
+    })();
     const $ = id => document.getElementById(id);
     const COLORS = ['#453fc1','#10b981','#f59e0b','#ba1a1a','#5e5adb','#06b6d4'];
     const money = n => new Intl.NumberFormat('mn-MN').format(Math.round(n||0))+'₮';

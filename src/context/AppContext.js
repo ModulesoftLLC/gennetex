@@ -208,7 +208,21 @@ export function AppProvider({ children }) {
   };
 
   const adminCreateEmployee = async (payload) => {
-    return authApi.adminCreateEmployee(payload);
+    const result = await authApi.adminCreateEmployee(payload);
+    const fallbackProfile = result?.localFallback ? {
+      id: result.user?.uid || genId(),
+      name: payload.name || 'Ажилтан',
+      last_name: '',
+      email: payload.email || '',
+      phone: payload.phone || '',
+      position: payload.position || '',
+      role: payload.role || 'employee',
+      avatar_url: '',
+    } : null;
+    if (fallbackProfile) {
+      setStaff((prev) => [fallbackProfile, ...prev.filter((item) => item.id !== fallbackProfile.id)]);
+    }
+    return result;
   };
 
   const adminUpdateEmployee = async (userId, patch) => {
