@@ -1,0 +1,13 @@
+node_modules/
+public-web/node_modules/
+android/
+ios/
+.git/
+.expo/
+.cursor/
+.aider.tags.cache.v4/
+supabase/full_import.sql
+dist/
+public-web/dist/
+*.log
+.env*
