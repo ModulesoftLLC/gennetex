@@ -79,7 +79,7 @@ export default function LoginScreen() {
             />
             {!isCloud ? (
               <Text style={styles.note}>
-                Supabase холбогдоогүй байна. Нэвтрэлт ажиллахын тулд .env тохируулна уу.
+                Firebase холбогдоогүй байна. Нэвтрэлт ажиллахын тулд .env тохируулна уу.
               </Text>
             ) : (
               <Text style={styles.hint}>

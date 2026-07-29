@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Platform, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from '../components/Map';
 import { Badge, ScreenHeader, EmptyState } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { CALL_TYPES } from '../data/mockData';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
-import { isSupabaseApiConfigured } from '../lib/supabase';
 import * as tracking from '../services/trackingService';
 
 function callTypeLabel(key) {
@@ -27,10 +26,17 @@ const UB_REGION = {
 };
 
 const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#a855f7', '#06b6d4'];
+const ONLINE_MS = 5 * 60 * 1000;
+const isValidCoordinate = (w) => Number.isFinite(Number(w?.latitude))
+  && Number.isFinite(Number(w?.longitude))
+  && Math.abs(Number(w.latitude)) <= 90
+  && Math.abs(Number(w.longitude)) <= 180;
+const timestampMs = (value) => value?.toMillis?.() ?? new Date(value || 0).getTime();
 
 function timeAgo(ts) {
   if (!ts) return 'мэдээлэлгүй';
-  const diff = Date.now() - new Date(ts).getTime();
+  const diff = Date.now() - timestampMs(ts);
+  if (!Number.isFinite(diff)) return 'хугацаа тодорхойгүй';
   const m = Math.floor(diff / 60000);
   if (m < 1) return 'дөнгөж сая';
   if (m < 60) return `${m} мин өмнө`;
@@ -77,19 +83,28 @@ function WorkerMarker({ worker, color, visit, onPress }) {
 export default function LiveLocationScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isCloud, isAdmin, trackingState } = useApp();
+  const { isCloud, isAdmin, trackingState, authProfile, profile } = useApp();
   const [workers, setWorkers] = useState([]);
   const [visits, setVisits] = useState([]);
   const [tab, setTab] = useState('workers'); // workers | visits
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef(null);
 
   const load = async () => {
     if (!isCloud) return;
     try {
-      const [w, v] = await Promise.all([tracking.fetchWorkers(), tracking.fetchVisitLogs()]);
+      const viewerRole = authProfile?.role || profile?.role || (isAdmin ? 'admin' : 'employee');
+      const [w, v] = await Promise.all([tracking.fetchWorkers(viewerRole), tracking.fetchVisitLogs()]);
       setWorkers(w);
       setVisits(v);
-    } catch (e) {}
+      setError(null);
+    } catch (e) {
+      setError(e?.message || 'Байршлын мэдээлэл ачаалж чадсангүй');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -101,7 +116,7 @@ export default function LiveLocationScreen() {
       unsub?.();
       clearInterval(timer);
     };
-  }, [isCloud]);
+  }, [isCloud, authProfile?.role, profile?.role, isAdmin]);
 
   // Ажилтан бүрийн хамгийн сүүлд очсон айл (visits нь arrived_at-аар буурахаар эрэмбэлэгдсэн)
   const latestVisitByUser = useMemo(() => {
@@ -113,13 +128,27 @@ export default function LiveLocationScreen() {
   }, [visits]);
 
   const located = workers
-    .filter((w) => w.latitude != null && w.longitude != null)
-    .map((w, i) => ({ ...w, color: COLORS[i % COLORS.length], visit: latestVisitByUser[w.id] }));
+    .filter(isValidCoordinate)
+    .map((w, i) => ({ ...w, latitude: Number(w.latitude), longitude: Number(w.longitude), color: COLORS[i % COLORS.length], visit: latestVisitByUser[w.id], online: Date.now() - timestampMs(w.last_seen) <= ONLINE_MS }));
+  const onlineCount = located.filter((w) => w.online).length;
+
+  const fitWorkers = () => {
+    if (!mapReady || !located.length) return;
+    if (located.length === 1) {
+      mapRef.current?.animateToRegion?.({ latitude: located[0].latitude, longitude: located[0].longitude, latitudeDelta: 0.015, longitudeDelta: 0.015 }, 450);
+      return;
+    }
+    mapRef.current?.fitToCoordinates?.(located.map(({ latitude, longitude }) => ({ latitude, longitude })), {
+      edgePadding: { top: 70, right: 45, bottom: 250, left: 45 }, animated: true,
+    });
+  };
+
+  useEffect(() => { fitWorkers(); }, [mapReady, located.map((w) => `${w.id}:${w.latitude}:${w.longitude}`).join('|')]);
 
   return (
     <View style={styles.container}>
       <ScreenHeader title={isAdmin ? 'Ажилчдын хяналт' : 'Байршил'}
-        subtitle={`${isCloud ? (isSupabaseApiConfigured ? 'Supabase' : 'Firebase') : 'Локал'} · ${located.length} online`}
+        subtitle={`Firebase · ${onlineCount} online · ${located.length} байршилтай`}
         right={
           <Badge
             text={trackingState?.active ? 'Илгээж байна' : 'Идэвхгүй'}
@@ -134,6 +163,11 @@ export default function LiveLocationScreen() {
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         initialRegion={UB_REGION}
         showsUserLocation
+        showsMyLocationButton
+        showsCompass
+        toolbarEnabled
+        loadingEnabled
+        onMapReady={() => setMapReady(true)}
       >
         {located.map((w) => (
           <WorkerMarker
@@ -151,10 +185,18 @@ export default function LiveLocationScreen() {
         ))}
       </MapView>
 
+      <TouchableOpacity style={styles.fitButton} onPress={fitWorkers} activeOpacity={0.85}>
+        <Text style={styles.fitButtonText}>Бүгдийг харах</Text>
+      </TouchableOpacity>
+
       <View style={styles.panel}>
-        {!isCloud ? (
+        {loading ? (
+          <View style={styles.stateRow}><ActivityIndicator color={colors.primary} /><Text style={styles.note}>Байршил ачаалж байна...</Text></View>
+        ) : error ? (
+          <TouchableOpacity style={styles.errorCard} onPress={load}><Text style={styles.errorText}>{error}</Text><Text style={styles.retryText}>Дахин оролдох</Text></TouchableOpacity>
+        ) : !isCloud ? (
           <Text style={styles.note}>
-            Supabase холбогдоогүй тул бусад ажилчдын байршил харагдахгүй.
+            Firebase холболтгүй тул бусад ажилчдын байршил харагдахгүй.
           </Text>
         ) : (
           <>
@@ -166,7 +208,7 @@ export default function LiveLocationScreen() {
             <ScrollView style={{ maxHeight: 220 }}>
               {tab === 'workers' ? (
                 located.length === 0 ? (
-                  <EmptyState text="Online ажилтан алга."/>
+                  <EmptyState text="Байршлаа илгээсэн ажилтан алга."/>
                 ) : (
                   located.map((w) => (
                     <TouchableOpacity
@@ -190,7 +232,7 @@ export default function LiveLocationScreen() {
                         )}
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.rowName}>{w.name || 'Нэргүй'}</Text>
+                        <View style={styles.nameLine}><View style={[styles.onlineDot, { backgroundColor: w.online ? colors.success : colors.textFaint }]} /><Text style={styles.rowName}>{w.name || 'Нэргүй'}</Text></View>
                         {w.visit ? (
                           <Text style={styles.rowActivity} numberOfLines={1}>
                              {w.visit.customer || 'Айл'}
@@ -258,6 +300,12 @@ const makeStyles = ({ colors, shadow }) => StyleSheet.create({
     marginTop: -radius.xl,
     ...shadow.md,
   },
+  fitButton: { position: 'absolute', right: 16, top: 86, backgroundColor: colors.surface, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: colors.border, ...shadow.md },
+  fitButtonText: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  stateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  errorCard: { padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.danger + '12', borderWidth: 1, borderColor: colors.danger + '35' },
+  errorText: { color: colors.danger, textAlign: 'center', fontSize: 13 },
+  retryText: { color: colors.primary, textAlign: 'center', fontWeight: '800', marginTop: 6 },
   note: { color: colors.textMuted, textAlign: 'center', paddingVertical: spacing.md },
   tabs: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   tab: {
@@ -281,6 +329,8 @@ const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   },
   dot: { width: 12, height: 12, borderRadius: 6, marginRight: spacing.md },
   rowName: { color: colors.text, fontSize: 15, fontWeight: '700'},
+  nameLine: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  onlineDot: { width: 8, height: 8, borderRadius: 4 },
   rowSub: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
   rowActivity: { color: colors.primary, fontSize: 12, marginTop: 2, fontWeight: '600'},
   rowTime: { color: colors.textFaint, fontSize: 11 },

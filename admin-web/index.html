@@ -2515,17 +2515,33 @@
       setupMap();
       initDashboardCharts();
     }
+    function validMapWorker(w){
+      const lat=Number(w?.latitude),lng=Number(w?.longitude);
+      return Number.isFinite(lat)&&Number.isFinite(lng)&&Math.abs(lat)<=90&&Math.abs(lng)<=180;
+    }
     function renderLocation(c){
-      c.innerHTML=`<div class="card"><div class="card-h"><h3>Real-time байршил</h3><button class="btn btn-ghost btn-sm" onclick="loadAll()">Шинэчлэх</button></div><div class="card-b" style="padding:12px"><div id="map" style="height:520px"></div></div></div>`;
+      const located=visibleWorkers().filter(validMapWorker),active=located.filter(online).length;
+      c.innerHTML=`<div class="stats" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:16px">
+        <div class="stat stat-card"><span class="material-symbols-outlined" style="color:#10b981">location_on</span><div><div class="v">${located.length}</div><div class="l">Байршилтай</div></div></div>
+        <div class="stat stat-card"><span class="material-symbols-outlined" style="color:#22c55e">sensors</span><div><div class="v">${active}</div><div class="l">Online (5 мин)</div></div></div>
+        <div class="stat stat-card"><span class="material-symbols-outlined" style="color:#64748b">schedule</span><div><div class="v">${Math.max(0,located.length-active)}</div><div class="l">Хуучин байршил</div></div></div>
+      </div><div class="card"><div class="card-h"><div><h3>Real-time байршил</h3><div class="muted" style="font-size:12px;margin-top:3px">Firebase профайлын хамгийн сүүлийн баталгаатай координат</div></div><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" onclick="fitMapWorkers()">Бүгдийг харах</button><button class="btn btn-primary btn-sm" onclick="loadAll()">Шинэчлэх</button></div></div><div class="card-b" style="padding:12px"><div id="map" style="height:520px"></div>${located.length?'':`<div class="empty" style="padding:18px">Одоогоор хүчинтэй координаттай ажилтан алга.</div>`}</div></div>`;
       setupMap();
     }
     function setupMap(){
       const el=$('map'); if(!el) return;
       if(map){ map.remove(); map=null; }
       map=L.map(el).setView([47.9185,106.9176],12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+      const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap',updateWhenIdle:false,keepBuffer:4}).addTo(map);
+      tiles.on('tileerror',()=>{ const el=$('map'); if(el) el.setAttribute('data-map-network-error','1'); });
       refreshMarkers();
     }
+    window.fitMapWorkers=function(){
+      if(!map) return;
+      const coords=visibleWorkers().filter(validMapWorker).map(w=>[Number(w.latitude),Number(w.longitude)]);
+      if(coords.length===1) map.setView(coords[0],16,{animate:true});
+      else if(coords.length>1) map.fitBounds(coords,{padding:[45,45],maxZoom:16,animate:true});
+    };
     function workerMapIcon(w, col) {
       const name = (w.name || 'А').charAt(0).toUpperCase();
       if (w.avatar_url) {
@@ -2546,14 +2562,17 @@
     function refreshMarkers(){
       if(!map) return;
       markers.forEach(m=>map.removeLayer(m)); markers=[];
-      visibleWorkers().filter(w=>w.latitude!=null).forEach((w,i)=>{
+      visibleWorkers().filter(validMapWorker).forEach((w,i)=>{
         const col=COLORS[i%COLORS.length];
         const icon=workerMapIcon(w,col);
+        const freshness=online(w)?'<span style="color:#16a34a;font-weight:700">● Online</span>':'<span style="color:#64748b;font-weight:700">● Offline</span>';
+        const accuracy=w.location_accuracy!=null?`<br><span style="color:#64748b">Нарийвчлал: ±${Math.round(Number(w.location_accuracy))} м</span>`:'';
         const popup=w.avatar_url
-          ? `<div style="text-align:center"><div style="background:#fff;padding:8px;border-radius:10px;border:1px solid #e5e7eb;display:inline-block;margin-bottom:8px"><img src="${w.avatar_url}" style="width:120px;height:150px;object-fit:contain;background:#fff;display:block" alt=""></div><br><b>${w.name||'Ажилтан'}</b><br>${timeAgo(w.last_seen)} өмнө</div>`
-          : `<b>${w.name||'Ажилтан'}</b><br>${timeAgo(w.last_seen)} өмнө`;
-        markers.push(L.marker([w.latitude,w.longitude],{icon}).addTo(map).bindPopup(popup));
+          ? `<div style="text-align:center"><div style="background:#fff;padding:8px;border-radius:10px;border:1px solid #e5e7eb;display:inline-block;margin-bottom:8px"><img src="${w.avatar_url}" style="width:96px;height:96px;border-radius:14px;object-fit:cover;background:#fff;display:block" alt=""></div><br><b>${w.name||'Ажилтан'}</b><br>${freshness} · ${timeAgo(w.last_seen)} өмнө${accuracy}</div>`
+          : `<b>${w.name||'Ажилтан'}</b><br>${freshness} · ${timeAgo(w.last_seen)} өмнө${accuracy}`;
+        markers.push(L.marker([Number(w.latitude),Number(w.longitude)],{icon}).addTo(map).bindPopup(popup));
       });
+      fitMapWorkers();
       if($('onl')) $('onl').textContent=visibleWorkers().filter(online).length+'online';
     }
 

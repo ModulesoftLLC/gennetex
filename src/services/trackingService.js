@@ -3,9 +3,17 @@ import { withoutSampleByName, withoutSampleVisits } from '../lib/sampleNames';
 import { filterVisibleProfiles } from '../lib/roles';
 
 // Ажилтны одоогийн байршлыг profiles дээр шинэчлэх (админ хардаг)
-export async function updateMyLocation(userId, { latitude, longitude }) {
+export async function updateMyLocation(userId, { latitude, longitude, accuracy, heading, speed, timestamp }) {
   // Supabase-ийн оронд Firebase-ийн update функцийг ашиглана
-  await firebaseUpdate('profiles', userId, { latitude, longitude, last_seen: new Date().toISOString() });
+  await firebaseUpdate('profiles', userId, {
+    latitude,
+    longitude,
+    location_accuracy: accuracy ?? null,
+    location_heading: heading ?? null,
+    location_speed: speed ?? null,
+    location_source: 'foreground',
+    last_seen: new Date(timestamp || Date.now()).toISOString(),
+  });
 }
 
 // Байршлын лог нэмэх (түүх)
@@ -50,16 +58,10 @@ export async function logVisit({
   });
 }
 
-// Админ: бүх ажилчдын одоогийн байршил (зурагтай)
-// Энэ хэсэгт Supabase auth болон profiles-ийг дуудаж байгаа тул Firebase-ийн харгалзах функцээр солих шаардлагатай.
-// Одоогоор Firebase-ийн auth болон profiles-ийн дуудлагыг шууд орлуулах боломжгүй тул түр Supabase-ийн дуудлагыг хадгалав.
-// Гэхдээ `isCloud` шалгалт байгаа тул Supabase холбогдоогүй үед ажиллахгүй.
-export async function fetchWorkers() {
+// Админ: Firebase profiles collection-оос ажилчдын одоогийн байршлыг авна.
+export async function fetchWorkers(viewerRole = 'admin') {
   // Firebase-ээс бүх профайлыг татаж авах
   const profiles = await firebaseGetAll('profiles', { order: { field: 'name', direction: 'asc' } });
-  // Firebase-ийн auth хэрхэн ажиллахаас хамаарч viewerRole-ийг тодорхойлно.
-  // Одоогоор Firebase-ийн auth-ийг шууд орлуулах боломжгүй тул энэ хэсгийг та өөрөө тохируулах шаардлагатай.
-  const viewerRole = null; // Firebase auth-аас хэрэглэгчийн role-ийг авах
   return filterVisibleProfiles(withoutSampleByName(profiles || []), viewerRole);
 }
 

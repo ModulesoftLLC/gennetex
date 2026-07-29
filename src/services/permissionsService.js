@@ -10,7 +10,7 @@ export const ONBOARDING_KEY = '@gennetex_permissions_onboarded_v1';
 
 // Анх апп нээхэд бүх шаардлагатай зөвшөөрлийг дараалан асууна
 export async function requestAllAppPermissions() {
-  const results = { notifications: false, location: false, camera: false, media: false, speech: false };
+  const results = { notifications: false, location: false, backgroundLocation: false, camera: false, media: false, speech: false };
 
   if (Platform.OS === 'web' || !Device.isDevice) return results;
 
@@ -29,6 +29,14 @@ export async function requestAllAppPermissions() {
     lStatus = status;
   }
   results.location = lStatus === 'granted';
+  if (results.location) {
+    try {
+      const bg = await Location.requestBackgroundPermissionsAsync();
+      results.backgroundLocation = bg.status === 'granted';
+    } catch (_) {
+      results.backgroundLocation = false;
+    }
+  }
 
   const cam = await Camera.requestCameraPermissionsAsync();
   results.camera = cam.status === 'granted';

@@ -600,7 +600,7 @@ export default function AttendanceScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {!isCloud ? (
         <Text style={styles.note}>
-           Supabase холбогдоогүй тул ирц зөвхөн энэ утсанд хадгалагдана.
+           Firebase холбогдоогүй тул ирц зөвхөн энэ утсанд хадгалагдана.
         </Text>
       ) : null}
 
