@@ -4,7 +4,6 @@ import { useApp } from '../context/AppContext';
 import * as liveApi from '../services/liveInviteService';
 import { startIncomingCallAlert, stopIncomingCallAlert } from '../services/callAlertService';
 import { navigationRef } from '../lib/navigationRef';
-import { supabase } from '../lib/supabase';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 
@@ -33,15 +32,8 @@ export default function IncomingLiveInviteManager() {
     // Апп нээгдэхэд pending урилга шалгах (түгжээтэй үед push ирсэн байж болно)
     (async () => {
       try {
-        const { data } = await supabase
-          .from('live_invites')
-          .select('*')
-          .eq('invitee_id', currentUser.id)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (data) await ringInvite(data);
+        const rows = await liveApi.fetchPendingLiveInvites(currentUser.id);
+        if (rows[0]) await ringInvite(rows[0]);
       } catch (e) {}
     })();
 

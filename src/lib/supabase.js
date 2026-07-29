@@ -14,6 +14,7 @@ import {
   firebaseUploadFile,
   firebaseDeleteFile,
   firebaseWatchAuth,
+  firebaseSubscribe,
 } from './firebaseAdapter';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -39,10 +40,13 @@ function normalizeQueryField(field) {
 
 function normalizeRow(row) {
   if (!row || typeof row !== 'object') return row;
-  const result = { ...row };
+  const result = {};
+  Object.entries(row).forEach(([key, value]) => {
+    result[key] = value?.toDate?.().toISOString?.() || value;
+  });
   Object.keys(row).forEach((key) => {
     if (key === 'createdAt' && result.created_at === undefined) {
-      result.created_at = row[key];
+      result.created_at = result[key];
     }
     if (key === 'updatedAt' && result.updated_at === undefined) {
       result.updated_at = row[key];
@@ -50,7 +54,7 @@ function normalizeRow(row) {
     if (/[A-Z]/.test(key)) {
       const snake = camelToSnake(key);
       if (result[snake] === undefined) {
-        result[snake] = row[key];
+        result[snake] = result[key];
       }
     }
   });
@@ -245,6 +249,7 @@ class SupabaseCompatBuilder {
 
 function createSupabaseCompat() {
   const uploadedUrls = new Map();
+  const activeChannels = new Set();
   const auth = {
     async signInWithPassword({ email, password }) {
       try {
@@ -322,13 +327,55 @@ function createSupabaseCompat() {
     rpc(name, params) {
       return Promise.resolve({ data: null, error: null });
     },
-    channel() {
-      return {
-        on() { return this; },
-        subscribe() { return this; },
+    channel(name) {
+      const handlers = [];
+      const channel = {
+        name,
+        unsubscribe: null,
+        on(_type, config, callback) {
+          if (config?.table && callback) handlers.push({ config, callback, known: new Map(), initialized: false });
+          return this;
+        },
+        subscribe() {
+          const unsubs = handlers.map((handler) => {
+            const clauses = [];
+            const rawFilter = String(handler.config.filter || '');
+            const match = rawFilter.match(/^([^=]+)=eq\.(.*)$/);
+            if (match) clauses.push({ field: match[1], op: '==', value: match[2] });
+            return firebaseSubscribe(handler.config.table, (rows) => {
+              const next = new Map(rows.map((row) => [row.id, row]));
+              if (!handler.initialized) {
+                handler.known = next;
+                handler.initialized = true;
+                return;
+              }
+              rows.forEach((row) => {
+                const old = handler.known.get(row.id);
+                if (!old && handler.config.event !== 'UPDATE' && handler.config.event !== 'DELETE') {
+                  handler.callback({ eventType: 'INSERT', new: row, old: null });
+                } else if (old && JSON.stringify(old) !== JSON.stringify(row) && handler.config.event !== 'INSERT' && handler.config.event !== 'DELETE') {
+                  handler.callback({ eventType: 'UPDATE', new: row, old });
+                }
+              });
+              handler.known.forEach((old, id) => {
+                if (!next.has(id) && handler.config.event !== 'INSERT' && handler.config.event !== 'UPDATE') {
+                  handler.callback({ eventType: 'DELETE', new: null, old });
+                }
+              });
+              handler.known = next;
+            }, { whereClauses: clauses });
+          });
+          channel.unsubscribe = () => unsubs.forEach((fn) => fn?.());
+          activeChannels.add(channel);
+          return this;
+        },
       };
+      return channel;
     },
-    removeChannel() {},
+    removeChannel(channel) {
+      channel?.unsubscribe?.();
+      activeChannels.delete(channel);
+    },
     createClient() {
       return this;
     },

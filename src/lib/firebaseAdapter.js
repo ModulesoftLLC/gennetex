@@ -53,11 +53,7 @@ export function firebaseWatchAuth(onChange) {
 }
 
 function normalizeFirestoreField(field) {
-  if (typeof field !== 'string') return field;
-  if (field.includes('_')) {
-    return field.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-  }
-  return field;
+  return typeof field === 'string' ? field : field;
 }
 
 function buildFirestoreQuery(dbCollection, whereClauses, order, limitCount, useCamelCase = false) {
@@ -196,9 +192,27 @@ export function firebaseSubscribe(collectionName, callback, options = {}) {
     );
   }
   if (order) q = query(q, orderBy(normalizeFirestoreField(order.field), order.direction || 'asc'));
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
-  });
+  return onSnapshot(
+    q,
+    (snap) => callback(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))),
+    (error) => {
+      console.warn(`Firebase subscription failed (${collectionName}):`, error?.message || error);
+      options.onError?.(error);
+    }
+  );
+}
+
+export function firebaseSubscribeOne(collectionName, id, callback, onError) {
+  const db = ensureDb();
+  if (!id) return () => {};
+  return onSnapshot(
+    doc(db, collectionName, id),
+    (snap) => callback(snap.exists() ? { id: snap.id, ...snap.data() } : null),
+    (error) => {
+      console.warn(`Firebase document subscription failed (${collectionName}/${id}):`, error?.message || error);
+      onError?.(error);
+    }
+  );
 }
 
 function normalizeUploadPayload(file, contentType) {

@@ -963,7 +963,8 @@
             if (limitCount !== null) ref = ref.limit(limitCount);
             const snap = await ref.get();
             const rows = (snap.docs || []).map((docSnap) => {
-              const data = docSnap.data ? docSnap.data() : {};
+              const rawData = docSnap.data ? docSnap.data() : {};
+              const data = Object.fromEntries(Object.entries(rawData).map(([key,value]) => [key, value && typeof value.toDate === 'function' ? value.toDate().toISOString() : value]));
               if (activeColumns && activeColumns !== '*' && typeof activeColumns === 'string') {
                 const fields = activeColumns.split(',').map((field) => field.trim()).filter(Boolean);
                 const selection = {};
@@ -1011,9 +1012,13 @@
             }
             return { data: Array.isArray(payload) ? saved : saved[0], error: null };
           }
+          const idFilter = filters.find(f => f.field === 'id');
+          const queryFilters = filters.filter(f => f.field !== 'id');
           let query = col;
-          filters.forEach(f => { query = query.where(f.field, '==', f.value); });
-          const snap = await query.get();
+          queryFilters.forEach(f => { query = query.where(f.field, '==', f.value); });
+          const snap = idFilter
+            ? await col.doc(String(idFilter.value)).get().then(doc => ({ docs: doc.exists ? [doc] : [] }))
+            : await query.get();
           const batch = firebaseDbInstance.batch();
           snap.docs.forEach(docSnap => {
             if (operation === 'update') batch.update(docSnap.ref, { ...payload, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
@@ -1695,8 +1700,8 @@
         else if(String(jc.error.message).includes('job_contracts')) toast('Хөдөлмөрийн гэрээ: migration_job_contracts.sql ажиллуулна уу');
       }catch(e){}
       try{
-        const da=await sb.from('device_approvals').select('*').order('requested_at',{ascending:false}).limit(300);
-        if(!da.error) deviceApprovals=da.data||[];
+        const da=await sb.from('device_approvals').select('*').limit(300);
+        if(!da.error) deviceApprovals=(da.data||[]).sort((a,b)=>new Date(b.requested_at||b.created_at||b.createdAt||0)-new Date(a.requested_at||a.created_at||a.createdAt||0));
         else if(String(da.error.message).includes('device_approvals')) toast('Төхөөрөмж зөвшөөрөл: migration_device_approvals.sql ажиллуулна уу');
       }catch(e){}
       try{
@@ -2283,7 +2288,7 @@
       const today=new Date();today.setHours(0,0,0,0);
       const msym=(name,color)=>`<span class="material-symbols-outlined" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:${color}18;color:${color};font-size:22px">${name}</span>`;
       const s=[
-        {ic:msym('group','#453fc1'),v:visibleWorkers().length,l:'Ажилтан'},
+        {ic:msym('group','#453fc1'),v:fieldWorkers().length,l:'Ажилтан'},
         {ic:msym('construction','#ea580c'),v:(data.inventory||[]).filter(it=>(it.category||'material')==='tool').length,l:'Багаж'},
         {ic:msym('inventory_2','#2563eb'),v:(data.inventory||[]).filter(it=>(it.category||'material')==='material').length,l:'Бараа материал'},
         {ic:msym('wifi','#10b981'),v:visibleWorkers().filter(online).length,l:'Online'},

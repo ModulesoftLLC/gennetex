@@ -1,5 +1,4 @@
-import { firebaseSubscribe, firebaseGetOne, firebaseInsert, firebaseUpdate } from '../lib/firebaseAdapter';
-import { isSupabaseApiConfigured } from '../lib/supabase'; // Keep this if you still need to check for Supabase config elsewhere
+import { firebaseSubscribe, firebaseSubscribeOne, firebaseGetOne, firebaseInsert, firebaseUpdate } from '../lib/firebaseAdapter';
 import * as notifyApi from './notificationService';
 
 const TABLE = 'call_sessions';
@@ -49,7 +48,6 @@ export function subscribeIncomingCalls(userId, onCall) {
     },
     {
       whereClauses: [{ field: 'callee_id', op: '==', value: userId }],
-      order: { field: 'createdAt', direction: 'desc' },
     }
   );
 }
@@ -57,14 +55,7 @@ export function subscribeIncomingCalls(userId, onCall) {
 // Миний эхлүүлсэн дуудлагын төлөв өөрчлөгдөхийг сонсох (хариулсан/татгалзсан)
 export function subscribeCallUpdates(callId, onUpdate) {
 
-  return firebaseSubscribe(
-    TABLE,
-    (rows) => {
-      const call = (rows || [])[0];
-      if (call) onUpdate(call);
-    },
-    {
-      whereClauses: [{ field: 'id', op: '==', value: callId }],
-    }
-  );
+  return firebaseSubscribeOne(TABLE, callId, (call) => {
+    if (call) onUpdate(call);
+  });
 }

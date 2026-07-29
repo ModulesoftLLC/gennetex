@@ -1,17 +1,20 @@
-import { supabase } from '../lib/supabase';
+import { firebaseInsert, firebaseList, firebaseSubscribe, firebaseUpdate } from '../lib/firebaseAdapter';
 import * as notifyApi from './notificationService';
 import { CALLS_CHANNEL } from './notificationService';
 import { resolveKind, KIND_LIVE } from './meetingService';
 
+const timeValue = (value) => value?.toMillis?.() ?? new Date(value || 0).getTime();
+
+export async function fetchPendingLiveInvites(userId) {
+  if (!userId) return [];
+  const rows = await firebaseList('live_invites', { whereClauses: [{ field: 'invitee_id', op: '==', value: userId }] });
+  return rows.filter((row) => row.status === 'pending')
+    .sort((a, b) => timeValue(b.created_at || b.createdAt) - timeValue(a.created_at || a.createdAt));
+}
+
 export async function fetchActiveLives() {
-  const { data, error } = await supabase
-    .from('meetings')
-    .select('*')
-    .eq('status', 'active')
-    .order('started_at', { ascending: false })
-    .limit(50);
-  if (error) throw error;
-  return (data || [])
+  const data = await firebaseList('meetings', { whereClauses: [{ field: 'status', op: '==', value: 'active' }] });
+  return (data || []).sort((a, b) => timeValue(b.started_at) - timeValue(a.started_at)).slice(0, 50)
     .filter((r) => resolveKind(r) === KIND_LIVE)
     .map((r) => ({
       id: r.id,
@@ -24,52 +27,29 @@ export async function fetchActiveLives() {
 
 export async function fetchLiveComments(liveId, limit = 100) {
   if (!liveId) return [];
-  const { data, error } = await supabase
-    .from('live_comments')
-    .select('*')
-    .eq('live_id', liveId)
-    .order('created_at', { ascending: true })
-    .limit(limit);
-  if (error) {
-    if (String(error.message).includes('live_comments')) return [];
-    throw error;
-  }
-  return data || [];
+  const data = await firebaseList('live_comments', { whereClauses: [{ field: 'live_id', op: '==', value: liveId }] });
+  return (data || []).sort((a, b) => timeValue(a.created_at || a.createdAt) - timeValue(b.created_at || b.createdAt)).slice(-limit);
 }
 
 export async function postLiveComment({ liveId, userId, userName, content }) {
   const text = String(content || '').trim();
   if (!liveId || !text) throw new Error('Сэтгэгдэл хоосон');
-  const { data, error } = await supabase
-    .from('live_comments')
-    .insert({
+  return firebaseInsert('live_comments', {
       live_id: liveId,
       user_id: userId || null,
       user_name: userName || 'Ажилтан',
       content: text,
-    })
-    .select()
-    .single();
-  if (error) {
-    if (String(error.message).includes('live_comments')) {
-      throw new Error('migration_live_comments_invites.sql ажиллуулна уу');
-    }
-    throw error;
-  }
-  return data;
+    });
 }
 
 export function subscribeLiveComments(liveId, onInsert) {
   if (!liveId) return () => {};
-  const channel = supabase
-    .channel(`live-comments-db-${liveId}`)
-    .on(
-      'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'live_comments', filter: `live_id=eq.${liveId}` },
-      (payload) => onInsert?.(payload.new)
-    )
-    .subscribe();
-  return () => supabase.removeChannel(channel);
+  let known = new Set();
+  return firebaseSubscribe('live_comments', (rows) => {
+    const sorted = [...rows].sort((a, b) => timeValue(a.created_at || a.createdAt) - timeValue(b.created_at || b.createdAt));
+    sorted.forEach((row) => { if (!known.has(row.id)) onInsert?.(row); });
+    known = new Set(rows.map((row) => row.id));
+  }, { whereClauses: [{ field: 'live_id', op: '==', value: liveId }] });
 }
 
 export function isJoinRequest(text) {
@@ -96,31 +76,19 @@ export async function inviteToLive({
   if (inviteeId === hostId) throw new Error('Өөрийгөө урих боломжгүй');
 
   // Хуучин pending урилгыг хаана
-  await supabase
-    .from('live_invites')
-    .update({ status: 'expired' })
-    .eq('invitee_id', inviteeId)
-    .eq('status', 'pending');
+  const pending = await firebaseList('live_invites', { whereClauses: [
+    { field: 'invitee_id', op: '==', value: inviteeId }, { field: 'status', op: '==', value: 'pending' },
+  ] });
+  await Promise.all(pending.map((row) => firebaseUpdate('live_invites', row.id, { status: 'expired' })));
 
-  const { data, error } = await supabase
-    .from('live_invites')
-    .insert({
+  const data = await firebaseInsert('live_invites', {
       live_id: liveId,
       host_id: hostId,
       host_name: hostName || 'Ажилтан',
       invitee_id: inviteeId,
       invitee_name: inviteeName || 'Ажилтан',
       status: 'pending',
-    })
-    .select()
-    .single();
-
-  if (error) {
-    if (String(error.message).includes('live_invites')) {
-      throw new Error('migration_live_comments_invites.sql ажиллуулна уу');
-    }
-    throw error;
-  }
+    });
 
   const phrase = `таныг ${hostName || 'Ажилтан'} live-д урьж байна`;
   try {
@@ -143,33 +111,15 @@ export async function inviteToLive({
 }
 
 export async function respondLiveInvite(inviteId, status) {
-  const { data, error } = await supabase
-    .from('live_invites')
-    .update({ status })
-    .eq('id', inviteId)
-    .eq('status', 'pending')
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+  return firebaseUpdate('live_invites', inviteId, { status });
 }
 
 export function subscribeLiveInvites(userId, onInvite) {
   if (!userId) return () => {};
-  const channel = supabase
-    .channel(`live-invites-${userId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'live_invites',
-        filter: `invitee_id=eq.${userId}`,
-      },
-      (payload) => {
-        if (payload.new?.status === 'pending') onInvite?.(payload.new);
-      }
-    )
-    .subscribe();
-  return () => supabase.removeChannel(channel);
+  let lastId = null;
+  return firebaseSubscribe('live_invites', (rows) => {
+    const pending = rows.filter((row) => row.status === 'pending')
+      .sort((a, b) => timeValue(b.created_at || b.createdAt) - timeValue(a.created_at || a.createdAt))[0];
+    if (pending && pending.id !== lastId) { lastId = pending.id; onInvite?.(pending); }
+  }, { whereClauses: [{ field: 'invitee_id', op: '==', value: userId }] });
 }

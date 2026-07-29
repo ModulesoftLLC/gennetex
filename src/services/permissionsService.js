@@ -4,6 +4,7 @@ import * as Location from 'expo-location';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as Device from 'expo-device';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const ONBOARDING_KEY = '@gennetex_permissions_onboarded_v1';
 
@@ -47,11 +48,9 @@ export async function requestAllAppPermissions() {
 }
 
 export async function isOnboardingComplete() {
-  const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-  return (await AsyncStorage.getItem(ONBOARDING_KEY)) === '1';
+  return (await AsyncStorage.getItem(String(ONBOARDING_KEY))) === '1';
 }
 
 export async function markOnboardingComplete() {
-  const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-  await AsyncStorage.setItem(ONBOARDING_KEY, '1');
+  await AsyncStorage.setItem(String(ONBOARDING_KEY), '1');
 }

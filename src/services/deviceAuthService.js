@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Network from 'expo-network';
-import { supabase } from '../lib/supabase';
+import { firebaseInsert, firebaseList, firebaseSubscribe, firebaseUpdate } from '../lib/firebaseAdapter';
 import * as notifyApi from './notificationService';
 
 // expo-application нь заримдаа build дотор байхгүй байж болзошгүй тул хамгаалалттай ачаална
@@ -15,6 +15,8 @@ try {
 
 const TABLE = 'device_approvals';
 const DEVICE_ID_KEY = '@gennetex_device_id_v1';
+const rowTime = (row) => row?.requested_at?.toMillis?.() ?? row?.createdAt?.toMillis?.()
+  ?? new Date(row?.requested_at || row?.created_at || 0).getTime();
 
 function isPrivilegedUser(user) {
   const role = String(user?.role || user?.user_metadata?.role || '').toLowerCase();
@@ -102,17 +104,9 @@ export async function ensureDeviceApproval(user) {
   }
   const fp = await getDeviceFingerprint();
   try {
-    const { data: existing, error } = await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('device_id', fp.device_id)
-      .maybeSingle();
-
-    if (error) {
-      // Хүснэгт байхгүй / алдаа — хатуу блоклохгүй
-      return { status: 'approved', deviceId: fp.device_id, error: true };
-    }
+    const existing = (await firebaseList(TABLE, { whereClauses: [
+      { field: 'user_id', op: '==', value: user.id },
+    ] })).find((row) => row.device_id === fp.device_id) || null;
 
     if (existing) {
       return { status: existing.status || 'pending', deviceId: fp.device_id, row: existing };
@@ -122,16 +116,10 @@ export async function ensureDeviceApproval(user) {
       user_id: user.id,
       user_name: user.name || null,
       status: 'pending',
+      requested_at: new Date().toISOString(),
       ...fp,
     };
-    const { data: created, error: insErr } = await supabase
-      .from(TABLE)
-      .insert(insertRow)
-      .select()
-      .single();
-    if (insErr) {
-      return { status: 'approved', deviceId: fp.device_id, error: true };
-    }
+    const created = await firebaseInsert(TABLE, insertRow);
     try {
       await notifyApi.notifyDeviceRequestToSuperadmins({
         userName: user.name,
@@ -151,65 +139,35 @@ export async function ensureDeviceApproval(user) {
 /** Тухайн хэрэглэгч+төхөөрөмжийн одоогийн төлөв (poll) */
 export async function fetchMyDeviceStatus(userId, deviceId) {
   if (!userId || !deviceId) return null;
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select('*')
-    .eq('user_id', userId)
-    .eq('device_id', deviceId)
-    .maybeSingle();
-  if (error) return null;
-  return data;
+  return (await firebaseList(TABLE, { whereClauses: [
+    { field: 'user_id', op: '==', value: userId },
+  ] })).find((row) => row.device_id === deviceId) || null;
 }
 
 /** Realtime — өөрийн төхөөрөмжийн төлөв өөрчлөгдөхөд */
 export function subscribeMyDevice(userId, deviceId, onChange) {
-  const channel = supabase
-    .channel(`device-approval-${userId}`)
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: TABLE, filter: `user_id=eq.${userId}` },
-      (payload) => {
-        const row = payload.new || payload.old;
-        if (!deviceId || row?.device_id === deviceId) onChange?.(payload.new);
-      }
-    )
-    .subscribe();
-  return () => supabase.removeChannel(channel);
+  return firebaseSubscribe(TABLE, (rows) => {
+    onChange?.(rows.find((row) => !deviceId || row.device_id === deviceId) || null);
+  }, { whereClauses: [{ field: 'user_id', op: '==', value: userId }] });
 }
 
 // ---- Системийн админд зориулсан ----
 export async function fetchAllDevices(limit = 300) {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select('*')
-    .order('requested_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data || [];
+  const rows = await firebaseList(TABLE);
+  return rows.sort((a, b) => rowTime(b) - rowTime(a)).slice(0, limit);
 }
 
 export async function countPendingDevices() {
-  const { count, error } = await supabase
-    .from(TABLE)
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'pending');
-  if (error) return 0;
-  return count || 0;
+  return (await firebaseList(TABLE, { whereClauses: [{ field: 'status', op: '==', value: 'pending' }] })).length;
 }
 
 export async function decideDevice(id, status, { deciderId, deciderName, userId } = {}) {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .update({
+  const data = await firebaseUpdate(TABLE, id, {
       status,
       decided_at: new Date().toISOString(),
       decided_by: deciderId || null,
       decided_by_name: deciderName || null,
-    })
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
+    });
   try {
     if (userId) {
       await notifyApi.notifyDeviceDecisionToUser(userId, { status });
@@ -219,9 +177,5 @@ export async function decideDevice(id, status, { deciderId, deciderName, userId 
 }
 
 export function subscribeDevices(onChange) {
-  const channel = supabase
-    .channel('device-approvals-admin')
-    .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => onChange?.())
-    .subscribe();
-  return () => supabase.removeChannel(channel);
+  return firebaseSubscribe(TABLE, () => onChange?.());
 }

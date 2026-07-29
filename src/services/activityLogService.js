@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { firebaseInsert, firebaseList } from '../lib/firebaseAdapter';
 
 /**
  * Ажилтны үйлдлийг автоматаар бүртгэнэ (алдааг чимээгүй алгасна).
@@ -15,7 +15,7 @@ export async function logActivity({
 }) {
   if (!userId || !action) return;
   try {
-    await supabase.from('activity_logs').insert({
+    await firebaseInsert('activity_logs', {
       user_id: userId,
       user_name: userName || null,
       action: String(action).slice(0, 80),
@@ -28,16 +28,15 @@ export async function logActivity({
 }
 
 export async function fetchActivityLogs({ limit = 1000, from = null, to = null } = {}) {
-  let q = supabase
-    .from('activity_logs')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (from) q = q.gte('created_at', from);
-  if (to) q = q.lte('created_at', to);
-  const { data, error } = await q;
-  if (error) throw error;
-  return data || [];
+  const rows = await firebaseList('activity_logs', {
+    whereClauses: [
+      ...(from ? [{ field: 'created_at', op: '>=', value: from }] : []),
+      ...(to ? [{ field: 'created_at', op: '<=', value: to }] : []),
+    ],
+    order: { field: 'created_at', direction: 'desc' },
+    limitCount: limit,
+  });
+  return rows || [];
 }
 
 export function actionLabel(action) {

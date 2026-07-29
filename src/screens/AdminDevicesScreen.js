@@ -66,7 +66,7 @@ export default function AdminDevicesScreen() {
               <Info k="IP хаяг" v={r.public_ip || '—'} styles={styles} />
               <Info k="Дотоод IP" v={r.local_ip || '—'} styles={styles} />
               <Info k="MAC" v={r.mac || '—'} styles={styles} />
-              <Info k="Огноо" v={new Date(r.requested_at).toLocaleString('mn-MN')} styles={styles} />
+              <Info k="Огноо" v={new Date(r.requested_at || r.created_at || r.createdAt || 0).toLocaleString('mn-MN')} styles={styles} />
               {r.status === 'pending' ? (
                 <View style={styles.actions}>
                   <Button title="Зөвшөөрөх" variant="success" onPress={() => decide(r, 'approved')} style={{ flex: 1 }} />

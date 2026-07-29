@@ -1,5 +1,4 @@
 import { firebaseSubscribe, firebaseUpdate, firebaseInsert, firebaseGetAll } from '../lib/firebaseAdapter';
-import { isSupabaseApiConfigured } from '../lib/supabase'; // Keep this if you still need to check for Supabase config elsewhere
 import { withoutSampleByName, withoutSampleVisits } from '../lib/sampleNames';
 import { filterVisibleProfiles } from '../lib/roles';
 
@@ -19,7 +18,6 @@ export async function logLocation({ userId, userName, latitude, longitude, speed
     longitude,
     speed: speed ?? null,
   });
-  if (error) throw error;
 }
 
 // Айлд очсон лог
@@ -50,7 +48,6 @@ export async function logVisit({
     face_verified: faceVerified ?? false,
     location_name: locationName ?? customer ?? null,
   });
-  if (error) throw error;
 }
 
 // Админ: бүх ажилчдын одоогийн байршил (зурагтай)
