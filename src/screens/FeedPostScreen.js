@@ -18,6 +18,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { Video, ResizeMode } from 'expo-av';
 import { useApp } from '../context/AppContext';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { ERP_NOT_FOUND } from '../lib/erpMessages';
@@ -199,6 +200,9 @@ export default function FeedPostScreen() {
             ) : null}
             {post.image_url ? (
               <Image source={{ uri: post.image_url }} style={styles.image} resizeMode="cover" />
+            ) : null}
+            {post.video_url ? (
+              <Video source={{ uri: post.video_url }} style={styles.image} resizeMode={ResizeMode.CONTAIN} useNativeControls />
             ) : null}
 
             <View style={styles.stats}>

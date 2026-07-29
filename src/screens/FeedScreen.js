@@ -22,6 +22,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Video, ResizeMode } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { useApp } from '../context/AppContext';
 import { useTheme, useStyles } from '../context/ThemeContext';
@@ -320,6 +321,9 @@ function PostCard({
           <Image source={{ uri: post.image_url }} style={styles.postImage} resizeMode="cover" />
         </Pressable>
       ) : null}
+      {post.video_url ? (
+        <Video source={{ uri: post.video_url }} style={styles.postImage} resizeMode={ResizeMode.CONTAIN} useNativeControls />
+      ) : null}
 
       {hasStats ? (
         <View style={styles.countsRow}>
@@ -450,6 +454,8 @@ export default function FeedScreen() {
   const [error, setError] = useState(null);
   const [composer, setComposer] = useState('');
   const [imageUri, setImageUri] = useState(null);
+  const [videoUri, setVideoUri] = useState(null);
+  const [mediaMeta, setMediaMeta] = useState(null);
   const [tags, setTags] = useState([]);
   const [tagPickerOpen, setTagPickerOpen] = useState(false);
   const [posting, setPosting] = useState(false);
@@ -598,7 +604,27 @@ export default function FeedScreen() {
       mediaTypes: ['images'],
       quality: 0.75,
     });
-    if (!res.canceled) setImageUri(res.assets[0].uri);
+    if (!res.canceled) {
+      const asset = res.assets[0];
+      setImageUri(asset.uri);
+      setVideoUri(null);
+      setMediaMeta({ mimeType: asset.mimeType || 'image/jpeg', fileName: asset.fileName });
+    }
+  };
+
+  const pickVideo = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Зөвшөөрөл', 'Видео санд хандах зөвшөөрөл өгнө үү.');
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], videoMaxDuration: 180 });
+    if (!res.canceled) {
+      const asset = res.assets[0];
+      setVideoUri(asset.uri);
+      setImageUri(null);
+      setMediaMeta({ mimeType: asset.mimeType || 'video/mp4', fileName: asset.fileName });
+    }
   };
 
   const createStory = async () => {
@@ -630,7 +656,7 @@ export default function FeedScreen() {
   const submitPost = async () => {
     if (!me || posting) return;
     const body = composer.trim();
-    if (!body && !imageUri) return;
+    if (!body && !imageUri && !videoUri) return;
     setPosting(true);
     try {
       const post = await feedApi.createPost({
@@ -638,11 +664,16 @@ export default function FeedScreen() {
         authorName: me.name,
         content: body,
         imageUri,
+        videoUri,
+        mediaMimeType: mediaMeta?.mimeType,
+        mediaFileName: mediaMeta?.fileName,
         tags,
       });
       setPosts((prev) => [post, ...prev.filter((p) => p.id !== post.id)]);
       setComposer('');
       setImageUri(null);
+      setVideoUri(null);
+      setMediaMeta(null);
       setTags([]);
     } catch (e) {
       Alert.alert('Алдаа', e.message);
@@ -844,6 +875,14 @@ export default function FeedScreen() {
                     </TouchableOpacity>
                   </View>
                 ) : null}
+                {videoUri ? (
+                  <View style={styles.previewWrap}>
+                    <Video source={{ uri: videoUri }} style={styles.previewImage} resizeMode={ResizeMode.CONTAIN} useNativeControls />
+                    <TouchableOpacity style={styles.previewRemove} onPress={() => setVideoUri(null)}>
+                      <Ionicons name="close" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
 
                 <View style={styles.createDivider} />
 
@@ -859,6 +898,11 @@ export default function FeedScreen() {
                     <Text style={styles.quickLabel}>Зураг</Text>
                   </TouchableOpacity>
                   <View style={styles.quickSep} />
+                  <TouchableOpacity style={styles.quickBtn} onPress={pickVideo} activeOpacity={0.7}>
+                    <Ionicons name="videocam" size={20} color={colors.primary} />
+                    <Text style={styles.quickLabel}>Видео</Text>
+                  </TouchableOpacity>
+                  <View style={styles.quickSep} />
                   <TouchableOpacity
                     style={styles.quickBtn}
                     onPress={() => setTagPickerOpen(true)}
@@ -869,7 +913,7 @@ export default function FeedScreen() {
                   </TouchableOpacity>
                 </View>
 
-                {(composer.trim() || imageUri) && (
+                {(composer.trim() || imageUri || videoUri) && (
                   <TouchableOpacity
                     style={[styles.publishBtn, posting && { opacity: 0.5 }]}
                     onPress={submitPost}

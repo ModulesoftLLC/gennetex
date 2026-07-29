@@ -18,6 +18,7 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Video, ResizeMode } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
 import { useApp } from '../context/AppContext';
 import { useTheme, useStyles } from '../context/ThemeContext';
@@ -177,6 +178,9 @@ export default function FeedProfileScreen() {
         ) : null}
         {item.image_url ? (
           <Image source={{ uri: item.image_url }} style={styles.postImage} />
+        ) : null}
+        {item.video_url ? (
+          <Video source={{ uri: item.video_url }} style={styles.postImage} resizeMode={ResizeMode.CONTAIN} useNativeControls />
         ) : null}
 
         {(item.reactionTotal > 0 || item.commentCount > 0) && (

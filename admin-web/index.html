@@ -2268,6 +2268,8 @@
       const msym=(name,color)=>`<span class="material-symbols-outlined" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:${color}18;color:${color};font-size:22px">${name}</span>`;
       const s=[
         {ic:msym('group','#453fc1'),v:visibleWorkers().length,l:'Ажилтан'},
+        {ic:msym('construction','#ea580c'),v:(data.inventory||[]).filter(it=>(it.category||'material')==='tool').length,l:'Багаж'},
+        {ic:msym('inventory_2','#2563eb'),v:(data.inventory||[]).filter(it=>(it.category||'material')==='material').length,l:'Бараа материал'},
         {ic:msym('wifi','#10b981'),v:visibleWorkers().filter(online).length,l:'Online'},
         {ic:msym('work','#059669'),v:countTodayBags(),l:'Өнөөдрийн баг'},
         {ic:msym('badge','#5e5adb'),v:data.attendance.filter(r=>r.type==='check_in'&&new Date(r.created_at)>=today).length,l:'Өнөөдрийн ирц'},

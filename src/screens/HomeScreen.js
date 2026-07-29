@@ -106,7 +106,7 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const styles = useStyles(makeStyles);
-  const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees, currentUser } = useApp();
+  const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees, currentUser, inventory } = useApp();
   const name = authProfile?.name || profile?.name || currentUser?.name || 'Ажилтан';
   const effectiveRole = resolveRole(
     authProfile?.role || profile?.role || currentUser?.user_metadata?.role,
@@ -115,7 +115,7 @@ export default function HomeScreen() {
   const effectiveAdmin = Boolean(isAdmin || effectiveRole === 'admin' || effectiveRole === 'superadmin');
   const effectiveSuperAdmin = Boolean(isSuperAdmin || effectiveRole === 'superadmin');
 
-  const [stats, setStats] = useState({ employees: 0, online: 0, vehicles: 0, checkins: 0 });
+  const [stats, setStats] = useState({ employees: 0, tools: 0, materials: 0, online: 0, vehicles: 0, checkins: 0 });
   const [now, setNow] = useState(() => new Date());
   const [ohaabSignedToday, setOhaabSignedToday] = useState(true);
 
@@ -156,13 +156,21 @@ export default function HomeScreen() {
           const online = workers.filter(
             (w) => w.latitude != null && w.last_seen && new Date(w.last_seen).getTime() > fiveMinAgo
           ).length;
-          setStats({ employees: emps.length, online, vehicles: vehicles.length, checkins });
+          const items = inventory || [];
+          setStats({
+            employees: emps.length,
+            tools: items.filter((it) => (it.category || 'material') === 'tool').length,
+            materials: items.filter((it) => (it.category || 'material') === 'material').length,
+            online,
+            vehicles: vehicles.length,
+            checkins,
+          });
         } catch (e) {}
       })();
       return () => {
         active = false;
       };
-    }, [isAdmin, isCloud, fetchEmployees, currentUser?.id])
+    }, [isAdmin, isCloud, fetchEmployees, currentUser?.id, inventory])
   );
 
   const dateStr = formatDate(now);
@@ -323,6 +331,10 @@ export default function HomeScreen() {
 
             <View style={styles.statRow}>
               <Stat icon="employees" value={stats.employees} label="Ажилтан" color={colors.primary} />
+              <Stat icon="tools" value={stats.tools} label="Багаж" color="#ea580c" />
+            </View>
+            <View style={styles.statRow}>
+              <Stat icon="inventory" value={stats.materials} label="Бараа материал" color="#2563eb" />
               <Stat icon="online" value={stats.online} label="Online" color={colors.success} />
             </View>
             <View style={styles.statRow}>

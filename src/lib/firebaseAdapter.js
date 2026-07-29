@@ -206,12 +206,10 @@ function normalizeUploadPayload(file, contentType) {
   if (typeof Blob !== 'undefined' && file instanceof Blob) return file;
   if (typeof File !== 'undefined' && file instanceof File) return file;
   if (typeof ArrayBuffer !== 'undefined' && file instanceof ArrayBuffer) {
-    return new Blob([file], { type: contentType });
+    return file;
   }
   if (ArrayBuffer.isView(file)) {
-    const view = file;
-    const buffer = view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
-    return new Blob([buffer], { type: contentType });
+    return file;
   }
   return file;
 }

@@ -19,13 +19,14 @@ export function isValidReaction(r) {
   return REACTIONS.includes(r);
 }
 
-async function uploadFeedImage(uri, folder = 'posts') {
-  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+async function uploadFeedMedia(uri, { folder = 'posts', mimeType = 'image/jpeg', fileName } = {}) {
+  const extension = (fileName?.match(/\.([a-z0-9]+)$/i)?.[1]) || (mimeType.startsWith('video/') ? 'mp4' : 'jpg');
+  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${extension}`;
   const base64 = await FileSystem.readAsStringAsync(uri, {
     encoding: FileSystem.EncodingType.Base64,
   });
   const file = decode(base64);
-  return firebaseUploadFile(path, file, 'image/jpeg');
+  return firebaseUploadFile(path, file, mimeType);
 }
 
 async function fetchAllUserIds(excludeId) {
@@ -143,12 +144,14 @@ export async function fetchFeedProfile(userId) {
   return firebaseGetOne('profiles', userId);
 }
 
-export async function createPost({ authorId, authorName, content, imageUri, tags = [] }) {
+export async function createPost({ authorId, authorName, content, imageUri, videoUri, mediaMimeType, mediaFileName, tags = [] }) {
   const body = String(content || '').trim();
-  if (!body && !imageUri) throw new Error('Пост хоосон байна');
+  if (!body && !imageUri && !videoUri) throw new Error('Пост хоосон байна');
 
   let imageUrl = null;
-  if (imageUri) imageUrl = await uploadFeedImage(imageUri);
+  let videoUrl = null;
+  if (imageUri) imageUrl = await uploadFeedMedia(imageUri, { mimeType: mediaMimeType || 'image/jpeg', fileName: mediaFileName });
+  if (videoUri) videoUrl = await uploadFeedMedia(videoUri, { mimeType: mediaMimeType || 'video/mp4', fileName: mediaFileName });
 
   const cleanTags = (tags || [])
     .filter((t) => t?.user_id && t?.user_name)
@@ -159,6 +162,7 @@ export async function createPost({ authorId, authorName, content, imageUri, tags
     author_name: authorName,
     content: body,
     image_url: imageUrl,
+    video_url: videoUrl,
     tags: cleanTags,
     created_at: new Date().toISOString(),
   });
@@ -167,7 +171,7 @@ export async function createPost({ authorId, authorName, content, imageUri, tags
     const recipients = await fetchAllUserIds(authorId);
     await notifyApi.notifyUsers(recipients, {
       title: `${authorName || 'Ажилтан'} шинэ пост тавилаа`,
-      body: body || 'Зурагтай пост',
+      body: body || (videoUrl ? 'Видеотой пост' : 'Зурагтай пост'),
       data: { type: 'feed', postId: data.id },
       channelId: 'feed',
       priority: 'high',
@@ -218,6 +222,7 @@ export async function sharePost({ post, authorId, authorName }) {
     author_name: authorName,
     content: body,
     image_url: post.image_url || null,
+    video_url: post.video_url || null,
     tags: [],
     created_at: new Date().toISOString(),
   });
@@ -402,7 +407,7 @@ export async function fetchStories(viewerId) {
 
 export async function createStory({ authorId, authorName, imageUri }) {
   if (!imageUri) throw new Error('Story зураг сонгоно уу');
-  const imageUrl = await uploadFeedImage(imageUri, 'stories');
+  const imageUrl = await uploadFeedMedia(imageUri, { folder: 'stories' });
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   const data = await firebaseCreate('stories', {
     author_id: authorId,
