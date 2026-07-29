@@ -8,7 +8,6 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "eas": "eas-cli",
     "version:bump": "node scripts/bump-version.js",
     "admin:sync-env": "node scripts/sync-admin-env.js",
     "admin:serve": "python -m http.server 5500 --directory admin-web",
@@ -25,7 +24,7 @@
     "base64-arraybuffer": "^1.0.2",
     "buffer": "^6.0.3",
     "events": "^3.3.0",
-    "expo": "~54.0.0",
+    "expo": "~54.0.36",
     "expo-application": "~7.0.8",
     "expo-av": "~16.0.8",
     "expo-blur": "~15.0.8",
@@ -61,7 +60,7 @@
     "react-native": "0.81.5",
     "react-native-full-screen-notification-incoming-call": "^1.1.0",
     "react-native-gesture-handler": "~2.28.0",
-    "react-native-get-random-values": "^2.0.0",
+    "react-native-get-random-values": "~1.11.0",
     "react-native-maps": "1.20.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
@@ -75,8 +74,21 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~19.1.10",
-    "eas-cli": "^20.5.1",
     "typescript": "~5.9.2"
+  },
+  "expo": {
+    "doctor": {
+      "appConfigFieldsNotSyncedCheck": {
+        "enabled": false
+      },
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-full-screen-notification-incoming-call",
+          "onnxruntime-react-native",
+          "@solana-mobile/mobile-wallet-adapter-protocol"
+        ]
+      }
+    }
   },
   "private": true
 }
