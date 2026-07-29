@@ -55,6 +55,7 @@ import OhaabScreen from './src/screens/OhaabScreen';
 import OhaabGateScreen from './src/screens/OhaabGateScreen';
 import DeviceGateScreen from './src/screens/DeviceGateScreen';
 import AdminDevicesScreen from './src/screens/AdminDevicesScreen';
+import ErpHealthScreen from './src/screens/ErpHealthScreen';
 import AdminApplicationsScreen from './src/screens/AdminApplicationsScreen';
 import AdminContractsScreen from './src/screens/AdminContractsScreen';
 import MyContractScreen from './src/screens/MyContractScreen';
@@ -185,6 +186,7 @@ function AppStack() {
       <Stack.Screen name="Feedback" component={FeedbackScreen} />
       <Stack.Screen name="Ohaab" component={OhaabScreen} />
       <Stack.Screen name="AdminDevices" component={AdminDevicesScreen} />
+      <Stack.Screen name="ErpHealth" component={ErpHealthScreen} />
       <Stack.Screen name="AdminApplications" component={AdminApplicationsScreen} />
       <Stack.Screen name="AdminContracts" component={AdminContractsScreen} />
       <Stack.Screen name="MyContract" component={MyContractScreen} />

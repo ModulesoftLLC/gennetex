@@ -74,6 +74,7 @@ const ADMIN_MODULES = [
   { key: 'PublicTickets', label: 'Public tickets', icon: 'chat', color: '#0369a1' },
   { key: 'BranchAdmin', label: 'Салбар', icon: 'location', color: '#64748b' },
   { key: 'FeatureFlags', label: 'Feature flags', icon: 'ai', color: '#4f46e5' },
+  { key: 'ErpHealth', label: 'ERP Health Center', icon: 'report', color: '#10b981' },
 ];
 
 // AI боломжуудыг тусад нь тод хэсэг болгож харуулна

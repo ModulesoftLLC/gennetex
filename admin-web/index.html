@@ -685,6 +685,7 @@
           <a data-view="publicsite"><span class="material-symbols-outlined">language</span><span class="t">Вэб сайт</span></a>
           <a data-view="contracts"><span class="material-symbols-outlined">contract</span><span class="t">Хөдөлмөрийн гэрээ</span></a>
           <a data-view="devices"><span class="material-symbols-outlined">smartphone</span><span class="t">Төхөөрөмж зөвшөөрөл</span></a>
+          <a data-view="health"><span class="material-symbols-outlined">health_and_safety</span><span class="t">ERP Health Center</span></a>
           <a data-view="aiappusage"><span class="material-symbols-outlined">computer</span><span class="t">AI апп хэрэглээ</span></a>
           <a data-view="aiperformance"><span class="material-symbols-outlined">auto_awesome</span><span class="t">AI гүйцэтгэл</span></a>
           <a data-view="attendance"><span class="material-symbols-outlined">badge</span><span class="t">Ирц</span></a>
@@ -1544,7 +1545,7 @@
 
     // ===== Navigation =====
     document.querySelectorAll('#nav a').forEach(a=>a.onclick=()=>go(a.dataset.view));
-    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',publicsite:'Вэб сайт',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машины мэдээлэл солих',fuelconsumption:'Бензин зарцуулалт',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
+    const TITLES={dashboard:'Хяналт',employees:'Ажилчид',reports:'Ажилтны тайлан',feedback:'Санал гомдол',applications:'Ажлын байрны анкет',publicsite:'Вэб сайт',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмж зөвшөөрөл',health:'ERP Health Center',aiperformance:'AI гүйцэтгэл',aiappusage:'AI апп хэрэглээ',attendance:'Ирц',location:'Байршил',visits:'Очсон лог',vehicles:'Машины мэдээлэл солих',fuelconsumption:'Бензин зарцуулалт',trips:'Аялал',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Дуудлага',inventory:'Агуулах',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Нийт лог',excelarchive:'Excel архив'};
     let activityFilter={year:new Date().getFullYear(),month:0,day:0,user:''};
     const ACTION_LABEL={login:'Нэвтрэлт',leave_request:'Чөлөө хүсэлт',screen:'Дэлгэц нээсэн',tap:'Даралт',location:'Байршил',face_enroll:'Царай бүртгэл',attendance:'Ирц',inventory:'Бараа/багаж',visit:'Айлд очсон',site_work:'Ажлын байр',service_call:'Дуудлага',other:'Бусад'};
     const fmtLogTime=ts=>{
@@ -1553,7 +1554,7 @@
       const p=n=>String(n).padStart(2,'0');
       return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
     };
-    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',publicsite:'Public вэбсайтын текст засварлах',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'QR уншуулж машины мэдээлэл засах · Autobox',fuelconsumption:'Машинаар км · бензиний түвшин (%)',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
+    const SUBTITLES={dashboard:'ERP удирдлагын тойм',employees:'Ажилтнуудын мэдээлэл',reports:'Ажилтны тайлангууд',feedback:'Санал, гомдлын жагсаалт',applications:'Ажилд орох анкетууд',publicsite:'Public вэбсайтын текст засварлах',contracts:'Хөдөлмөрийн гэрээ',devices:'Төхөөрөмжийн зөвшөөрөл',health:'Firebase өгөгдөл ба sync-ийн автомат оношилгоо',aiperformance:'AI гүйцэтгэлийн дүн шинжилгээ',aiappusage:'Апп хэрэглээний AI тайлан',attendance:'Ирцийн бүртгэл',location:'Real-time байршил',visits:'Айлд очсон лог',vehicles:'QR уншуулж машины мэдээлэл засах · Autobox',fuelconsumption:'Машинаар км · бензиний түвшин (%)',trips:'Аялал, түлш',companions:'Хамт яваа багууд',sitework:'Ажлын байр',servicecalls:'Үйлчилгээний дуудлага',inventory:'Агуулах, бараа',usage:'Барааны хэрэглээ',feedposts:'Gennetex Post удирдлага',meetings:'Хурал удирдлага',livestreams:'Live stream хянах',screenshare:'Дэлгэц хянах',activitylogs:'Системийн нийт лог',excelarchive:'Excel архив'};
     function go(v){
       if(view==='vehicles'&&v!=='vehicles'){ stopVehicleQrScan(); stopAutoboxPoll(); }
       view=v;
@@ -1764,6 +1765,7 @@
       if(view==='publicsite') return renderPublicSite(c);
       if(view==='contracts') return renderContracts(c);
       if(view==='devices') return renderDevices(c);
+      if(view==='health') return renderHealth(c);
       if(view==='aiappusage') return renderAiAppUsage(c);
       if(view==='aiperformance') return renderAiPerformance(c);
       if(view==='attendance') return renderAttendance(c);
@@ -2284,6 +2286,43 @@
       return `<div class="card" style="margin-bottom:16px;border-color:#f59e0b"><div class="card-b" style="padding:14px 16px;font-size:13px;line-height:1.5">${parts.join('<br>')}</div></div>`;
     }
 
+    function collectWebHealth(){
+      const now=Date.now(),day=86400000,issues=[];
+      const workers=data.workers||[],inventory=data.inventory||[],devices=data.deviceApprovals||[],attendance=data.attendance||[],vehicles=data.vehicles||[];
+      const incomplete=workers.filter(w=>!w.name||!w.email||!w.role);
+      const emails={}; workers.forEach(w=>{const e=String(w.email||'').trim().toLowerCase();if(e)emails[e]=(emails[e]||0)+1});
+      const duplicates=Object.values(emails).filter(n=>n>1).reduce((a,n)=>a+n,0);
+      const negative=inventory.filter(x=>Number(x.quantity)<0);
+      const low=inventory.filter(x=>Number(x.quantity)>=0&&Number(x.quantity)<=Number(x.min_stock??x.minimum_stock??0));
+      const stale=fieldWorkers().filter(w=>!w.last_seen||now-new Date(w.last_seen).getTime()>day);
+      const oldDevices=devices.filter(x=>x.status==='pending'&&now-new Date(x.requested_at||x.created_at||x.createdAt||0).getTime()>day);
+      const oldAttendance=attendance.filter(x=>x.status==='pending'&&now-new Date(x.created_at||x.createdAt||0).getTime()>day);
+      const noPlate=vehicles.filter(x=>!String(x.plate_number||x.plate||'').trim());
+      const add=(id,severity,title,detail,count,target)=>{if(count)issues.push({id,severity,title,detail,count,target})};
+      add('negative','critical','Сөрөг үлдэгдэл','Барааны үлдэгдэл 0-ээс доош орсон.',negative.length,'inventory');
+      add('profiles','critical','Дутуу ажилтны мэдээлэл','Нэр, имэйл эсвэл эрх дутуу profile байна.',incomplete.length,'employees');
+      add('emails','critical','Давхардсан имэйл','Нэг имэйлтэй олон profile илэрлээ.',duplicates,'employees');
+      add('devices','warning','Удаан хүлээгдсэн төхөөрөмж','24 цагаас удаан pending хүсэлт байна.',oldDevices.length,'devices');
+      add('attendance','warning','Шийдээгүй ирц','24 цагаас удаан pending ирц байна.',oldAttendance.length,'attendance');
+      add('low','warning','Бага үлдэгдэл','Доод нөөцөд хүрсэн бараа/багаж байна.',low.length,'inventory');
+      add('stale','info','Байршил шинэчлээгүй','24 цагт байршлаа шинэчлээгүй ажилтан байна.',stale.length,'location');
+      add('plate','warning','Улсын дугаар дутуу','Улсын дугааргүй машин байна.',noPlate.length,'vehicles');
+      const deduction=issues.reduce((s,x)=>s+x.count*(x.severity==='critical'?8:x.severity==='warning'?3:1),0);
+      return {score:Math.max(0,100-deduction),issues,counts:{profiles:workers.length,employees:fieldWorkers().length,inventory:inventory.length,vehicles:vehicles.length,attendance:attendance.length}};
+    }
+
+    function healthSummaryBanner(){
+      const h=collectWebHealth(); if(!h.issues.length) return `<div class="card" style="margin-bottom:16px;border-color:#16a34a"><div class="card-b" style="padding:14px 16px;color:#16a34a;font-weight:700">✓ ERP Health ${h.score}/100 — бүх автомат шалгалт хэвийн</div></div>`;
+      const critical=h.issues.filter(x=>x.severity==='critical').length;
+      return `<button class="card" style="width:100%;margin-bottom:16px;text-align:left;border-color:${critical?'#dc2626':'#d97706'};cursor:pointer" onclick="go('health')"><div class="card-b" style="padding:14px 16px"><b style="color:${critical?'#dc2626':'#d97706'}">ERP Health ${h.score}/100</b><span class="muted"> · ${h.issues.length} төрлийн асуудал илэрлээ — дэлгэрэнгүй харах →</span></div></button>`;
+    }
+
+    function renderHealth(c){
+      const h=collectWebHealth(),scoreColor=h.score>=90?'#16a34a':h.score>=70?'#d97706':'#dc2626';
+      const issueHtml=h.issues.length?h.issues.map(x=>{const col=x.severity==='critical'?'#dc2626':x.severity==='warning'?'#d97706':'#2563eb';return `<button class="card" style="width:100%;text-align:left;border-left:4px solid ${col};cursor:pointer;margin-bottom:10px" onclick="go('${x.target}')"><div class="card-b"><div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-size:11px;font-weight:800;text-transform:uppercase;color:${col}">${x.severity==='critical'?'Яаралтай':x.severity==='warning'?'Анхаарах':'Мэдээлэл'}</div><div style="font-size:16px;font-weight:800;margin-top:5px">${x.title}</div><div class="muted" style="font-size:13px;margin-top:4px">${x.detail}</div><div style="font-size:12px;color:var(--accent);font-weight:700;margin-top:9px">Засах хэсэг рүү орох →</div></div><div style="font-size:28px;font-weight:900;color:${col}">${x.count}</div></div></div></button>`}).join(''):`<div class="card" style="border-color:#16a34a"><div class="card-b" style="text-align:center;color:#16a34a;font-weight:800;padding:32px">✓ Одоогоор илэрсэн асуудал алга.</div></div>`;
+      c.innerHTML=`<div class="grid2" style="align-items:stretch;margin-bottom:16px"><div class="card"><div class="card-b" style="display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:190px"><div class="muted">Системийн эрүүл мэнд</div><div style="font-size:64px;line-height:1;font-weight:900;color:${scoreColor};margin-top:8px">${h.score}</div><div class="muted">/ 100 · ${h.issues.length} төрлийн асуудал</div></div></div><div class="stats" style="margin:0;grid-template-columns:repeat(2,1fr)">${Object.entries(h.counts).map(([k,v])=>`<div class="stat stat-card"><div><div class="v">${v}</div><div class="l">${k}</div></div></div>`).join('')}</div></div>${issueHtml}`;
+    }
+
     function statCards(){
       const today=new Date();today.setHours(0,0,0,0);
       const msym=(name,color)=>`<span class="material-symbols-outlined" style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:${color}18;color:${color};font-size:22px">${name}</span>`;
@@ -2477,7 +2516,7 @@
     }
 
     function renderDashboard(c){
-      c.innerHTML = dashboardHealthBanner()+statCards()+`
+      c.innerHTML = dashboardHealthBanner()+healthSummaryBanner()+statCards()+`
         <div class="card animate-chart-entry" style="margin-bottom:20px;animation-delay:.1s">
           <div class="card-h"><h3>Ирцийн график (7 хоног)</h3></div>
           <div class="card-b"><div class="dash-chart-wrap"><canvas id="dashAttendanceChart"></canvas></div></div>
