@@ -7,6 +7,9 @@ import { distanceMeters } from '../lib/geo';
 
 const TABLE = 'attendance';
 const BUCKET = 'attendance';
+const rowTime = (row) => row?.created_at?.toMillis?.() ?? row?.createdAt?.toMillis?.()
+  ?? new Date(row?.created_at || row?.createdAt || 0).getTime();
+const newestFirst = (rows) => [...(rows || [])].sort((a, b) => rowTime(b) - rowTime(a));
 
 // Селфи зургийг Supabase Storage-д байршуулж, нийтийн URL буцаана
 export async function uploadSelfie(uri, staffId) {
@@ -136,9 +139,8 @@ export async function fetchAttendanceLocations() {
   if (isFirebaseOnly) {
     const rows = await firebaseList('attendance_locations', {
       whereClauses: [{ field: 'active', op: '==', value: true }],
-      order: { field: 'created_at', direction: 'desc' },
     });
-    return rows || [];
+    return newestFirst(rows);
   }
 
   const { data, error } = await supabase
@@ -175,9 +177,8 @@ export async function fetchPendingAttendance() {
   if (isFirebaseOnly) {
     const rows = await firebaseList(TABLE, {
       whereClauses: [{ field: 'status', op: '==', value: 'pending' }],
-      order: { field: 'created_at', direction: 'desc' },
     });
-    return rows || [];
+    return newestFirst(rows);
   }
 
   const { data, error } = await supabase
@@ -199,13 +200,8 @@ export async function countTodayCheckIns() {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   if (isFirebaseOnly) {
-    const rows = await firebaseList(TABLE, {
-      whereClauses: [
-        { field: 'type', op: '==', value: 'check_in' },
-        { field: 'created_at', op: '>=', value: start.toISOString() },
-      ],
-    });
-    return (rows || []).length;
+    const rows = await firebaseList(TABLE);
+    return (rows || []).filter((row) => row.type === 'check_in' && rowTime(row) >= start.getTime()).length;
   }
 
   const { count, error } = await supabase
@@ -219,11 +215,8 @@ export async function countTodayCheckIns() {
 
 export async function fetchAttendance(limit = 50) {
   if (isFirebaseOnly) {
-    const rows = await firebaseList(TABLE, {
-      order: { field: 'created_at', direction: 'desc' },
-      limitCount: limit,
-    });
-    return rows || [];
+    const rows = await firebaseList(TABLE);
+    return newestFirst(rows).slice(0, limit);
   }
   const { data, error } = await supabase
     .from(TABLE)

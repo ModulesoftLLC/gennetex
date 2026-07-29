@@ -75,29 +75,67 @@ function buildFirestoreQuery(dbCollection, whereClauses, order, limitCount, useC
   return q;
 }
 
+function comparable(value) {
+  return value?.toMillis ? value.toMillis() : value;
+}
+
+function matchesClause(row, clause) {
+  const actual = comparable(row?.[clause.field]);
+  const expected = comparable(clause.value);
+  if (clause.op === '==') return actual === expected;
+  if (clause.op === '!=') return actual !== expected;
+  if (clause.op === '>') return actual > expected;
+  if (clause.op === '>=') return actual >= expected;
+  if (clause.op === '<') return actual < expected;
+  if (clause.op === '<=') return actual <= expected;
+  if (clause.op === 'in') return Array.isArray(expected) && expected.includes(actual);
+  if (clause.op === 'not-in') return Array.isArray(expected) && !expected.includes(actual);
+  if (clause.op === 'array-contains') return Array.isArray(actual) && actual.includes(expected);
+  return true;
+}
+
+function finalizeRows(rows, clauses, order, limitCount) {
+  let result = (rows || []).filter((row) => clauses.every((clause) => matchesClause(row, clause)));
+  if (order?.field) {
+    const direction = order.direction === 'desc' ? -1 : 1;
+    result = [...result].sort((a, b) => {
+      const av = comparable(a?.[order.field]);
+      const bv = comparable(b?.[order.field]);
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      return (av < bv ? -1 : av > bv ? 1 : 0) * direction;
+    });
+  }
+  return limitCount ? result.slice(0, limitCount) : result;
+}
+
 export async function firebaseList(collectionName, options = {}) {
   const db = ensureDb();
   const { whereClauses = [], order = null, limitCount = null } = options;
   const rawClauses = whereClauses.map((w) => ({ ...w, field: String(w.field) }));
-  const tryQuery = async (useCamelCase = false) => {
-    const q = buildFirestoreQuery(collection(db, collectionName), rawClauses, order, limitCount, useCamelCase);
+  const tryQuery = async () => {
+    // Server orderBy нь order field-гүй legacy document-ийг хасдаг тул client талд эрэмбэлнэ.
+    const q = buildFirestoreQuery(collection(db, collectionName), rawClauses, null, null, false);
     const snap = await getDocs(q);
-    return snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+    return finalizeRows(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })), rawClauses, order, limitCount);
   };
 
   try {
-    return await tryQuery(false);
+    return await tryQuery();
   } catch (error) {
-    if (rawClauses.some((w) => w.field.includes('_')) || (order?.field && order.field.includes('_'))) {
-      try {
-        return await tryQuery(true);
-      } catch (fallbackError) {
-        console.warn('Firebase list fallback failed:', fallbackError?.message || fallbackError);
-        return [];
-      }
+    try {
+      const snap = await getDocs(collection(db, collectionName));
+      return finalizeRows(
+        snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })),
+        rawClauses,
+        order,
+        limitCount
+      );
+    } catch (fallbackError) {
+      console.warn('Firebase list failed:', fallbackError?.message || error?.message || fallbackError || error);
+      return [];
     }
-    console.warn('Firebase list failed:', error?.message || error);
-    return [];
   }
 }
 
@@ -191,10 +229,14 @@ export function firebaseSubscribe(collectionName, callback, options = {}) {
       ...whereClauses.map((w) => where(normalizeFirestoreField(w.field), w.op, w.value))
     );
   }
-  if (order) q = query(q, orderBy(normalizeFirestoreField(order.field), order.direction || 'asc'));
   return onSnapshot(
     q,
-    (snap) => callback(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))),
+    (snap) => callback(finalizeRows(
+      snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })),
+      whereClauses,
+      order,
+      null
+    )),
     (error) => {
       console.warn(`Firebase subscription failed (${collectionName}):`, error?.message || error);
       options.onError?.(error);

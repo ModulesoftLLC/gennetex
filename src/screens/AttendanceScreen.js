@@ -732,7 +732,7 @@ export default function AttendanceScreen() {
       />
       <FlatList
         data={isAdmin ? records.filter((r) => r.status !== 'pending') : []}
-        keyExtractor={(r) => r.id}
+        keyExtractor={(r, index) => `${r.id || 'attendance'}-${index}`}
         ListHeaderComponent={header}
         contentContainerStyle={{ padding: spacing.lg, paddingBottom: 110 }}
         renderItem={({ item }) => (

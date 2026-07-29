@@ -227,11 +227,13 @@ export async function updateProfile(userId, patch) {
 
 export async function fetchEmployees() {
   const viewerRole = await getViewerRole();
-  const data = await firebaseList('profiles', { order: { field: 'createdAt', direction: 'asc' } });
+  // Firestore orderBy нь тухайн field байхгүй хуучин profile-уудыг үр дүнгээс хасдаг.
+  // Admin web-тэй ижил бүх document-ийг авч, client талд эрэмбэлнэ.
+  const data = await firebaseList('profiles');
   const profiles = (data || []).map((p) => ({
     ...p,
     role: normalizeRole(p.role) || p.role,
-  }));
+  })).sort((a, b) => String(a.name || a.email || '').localeCompare(String(b.name || b.email || ''), 'mn'));
   try {
     console.debug('DIAG fetchEmployees', { viewerRole, count: profiles.length, sample: profiles.slice(0,5).map((p) => ({ id: p.id, email: p.email, role: p.role })) });
   } catch (e) {}
