@@ -95,6 +95,9 @@ export default function LoginScreen() {
 
 function mapError(msg = '') {
   const message = String(msg || '').trim();
+  if (/too-many-requests/i.test(message)) {
+    return 'Олон удаа нэвтрэх оролдлого хийсэн тул Firebase түр хамгаалалт тавилаа. Хэсэг хүлээгээд дахин оролдох эсвэл нууц үгээ сэргээнэ үү.';
+  }
   if (/invalid login credentials/i.test(message) || /invalid-credential/i.test(message)) {
     return 'Имэйл эсвэл нууц үг буруу байна. Хэрэглэгчийн мэдээллээ шалгана уу.';
   }

@@ -86,28 +86,17 @@ async function resolveProfileRecord(userIdOrEmail, email) {
   return profile;
 }
 
-function buildFallbackProfile(email) {
-  const normalizedEmail = String(email || '').trim().toLowerCase();
-  const name = normalizedEmail.split('@')[0] || 'Хэрэглэгч';
-  const role = resolveRole(null, normalizedEmail);
-  const id = `local_${normalizedEmail.replace(/[^a-z0-9]+/g, '_') || 'user'}`;
-  return {
-    id,
-    email: normalizedEmail,
-    name,
-    role,
-    must_change_password: false,
-    isLocalFallback: true,
-  };
-}
-
 export async function signIn(email, password) {
   const trimmedEmail = String(email || '').trim();
   try {
     const user = await firebaseSignIn(trimmedEmail, password);
     await syncProfileAfterAuth();
     const profile = await getProfile(user?.uid, trimmedEmail);
-    return { user, profile: profile || buildFallbackProfile(trimmedEmail) };
+    if (!profile) {
+      await firebaseLogout();
+      throw new Error('Firebase profile олдсонгүй. Системийн админ хэрэглэгчийн бүртгэлийг шалгана уу.');
+    }
+    return { user, profile };
   } catch (error) {
     const authUser = getCurrentFirebaseUser();
     if (authUser) {
