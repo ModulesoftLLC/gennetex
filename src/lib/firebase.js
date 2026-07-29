@@ -1,5 +1,5 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeApp, getApps, getApp, deleteApp } from 'firebase/app';
+import { getAuth, initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { Platform } from 'react-native';
@@ -51,4 +51,18 @@ export function normalizeFirebaseError(error) {
   if (!error) return null;
   if (typeof error === 'string') return new Error(error);
   return new Error(error.message || 'Firebase error');
+}
+
+export async function createFirebaseUserWithoutChangingSession(email, password) {
+  if (!isFirebaseConfigured) throw new Error('Firebase Authentication is not configured');
+  const secondaryName = `employee-create-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const secondaryApp = initializeApp(config, secondaryName);
+  try {
+    const secondaryAuth = getAuth(secondaryApp);
+    const { user } = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+    await firebaseSignOut(secondaryAuth);
+    return user;
+  } finally {
+    await deleteApp(secondaryApp).catch(() => {});
+  }
 }

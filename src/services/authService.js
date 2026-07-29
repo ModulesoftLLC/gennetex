@@ -1,6 +1,5 @@
 import {
   firebaseSignIn,
-  firebaseSignUp,
   firebaseLogout,
   firebaseResetPassword,
   firebaseChangePassword,
@@ -11,6 +10,7 @@ import {
   firebaseDelete,
   firebaseCreate,
 } from '../lib/firebaseAdapter';
+import { createFirebaseUserWithoutChangingSession } from '../lib/firebase';
 import { withoutSampleByName } from '../lib/sampleNames';
 import {
   ROLES,
@@ -296,8 +296,7 @@ export async function adminCreateEmployee({ email, password, name, position, pho
   }
   const oneTime = password || generateOneTimePassword();
   try {
-    const result = await firebaseSignUp(email.trim(), oneTime, { name, position, phone, role: safeRole, must_change_password: true });
-    const user = result.user;
+    const user = await createFirebaseUserWithoutChangingSession(email.trim(), oneTime);
     await firebaseSet('profiles', user.uid, {
       id: user.uid,
       email: user.email,

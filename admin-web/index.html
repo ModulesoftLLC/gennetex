@@ -799,7 +799,16 @@
       if (!initFirebaseClient()) {
         throw new Error('Firebase client эхлүүлэх боломжгүй');
       }
-      const userCred = await firebaseAuthInstance.createUserWithEmailAndPassword(email, password);
+      const secondaryName = `employee-create-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const secondaryApp = window.firebase.initializeApp(FIREBASE_CONFIG, secondaryName);
+      const secondaryAuth = window.firebase.auth(secondaryApp);
+      let userCred;
+      try {
+        userCred = await secondaryAuth.createUserWithEmailAndPassword(email, password);
+        await secondaryAuth.signOut();
+      } finally {
+        await secondaryApp.delete().catch(() => {});
+      }
       const uid = userCred?.user?.uid;
       if (!uid) {
         throw new Error('Firebase хэрэглэгч үүсгэхэд UID олдсонгүй');
@@ -985,27 +994,42 @@
       return builder;
     }
 
-    function createFirebaseMutationBuilder(collectionName, payload) {
-      const builder = {
-        select: () => ({
-          single: async () => {
-            if (!initFirebaseClient()) return { data: null, error: new Error('Firebase client эхлүүлж чадсангүй') };
-            const currentUser = getFirebaseAuthUser();
-            if (!currentUser) return { data: null, error: new Error('Firebase-д нэвтрээгүй байна. Админ хэрэглэгчээр нэвтэрнэ үү.') };
-            try {
-              const docRef = firebaseDbInstance.collection(collectionName).doc();
-              await docRef.set({
-                ...payload,
-                createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-              }, { merge: true });
-              const snap = await docRef.get();
-              return { data: { id: snap.id, ...(snap.data ? snap.data() : {}) }, error: null };
-            } catch (error) {
-              return { data: null, error };
+    function createFirebaseMutationBuilder(collectionName, operation, payload) {
+      const filters = [];
+      const execute = async () => {
+        if (!initFirebaseClient()) return { data: null, error: new Error('Firebase client эхлүүлж чадсангүй') };
+        if (!getFirebaseAuthUser()) return { data: null, error: new Error('Firebase-д нэвтрээгүй байна. Админ хэрэглэгчээр нэвтэрнэ үү.') };
+        try {
+          const col = firebaseDbInstance.collection(collectionName);
+          if (operation === 'insert') {
+            const rows = Array.isArray(payload) ? payload : [payload];
+            const saved = [];
+            for (const row of rows) {
+              const docRef = col.doc();
+              await docRef.set({ ...row, createdAt: window.firebase.firestore.FieldValue.serverTimestamp(), updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+              saved.push({ id: docRef.id, ...row });
             }
-          },
-        }),
+            return { data: Array.isArray(payload) ? saved : saved[0], error: null };
+          }
+          let query = col;
+          filters.forEach(f => { query = query.where(f.field, '==', f.value); });
+          const snap = await query.get();
+          const batch = firebaseDbInstance.batch();
+          snap.docs.forEach(docSnap => {
+            if (operation === 'update') batch.update(docSnap.ref, { ...payload, updatedAt: window.firebase.firestore.FieldValue.serverTimestamp() });
+            else batch.delete(docSnap.ref);
+          });
+          await batch.commit();
+          return { data: snap.docs.map(d => ({ id: d.id, ...d.data(), ...(operation === 'update' ? payload : {}) })), error: null };
+        } catch (error) {
+          return { data: null, error };
+        }
+      };
+      const builder = {
+        eq: (field, value) => { filters.push({ field, value }); return builder; },
+        select: () => builder,
+        single: async () => { const result = await execute(); return { ...result, data: Array.isArray(result.data) ? (result.data[0] || null) : result.data }; },
+        then: (resolve, reject) => execute().then(resolve, reject),
       };
       return builder;
     }
@@ -1025,17 +1049,9 @@
         },
         from: (collectionName) => ({
           select: (columns) => createFirebaseQueryBuilder(collectionName, columns),
-          insert: (payload) => createFirebaseMutationBuilder(collectionName, payload),
-          update: () => ({
-            eq: () => ({
-              select: () => ({
-                single: async () => ({ data: null, error: null }),
-              }),
-            }),
-          }),
-          delete: () => ({
-            eq: async () => ({ data: null, error: null }),
-          }),
+          insert: (payload) => createFirebaseMutationBuilder(collectionName, 'insert', payload),
+          update: (payload) => createFirebaseMutationBuilder(collectionName, 'update', payload),
+          delete: () => createFirebaseMutationBuilder(collectionName, 'delete', null),
         }),
         rpc: async () => ({ data: null, error: null }),
         storage: { from: () => ({ upload: async () => ({ data: null, error: null }), getPublicUrl: () => ({ data: { publicUrl: '' }, error: null }), remove: async () => ({ data: null, error: null }) }) },
