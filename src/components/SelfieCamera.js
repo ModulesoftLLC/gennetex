@@ -19,10 +19,12 @@ export default function SelfieCamera({
   const cameraRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
   const [countdown, setCountdown] = useState(null);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [cameraError, setCameraError] = useState(null);
   const styles = useStyles(makeStyles);
 
   const takePhoto = async () => {
-    if (!cameraRef.current || capturing) return;
+    if (!cameraRef.current || !cameraReady || capturing) return;
     try {
       setCapturing(true);
       const photo = await cameraRef.current.takePictureAsync({
@@ -31,6 +33,8 @@ export default function SelfieCamera({
       });
       onCapture?.(photo);
     } catch (e) {
+      const message = e?.message || 'Камераар зураг авч чадсангүй';
+      setCameraError(message);
       console.warn('Зураг авахад алдаа:', e);
     } finally {
       setCapturing(false);
@@ -39,7 +43,7 @@ export default function SelfieCamera({
 
   // Автомат зураг авах — товч дарахгүйгээр тодорхой хугацааны дараа
   useEffect(() => {
-    if (!auto || !visible || !permission?.granted || busy || capturing) {
+    if (!auto || !visible || !permission?.granted || !cameraReady || busy || capturing) {
       setCountdown(null);
       return;
     }
@@ -57,7 +61,14 @@ export default function SelfieCamera({
       clearTimeout(t);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auto, visible, permission?.granted, busy, capturing, autoDelayMs]);
+  }, [auto, visible, permission?.granted, cameraReady, busy, capturing, autoDelayMs]);
+
+  useEffect(() => {
+    if (!visible) {
+      setCameraReady(false);
+      setCameraError(null);
+    }
+  }, [visible]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -76,14 +87,29 @@ export default function SelfieCamera({
           </View>
         ) : (
           <>
-            <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} facing="front"/>
+            <CameraView
+              ref={cameraRef}
+              style={StyleSheet.absoluteFill}
+              facing="front"
+              onCameraReady={() => {
+                setCameraReady(true);
+                setCameraError(null);
+              }}
+              onMountError={(event) => {
+                setCameraReady(false);
+                setCameraError(event?.message || 'Камер нээгдсэнгүй');
+              }}
+            />
             <View style={styles.overlay} pointerEvents="none">
               {progressText ? <Text style={styles.progress}>{progressText}</Text> : null}
+              {cameraError ? <Text style={styles.errorText}>{cameraError}</Text> : null}
               <View style={styles.faceFrame}>
                 {auto && countdown ? <Text style={styles.countdown}>{countdown}</Text> : null}
               </View>
               <Text style={styles.hint}>
-                {busy || capturing
+                {!cameraReady
+                  ? 'Камер бэлэн болж байна...'
+                  : busy || capturing
                   ? 'Боловсруулж байна...'
                   : auto
                   ? hint || 'Царайгаа хүрээнд байрлуулаарай — автоматаар авна'
@@ -150,6 +176,7 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
   },
+  errorText: { color: '#fff', backgroundColor: '#b91c1ccc', padding: 10, borderRadius: 8, marginBottom: 12 },
   controls: { position: 'absolute', bottom: 48, left: 0, right: 0, alignItems: 'center'},
   shutter: {
     width: 74,

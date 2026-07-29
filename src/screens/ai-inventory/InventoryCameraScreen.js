@@ -47,6 +47,7 @@ export default function InventoryCameraScreen() {
   const [fps, setFps] = useState(0);
   const [live, setLive] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState('all');
   const intervalRef = useRef(null);
   const fpsRef = useRef({ n: 0, t: Date.now() });
@@ -91,7 +92,7 @@ export default function InventoryCameraScreen() {
   const processFrame = useCallback(async () => {
     let uri = null;
     // ONNX path: capture frame on-device and run YOLO tensor inference
-    if (backend.startsWith('onnx') && cameraRef.current) {
+    if (backend.startsWith('onnx') && cameraRef.current && cameraReady) {
       try {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.4,
@@ -113,7 +114,7 @@ export default function InventoryCameraScreen() {
       setFps(fpsRef.current.n);
       fpsRef.current = { n: 0, t: now };
     }
-  }, [syncState, backend]);
+  }, [syncState, backend, cameraReady]);
 
   useEffect(() => {
     if (!live) {
@@ -181,7 +182,7 @@ export default function InventoryCameraScreen() {
     try {
       let evidenceUrl = null;
       let evidenceUri = null;
-      if (cameraRef.current) {
+      if (cameraRef.current && cameraReady) {
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.6,
           skipProcessing: true,
@@ -235,7 +236,16 @@ export default function InventoryCameraScreen() {
       <InventoryCategoryTabs value={categoryFilter} onChange={setCategoryFilter} />
 
       <View style={styles.previewWrap}>
-        <CameraView ref={cameraRef} style={styles.camera} facing="back" />
+        <CameraView
+          ref={cameraRef}
+          style={styles.camera}
+          facing="back"
+          onCameraReady={() => setCameraReady(true)}
+          onMountError={(event) => {
+            setCameraReady(false);
+            setInitError(event?.message || 'Камер нээгдсэнгүй');
+          }}
+        />
         <Pressable style={styles.overlay} onPress={onPreviewPress}>
           {tracks.map((t) => (
             <View

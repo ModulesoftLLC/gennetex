@@ -34,10 +34,6 @@ function camelToSnake(field) {
 }
 
 function normalizeQueryField(field) {
-  if (typeof field !== 'string') return field;
-  if (field.includes('_')) {
-    return snakeToCamel(field);
-  }
   return field;
 }
 
@@ -248,6 +244,7 @@ class SupabaseCompatBuilder {
 }
 
 function createSupabaseCompat() {
+  const uploadedUrls = new Map();
   const auth = {
     async signInWithPassword({ email, password }) {
       try {
@@ -295,18 +292,20 @@ function createSupabaseCompat() {
         return {
           async upload(path, file, options = {}) {
             try {
-              await firebaseUploadFile(path, file, options.contentType || 'application/octet-stream');
-              return { data: { path }, error: null };
+              const storagePath = `${bucket}/${path}`;
+              const publicUrl = await firebaseUploadFile(storagePath, file, options.contentType || 'application/octet-stream');
+              uploadedUrls.set(`${bucket}:${path}`, publicUrl);
+              return { data: { path, publicUrl }, error: null };
             } catch (error) {
               return { data: null, error };
             }
           },
           getPublicUrl(path) {
-            return { data: { publicUrl: path }, error: null };
+            return { data: { publicUrl: uploadedUrls.get(`${bucket}:${path}`) || path }, error: null };
           },
           async remove(path) {
             try {
-              await firebaseDeleteFile(path);
+              await firebaseDeleteFile(`${bucket}/${path}`);
               return { data: null, error: null };
             } catch (error) {
               return { data: null, error };
