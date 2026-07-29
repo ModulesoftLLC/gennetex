@@ -1,6 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
-import { supabase } from '../lib/supabase';
+import { supabase, isFirebaseOnly } from '../lib/supabase';
+import { firebaseCreate, firebaseList } from '../lib/firebaseAdapter';
 import * as notifyApi from './notificationService';
 import { distanceMeters } from '../lib/geo';
 
@@ -58,6 +59,41 @@ export function nearestAttendanceLocation(loc, locations = []) {
 }
 
 export async function insertAttendance(record) {
+  if (isFirebaseOnly) {
+    const data = await firebaseCreate(TABLE, {
+      staff_id: record.staffId || null,
+      staff_name: record.staffName,
+      type: record.type || 'check_in',
+      photo_url: record.photoUrl || null,
+      latitude: record.latitude ?? null,
+      longitude: record.longitude ?? null,
+      status: record.status || 'approved',
+      is_remote: record.isRemote || false,
+      distance_m: record.distanceM ?? null,
+      note: record.note || null,
+      location_name: record.locationName || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+    if (data.status === 'pending' && data.is_remote) {
+      try {
+        await notifyApi.notifyRemoteAttendance({
+          staffName: record.staffName,
+          note: record.note,
+        });
+      } catch (e) {}
+    } else if (data.type === 'check_in' && data.is_remote) {
+      try {
+        await notifyApi.notifyOffSiteCheckIn({
+          staffName: record.staffName,
+          locationName: record.locationName,
+          distanceM: data.distance_m,
+        });
+      } catch (e) {}
+    }
+    return data;
+  }
+
   const { data, error } = await supabase
     .from(TABLE)
     .insert({
@@ -97,6 +133,14 @@ export async function insertAttendance(record) {
 
 // ---- Ирц бүртгэх байршил (geofence) ----
 export async function fetchAttendanceLocations() {
+  if (isFirebaseOnly) {
+    const rows = await firebaseList('attendance_locations', {
+      whereClauses: [{ field: 'active', op: '==', value: true }],
+      order: { field: 'created_at', direction: 'desc' },
+    });
+    return rows || [];
+  }
+
   const { data, error } = await supabase
     .from('attendance_locations')
     .select('*')
@@ -128,6 +172,14 @@ export async function deleteAttendanceLocation(id) {
 
 // ---- Зайнаас бүртгүүлэх хүсэлт (admin зөвшөөрөл) ----
 export async function fetchPendingAttendance() {
+  if (isFirebaseOnly) {
+    const rows = await firebaseList(TABLE, {
+      whereClauses: [{ field: 'status', op: '==', value: 'pending' }],
+      order: { field: 'created_at', direction: 'desc' },
+    });
+    return rows || [];
+  }
+
   const { data, error } = await supabase
     .from(TABLE)
     .select('*')
@@ -146,6 +198,16 @@ export async function setAttendanceStatus(id, status) {
 export async function countTodayCheckIns() {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
+  if (isFirebaseOnly) {
+    const rows = await firebaseList(TABLE, {
+      whereClauses: [
+        { field: 'type', op: '==', value: 'check_in' },
+        { field: 'created_at', op: '>=', value: start.toISOString() },
+      ],
+    });
+    return (rows || []).length;
+  }
+
   const { count, error } = await supabase
     .from(TABLE)
     .select('id', { count: 'exact', head: true })
@@ -156,6 +218,13 @@ export async function countTodayCheckIns() {
 }
 
 export async function fetchAttendance(limit = 50) {
+  if (isFirebaseOnly) {
+    const rows = await firebaseList(TABLE, {
+      order: { field: 'created_at', direction: 'desc' },
+      limitCount: limit,
+    });
+    return rows || [];
+  }
   const { data, error } = await supabase
     .from(TABLE)
     .select('*')

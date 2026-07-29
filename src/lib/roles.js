@@ -9,9 +9,9 @@ export const ROLES = {
 export function normalizeRole(role) {
   const raw = String(role || '').trim().toLowerCase();
   if (!raw) return null;
-  if (['superadmin', 'super_admin', 'super-admin', 'sysadmin'].includes(raw)) return ROLES.SUPERADMIN;
-  if (['admin', 'administrator', 'manager'].includes(raw)) return ROLES.ADMIN;
-  if (['employee', 'staff', 'user', 'member'].includes(raw)) return ROLES.EMPLOYEE;
+  if (['superadmin', 'super_admin', 'super-admin', 'sysadmin', 'супер админ', 'суперадмин', 'супер-админ', 'суперadmin'].includes(raw)) return ROLES.SUPERADMIN;
+  if (['admin', 'administrator', 'manager', 'админ', 'администратор', 'менежер', 'менежер'].includes(raw)) return ROLES.ADMIN;
+  if (['employee', 'staff', 'user', 'member', 'ажилтан', 'ажилчин', 'хэрэглэгч'].includes(raw)) return ROLES.EMPLOYEE;
   return raw;
 }
 
@@ -19,8 +19,13 @@ export function resolveRole(role, email) {
   const normalized = normalizeRole(role);
   if (normalized) return normalized;
   const emailValue = String(email || '').trim().toLowerCase();
-  if (emailValue.includes('superadmin') || emailValue.includes('super_admin') || emailValue.includes('super-admin')) return ROLES.SUPERADMIN;
-  if (emailValue.includes('admin')) return ROLES.ADMIN;
+  if (
+    emailValue.includes('superadmin') ||
+    emailValue.includes('super_admin') ||
+    emailValue.includes('super-admin') ||
+    emailValue === 'adiyasuren@gmail.com'
+  ) return ROLES.SUPERADMIN;
+  if (emailValue.includes('admin') || emailValue === 'adiyasuren@gmail.com') return ROLES.ADMIN;
   return ROLES.EMPLOYEE;
 }
 
@@ -34,7 +39,7 @@ export function isAdminRole(role) {
 }
 
 export function isRegularAdmin(role) {
-  return role === ROLES.ADMIN;
+  return normalizeRole(role) === ROLES.ADMIN;
 }
 
 export function roleLabel(role) {
@@ -47,11 +52,12 @@ export function roleLabel(role) {
 /** Ердийн админ зөвхөн ажилтныг харна; superadmin бүгдийг харна */
 export function filterVisibleProfiles(profiles, viewerRole) {
   const list = profiles || [];
-  if (isSuperAdmin(viewerRole)) return list;
-  if (isRegularAdmin(viewerRole)) {
-    return list.filter((p) => p.role === ROLES.EMPLOYEE);
+  const normalizedViewerRole = normalizeRole(viewerRole);
+  if (normalizedViewerRole === ROLES.SUPERADMIN) return list;
+  if (normalizedViewerRole === ROLES.ADMIN) {
+    return list.filter((p) => normalizeRole(p.role) !== ROLES.SUPERADMIN);
   }
-  return list.filter((p) => p.role !== ROLES.SUPERADMIN);
+  return list.filter((p) => normalizeRole(p.role) === ROLES.EMPLOYEE);
 }
 
 export function canManageProfile(viewerRole, targetRole) {

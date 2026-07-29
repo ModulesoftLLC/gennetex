@@ -52,19 +52,54 @@ export function firebaseWatchAuth(onChange) {
   return onAuthStateChanged(auth, onChange);
 }
 
+function normalizeFirestoreField(field) {
+  if (typeof field !== 'string') return field;
+  if (field.includes('_')) {
+    return field.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+  }
+  return field;
+}
+
+function buildFirestoreQuery(dbCollection, whereClauses, order, limitCount, useCamelCase = false) {
+  let q = dbCollection;
+  if (whereClauses.length) {
+    q = query(
+      q,
+      ...whereClauses.map((w) => {
+        const field = useCamelCase ? w.field.replace(/_([a-z])/g, (_, c) => c.toUpperCase()) : w.field;
+        return where(field, w.op, w.value);
+      })
+    );
+  }
+  if (order) {
+    const field = useCamelCase ? order.field.replace(/_([a-z])/g, (_, c) => c.toUpperCase()) : order.field;
+    q = query(q, orderBy(field, order.direction || 'asc'));
+  }
+  if (limitCount) q = query(q, limit(limitCount));
+  return q;
+}
+
 export async function firebaseList(collectionName, options = {}) {
-  try {
-    const db = ensureDb();
-    const { whereClauses = [], order = null, limitCount = null } = options;
-    let q = collection(db, collectionName);
-    if (whereClauses.length) {
-      q = query(q, ...whereClauses.map((w) => where(w.field, w.op, w.value)));
-    }
-    if (order) q = query(q, orderBy(order.field, order.direction || 'asc'));
-    if (limitCount) q = query(q, limit(limitCount));
+  const db = ensureDb();
+  const { whereClauses = [], order = null, limitCount = null } = options;
+  const rawClauses = whereClauses.map((w) => ({ ...w, field: String(w.field) }));
+  const tryQuery = async (useCamelCase = false) => {
+    const q = buildFirestoreQuery(collection(db, collectionName), rawClauses, order, limitCount, useCamelCase);
     const snap = await getDocs(q);
     return snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+  };
+
+  try {
+    return await tryQuery(false);
   } catch (error) {
+    if (rawClauses.some((w) => w.field.includes('_')) || (order?.field && order.field.includes('_'))) {
+      try {
+        return await tryQuery(true);
+      } catch (fallbackError) {
+        console.warn('Firebase list fallback failed:', fallbackError?.message || fallbackError);
+        return [];
+      }
+    }
     console.warn('Firebase list failed:', error?.message || error);
     return [];
   }
@@ -88,6 +123,8 @@ export async function firebaseCreate(collectionName, payload) {
       ...payload,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      created_at: serverTimestamp(),
+      updated_at: serverTimestamp(),
     };
     const refDoc = await addDoc(collection(db, collectionName), data);
     const snap = await getDoc(refDoc);
@@ -96,6 +133,14 @@ export async function firebaseCreate(collectionName, payload) {
     console.warn('Firebase create failed:', error?.message || error);
     throw error;
   }
+}
+
+export async function firebaseInsert(collectionName, payload) {
+  return firebaseCreate(collectionName, payload);
+}
+
+export async function firebaseGetAll(collectionName, options = {}) {
+  return firebaseList(collectionName, options);
 }
 
 export async function firebaseSet(collectionName, id, payload) {
@@ -145,19 +190,38 @@ export function firebaseSubscribe(collectionName, callback, options = {}) {
   const { whereClauses = [], order = null } = options;
   let q = collection(db, collectionName);
   if (whereClauses.length) {
-    q = query(q, ...whereClauses.map((w) => where(w.field, w.op, w.value)));
+    q = query(
+      q,
+      ...whereClauses.map((w) => where(normalizeFirestoreField(w.field), w.op, w.value))
+    );
   }
-  if (order) q = query(q, orderBy(order.field, order.direction || 'asc'));
+  if (order) q = query(q, orderBy(normalizeFirestoreField(order.field), order.direction || 'asc'));
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() })));
   });
+}
+
+function normalizeUploadPayload(file, contentType) {
+  if (file == null) throw new Error('No file data to upload');
+  if (typeof Blob !== 'undefined' && file instanceof Blob) return file;
+  if (typeof File !== 'undefined' && file instanceof File) return file;
+  if (typeof ArrayBuffer !== 'undefined' && file instanceof ArrayBuffer) {
+    return new Blob([file], { type: contentType });
+  }
+  if (ArrayBuffer.isView(file)) {
+    const view = file;
+    const buffer = view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
+    return new Blob([buffer], { type: contentType });
+  }
+  return file;
 }
 
 export async function firebaseUploadFile(path, file, contentType = 'application/octet-stream') {
   try {
     const storage = ensureStorage();
     const storageRef = ref(storage, path);
-    await uploadBytes(storageRef, file, { contentType });
+    const payload = normalizeUploadPayload(file, contentType);
+    await uploadBytes(storageRef, payload, { contentType });
     return getDownloadURL(storageRef);
   } catch (error) {
     console.warn('Firebase upload failed:', error?.message || error);

@@ -1,7 +1,7 @@
 /**
  * Payroll-ready export — ирц + shift + leave → CSV.
  */
-import { supabase } from '../lib/supabase';
+import { firebaseGetAll } from '../lib/firebaseAdapter'; // Firebase-ийн getAll-ийг импортлов
 import { isFlagOn } from '../lib/featureFlags';
 
 function csvEscape(v) {
@@ -32,33 +32,30 @@ function hoursBetween(a, b) {
  * @param {{ from: string, to: string }} range ISO dates
  */
 export async function buildPayrollRows({ from, to } = {}) {
-  if (!isFlagOn('payrollExport') || !supabase) return [];
+  if (!isFlagOn('payrollExport')) return []; // Supabase шалгалтыг хасав
 
   const fromIso = from || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
   const toIso = to || new Date().toISOString();
 
   const [profilesRes, attRes, leaveRes] = await Promise.all([
-    supabase.from('profiles').select('id, name, email, role, phone').neq('role', 'superadmin'),
-    supabase
-      .from('attendance')
-      .select('*')
-      .gte('created_at', fromIso)
-      .lte('created_at', toIso)
-      .order('created_at', { ascending: true })
-      .limit(5000),
-    supabase
-      .from('leave_requests')
-      .select('*')
-      .gte('start_date', fromIso.slice(0, 10))
-      .lte('end_date', toIso.slice(0, 10))
-      .limit(1000)
-      .then((r) => r)
-      .catch(() => ({ data: [] })),
+    // Firebase-ээс профайл татах
+    firebaseGetAll('profiles', { whereClauses: [{ field: 'role', op: '!=', value: 'superadmin' }] }),
+    // Firebase-ээс ирц татах
+    firebaseGetAll('attendance', {
+      whereClauses: [{ field: 'created_at', op: '>=', value: fromIso }, { field: 'created_at', op: '<=', value: toIso }],
+      order: { field: 'created_at', direction: 'asc' },
+      limit: 5000,
+    }),
+    // Firebase-ээс чөлөөний хүсэлт татах
+    firebaseGetAll('leave_requests', {
+      whereClauses: [{ field: 'start_date', op: '>=', value: fromIso.slice(0, 10) }, { field: 'end_date', op: '<=', value: toIso.slice(0, 10) }],
+      limit: 1000,
+    }),
   ]);
 
-  const profiles = profilesRes.data || [];
-  const attendance = attRes.data || [];
-  const leaves = leaveRes.data || [];
+  const profiles = profilesRes || [];
+  const attendance = attRes || [];
+  const leaves = leaveRes || [];
 
   // Group attendance by user+day — check-in / check-out pairs
   const byUserDay = {};

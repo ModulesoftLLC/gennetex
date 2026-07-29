@@ -1,7 +1,8 @@
 {
   "expo": {
+    "owner": "gennetex",
     "name": "Gennetex ERP",
-    "slug": "gennetex-erp",
+    "slug": "gennetex",
     "scheme": "gennetex-erp",
     "version": "1.0.4",
     "orientation": "portrait",
@@ -91,7 +92,7 @@
           "color": "#3b82f6",
           "defaultChannel": "chat",
           "sounds": [
-            "./assets/sounds/incoming-call.wav"
+            "./assets/sounds/incoming_call.wav"
           ]
         }
       ],
@@ -115,7 +116,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "5c8b7868-880a-4c81-aa6c-f5ec464d0d22"
+        "projectId": "75b6e03e-87a1-408d-b20f-a4b5cf496ce5"
       }
     }
   }

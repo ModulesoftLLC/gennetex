@@ -36,7 +36,7 @@ export default function IncomingCallManager() {
 
   // Supabase realtime — над руу ирж буй дуудлага
   useEffect(() => {
-    if (!isCloud || !currentUser?.id) return;
+    if (!currentUser?.id) return; // isCloud шалгалтыг хасав
     const unsub = callApi.subscribeIncomingCalls(currentUser.id, async (call) => {
       if (call.status !== 'ringing') return;
       const createdAtMs = parseTimestamp(call.created_at) || Date.now();
@@ -54,7 +54,7 @@ export default function IncomingCallManager() {
       unsub();
       stopIncomingCallAlert();
     };
-  }, [isCloud, currentUser?.id, useNative]);
+  }, [currentUser?.id, useNative]);
 
   // Native дуудлагын дэлгэцээс ирэх answer / decline / timeout
   useEffect(() => {

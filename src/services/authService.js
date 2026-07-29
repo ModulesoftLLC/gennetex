@@ -8,6 +8,7 @@ import {
   firebaseList,
   firebaseSet,
   firebaseUpdate,
+  firebaseDelete,
   firebaseCreate,
 } from '../lib/firebaseAdapter';
 import { withoutSampleByName } from '../lib/sampleNames';
@@ -19,16 +20,28 @@ import {
   canManageProfile,
   allowedAssignRole,
   resolveRole,
+  normalizeRole,
 } from '../lib/roles';
+
+async function findProfileByEmail(email) {
+  const normalized = String(email || '').trim().toLowerCase();
+  if (!normalized) return null;
+  const rows = await firebaseList('profiles', {
+    whereClauses: [{ field: 'email', op: '==', value: normalized }],
+    limitCount: 1,
+  });
+  return (rows || [])[0] || null;
+}
 
 async function getViewerRole() {
   const authUser = getCurrentFirebaseUser();
   if (!authUser) return null;
   try {
-    const profile = await firebaseGetOne('profiles', authUser.uid);
-    return profile?.role || null;
+    const profile = await getProfile(authUser.uid, authUser.email);
+    if (profile) return resolveRole(profile.role, profile.email);
+    return resolveRole(null, authUser.email);
   } catch (error) {
-    return null;
+    return resolveRole(null, authUser.email);
   }
 }
 
@@ -44,6 +57,33 @@ async function getProfileRole(userId) {
 function getCurrentFirebaseUser() {
   const auth = require('../lib/firebase').firebaseAuth;
   return auth?.currentUser || null;
+}
+
+async function resolveProfileRecord(userIdOrEmail, email) {
+  if (!userIdOrEmail && !email) return null;
+  let profile = null;
+
+  if (userIdOrEmail) {
+    profile = await firebaseGetOne('profiles', userIdOrEmail);
+  }
+
+  if (!profile && email) {
+    profile = await findProfileByEmail(email);
+  }
+
+  if (!profile && userIdOrEmail && userIdOrEmail.includes('@')) {
+    profile = await findProfileByEmail(userIdOrEmail);
+  }
+
+  try {
+    if (profile) {
+      console.debug('DIAG resolveProfileRecord', { query: userIdOrEmail, email, profileId: profile.id, role: profile.role });
+    } else {
+      console.debug('DIAG resolveProfileRecord', { query: userIdOrEmail, email, profile: null });
+    }
+  } catch (e) {}
+
+  return profile;
 }
 
 function buildFallbackProfile(email) {
@@ -66,43 +106,77 @@ export async function signIn(email, password) {
   try {
     const user = await firebaseSignIn(trimmedEmail, password);
     await syncProfileAfterAuth();
-    const profile = await getProfile(user?.uid || trimmedEmail);
+    const profile = await getProfile(user?.uid, trimmedEmail);
     return { user, profile: profile || buildFallbackProfile(trimmedEmail) };
   } catch (error) {
-    const fallbackUser = getCurrentFirebaseUser();
-    if (fallbackUser) {
-      const profile = await getProfile(fallbackUser.uid);
-      return { user: fallbackUser, profile: profile || buildFallbackProfile(trimmedEmail) };
+    const authUser = getCurrentFirebaseUser();
+    if (authUser) {
+      await firebaseLogout();
     }
-    const fallbackProfile = buildFallbackProfile(trimmedEmail);
-    return {
-      user: {
-        uid: fallbackProfile.id,
-        email: fallbackProfile.email,
-        displayName: fallbackProfile.name,
-      },
-      profile: fallbackProfile,
-      localFallback: true,
-    };
+    throw error;
   }
 }
 
 async function ensureProfileFromUser(user) {
   if (!user?.uid) return;
   try {
-    const profile = await firebaseGetOne('profiles', user.uid);
-    if (!profile) {
-      const meta = user?.providerData?.[0] || {};
-      const role = ROLES.EMPLOYEE;
-      try {
-        await firebaseSet('profiles', user.uid, {
+    let existing = await firebaseGetOne('profiles', user.uid);
+    const meta = user?.providerData?.[0] || {};
+    const resolvedRole = resolveRole(existing?.role || meta.role, user.email);
+    const nextProfile = {
+      id: user.uid,
+      email: user.email,
+      name: existing?.name || meta.displayName || user.email?.split('@')[0] || 'Хэрэглэгч',
+      role: resolvedRole,
+      must_change_password: existing?.must_change_password ?? false,
+      position: existing?.position || '',
+      phone: existing?.phone || '',
+    };
+
+    if (!existing && user.email) {
+      const emailMatch = await findProfileByEmail(user.email);
+      if (emailMatch && emailMatch.id !== user.uid) {
+        const migrated = {
+          ...emailMatch,
           id: user.uid,
           email: user.email,
-          name: meta.displayName || user.email?.split('@')[0] || 'Хэрэглэгч',
-          role,
-        });
+          name: nextProfile.name,
+          role: resolvedRole,
+          must_change_password: emailMatch?.must_change_password ?? nextProfile.must_change_password,
+          position: emailMatch.position || nextProfile.position,
+          phone: emailMatch.phone || nextProfile.phone,
+          updatedAt: nextProfile.updatedAt,
+        };
+        try {
+          await firebaseSet('profiles', user.uid, migrated);
+          if (emailMatch.id && emailMatch.id !== user.uid) {
+            try {
+              await firebaseDelete('profiles', emailMatch.id);
+            } catch (deleteError) {
+              console.warn('Legacy profile delete skipped:', deleteError?.message || deleteError);
+            }
+          }
+        } catch (writeError) {
+          console.warn('Profile migrate skipped:', writeError?.message || writeError);
+        }
+        return;
+      }
+    }
+
+    if (!existing) {
+      try {
+        await firebaseSet('profiles', user.uid, nextProfile);
       } catch (writeError) {
         console.warn('Profile write skipped:', writeError?.message || writeError);
+      }
+      return;
+    }
+
+    if (existing.role !== resolvedRole || existing.email !== user.email || existing.name !== nextProfile.name) {
+      try {
+        await firebaseUpdate('profiles', user.uid, nextProfile);
+      } catch (writeError) {
+        console.warn('Profile update skipped:', writeError?.message || writeError);
       }
     }
   } catch (error) {
@@ -139,8 +213,12 @@ export async function changeMyPassword(newPassword) {
   }
 }
 
-export async function getProfile(userId) {
-  return firebaseGetOne('profiles', userId);
+export async function getProfile(userId, email) {
+  const profile = await resolveProfileRecord(userId, email);
+  if (profile) {
+    profile.role = normalizeRole(profile.role) || profile.role;
+  }
+  return profile;
 }
 
 export async function updateProfile(userId, patch) {
@@ -150,7 +228,14 @@ export async function updateProfile(userId, patch) {
 export async function fetchEmployees() {
   const viewerRole = await getViewerRole();
   const data = await firebaseList('profiles', { order: { field: 'createdAt', direction: 'asc' } });
-  return filterVisibleProfiles(withoutSampleByName(data || []), viewerRole);
+  const profiles = (data || []).map((p) => ({
+    ...p,
+    role: normalizeRole(p.role) || p.role,
+  }));
+  try {
+    console.debug('DIAG fetchEmployees', { viewerRole, count: profiles.length, sample: profiles.slice(0,5).map((p) => ({ id: p.id, email: p.email, role: p.role })) });
+  } catch (e) {}
+  return filterVisibleProfiles(withoutSampleByName(profiles), viewerRole);
 }
 
 export async function adminUpdateEmployee(userId, patch) {

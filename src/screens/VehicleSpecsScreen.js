@@ -23,7 +23,7 @@ import { notifyAdmins, showLocalNotification } from '../services/notificationSer
 export default function VehicleSpecsScreen({ navigation }) {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isAdmin, isCloud } = useApp();
+  const { isAdmin } = useApp(); // isCloud-ийг хасав
   const [list, setList] = useState([]);
   const [trips, setTrips] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -35,7 +35,7 @@ export default function VehicleSpecsScreen({ navigation }) {
   const autoboxHashRef = useRef('');
 
   const load = useCallback(async () => {
-    if (!isCloud) return;
+    // if (!isCloud) return; // isCloud шалгалтыг хасав
     try {
       const [veh, tr] = await Promise.all([vehicleApi.fetchVehicles(), vehicleApi.fetchTrips(800).catch(() => [])]);
       setList(veh);
@@ -43,7 +43,7 @@ export default function VehicleSpecsScreen({ navigation }) {
     } catch (e) {
       setAutoboxError(e.message);
     }
-  }, [isCloud]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -255,7 +255,7 @@ export default function VehicleSpecsScreen({ navigation }) {
         title="Машины оншилгоо"
         subtitle={`${list.length} бүртгэлтэй машин`}
       />
-      {!isCloud ? (
+      {false ? ( // isCloud шалгалтыг хасаж, үргэлж false болгов
         <EmptyState text="Supabase холбогдсон байх шаардлагатай." />
       ) : (
         <FlatList

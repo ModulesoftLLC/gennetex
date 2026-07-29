@@ -3,6 +3,7 @@
  */
 import { supabase } from '../lib/supabase';
 import { isFlagOn } from '../lib/featureFlags';
+import { firebaseInsert, firebaseGetAll } from '../lib/firebaseAdapter';
 
 export const CONDITIONS = [
   { key: 'ok', label: 'Хэвийн', color: '#16a34a' },
@@ -36,25 +37,24 @@ export async function logToolCondition({
     photo_url: photoUrl || null,
     quantity: quantity || 1,
   };
-  if (!supabase) {
+  if (!supabase) { // Энэ нь isSupabaseConfigured=false үед ажиллана
     return { local: true, ...row, created_at: new Date().toISOString() };
   }
-  const { data, error } = await supabase.from('tool_condition_logs').insert(row).select().single();
-  if (error) throw error;
+  const data = await firebaseInsert('tool_condition_logs', row);
   return data;
 }
 
 export async function fetchToolConditionLogs({ itemId, userId, limit = 100 } = {}) {
   if (!supabase) return [];
-  let q = supabase
-    .from('tool_condition_logs')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (itemId) q = q.eq('item_id', itemId);
-  if (userId) q = q.eq('user_id', userId);
-  const { data, error } = await q;
-  if (error) throw error;
+  const whereClauses = [];
+  if (itemId) whereClauses.push({ field: 'item_id', op: '==', value: itemId });
+  if (userId) whereClauses.push({ field: 'user_id', op: '==', value: userId });
+
+  const data = await firebaseGetAll('tool_condition_logs', {
+    whereClauses,
+    order: { field: 'created_at', direction: 'desc' },
+    limit,
+  });
   return data || [];
 }
 

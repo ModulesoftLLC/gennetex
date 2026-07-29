@@ -83,7 +83,7 @@ export default function LoginScreen() {
               </Text>
             ) : (
               <Text style={styles.hint}>
-                Шинэ ажилтныг админ бүртгэнэ. Эрх авахын тулд админд хандана уу.
+          
               </Text>
             )}
           </View>

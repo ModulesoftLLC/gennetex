@@ -6,7 +6,7 @@ import {
   DEFAULT_FUEL_SETTINGS,
   STAFF,
 } from '../data/mockData';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import * as invApi from '../services/inventoryService';
 import * as staffApi from '../services/staffService';
 import * as authApi from '../services/authService';
@@ -38,7 +38,7 @@ export function AppProvider({ children }) {
   // ---- Auth ----
   const [session, setSession] = useState(null);
   const [authProfile, setAuthProfile] = useState(null); // Supabase profiles мөр
-  const [authLoading, setAuthLoading] = useState(isSupabaseConfigured);
+  const [authLoading, setAuthLoading] = useState(Boolean(isSupabaseConfigured));
 
   // ---- Байршил хянах төлөв ----
   const [trackingState, setTrackingState] = useState({ active: false });
@@ -49,8 +49,12 @@ export function AppProvider({ children }) {
     (async () => {
       try {
         // Профайл (би хэн бэ)
-        const prof = await AsyncStorage.getItem(PROFILE_KEY);
-        if (prof) setProfile(JSON.parse(prof));
+        if (!isSupabaseConfigured) {
+          const prof = await AsyncStorage.getItem(PROFILE_KEY);
+          if (prof) setProfile(JSON.parse(prof));
+        } else {
+          await AsyncStorage.removeItem(PROFILE_KEY).catch(() => {});
+        }
 
         // Дуудлага, бензин, тохиргоо нь локалд хадгалагдана
         const raw = await AsyncStorage.getItem(STORAGE_KEY);
@@ -103,65 +107,34 @@ export function AppProvider({ children }) {
 
   // ---- Auth: session + профайл сонсох ----
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    let mounted = true;
-
-    const loadProfile = async (sess) => {
-      if (!sess?.user) {
-        if (mounted) setAuthProfile(null);
-        return;
-      }
-      try {
-        await authApi.syncProfileAfterAuth();
-        let p = null;
-        try {
-          p = await authApi.getProfile(sess.user.id);
-        } catch (e) {
-          const meta = sess.user.user_metadata || {};
-          p = {
-            id: sess.user.id,
-            email: sess.user.email,
-            name: meta.name || sess.user.email?.split('@')[0] || 'Хэрэглэгч',
-            role: resolveRole(meta.role, sess.user.email),
-          };
-        }
-        if (mounted) setAuthProfile(p);
-      } catch (e) {
-        const meta = sess.user.user_metadata || {};
-        if (mounted) {
-          setAuthProfile({
-            id: sess.user.id,
-            email: sess.user.email,
-            name: meta.name || sess.user.email?.split('@')[0] || 'Хэрэглэгч',
-            role: resolveRole(meta.role, sess.user.email),
-          });
-        }
-      }
-    };
-
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!mounted) return;
-      setSession(data.session);
-      await loadProfile(data.session);
-      if (mounted) setAuthLoading(false);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-      loadProfile(sess);
-    });
-
-    return () => {
-      mounted = false;
-      sub?.subscription?.unsubscribe();
-    };
+    if (!isSupabaseConfigured) {
+      setAuthLoading(false);
+      return;
+    }
+    setAuthLoading(false);
   }, []);
+
+  // Debugging: log current auth + profile state to help diagnose missing engineers/calls
+  useEffect(() => {
+    try {
+      console.debug('DIAG AppContext state', {
+        isSupabaseConfigured,
+        authProfile: authProfile ? { id: authProfile.id, email: authProfile.email, role: authProfile.role } : null,
+        profile: profile ? { id: profile.id, email: profile.email, role: profile.role } : null,
+        session: session ? { user: session.user } : null,
+        staffCount: Array.isArray(staff) ? staff.length : null,
+        callsCount: Array.isArray(calls) ? calls.length : null,
+      });
+    } catch (e) {
+      console.warn('DIAG AppContext log failed', e);
+    }
+  }, [authProfile, profile, session, staff.length, calls.length]);
 
   const signIn = async (email, password) => {
     const result = await authApi.signIn(email, password);
     const profile = result?.profile || null;
     if (profile) {
-      const resolvedRole = resolveRole(profile.role, profile.email);
+      const resolvedRole = resolveRole(profile.role, profile.email || email);
       const nextProfile = { ...profile, role: resolvedRole };
       setAuthProfile(nextProfile);
       setSession({

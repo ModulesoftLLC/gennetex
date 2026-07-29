@@ -27,13 +27,27 @@ export default function OnboardingPermissionsScreen({ onComplete }) {
       if (currentUser?.id) {
         try {
           await enablePushForUser(currentUser.id);
-        } catch (e) {}
+        } catch (e) {
+          console.warn('Push registration failed during onboarding:', e?.message || e);
+        }
       }
-      await markOnboardingComplete();
-      onComplete();
-    } finally {
-      setLoading(false);
+    } catch (e) {
+      console.warn('Permission request failed during onboarding:', e?.message || e);
     }
+
+    try {
+      await markOnboardingComplete();
+    } catch (e) {
+      console.warn('Failed to mark onboarding complete:', e?.message || e);
+    }
+
+    try {
+      onComplete?.();
+    } catch (e) {
+      console.warn('Onboarding completion callback failed:', e?.message || e);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -71,8 +85,15 @@ export default function OnboardingPermissionsScreen({ onComplete }) {
             title="Дараа"
             variant="ghost"
             onPress={async () => {
-              await markOnboardingComplete();
-              onComplete();
+              setLoading(true);
+              try {
+                await markOnboardingComplete();
+                onComplete?.();
+              } catch (e) {
+                console.warn('Delayed onboarding complete failed:', e?.message || e);
+              } finally {
+                setLoading(false);
+              }
             }}
             disabled={loading}
             style={{ marginTop: spacing.sm }}

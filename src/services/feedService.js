@@ -2,6 +2,16 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
 import * as notifyApi from './notificationService';
+import {
+  firebaseCreate,
+  firebaseDelete,
+  firebaseGetOne,
+  firebaseList,
+  firebaseSet,
+  firebaseSubscribe,
+  firebaseUpdate,
+  firebaseUploadFile,
+} from '../lib/firebaseAdapter';
 
 const REACTIONS = ['like', 'love', 'care', 'haha', 'angry'];
 
@@ -14,22 +24,12 @@ async function uploadFeedImage(uri, folder = 'posts') {
   const base64 = await FileSystem.readAsStringAsync(uri, {
     encoding: FileSystem.EncodingType.Base64,
   });
-  const { error } = await supabase.storage
-    .from('feed')
-    .upload(path, decode(base64), { contentType: 'image/jpeg', upsert: true });
-  if (error) {
-    if (String(error.message).includes('Bucket not found')) {
-      throw new Error('Feed storage байхгүй. Supabase дээр migration_feed.sql ажиллуулна уу.');
-    }
-    throw error;
-  }
-  const { data } = supabase.storage.from('feed').getPublicUrl(path);
-  return data.publicUrl;
+  const file = decode(base64);
+  return firebaseUploadFile(path, file, 'image/jpeg');
 }
 
 async function fetchAllUserIds(excludeId) {
-  const { data, error } = await supabase.from('profiles').select('id');
-  if (error) throw error;
+  const data = await firebaseList('profiles');
   return (data || []).map((p) => p.id).filter((id) => id && id !== excludeId);
 }
 
@@ -75,14 +75,10 @@ function attachMeta(posts, reactions, comments, profilesById = {}) {
 async function fetchProfilesMap(userIds) {
   const ids = [...new Set((userIds || []).filter(Boolean))];
   if (!ids.length) return {};
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, avatar_url')
-    .in('id', ids);
-  if (error) return {};
+  const allProfiles = await firebaseList('profiles');
   const map = {};
-  (data || []).forEach((p) => {
-    map[p.id] = p;
+  (allProfiles || []).filter((p) => ids.includes(p.id)).forEach((p) => {
+    map[p.id] = { id: p.id, name: p.name, avatar_url: p.avatar_url };
   });
   return map;
 }
@@ -90,9 +86,9 @@ async function fetchProfilesMap(userIds) {
 async function hydratePosts(posts) {
   if (!posts?.length) return [];
   const ids = posts.map((p) => p.id);
-  const [{ data: reactions }, { data: comments }] = await Promise.all([
-    supabase.from('post_reactions').select('*').in('post_id', ids),
-    supabase.from('post_comments').select('*').in('post_id', ids).order('created_at', { ascending: true }),
+  const [reactions, comments] = await Promise.all([
+    firebaseList('post_reactions', { whereClauses: [{ field: 'post_id', op: 'in', value: ids }] }),
+    firebaseList('post_comments', { whereClauses: [{ field: 'post_id', op: 'in', value: ids }] }),
   ]);
   const profileIds = [
     ...posts.map((p) => p.author_id),
@@ -103,31 +99,26 @@ async function hydratePosts(posts) {
 }
 
 export async function fetchFeed(limit = 50) {
-  const { data: posts, error } = await supabase
-    .from('posts')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
+  const posts = await firebaseList('posts', {
+    order: { field: 'created_at', direction: 'desc' },
+    limitCount: limit,
+  });
   return hydratePosts(posts);
 }
 
 export async function fetchPostsByAuthor(authorId, limit = 50) {
   if (!authorId) return [];
-  const { data: posts, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('author_id', authorId)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
+  const posts = await firebaseList('posts', {
+    whereClauses: [{ field: 'author_id', op: '==', value: authorId }],
+    order: { field: 'created_at', direction: 'desc' },
+    limitCount: limit,
+  });
   return hydratePosts(posts);
 }
 
 export async function fetchPostById(postId) {
   if (!postId) return null;
-  const { data: post, error } = await supabase.from('posts').select('*').eq('id', postId).maybeSingle();
-  if (error) throw error;
+  const post = await firebaseGetOne('posts', postId);
   if (!post) return null;
   const [hydrated] = await hydratePosts([post]);
   return hydrated;
@@ -136,25 +127,20 @@ export async function fetchPostById(postId) {
 export async function searchPosts(query, limit = 40) {
   const q = String(query || '').trim();
   if (!q) return [];
-  const { data: posts, error } = await supabase
-    .from('posts')
-    .select('*')
-    .or(`content.ilike.%${q}%,author_name.ilike.%${q}%`)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return hydratePosts(posts);
+  const posts = await firebaseList('posts', {
+    order: { field: 'created_at', direction: 'desc' },
+    limitCount: limit,
+  });
+  const filtered = (posts || []).filter((post) => {
+    const text = `${post.content || ''} ${post.author_name || ''}`.toLowerCase();
+    return text.includes(q.toLowerCase());
+  });
+  return hydratePosts(filtered);
 }
 
 export async function fetchFeedProfile(userId) {
   if (!userId) return null;
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, position, phone, avatar_url, role, email')
-    .eq('id', userId)
-    .maybeSingle();
-  if (error) throw error;
-  return data;
+  return firebaseGetOne('profiles', userId);
 }
 
 export async function createPost({ authorId, authorName, content, imageUri, tags = [] }) {
@@ -168,23 +154,14 @@ export async function createPost({ authorId, authorName, content, imageUri, tags
     .filter((t) => t?.user_id && t?.user_name)
     .map((t) => ({ user_id: t.user_id, user_name: t.user_name }));
 
-  const { data, error } = await supabase
-    .from('posts')
-    .insert({
-      author_id: authorId,
-      author_name: authorName,
-      content: body,
-      image_url: imageUrl,
-      tags: cleanTags,
-    })
-    .select()
-    .single();
-  if (error) {
-    if (String(error.message).includes('posts') && String(error.message).includes('schema cache')) {
-      throw new Error('Пост хүснэгт байхгүй. Supabase дээр migration_feed.sql ажиллуулна уу.');
-    }
-    throw error;
-  }
+  const data = await firebaseCreate('posts', {
+    author_id: authorId,
+    author_name: authorName,
+    content: body,
+    image_url: imageUrl,
+    tags: cleanTags,
+    created_at: new Date().toISOString(),
+  });
 
   try {
     const recipients = await fetchAllUserIds(authorId);
@@ -224,8 +201,9 @@ export async function createPost({ authorId, authorName, content, imageUri, tags
 }
 
 export async function deletePost(postId, userId) {
-  const { error } = await supabase.from('posts').delete().eq('id', postId).eq('author_id', userId);
-  if (error) throw error;
+  const post = await firebaseGetOne('posts', postId);
+  if (!post || post.author_id !== userId) return;
+  await firebaseDelete('posts', postId);
 }
 
 /** Постыг feed дээр хуваалцах (share) */
@@ -235,18 +213,14 @@ export async function sharePost({ post, authorId, authorName }) {
   const header = `🔄 ${originalAuthor}-ийн постыг хуваалцлаа`;
   const body = post.content ? `${header}\n\n${post.content}` : header;
 
-  const { data, error } = await supabase
-    .from('posts')
-    .insert({
-      author_id: authorId,
-      author_name: authorName,
-      content: body,
-      image_url: post.image_url || null,
-      tags: [],
-    })
-    .select()
-    .single();
-  if (error) throw error;
+  const data = await firebaseCreate('posts', {
+    author_id: authorId,
+    author_name: authorName,
+    content: body,
+    image_url: post.image_url || null,
+    tags: [],
+    created_at: new Date().toISOString(),
+  });
 
   try {
     const recipients = await fetchAllUserIds(authorId);
@@ -277,41 +251,31 @@ export async function sharePost({ post, authorId, authorName }) {
 export async function setReaction({ postId, userId, userName, reaction, postAuthorId, postAuthorName }) {
   if (!isValidReaction(reaction)) throw new Error('Буруу reaction');
 
-  const { data: existing } = await supabase
-    .from('post_reactions')
-    .select('id, reaction')
-    .eq('post_id', postId)
-    .eq('user_id', userId)
-    .maybeSingle();
+  const existing = await firebaseList('post_reactions', {
+    whereClauses: [
+      { field: 'post_id', op: '==', value: postId },
+      { field: 'user_id', op: '==', value: userId },
+    ],
+  });
+  const current = (existing || [])[0];
 
-  if (existing?.reaction === reaction) {
-    const { error } = await supabase.from('post_reactions').delete().eq('id', existing.id);
-    if (error) throw error;
+  if (current?.reaction === reaction) {
+    await firebaseDelete('post_reactions', current.id);
     return null;
   }
 
-  if (existing) {
-    const { data, error } = await supabase
-      .from('post_reactions')
-      .update({ reaction, user_name: userName })
-      .eq('id', existing.id)
-      .select()
-      .single();
-    if (error) throw error;
+  if (current) {
+    const data = await firebaseUpdate('post_reactions', current.id, { reaction, user_name: userName });
     return data;
   }
 
-  const { data, error } = await supabase
-    .from('post_reactions')
-    .insert({
-      post_id: postId,
-      user_id: userId,
-      user_name: userName,
-      reaction,
-    })
-    .select()
-    .single();
-  if (error) throw error;
+  const data = await firebaseCreate('post_reactions', {
+    post_id: postId,
+    user_id: userId,
+    user_name: userName,
+    reaction,
+    created_at: new Date().toISOString(),
+  });
 
   if (postAuthorId && postAuthorId !== userId) {
     try {
@@ -332,17 +296,13 @@ export async function addComment({ postId, userId, userName, content, postAuthor
   const body = String(content || '').trim();
   if (!body) throw new Error('Сэтгэгдэл хоосон байна');
 
-  const { data, error } = await supabase
-    .from('post_comments')
-    .insert({
-      post_id: postId,
-      user_id: userId,
-      user_name: userName,
-      content: body,
-    })
-    .select()
-    .single();
-  if (error) throw error;
+  const data = await firebaseCreate('post_comments', {
+    post_id: postId,
+    user_id: userId,
+    user_name: userName,
+    content: body,
+    created_at: new Date().toISOString(),
+  });
 
   if (postAuthorId && postAuthorId !== userId) {
     try {
@@ -360,12 +320,9 @@ export async function addComment({ postId, userId, userName, content, postAuthor
 }
 
 export async function deleteComment(commentId, userId) {
-  const { error } = await supabase
-    .from('post_comments')
-    .delete()
-    .eq('id', commentId)
-    .eq('user_id', userId);
-  if (error) throw error;
+  const comment = await firebaseGetOne('post_comments', commentId);
+  if (!comment || comment.user_id !== userId) return;
+  await firebaseDelete('post_comments', commentId);
 }
 
 export function reactionLabel(reaction) {
@@ -393,25 +350,21 @@ export function reactionEmoji(reaction) {
 /** Story-уудыг author-оор бүлэглэж, 24 цагийн доторхыг буцаана */
 export async function fetchStories(viewerId) {
   const now = new Date().toISOString();
-  const { data: stories, error } = await supabase
-    .from('stories')
-    .select('*')
-    .gt('expires_at', now)
-    .order('created_at', { ascending: false });
-  if (error) throw error;
-  if (!stories?.length) return [];
+  const stories = await firebaseList('stories', {
+    order: { field: 'created_at', direction: 'desc' },
+  });
+  const activeStories = (stories || []).filter((story) => (story.expires_at || '').toString() > now);
+  if (!activeStories.length) return [];
 
-  const ids = stories.map((s) => s.id);
-  const { data: views } = await supabase
-    .from('story_views')
-    .select('story_id')
-    .eq('user_id', viewerId)
-    .in('story_id', ids);
-  const seen = new Set((views || []).map((v) => v.story_id));
-  const profilesById = await fetchProfilesMap(stories.map((s) => s.author_id));
+  const ids = activeStories.map((s) => s.id);
+  const views = await firebaseList('story_views', {
+    whereClauses: [{ field: 'user_id', op: '==', value: viewerId }],
+  });
+  const seen = new Set((views || []).filter((v) => ids.includes(v.story_id)).map((v) => v.story_id));
+  const profilesById = await fetchProfilesMap(activeStories.map((s) => s.author_id));
 
   const byAuthor = new Map();
-  stories.forEach((s) => {
+  activeStories.forEach((s) => {
     if (!byAuthor.has(s.author_id)) {
       const profile = profilesById[s.author_id] || {};
       byAuthor.set(s.author_id, {
@@ -451,22 +404,13 @@ export async function createStory({ authorId, authorName, imageUri }) {
   if (!imageUri) throw new Error('Story зураг сонгоно уу');
   const imageUrl = await uploadFeedImage(imageUri, 'stories');
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-  const { data, error } = await supabase
-    .from('stories')
-    .insert({
-      author_id: authorId,
-      author_name: authorName,
-      image_url: imageUrl,
-      expires_at: expires,
-    })
-    .select()
-    .single();
-  if (error) {
-    if (String(error.message).includes('stories')) {
-      throw new Error('Story хүснэгт байхгүй. Supabase дээр migration_feed.sql ажиллуулна уу.');
-    }
-    throw error;
-  }
+  const data = await firebaseCreate('stories', {
+    author_id: authorId,
+    author_name: authorName,
+    image_url: imageUrl,
+    expires_at: expires,
+    created_at: new Date().toISOString(),
+  });
 
   try {
     const recipients = await fetchAllUserIds(authorId);
@@ -484,30 +428,27 @@ export async function createStory({ authorId, authorName, imageUri }) {
 
 export async function markStoryViewed(storyId, userId) {
   if (!storyId || !userId) return;
-  await supabase
-    .from('story_views')
-    .upsert({ story_id: storyId, user_id: userId }, { onConflict: 'story_id,user_id' });
+  await firebaseSet('story_views', `${storyId}_${userId}`, { story_id: storyId, user_id: userId });
 }
 
 export function subscribeFeed({ onPost, onReaction, onComment, onStory }) {
-  const channel = supabase
-    .channel('feed-realtime')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, (payload) => {
-      onPost?.(payload.new);
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, (payload) => {
-      onReaction?.(payload);
-    })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'post_comments' }, (payload) => {
-      onComment?.(payload.new);
-    })
-    .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'posts' }, (payload) => {
-      onPost?.({ ...payload.old, _deleted: true });
-    })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'stories' }, (payload) => {
-      onStory?.(payload.new);
-    })
-    .subscribe();
+  const unsubPosts = firebaseSubscribe('posts', (items) => {
+    onPost?.(items?.[0] || null);
+  });
+  const unsubReactions = firebaseSubscribe('post_reactions', (items) => {
+    onReaction?.(items);
+  });
+  const unsubComments = firebaseSubscribe('post_comments', (items) => {
+    onComment?.(items?.[0] || null);
+  });
+  const unsubStories = firebaseSubscribe('stories', (items) => {
+    onStory?.(items?.[0] || null);
+  });
 
-  return () => supabase.removeChannel(channel);
+  return () => {
+    unsubPosts?.();
+    unsubReactions?.();
+    unsubComments?.();
+    unsubStories?.();
+  };
 }

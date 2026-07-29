@@ -1,6 +1,7 @@
-import { supabase } from '../lib/supabase';
+import { supabase, isFirebaseOnly } from '../lib/supabase';
 import { parseEmployeeBadge } from '../lib/employeeBadge';
 import { normalizePlateNumber } from '../lib/mongoliaPlate';
+import { firebaseList, firebaseCreate, firebaseUpdate, firebaseDelete } from '../lib/firebaseAdapter';
 
 // Машины давтагдашгүй код (QR-д хадгалагдана)
 export function generateVehicleCode() {
@@ -8,16 +9,56 @@ export function generateVehicleCode() {
   return `VH-${n}`;
 }
 
+function normalizeVehicleRow(row) {
+  if (!row) return row;
+  return {
+    ...row,
+    plate_number: row.plate_number || row.plateNumber || row.plate || null,
+    driver_id: row.driver_id || row.driverId || null,
+    created_at: row.created_at || row.createdAt || null,
+    updated_at: row.updated_at || row.updatedAt || null,
+  };
+}
+
 export async function fetchVehicles() {
+  if (isFirebaseOnly) {
+    const rows = await firebaseList('vehicles', {
+      order: { field: 'created_at', direction: 'desc' },
+    });
+    const data = (rows || []).map(normalizeVehicleRow);
+    try {
+      console.debug('DIAG fetchVehicles', { count: data.length, sample: data.slice(0,3).map((d) => ({ id: d.id, plate: d.plate_number, driver_id: d.driver_id })) });
+    } catch (e) {}
+    return data;
+  }
+
   const { data, error } = await supabase
     .from('vehicles')
     .select('*')
     .order('created_at', { ascending: false });
   if (error) throw error;
+  try {
+    console.debug('DIAG fetchVehicles', { count: (data || []).length, sample: (data || []).slice(0,3).map((d) => ({ id: d.id, plate: d.plate_number, driver_id: d.driver_id })) });
+  } catch (e) {}
   return data || [];
 }
 
 export async function insertVehicle({ code, plate_number, liters_per_100km, tank_capacity_liters, driver_name, driver_id }) {
+  if (isFirebaseOnly) {
+    const data = await firebaseCreate('vehicles', {
+      code: String(code || '').trim(),
+      plate_number: normalizePlateNumber(plate_number),
+      liters_per_100km: Number(liters_per_100km) || 12,
+      tank_capacity_liters: Number(tank_capacity_liters) || 60,
+      fuel_level_percent: 100,
+      driver_name: driver_name?.trim() || null,
+      driver_id: driver_id || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+    return normalizeVehicleRow(data);
+  }
+
   const { data, error } = await supabase
     .from('vehicles')
     .insert({
@@ -42,6 +83,15 @@ export async function updateVehicle(id, { plate_number, liters_per_100km, tank_c
   if (tank_capacity_liters != null) patch.tank_capacity_liters = Number(tank_capacity_liters) || 60;
   if (driver_name !== undefined) patch.driver_name = driver_name?.trim() || null;
   if (driver_id !== undefined) patch.driver_id = driver_id || null;
+
+  if (isFirebaseOnly) {
+    const data = await firebaseUpdate('vehicles', id, {
+      ...patch,
+      updated_at: new Date().toISOString(),
+    });
+    return normalizeVehicleRow(data);
+  }
+
   const { data, error } = await supabase
     .from('vehicles')
     .update(patch)
@@ -53,11 +103,22 @@ export async function updateVehicle(id, { plate_number, liters_per_100km, tank_c
 }
 
 export async function deleteVehicle(id) {
+  if (isFirebaseOnly) {
+    await firebaseDelete('vehicles', id);
+    return;
+  }
   const { error } = await supabase.from('vehicles').delete().eq('id', id);
   if (error) throw error;
 }
 
 export async function getVehicleByCode(code) {
+  if (isFirebaseOnly) {
+    const rows = await firebaseList('vehicles', {
+      whereClauses: [{ field: 'code', op: '==', value: String(code || '').trim() }],
+      limitCount: 1,
+    });
+    return normalizeVehicleRow((rows || [])[0] || null);
+  }
   const { data, error } = await supabase
     .from('vehicles')
     .select('*')
@@ -84,6 +145,15 @@ export async function resolveVehicleScan(raw) {
 
 // QR уншсан ажилтныг тухайн машины одоогийн жолооч болгож онооно
 export async function assignDriver(vehicleId, { driverId, driverName }) {
+  if (isFirebaseOnly) {
+    const data = await firebaseUpdate('vehicles', vehicleId, {
+      driver_id: driverId || null,
+      driver_name: driverName || null,
+      updated_at: new Date().toISOString(),
+    });
+    return normalizeVehicleRow(data);
+  }
+
   const { data, error } = await supabase
     .from('vehicles')
     .update({ driver_id: driverId || null, driver_name: driverName || null })
@@ -96,6 +166,25 @@ export async function assignDriver(vehicleId, { driverId, driverName }) {
 
 // Машины үйл явдлын лог (уншсан / аялал эхэлсэн / дууссан)
 export async function logVehicleEvent({ vehicle, userId, userName, event, distanceKm, liters, cost, latitude, longitude }) {
+  if (isFirebaseOnly) {
+    await firebaseCreate('vehicle_logs', {
+      vehicle_id: vehicle?.id || null,
+      plate_number: vehicle?.plate_number || null,
+      code: vehicle?.code || null,
+      user_id: userId || null,
+      user_name: userName || null,
+      event: event || 'scan',
+      distance_km: distanceKm ?? null,
+      liters: liters ?? null,
+      cost: cost ?? null,
+      latitude: latitude ?? null,
+      longitude: longitude ?? null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+    return;
+  }
+
   const { error } = await supabase.from('vehicle_logs').insert({
     vehicle_id: vehicle?.id || null,
     plate_number: vehicle?.plate_number || null,
@@ -113,6 +202,13 @@ export async function logVehicleEvent({ vehicle, userId, userName, event, distan
 }
 
 export async function fetchVehicleLogs(limit = 100) {
+  if (isFirebaseOnly) {
+    const rows = await firebaseList('vehicle_logs', {
+      order: { field: 'created_at', direction: 'desc' },
+      limitCount: limit,
+    });
+    return rows;
+  }
   const { data, error } = await supabase
     .from('vehicle_logs')
     .select('*')

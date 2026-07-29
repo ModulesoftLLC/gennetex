@@ -60,6 +60,9 @@ export default function VehiclesAdminScreen() {
         vehicleApi.fetchTrips(300),
         fetchEmployees().catch(() => []),
       ]);
+      try {
+        console.debug('DIAG VehiclesAdminScreen load', { vehiclesCount: (veh||[]).length, tripsCount: (tr||[]).length, employeesCount: (emps||[]).length });
+      } catch (e) {}
       setList(veh);
       setTrips(tr || []);
       setEmployees(emps);

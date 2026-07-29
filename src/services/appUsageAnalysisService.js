@@ -1,4 +1,5 @@
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase'; // isSupabaseConfigured энд ашиглагдаж байгаа тул үлдээнэ
+import { firebaseGetAll, firebaseInsert } from '../lib/firebaseAdapter';
 import { callGeminiText, getGeminiKeyAsync } from './gennetexAiService';
 import { fetchActivityLogs, actionLabel } from './activityLogService';
 import { screenLabel } from './screenPresenceService';
@@ -46,14 +47,14 @@ function buildEmployeeRow(id, name, email, role, lastSeen) {
 export async function collectEmployeeUsageStats(from, to) {
   const [logs, profilesRes] = await Promise.all([
     fetchActivityLogs({ from, to, limit: 8000 }),
-    supabase
-      .from('profiles')
-      .select('id,name,email,role,last_seen')
-      .in('role', ['employee', 'admin', 'superadmin'])
-      .order('name'),
+    firebaseGetAll('profiles', {
+      whereClauses: [{ field: 'role', op: 'in', value: ['employee', 'admin', 'superadmin'] }],
+      order: { field: 'name', direction: 'asc' },
+    }),
   ]);
 
-  const profiles = (profilesRes.data || []).filter((p) => p.id && (p.name || p.email));
+  // firebaseGetAll нь шууд data буцаадаг тул .data гэж задлах шаардлагагүй
+  const profiles = (profilesRes || []).filter((p) => p.id && (p.name || p.email));
   const byUser = {};
   const ensure = (id, name, email, role, lastSeen) => {
     const key = id || String(name || 'unknown').toLowerCase();
@@ -247,50 +248,35 @@ export async function runAppUsageAnalysis({
       .join('\n')}`;
   }
 
-  const { data, error } = await supabase
-    .from(TABLE)
-    .insert({
-      report_type: REPORT_TYPE,
-      period_label: range.periodLabel || periodLabel || null,
-      period_start: range.from,
-      period_end: range.to,
-      stats,
-      analysis_text: analysisText,
-      created_by: createdBy || null,
-      created_by_name: createdByName || null,
-    })
-    .select()
-    .single();
-  if (error) {
-    if (/ai_performance_reports/i.test(error.message)) {
-      throw new Error('ai_performance_reports хүснэгт байхгүй. migration_feedback_performance.sql ажиллуулна уу.');
-    }
-    throw error;
-  }
+  const data = await firebaseInsert(TABLE, {
+    report_type: REPORT_TYPE,
+    period_label: range.periodLabel || periodLabel || null,
+    period_start: range.from,
+    period_end: range.to,
+    stats,
+    analysis_text: analysisText,
+    created_by: createdBy || null,
+    created_by_name: createdByName || null,
+  });
+
   return { report: data, parsed, stats };
 }
 
 export async function fetchAppUsageReports(limit = 20) {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select('*')
-    .eq('report_type', REPORT_TYPE)
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data || [];
+  return firebaseGetAll(TABLE, {
+    whereClauses: [{ field: 'report_type', op: '==', value: REPORT_TYPE }],
+    order: { field: 'created_at', direction: 'desc' },
+    limit,
+  });
 }
 
 export async function fetchLatestAppUsageReport() {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select('*')
-    .eq('report_type', REPORT_TYPE)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (error) throw error;
-  return data;
+  const reports = await firebaseGetAll(TABLE, {
+    whereClauses: [{ field: 'report_type', op: '==', value: REPORT_TYPE }],
+    order: { field: 'created_at', direction: 'desc' },
+    limit: 1,
+  });
+  return reports?.[0] || null;
 }
 
 export async function runInstantAppUsageAnalysis(createdBy, createdByName) {

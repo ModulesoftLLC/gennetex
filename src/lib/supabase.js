@@ -21,6 +21,74 @@ const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 export const isSupabaseApiConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const isSupabaseConfigured = isSupabaseApiConfigured || isFirebaseConfigured;
+export const isFirebaseOnly = isFirebaseConfigured && !isSupabaseApiConfigured;
+
+function snakeToCamel(field) {
+  if (typeof field !== 'string') return field;
+  return field.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+function camelToSnake(field) {
+  if (typeof field !== 'string') return field;
+  return field.replace(/([A-Z])/g, '_$1').toLowerCase();
+}
+
+function normalizeQueryField(field) {
+  if (typeof field !== 'string') return field;
+  if (field.includes('_')) {
+    return snakeToCamel(field);
+  }
+  return field;
+}
+
+function normalizeRow(row) {
+  if (!row || typeof row !== 'object') return row;
+  const result = { ...row };
+  Object.keys(row).forEach((key) => {
+    if (key === 'createdAt' && result.created_at === undefined) {
+      result.created_at = row[key];
+    }
+    if (key === 'updatedAt' && result.updated_at === undefined) {
+      result.updated_at = row[key];
+    }
+    if (/[A-Z]/.test(key)) {
+      const snake = camelToSnake(key);
+      if (result[snake] === undefined) {
+        result[snake] = row[key];
+      }
+    }
+  });
+  return result;
+}
+
+function parseSupabaseInString(value) {
+  const raw = String(value || '').trim();
+  if (!raw.startsWith('(') || !raw.endsWith(')')) return [value];
+  const inner = raw.slice(1, -1);
+  return inner
+    .split(',')
+    .map((item) => item.trim().replace(/^['"]|['"]$/g, ''))
+    .filter((item) => item !== '');
+}
+
+function normalizeWhereClause(clause) {
+  const normalized = { ...clause };
+  normalized.field = normalizeQueryField(clause.field);
+  if (clause.op === 'ilike' || clause.op === 'like') {
+    normalized.op = '==';
+    normalized.value = String(clause.value || '').replace(/%/g, '');
+  }
+  if (clause.op === 'not' || clause.op === '!=' || clause.op === '<>') {
+    normalized.op = '!=';
+  }
+  if (clause.op === 'not-in' || (clause.op === 'in' && clause.not)) {
+    normalized.op = 'not-in';
+  }
+  if (clause.op === 'in' && typeof clause.value === 'string') {
+    normalized.value = parseSupabaseInString(clause.value);
+  }
+  return normalized;
+}
 
 class SupabaseCompatBuilder {
   constructor(table) {
@@ -29,13 +97,17 @@ class SupabaseCompatBuilder {
     this.orderConfig = null;
     this.limitCount = null;
     this.selectMode = false;
+    this.countOptions = null;
     this.operation = 'select';
     this.payload = null;
     this.result = null;
   }
 
-  select() {
+  select(columns = '*', options = {}) {
     this.selectMode = true;
+    if (options && options.count) {
+      this.countOptions = options;
+    }
     return this;
   }
 
@@ -44,8 +116,45 @@ class SupabaseCompatBuilder {
     return this;
   }
 
+  gte(field, value) {
+    this.whereClauses.push({ field, op: '>=', value });
+    return this;
+  }
+
+  lte(field, value) {
+    this.whereClauses.push({ field, op: '<=', value });
+    return this;
+  }
+
+  neq(field, value) {
+    this.whereClauses.push({ field, op: '!=', value });
+    return this;
+  }
+
   in(field, values) {
     this.whereClauses.push({ field, op: 'in', value: values });
+    return this;
+  }
+
+  like(field, value) {
+    this.whereClauses.push({ field, op: 'like', value });
+    return this;
+  }
+
+  ilike(field, value) {
+    this.whereClauses.push({ field, op: 'ilike', value });
+    return this;
+  }
+
+  not(field, op, value) {
+    const normalizedOp = String(op || '').toLowerCase();
+    if (normalizedOp === 'in') {
+      this.whereClauses.push({ field, op: 'not-in', value });
+    } else if (normalizedOp === 'is' && value === null) {
+      this.whereClauses.push({ field, op: '!=', value: null });
+    } else {
+      this.whereClauses.push({ field, op: '!=', value });
+    }
     return this;
   }
 
@@ -64,7 +173,7 @@ class SupabaseCompatBuilder {
   }
 
   single() {
-    return this._execute(false);
+    return this._execute(true);
   }
 
   insert(payload) {
@@ -88,22 +197,22 @@ class SupabaseCompatBuilder {
     try {
       if (this.operation === 'insert') {
         this.result = await firebaseCreate(this.table, this.payload || {});
-        return { data: this.result, error: null };
+        return { data: normalizeRow(this.result), error: null };
       }
 
       if (this.operation === 'update') {
         const idFilter = this.whereClauses.find((w) => w.field === 'id' && w.op === '==');
         if (idFilter) {
           this.result = await firebaseUpdate(this.table, idFilter.value, this.payload || {});
-          return { data: this.result, error: null };
+          return { data: normalizeRow(this.result), error: null };
         }
         const rows = await firebaseList(this.table, {
-          whereClauses: this.whereClauses,
+          whereClauses: this.whereClauses.map(normalizeWhereClause),
           order: this.orderConfig,
           limitCount: this.limitCount,
         });
         const updates = await Promise.all(rows.map((row) => firebaseUpdate(this.table, row.id, this.payload || {})));
-        return { data: updates, error: null };
+        return { data: updates.map(normalizeRow), error: null };
       }
 
       if (this.operation === 'delete') {
@@ -113,7 +222,7 @@ class SupabaseCompatBuilder {
           return { data: null, error: null };
         }
         const rows = await firebaseList(this.table, {
-          whereClauses: this.whereClauses,
+          whereClauses: this.whereClauses.map(normalizeWhereClause),
           order: this.orderConfig,
           limitCount: this.limitCount,
         });
@@ -122,11 +231,15 @@ class SupabaseCompatBuilder {
       }
 
       const rows = await firebaseList(this.table, {
-        whereClauses: this.whereClauses,
-        order: this.orderConfig,
+        whereClauses: this.whereClauses.map(normalizeWhereClause),
+        order: this.orderConfig ? { field: normalizeQueryField(this.orderConfig.field), direction: this.orderConfig.direction } : null,
         limitCount: this.limitCount,
       });
-      const data = maybeSingle ? rows[0] || null : rows;
+      const normalizedRows = (rows || []).map(normalizeRow);
+      const data = maybeSingle ? normalizedRows[0] || null : normalizedRows;
+      if (this.countOptions) {
+        return { data: this.countOptions.head ? null : normalizedRows, count: normalizedRows.length, error: null };
+      }
       return { data, error: null };
     } catch (error) {
       return { data: null, error };

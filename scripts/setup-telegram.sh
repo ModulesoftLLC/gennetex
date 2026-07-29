@@ -10,8 +10,10 @@ if [[ -f .env ]]; then
   set +a
 fi
 
-PROJECT_REF="${SUPABASE_PROJECT_REF:-xhxyrzzgmksjlibfrmlx}"
-SUPABASE_WEBHOOK_URL="https://${PROJECT_REF}.supabase.co/functions/v1/telegram-webhook"
+# Хэрэв Firebase Functions ашиглаж байгаа бол энд түүний URL-г оруулна уу.
+# Жишээ нь: https://<region>-<project-id>.cloudfunctions.net/telegramWebhook
+FIREBASE_WEBHOOK_URL="${FIREBASE_FUNCTION_WEBHOOK_URL:-}" 
+WEBHOOK_URL="${FIREBASE_WEBHOOK_URL:-https://${SUPABASE_PROJECT_REF:-xhxyrzzgmksjlibfrmlx}.supabase.co/functions/v1/telegram-webhook}"
 
 if [[ -z "${TELEGRAM_BOT_TOKEN:-}" ]]; then
   echo "TELEGRAM_BOT_TOKEN тохируулна уу (.env эсвэл export)"
@@ -34,7 +36,7 @@ import sys,json
 d=json.load(sys.stdin)
 print((d.get('result') or {}).get('url') or '')
 ")
-if [[ -n "$CURRENT_WEBHOOK" && "$CURRENT_WEBHOOK" != "$SUPABASE_WEBHOOK_URL" ]]; then
+if [[ -n "$CURRENT_WEBHOOK" && "$CURRENT_WEBHOOK" != "$WEBHOOK_URL" ]]; then
   echo "Өөр webhook олдсон: $CURRENT_WEBHOOK"
   echo "Устгаж байна..."
   curl -sS "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/deleteWebhook?drop_pending_updates=false" >/dev/null
@@ -154,7 +156,7 @@ fi
 echo "[4/4] Supabase webhook тохируулж байна..."
 curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/setWebhook" \
   -H "Content-Type: application/json" \
-  -d "{\"url\":\"${SUPABASE_WEBHOOK_URL}\",\"secret_token\":\"${WEBHOOK_SECRET}\",\"allowed_updates\":[\"message\"]}" \
+  -d "{\"url\":\"${WEBHOOK_URL}\",\"secret_token\":\"${WEBHOOK_SECRET}\",\"allowed_updates\":[\"message\"]}" \
   | python3 -c "import sys,json; d=json.load(sys.stdin); print('Webhook:', 'OK' if d.get('ok') else d)"
 
 echo ""

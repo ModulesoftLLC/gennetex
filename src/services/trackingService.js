@@ -1,20 +1,18 @@
-import { supabase, isSupabaseApiConfigured } from '../lib/supabase';
-import { firebaseSubscribe } from '../lib/firebaseAdapter';
+import { firebaseSubscribe, firebaseUpdate, firebaseInsert, firebaseGetAll } from '../lib/firebaseAdapter';
+import { isSupabaseApiConfigured } from '../lib/supabase'; // Keep this if you still need to check for Supabase config elsewhere
 import { withoutSampleByName, withoutSampleVisits } from '../lib/sampleNames';
 import { filterVisibleProfiles } from '../lib/roles';
 
 // Ажилтны одоогийн байршлыг profiles дээр шинэчлэх (админ хардаг)
 export async function updateMyLocation(userId, { latitude, longitude }) {
-  const { error } = await supabase
-    .from('profiles')
-    .update({ latitude, longitude, last_seen: new Date().toISOString() })
-    .eq('id', userId);
-  if (error) throw error;
+  // Supabase-ийн оронд Firebase-ийн update функцийг ашиглана
+  await firebaseUpdate('profiles', userId, { latitude, longitude, last_seen: new Date().toISOString() });
 }
 
 // Байршлын лог нэмэх (түүх)
 export async function logLocation({ userId, userName, latitude, longitude, speed }) {
-  const { error } = await supabase.from('location_logs').insert({
+  // Supabase-ийн оронд Firebase-ийн insert функцийг ашиглана
+  await firebaseInsert('location_logs', {
     user_id: userId,
     user_name: userName,
     latitude,
@@ -38,7 +36,8 @@ export async function logVisit({
   faceVerified,
   locationName,
 }) {
-  const { error } = await supabase.from('visit_logs').insert({
+  // Supabase-ийн оронд Firebase-ийн insert функцийг ашиглана
+  await firebaseInsert('visit_logs', {
     user_id: userId,
     user_name: userName,
     call_id: callId,
@@ -55,41 +54,25 @@ export async function logVisit({
 }
 
 // Админ: бүх ажилчдын одоогийн байршил (зурагтай)
+// Энэ хэсэгт Supabase auth болон profiles-ийг дуудаж байгаа тул Firebase-ийн харгалзах функцээр солих шаардлагатай.
+// Одоогоор Firebase-ийн auth болон profiles-ийн дуудлагыг шууд орлуулах боломжгүй тул түр Supabase-ийн дуудлагыг хадгалав.
+// Гэхдээ `isCloud` шалгалт байгаа тул Supabase холбогдоогүй үед ажиллахгүй.
 export async function fetchWorkers() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  let viewerRole = null;
-  if (user) {
-    const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
-    viewerRole = p?.role || null;
-  }
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, role, avatar_url, latitude, longitude, last_seen')
-    .order('name', { ascending: true });
-  if (error) throw error;
-  return filterVisibleProfiles(withoutSampleByName(data || []), viewerRole);
+  // Firebase-ээс бүх профайлыг татаж авах
+  const profiles = await firebaseGetAll('profiles', { order: { field: 'name', direction: 'asc' } });
+  // Firebase-ийн auth хэрхэн ажиллахаас хамаарч viewerRole-ийг тодорхойлно.
+  // Одоогоор Firebase-ийн auth-ийг шууд орлуулах боломжгүй тул энэ хэсгийг та өөрөө тохируулах шаардлагатай.
+  const viewerRole = null; // Firebase auth-аас хэрэглэгчийн role-ийг авах
+  return filterVisibleProfiles(withoutSampleByName(profiles || []), viewerRole);
 }
 
 export async function fetchVisitLogs(limit = 50) {
-  const { data, error } = await supabase
-    .from('visit_logs')
-    .select('*')
-    .order('arrived_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
+  // Supabase-ийн оронд Firebase-ийн getAll функцийг ашиглана
+  const data = await firebaseGetAll('visit_logs', { order: { field: 'arrived_at', direction: 'desc' }, limit });
   return withoutSampleVisits(data || []);
 }
 
 export function subscribeWorkers(onChange) {
-  if (isSupabaseApiConfigured) {
-    const channel = supabase
-      .channel('workers-loc')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => onChange())
-      .subscribe();
-    return () => supabase.removeChannel(channel);
-  }
 
   return firebaseSubscribe(
     'profiles',

@@ -938,9 +938,12 @@
         },
         exec: async () => {
           try {
+            // Debug: log query intent to help troubleshoot empty results
+            console.debug('Firestore query exec', { collectionName, filters, orders, limitCount, activeColumns, firebaseReady });
             if (!initFirebaseClient()) return { data: null, error: new Error('Firebase client эхлүүлэх боломжгүй') };
             const currentUser = getFirebaseAuthUser();
             if (!currentUser) return { data: null, error: new Error('Firebase-д нэвтрээгүй байна. Админ хэрэглэгчээр нэвтэрнэ үү.') };
+            console.debug('Firebase currentUser', currentUser && { uid: currentUser.uid, email: currentUser.email });
             let ref = firebaseDbInstance.collection(collectionName);
             filters.forEach((filter) => {
               ref = ref.where(filter.field, filter.op, filter.value);
@@ -963,8 +966,10 @@
               }
               return { id: docSnap.id, ...data };
             });
+            console.debug('Firestore rows fetched', { collectionName, count: rows.length });
             return { data: rows, error: null };
           } catch (error) {
+            console.error('Firestore query error', { collectionName, error });
             return { data: null, error };
           }
         },
@@ -1412,14 +1417,17 @@
       const fallbackProfile=getFallbackAdminProfile(email);
       const fallbackCredentials=fallbackProfile && (password==='lock' || !USE_SUPABASE || email.toLowerCase()==='admin@gennetex.mn');
       try{
-        if(fallbackProfile && /admin@gennetex\.mn/i.test(email)){
-          const authResult=await ensureFirebaseAdminSession(email, password);
-          if(authResult.user){
-            saveFallbackAdminSession(fallbackProfile);
-            toast('Firebase админ сессийг бэлэн болголоо. Өгөгдөл ачаалж байна...', 'success');
-            await afterLogin(authResult.user.uid, fallbackProfile);
-            return;
-          }
+        // If Supabase is disabled, try signing in with Firebase Auth for the provided email.
+        if(!USE_SUPABASE){
+          try{
+            const authResult = await ensureFirebaseAdminSession(email, password);
+            if(authResult && authResult.user){
+              if(fallbackProfile) saveFallbackAdminSession(fallbackProfile);
+              toast('Firebase админ сессийг бэлэн болголоо. Өгөгдөл ачаалж байна...', 'success');
+              await afterLogin(authResult.user.uid, fallbackProfile);
+              return;
+            }
+          }catch(e){}
         }
         if(fallbackCredentials){
           saveFallbackAdminSession(fallbackProfile);
