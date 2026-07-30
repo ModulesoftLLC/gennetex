@@ -129,6 +129,7 @@ export default function IncomingCallManager() {
         visible={!!inCall}
         room={inCall ? `gennetex-${inCall.room}` : ''}
         name={currentUser?.name}
+        peerName={inCall?.caller_name}
         onClose={endCall}
       />
     </>

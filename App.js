@@ -15,6 +15,8 @@ import LoginScreen from './src/screens/LoginScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import OnboardingPermissionsScreen from './src/screens/OnboardingPermissionsScreen';
+import FaceEnrollmentGateScreen from './src/screens/FaceEnrollmentGateScreen';
+import * as faceApi from './src/services/faceService';
 import InventoryScreen from './src/screens/InventoryScreen';
 import FuelScreen from './src/screens/FuelScreen';
 import FleetFuelScreen from './src/screens/FleetFuelScreen';
@@ -252,6 +254,7 @@ function Root({ shareRef }) {
   const [ohaabOk, setOhaabOk] = useState(null);
   const [deviceOk, setDeviceOk] = useState(null);
   const [deviceInfo, setDeviceInfo] = useState(null);
+  const [faceGate, setFaceGate] = useState(null);
 
   useEffect(() => {
     if (!isCloud || !session) {
@@ -266,6 +269,16 @@ function Root({ shareRef }) {
       active = false;
     };
   }, [isCloud, session?.user?.id]);
+
+  useEffect(() => {
+    if (!isCloud || !session || !currentUser?.id || isAdmin) { setFaceGate({ ok: true, count: 10 }); return; }
+    let active = true;
+    setFaceGate(null);
+    faceApi.countEnrollments(currentUser.id)
+      .then((count) => { if (active) setFaceGate({ ok: count >= faceApi.ENROLL_TARGET, count }); })
+      .catch(() => { if (active) setFaceGate({ ok: false, count: 0 }); });
+    return () => { active = false; };
+  }, [isCloud, session?.user?.id, currentUser?.id, isAdmin]);
 
   // Апп руу орохын өмнө: шинэ төхөөрөмж бол системийн админы зөвшөөрөл шаардлагатай.
   // Системийн админыг (superadmin) шалгахгүй.
@@ -334,6 +347,8 @@ function Root({ shareRef }) {
     if (!onboarded) {
       return <OnboardingPermissionsScreen onComplete={() => setOnboarded(true)} />;
     }
+    if (faceGate === null) return <Splash />;
+    if (!faceGate.ok) return <FaceEnrollmentGateScreen initialCount={faceGate.count} onComplete={() => setFaceGate({ ok: true, count: faceApi.ENROLL_TARGET })} />;
     if (deviceOk === null) return <Splash />;
     if (!deviceOk) {
       return (

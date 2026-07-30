@@ -2,7 +2,7 @@ import { supabase } from '../lib/supabase';
 import { firebaseAuth } from '../lib/firebase';
 
 export const isFaceApiConfigured = true;
-export const ENROLL_TARGET = 3;
+export const ENROLL_TARGET = 10;
 
 function endpoint(action) {
   const employeeAuthUrl = String(process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || '').trim();

@@ -78,7 +78,10 @@ module.exports = async function handler(req, res) {
         await profileRef.set({ face_uuid: uuid, faceUuid: uuid, updatedAt: new Date().toISOString() }, { merge: true });
       }
       await getAdmin().firestore().collection('face_enrollments').add({ user_id: user.uid, user_name: profile.name || null, photo_url: req.body.photoUrl, created_at: new Date().toISOString() });
-      return res.status(200).json({ ok: true, uuid });
+      const countSnap = await getAdmin().firestore().collection('face_enrollments').where('user_id', '==', user.uid).get();
+      const count = countSnap.size;
+      if (count >= 10) await profileRef.set({ face_enrolled: true, faceEnrolled: true, updatedAt: new Date().toISOString() }, { merge: true });
+      return res.status(200).json({ ok: true, uuid, count, complete: count >= 10 });
     }
 
     if (action === 'verify') {

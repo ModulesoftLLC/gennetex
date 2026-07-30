@@ -16,7 +16,7 @@ import { initials } from '../lib/telegram/avatarColor';
 
 const { width } = Dimensions.get('window');
 
-// Viber маягийн дуудлагын дэлгэц. mode: 'incoming' | 'outgoing'
+// Messenger маягийн дуудлагын дэлгэц. mode: 'incoming' | 'outgoing'
 export default function CallScreen({
   visible,
   mode = 'incoming',
@@ -64,10 +64,10 @@ export default function CallScreen({
 
   return (
     <Modal visible={visible} transparent={false} animationType="slide" onRequestClose={onCancel || onDecline}>
-      <LinearGradient colors={['#8E7BFF', '#5B3FE9', '#3B1FB5']} style={styles.bg}>
+      <LinearGradient colors={['#070b14', '#101a31', '#173b78']} style={styles.bg}>
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
           <View style={styles.top}>
-            <Text style={styles.appTag}>{video ? 'Видео дуудлага' : 'Дуудлага'}</Text>
+            <View style={styles.secureRow}><Ionicons name="lock-closed" size={13} color="rgba(255,255,255,.72)"/><Text style={styles.appTag}>GENNETEX · {video ? 'VIDEO CALL' : 'CALL'}</Text></View>
           </View>
 
           <View style={styles.center}>
@@ -118,11 +118,12 @@ const styles = StyleSheet.create({
   bg: { flex: 1 },
   safe: { flex: 1, justifyContent: 'space-between' },
   top: { alignItems: 'center', paddingTop: 24 },
+  secureRow:{flexDirection:'row',alignItems:'center',gap:7,backgroundColor:'rgba(255,255,255,.08)',paddingHorizontal:13,paddingVertical:7,borderRadius:18},
   appTag: {
     color: 'rgba(255,255,255,0.85)',
     fontSize: 14,
     fontWeight: '600',
-    letterSpacing: 1,
+    letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
   center: { alignItems: 'center', marginTop: -40 },
@@ -138,11 +139,11 @@ const styles = StyleSheet.create({
     width: AV,
     height: AV,
     borderRadius: AV / 2,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: 'rgba(34,116,255,0.32)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: 'rgba(255,255,255,0.4)',
+    borderColor: 'rgba(255,255,255,0.72)',
   },
   avatarText: { color: '#fff', fontSize: 46, fontWeight: '800' },
   name: { color: '#fff', fontSize: 30, fontWeight: '800', marginTop: 24, textAlign: 'center', paddingHorizontal: 24 },

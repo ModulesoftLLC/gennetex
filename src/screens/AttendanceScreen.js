@@ -302,14 +302,7 @@ export default function AttendanceScreen() {
 
     // Анх удаа — царай бүртгэх горим (10 удаа)
     if (isCloud && !enrolled) {
-      setEnrolling(true);
-      setPendingRemote(mode === 'remote');
-      if (mode === 'remote') {
-        setRemoteReason('');
-        setRemoteModal(true);
-      } else {
-        setCameraVisible(true);
-      }
+      Alert.alert('Нүүр бүртгэл дутуу', 'Үндсэн апп руу орохын өмнөх 10 удаагийн нүүр бүртгэлээ дуусгаад дахин оролдоно уу.');
       return;
     }
 

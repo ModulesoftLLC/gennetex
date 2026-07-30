@@ -155,6 +155,7 @@ export default function ConversationScreen() {
   const [error, setError] = useState(null);
   const [callVisible, setCallVisible] = useState(false);
   const [outgoing, setOutgoing] = useState(null);
+  const [activeCall, setActiveCall] = useState(null);
   const outgoingUnsub = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [voiceActive, setVoiceActive] = useState(false);
@@ -411,6 +412,7 @@ export default function ConversationScreen() {
         outgoingUnsub.current = callApi.subscribeCallUpdates(call.id, (updated) => {
           if (updated.status === 'accepted') {
             cleanupOutgoing();
+            setActiveCall(updated);
             setOutgoing(null);
             setCallVisible(true);
           } else if (updated.status === 'declined' || updated.status === 'ended') {
@@ -441,6 +443,14 @@ export default function ConversationScreen() {
       } catch (e) {}
     }
     setOutgoing(null);
+  };
+
+  const closeVideoCall = async () => {
+    setCallVisible(false);
+    if (activeCall?.id) {
+      try { await callApi.setCallStatus(activeCall.id, 'ended'); } catch (_) {}
+    }
+    setActiveCall(null);
   };
 
   useEffect(() => () => cleanupOutgoing(), []);
@@ -825,7 +835,8 @@ export default function ConversationScreen() {
         visible={callVisible}
         room={`gennetex-${room}`}
         name={me?.name}
-        onClose={() => setCallVisible(false)}
+        peerName={isGroup ? title : otherUser?.name}
+        onClose={closeVideoCall}
       />
     </View>
   );
