@@ -116,10 +116,11 @@ module.exports = async function handler(req, res) {
     }
     if (action === 'delete-employee') {
       const actor = await requireAdmin(req); const employeeId = String(body.employeeId || '');
-      if (actor.profile.normalizedPhone !== '+97695238118') throw httpError(403, 'Зөвхөн системийн админ ажилтан устгана.');
+      if (actor.profile.role !== 'superadmin' && actor.profile.normalizedPhone !== '+97695238118') throw httpError(403, 'Зөвхөн системийн админ ажилтан устгана.');
       if (!employeeId || employeeId === actor.uid) throw httpError(400, 'Өөрийн бүртгэлийг устгах боломжгүй.');
       const employeeRef = db.collection('profiles').doc(employeeId); const employeeSnap = await employeeRef.get();
       if (!employeeSnap.exists) throw httpError(404, 'Ажилтан олдсонгүй.');
+      if (employeeSnap.data()?.role === 'superadmin') throw httpError(403, 'Системийн админы бүртгэлийг устгах боломжгүй.');
       await Promise.all([
         employeeRef.delete(),
         db.collection('employeeAuthSecrets').doc(employeeId).delete(),

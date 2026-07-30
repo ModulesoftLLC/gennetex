@@ -35,8 +35,8 @@ const EMPTY = { code: '', plate_number: '', liters_per_100km: '12', tank_capacit
 export default function VehiclesAdminScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isAdmin, isCloud, fetchEmployees, authProfile } = useApp();
-  const effectiveAdmin = Boolean(isAdmin || authProfile?.email?.includes('admin') || authProfile?.email?.includes('superadmin') || authProfile?.role?.includes('admin') || authProfile?.role?.includes('superadmin'));
+  const { isAdmin, isCloud, fetchEmployees } = useApp();
+  const effectiveAdmin = Boolean(isAdmin);
   const [list, setList] = useState([]);
   const [trips, setTrips] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -180,6 +180,10 @@ export default function VehiclesAdminScreen() {
   };
 
   const handleDelete = (item) => {
+    if (!effectiveAdmin) {
+      Alert.alert('Эрх хүрэхгүй', 'Зөвхөн админ машины мэдээлэл устгана.');
+      return;
+    }
     Alert.alert('Устгах', `${item.plate_number} машиныг устгах уу?`, [
       { text: 'Болих', style: 'cancel' },
       {

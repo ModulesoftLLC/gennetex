@@ -24,7 +24,7 @@ export default function EmployeesScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   const { isAdmin, isSuperAdmin: isSuperAdminUser, authProfile, fetchEmployees, adminCreateEmployee, adminUpdateEmployee, adminResetUserPassword, adminDeleteEmployee } = useApp();
-  const effectiveAdmin = Boolean(isAdmin || authProfile?.email?.includes('admin') || authProfile?.email?.includes('superadmin') || authProfile?.role?.includes('admin') || authProfile?.role?.includes('superadmin'));
+  const effectiveAdmin = Boolean(isAdmin);
   const mayAssignRoles = canAssignRoles(authProfile?.role);
   const [list, setList] = useState([]);
   const [modal, setModal] = useState(false);
@@ -241,7 +241,7 @@ export default function EmployeesScreen() {
                 <Text style={styles.otpHint}>Эрх өөрчлөхийг зөвхөн системийн админ хийнэ. Та ажилтны мэдээлэл засна.</Text>
               )}
               {error ? <Text style={styles.error}>{error}</Text> : null}
-              {editId && editId !== authProfile?.id && authProfile?.normalizedPhone === '+97695238118' ? (
+              {editId && editId !== authProfile?.id && isSuperAdminUser && form.role !== ROLES.SUPERADMIN ? (
                 <Button title="Ажилтан устгах" variant="danger" onPress={confirmDelete} disabled={saving} style={{ marginBottom: spacing.md }} />
               ) : null}
               <View style={styles.actions}>

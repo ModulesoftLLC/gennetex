@@ -51,11 +51,16 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    match /vehicles/{vehicleId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
     match /{collection}/{document=**} {
       allow read: if signedIn()
         && !(collection in ['employeeAuthSecrets', 'verificationSessions']);
       allow create, update, delete: if signedIn()
-        && !(collection in ['employeeAuthSecrets', 'verificationSessions', 'inventory', 'stock_movements']);
+        && !(collection in ['employeeAuthSecrets', 'verificationSessions', 'inventory', 'stock_movements', 'vehicles']);
     }
   }
 }
