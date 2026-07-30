@@ -43,7 +43,7 @@ export default function AdminApplicationsScreen() {
         text: appApi.applicationStatusLabel(k),
         onPress: async () => {
           try {
-            await appApi.updateApplicationStatus(row.id, k);
+            await appApi.updateApplicationStatus(row.id, k, row._collection);
             load();
           } catch (e) {
             Alert.alert('Алдаа', e.message);

@@ -342,6 +342,7 @@ export default function AttendanceScreen() {
         userId: profile.id,
         userName: profile.name,
         photoUrl,
+        localUri: photo.uri,
       });
       const next = enrollCount + 1;
       setEnrollCount(next);
@@ -406,7 +407,7 @@ export default function AttendanceScreen() {
       if (isCloud) {
         const photoUrl = await attApi.uploadSelfie(photo.uri, profile.id);
         // Царай таних шалгалт — зөвхөн тухайн ажилтны царайг зөвшөөрнө
-        const vr = await faceApi.verifyFace(photoUrl);
+        const vr = await faceApi.verifyFace(photoUrl, photo.uri);
         if (!vr.skipped && !vr.match) {
           setBusy(false);
           setCameraVisible(false);

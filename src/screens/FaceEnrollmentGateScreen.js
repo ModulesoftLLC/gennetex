@@ -26,7 +26,7 @@ export default function FaceEnrollmentGateScreen({ initialCount = 0, onComplete 
     setBusy(true); setError('');
     try {
       const photoUrl = await attendance.uploadSelfie(photo.uri, currentUser.id);
-      const result = await face.insertEnrollment({ photoUrl });
+      const result = await face.insertEnrollment({ photoUrl, localUri: photo.uri });
       const next = Number(result.count ?? count + 1);
       setCount(next);
       if (result.complete || next >= face.ENROLL_TARGET) {

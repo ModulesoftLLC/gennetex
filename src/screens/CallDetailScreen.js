@@ -44,20 +44,9 @@ import {
 } from '../lib/callSla';
 import { callStatusLabelMn, getCallStatusMeta } from '../lib/callStatusColors';
 import { distanceMeters } from '../lib/geo';
+import { callPhone, composeSms, normalizeContactPhone } from '../lib/contactActions';
 import TeamCrewCard from '../components/TeamCrewCard';
 
-function smsComposerUrl(phone, message) {
-  const separator = Platform.OS === 'ios' ? '&' : '?';
-  return `sms:${String(phone || '').replace(/[^+\d]/g, '')}${separator}body=${encodeURIComponent(message)}`;
-}
-
-async function openSmsComposer(phone, message) {
-  if (!phone) return false;
-  const url = smsComposerUrl(phone, message);
-  if (!await Linking.canOpenURL(url)) throw new Error('Messages апп нээж чадсангүй.');
-  await Linking.openURL(url);
-  return true;
-}
 import * as vehicleApi from '../services/vehicleService';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
@@ -299,7 +288,7 @@ export default function CallDetailScreen() {
       });
       Alert.alert('Бүртгэгдлээ', `${call.customer} дээр очсоныг бүртгэлээ.`);
       if (call.phone) {
-        await openSmsComposer(
+        await composeSms(
           call.phone,
           `Сайн байна уу. Танайд ${currentUser.name || 'манай ажилтан'} ирлээ. Юнивишн болон Gennetex-ийн үйлчилгээг сонгосонд баярлалаа.`
         ).catch((error) => Alert.alert('Мессеж', error.message));
@@ -350,7 +339,7 @@ export default function CallDetailScreen() {
         { text: 'Хаах', style: 'cancel' },
         ...(call.phone ? [{
           text: 'Талархлын мессеж',
-          onPress: () => openSmsComposer(
+          onPress: () => composeSms(
             call.phone,
             'Манайхаар үйлчлүүлсэнд баярлалаа. Дахин үйлчлүүлээрэй. Юнивишн болон Gennetex-ийн үйлчилгээг сонгосонд баярлалаа.'
           ).catch((error) => Alert.alert('Мессеж', error.message)),
@@ -463,10 +452,10 @@ export default function CallDetailScreen() {
             <View style={{ flex: 1 }}><Text style={styles.contactName} numberOfLines={1}>{call.customer || 'Харилцагч'}</Text><Text style={styles.contactPhone}>{call.phone}</Text></View>
           </View>
           <View style={styles.contactActions}>
-            <TouchableOpacity style={[styles.contactButton, styles.callButton]} onPress={() => Linking.openURL(`tel:${String(call.phone).replace(/[^+\d]/g, '')}`).catch(() => Alert.alert('Алдаа', 'Утасны дуудлага нээж чадсангүй.'))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаар руу залгах`}>
+            <TouchableOpacity style={[styles.contactButton, styles.callButton]} onPress={() => callPhone(call.phone).catch((error) => Alert.alert('Дуудлага', error.message))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаар руу залгах`}>
               <Ionicons name="call" size={21} color="#fff"/><Text style={styles.contactButtonText}>Залгах</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.contactButton, styles.messageButton]} onPress={() => openSmsComposer(call.phone, `Сайн байна уу. ${currentUser?.name || 'Gennetex-ийн ажилтан'} холбогдож байна.`).catch((error) => Alert.alert('Мессеж', error.message))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаарт мессеж бичих`}>
+            <TouchableOpacity style={[styles.contactButton, styles.messageButton]} onPress={() => composeSms(call.phone, `Сайн байна уу. ${currentUser?.name || 'Gennetex-ийн ажилтан'} холбогдож байна.`).catch((error) => Alert.alert('Мессеж', error.message))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаарт мессеж бичих`}>
               <Ionicons name="chatbubble" size={20} color="#fff"/><Text style={styles.contactButtonText}>Мессеж</Text>
             </TouchableOpacity>
           </View>
@@ -510,7 +499,7 @@ export default function CallDetailScreen() {
               <InfoRow
                 label="Утасны дугаар 1"
                 value={call.phone}
-                link={call.phone ? `tel:${call.phone}` : null}
+                link={call.phone ? `tel:${normalizeContactPhone(call.phone)}` : null}
                 copyValue={call.phone}
               />
               <InfoRow label="Тайлбар" value={call.problem} />
@@ -601,7 +590,7 @@ export default function CallDetailScreen() {
               }}
             />
             {call.phone ? (
-              <MenuBtn color="#22c55e" label={`Залгах · ${call.phone}`} onPress={() => Linking.openURL(`tel:${call.phone}`)} />
+              <MenuBtn color="#22c55e" label={`Залгах · ${call.phone}`} onPress={() => callPhone(call.phone).catch((error) => Alert.alert('Дуудлага', error.message))} />
             ) : null}
             <MenuBtn color="#1677ff" label="Google Maps-аар чиглүүлэх" onPress={openMaps} />
             <MenuBtn

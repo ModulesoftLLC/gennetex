@@ -1,7 +1,27 @@
-import { supabase } from '../lib/supabase';
+import {
+  firebaseCreate,
+  firebaseList,
+  firebaseSubscribe,
+  firebaseUpdate,
+} from '../lib/firebaseAdapter';
 import * as notifyApi from './notificationService';
 
-const TABLE = 'job_applications';
+const TABLE = 'jobApplications';
+const LEGACY_TABLE = 'job_applications';
+
+function isoDate(value) {
+  return value?.toDate?.().toISOString?.() || value || null;
+}
+
+function normalizeApplication(row, collectionName) {
+  if (!row) return row;
+  return {
+    ...row,
+    created_at: isoDate(row.created_at || row.createdAt),
+    updated_at: isoDate(row.updated_at || row.updatedAt),
+    _collection: collectionName,
+  };
+}
 
 export const APPLICATION_STATUS = [
   { key: 'new', label: 'Шинэ' },
@@ -30,13 +50,7 @@ export async function submitApplication({ name, lastName, phone, email, position
     source,
     status: 'new',
   };
-  const { data, error } = await supabase.from(TABLE).insert(row).select().single();
-  if (error) {
-    if (/job_applications/i.test(error.message)) {
-      throw new Error('job_applications хүснэгт байхгүй. migration_job_applications.sql ажиллуулна уу.');
-    }
-    throw error;
-  }
+  const data = normalizeApplication(await firebaseCreate(TABLE, row), TABLE);
   try {
     await notifyApi.notifyApplicationToAdmins({
       name: n,
@@ -49,39 +63,39 @@ export async function submitApplication({ name, lastName, phone, email, position
 }
 
 export async function fetchApplications(limit = 200) {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  if (error) throw error;
-  return data || [];
+  const [current, legacy] = await Promise.all([
+    firebaseList(TABLE),
+    firebaseList(LEGACY_TABLE),
+  ]);
+  return [
+    ...current.map((row) => normalizeApplication(row, TABLE)),
+    ...legacy.map((row) => normalizeApplication(row, LEGACY_TABLE)),
+  ]
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+    .slice(0, limit);
 }
 
 export async function countNewApplications() {
-  const { count, error } = await supabase
-    .from(TABLE)
-    .select('*', { count: 'exact', head: true })
-    .eq('status', 'new');
-  if (error) return 0;
-  return count || 0;
+  const rows = await fetchApplications(500);
+  return rows.filter((row) => row.status === 'new').length;
 }
 
-export async function updateApplicationStatus(id, status) {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .update({ status })
-    .eq('id', id)
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+export async function updateApplicationStatus(id, status, collectionName = TABLE) {
+  return normalizeApplication(
+    await firebaseUpdate(collectionName === LEGACY_TABLE ? LEGACY_TABLE : TABLE, id, { status }),
+    collectionName
+  );
 }
 
 export function subscribeApplications(onChange) {
-  const channel = supabase
-    .channel('job-applications')
-    .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => onChange?.())
-    .subscribe();
-  return () => supabase.removeChannel(channel);
+  let initialized = 0;
+  const notifyAfterInitial = () => {
+    initialized += 1;
+    if (initialized > 2) onChange?.();
+  };
+  const unsubs = [
+    firebaseSubscribe(TABLE, notifyAfterInitial),
+    firebaseSubscribe(LEGACY_TABLE, notifyAfterInitial),
+  ];
+  return () => unsubs.forEach((unsubscribe) => unsubscribe?.());
 }

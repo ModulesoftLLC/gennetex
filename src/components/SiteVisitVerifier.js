@@ -30,7 +30,7 @@ export default function SiteVisitVerifier() {
     setBusy(true);
     try {
       const photoUrl = await attApi.uploadSelfie(photo.uri, currentUser.id);
-      const vr = await faceApi.verifyFace(photoUrl);
+      const vr = await faceApi.verifyFace(photoUrl, photo.uri);
       if (!vr.skipped && !vr.match) {
         Alert.alert('Царай таарсангүй', 'Таны бүртгэлтэй царайтай таарахгүй байна. Дахин оролдоно уу.');
         return;

@@ -16,8 +16,8 @@ service cloud.firestore {
       allow create: if signedIn() && (request.auth.uid == userId || isAdmin());
       allow update: if isAdmin() || (signedIn() && request.auth.uid == userId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'avatar_url', 'latitude', 'longitude', 'last_seen', 'face_uuid',
-          'face_enrolled', 'must_change_password', 'report_signature_url',
+          'avatar_url', 'latitude', 'longitude', 'last_seen', 'face_uuid', 'faceUuid',
+          'face_enrolled', 'faceEnrolled', 'must_change_password', 'report_signature_url',
           'telegram_user_id', 'telegram_username', 'telegram_linked_at'
         ]));
       allow delete: if isAdmin();
@@ -30,6 +30,13 @@ service cloud.firestore {
 
     match /verificationSessions/{sessionId} {
       allow read, write: if false;
+    }
+
+    // On-device SFace templates: an employee can only read/write their own embeddings.
+    match /face_enrollments/{enrollmentId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.user_id == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.user_id == request.auth.uid);
     }
 
     // Агуулахын нэр төрөл, багаж болон бусдад олголтыг зөвхөн админ удирдана.
