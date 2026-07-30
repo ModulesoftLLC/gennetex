@@ -1,5 +1,6 @@
 import { collection, doc, getDoc, getDocs, query, where, orderBy, limit, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ref, uploadBytes, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
+import { Buffer } from 'buffer';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as firebaseSignOut, sendPasswordResetEmail, updatePassword, onAuthStateChanged } from 'firebase/auth';
 import { firestoreDb, firebaseStorage, firebaseAuth } from './firebase';
 
@@ -270,12 +271,28 @@ function normalizeUploadPayload(file, contentType) {
   return file;
 }
 
+function uploadPayloadAsBase64(file) {
+  if (typeof ArrayBuffer === 'undefined') return null;
+  let bytes = null;
+  if (file instanceof ArrayBuffer) {
+    bytes = new Uint8Array(file);
+  } else if (ArrayBuffer.isView(file)) {
+    bytes = new Uint8Array(file.buffer, file.byteOffset, file.byteLength);
+  }
+  return bytes ? Buffer.from(bytes).toString('base64') : null;
+}
+
 export async function firebaseUploadFile(path, file, contentType = 'application/octet-stream') {
   try {
     const storage = ensureStorage();
     const storageRef = ref(storage, path);
     const payload = normalizeUploadPayload(file, contentType);
-    await uploadBytes(storageRef, payload, { contentType });
+    const base64 = uploadPayloadAsBase64(payload);
+    if (base64) {
+      await uploadString(storageRef, base64, 'base64', { contentType });
+    } else {
+      await uploadBytes(storageRef, payload, { contentType });
+    }
     return getDownloadURL(storageRef);
   } catch (error) {
     console.warn('Firebase upload failed:', error?.message || error);
