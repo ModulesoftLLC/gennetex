@@ -457,6 +457,21 @@ export default function CallDetailScreen() {
           </View>
         </View>
 
+        {call.phone ? <View style={styles.contactCard}>
+          <View style={styles.contactInfo}>
+            <View style={styles.contactIcon}><Ionicons name="person" size={20} color={colors.primary} /></View>
+            <View style={{ flex: 1 }}><Text style={styles.contactName} numberOfLines={1}>{call.customer || 'Харилцагч'}</Text><Text style={styles.contactPhone}>{call.phone}</Text></View>
+          </View>
+          <View style={styles.contactActions}>
+            <TouchableOpacity style={[styles.contactButton, styles.callButton]} onPress={() => Linking.openURL(`tel:${String(call.phone).replace(/[^+\d]/g, '')}`).catch(() => Alert.alert('Алдаа', 'Утасны дуудлага нээж чадсангүй.'))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаар руу залгах`}>
+              <Ionicons name="call" size={21} color="#fff"/><Text style={styles.contactButtonText}>Залгах</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.contactButton, styles.messageButton]} onPress={() => openSmsComposer(call.phone, `Сайн байна уу. ${currentUser?.name || 'Gennetex-ийн ажилтан'} холбогдож байна.`).catch((error) => Alert.alert('Мессеж', error.message))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаарт мессеж бичих`}>
+              <Ionicons name="chatbubble" size={20} color="#fff"/><Text style={styles.contactButtonText}>Мессеж</Text>
+            </TouchableOpacity>
+          </View>
+        </View> : null}
+
         <View style={styles.card}>
           <Accordion title="Мэдээлэл" open={infoOpen} onToggle={() => setInfoOpen((v) => !v)}>
             <View style={styles.addrRow}>
@@ -682,6 +697,16 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   sumCol: { flex: 1 },
   sumVal: { fontSize: 13, fontWeight: '700', color: colors.text },
   sumSub: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  contactCard:{backgroundColor:colors.surface,borderRadius:radius.md,borderWidth:1,borderColor:colors.border,padding:spacing.md,marginBottom:spacing.md},
+  contactInfo:{flexDirection:'row',alignItems:'center',gap:10,marginBottom:spacing.md},
+  contactIcon:{width:42,height:42,borderRadius:21,backgroundColor:colors.primarySoft,alignItems:'center',justifyContent:'center'},
+  contactName:{color:colors.text,fontSize:15,fontWeight:'800'},
+  contactPhone:{color:colors.textMuted,fontSize:13,marginTop:2},
+  contactActions:{flexDirection:'row',gap:spacing.sm},
+  contactButton:{flex:1,height:48,borderRadius:radius.md,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8},
+  callButton:{backgroundColor:colors.success},
+  messageButton:{backgroundColor:colors.primary},
+  contactButtonText:{color:'#fff',fontSize:14,fontWeight:'800'},
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,
