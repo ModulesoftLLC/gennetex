@@ -118,7 +118,7 @@ module.exports = async function handler(req, res) {
       const phone = normalizePhone(body.phone); const purpose = String(body.purpose || 'PHONE_ACTIVATION');
       if (!allowedPurposes.has(purpose)) throw httpError(400, 'Баталгаажуулалтын зорилго буруу.');
       const employee = await findEmployee(phone);
-      if (!employee || employee.status === 'DISABLED') throw httpError(404, 'This phone number has not been registered by an administrator.');
+      if (!employee || employee.status === 'DISABLED') throw httpError(404, 'Бүртгэлгүй утасны дугаар байна.');
       if (purpose === 'PHONE_ACTIVATION' && employee.appPinConfigured) throw httpError(409, 'Энэ дугаар аль хэдийн идэвхжсэн байна. PIN-ээр нэвтэрнэ үү.');
       return res.status(200).json(publicSession(await createVerifySession(employee, purpose)));
     }
