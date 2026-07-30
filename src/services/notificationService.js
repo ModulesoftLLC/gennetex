@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { supabase } from '../lib/supabase';
+import { firebaseAuth } from '../lib/firebase';
 
 export const CALLS_CHANNEL = 'calls';
 
@@ -142,6 +143,27 @@ async function notifyTokens(tokens, { title, body, data, channelId, priority, so
   );
 }
 
+function telegramEndpoint() {
+  const employeeAuthUrl = String(process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || '').trim();
+  if (employeeAuthUrl) return employeeAuthUrl.replace(/\/employee-auth\/?(?:\?.*)?$/, '/telegram-notify');
+  return 'https://adiya.site/api/telegram-notify';
+}
+
+export async function notifyTelegram(payload) {
+  const user = firebaseAuth?.currentUser;
+  if (!user || Platform.OS === 'web' && typeof fetch !== 'function') return;
+  const token = await user.getIdToken();
+  const response = await fetch(telegramEndpoint(), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: payload?.title, body: payload?.body }),
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => null);
+    throw new Error(result?.error || `Telegram push HTTP ${response.status}`);
+  }
+}
+
 export async function showLocalNotification({ title, body, data, channelId }) {
   await ensureChannels();
   await Notifications.scheduleNotificationAsync({
@@ -164,17 +186,17 @@ export async function notifyUsers(userIds, payload) {
 }
 
 export async function notifyAdmins(payload) {
-  try {
-    const tokens = await fetchAdminTokens();
-    await notifyTokens(tokens, { channelId: 'chat', ...payload });
-  } catch (e) {}
+  await Promise.allSettled([
+    (async () => { const tokens = await fetchAdminTokens(); await notifyTokens(tokens, { channelId: 'chat', ...payload }); })(),
+    notifyTelegram(payload),
+  ]);
 }
 
 export async function notifySuperadmins(payload) {
-  try {
-    const tokens = await fetchSuperadminTokens();
-    await notifyTokens(tokens, { channelId: 'chat', ...payload });
-  } catch (e) {}
+  await Promise.allSettled([
+    (async () => { const tokens = await fetchSuperadminTokens(); await notifyTokens(tokens, { channelId: 'chat', ...payload }); })(),
+    notifyTelegram(payload),
+  ]);
 }
 
 /** Ажилд орох шинэ анкет — админд */
