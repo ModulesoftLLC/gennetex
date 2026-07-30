@@ -14,13 +14,29 @@ service cloud.firestore {
     match /profiles/{userId} {
       allow read: if signedIn();
       allow create: if signedIn() && (request.auth.uid == userId || isAdmin());
-      allow update: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow update: if isAdmin() || (signedIn() && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'avatar_url', 'latitude', 'longitude', 'last_seen', 'face_uuid',
+          'face_enrolled', 'must_change_password', 'report_signature_url',
+          'telegram_user_id', 'telegram_username', 'telegram_linked_at'
+        ]));
       allow delete: if isAdmin();
     }
 
-    match /{document=**} {
-      allow read: if signedIn();
-      allow create, update, delete: if signedIn();
+    // Server Admin SDK only: PIN hashes and verify.mn session audit must never reach clients.
+    match /employeeAuthSecrets/{userId} {
+      allow read, write: if false;
+    }
+
+    match /verificationSessions/{sessionId} {
+      allow read, write: if false;
+    }
+
+    match /{collection}/{document=**} {
+      allow read: if signedIn()
+        && !(collection in ['employeeAuthSecrets', 'verificationSessions']);
+      allow create, update, delete: if signedIn()
+        && !(collection in ['employeeAuthSecrets', 'verificationSessions']);
     }
   }
 }

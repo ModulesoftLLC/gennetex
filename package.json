@@ -11,6 +11,8 @@
     "version:bump": "node scripts/bump-version.js",
     "admin:sync-env": "node scripts/sync-admin-env.js",
     "admin:serve": "python -m http.server 5500 --directory admin-web",
+    "seed:phone-admin": "node scripts/seed-phone-admin.js",
+    "test:verify-mn": "node --test tests/verifyMn.test.js",
     "postinstall": "node scripts/patch-incoming-call-rn81.js && node scripts/sync-google-services.js",
     "eas-build-post-install": "node scripts/patch-incoming-call-rn81.js && node scripts/sync-google-services.js"
   },
@@ -48,6 +50,7 @@
     "expo-status-bar": "~3.0.9",
     "expo-task-manager": "~14.0.9",
     "firebase": "^12.16.0",
+    "firebase-admin": "^13.4.0",
     "jpeg-js": "^0.4.4",
     "js-sha1": "^0.7.0",
     "js-sha256": "^0.11.1",

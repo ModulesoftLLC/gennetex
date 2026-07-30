@@ -22,6 +22,7 @@ import {
   resolveRole,
   normalizeRole,
 } from '../lib/roles';
+import { normalizeMongolianPhone } from '../lib/phone';
 
 async function findProfileByEmail(email) {
   const normalized = String(email || '').trim().toLowerCase();
@@ -244,6 +245,7 @@ export async function adminUpdateEmployee(userId, patch) {
   if (patch.address !== undefined) clean.address = String(patch.address).trim() || null;
   if (patch.position !== undefined) clean.position = String(patch.position).trim() || null;
   if (patch.phone !== undefined) clean.phone = String(patch.phone).trim() || null;
+  if (patch.phone !== undefined && patch.phone) clean.normalizedPhone = normalizeMongolianPhone(patch.phone);
   if (patch.role !== undefined) {
     const nextRole = patch.role === ROLES.ADMIN ? ROLES.ADMIN : patch.role === ROLES.SUPERADMIN ? ROLES.SUPERADMIN : ROLES.EMPLOYEE;
     if (!allowedAssignRole(viewerRole, nextRole)) {
@@ -278,7 +280,7 @@ export async function adminResetUserPassword(userId, newPassword, forceChange = 
 }
 
 // Админ шинэ ажилтан үүсгэнэ. Админы session-г алдахгүйн тулд тусдаа client-ээр signUp хийнэ.
-export async function adminCreateEmployee({ email, password, name, position, phone, role = ROLES.EMPLOYEE }) {
+export async function adminCreateEmployee({ email, password, name, last_name, position, phone, role = ROLES.EMPLOYEE }) {
   const viewerRole = await getViewerRole();
   if (!isAdminRole(viewerRole)) throw new Error('Зөвхөн админ үүсгэнэ.');
   const safeRole = role === ROLES.ADMIN ? ROLES.ADMIN : role === ROLES.SUPERADMIN ? ROLES.SUPERADMIN : ROLES.EMPLOYEE;
@@ -286,14 +288,20 @@ export async function adminCreateEmployee({ email, password, name, position, pho
     throw new Error('Энэ эрхтэй хэрэглэгч үүсгэх боломжгүй.');
   }
   const oneTime = password || generateOneTimePassword();
+  const normalizedPhone = normalizeMongolianPhone(phone);
   try {
     const user = await createFirebaseUserWithoutChangingSession(email.trim(), oneTime);
     await firebaseSet('profiles', user.uid, {
       id: user.uid,
       email: user.email,
       name,
+      last_name: String(last_name || '').trim(),
       position,
       phone,
+      normalizedPhone,
+      phoneVerified: false,
+      appPinConfigured: false,
+      status: 'ACTIVE',
       role: safeRole,
       must_change_password: true,
     });
@@ -306,6 +314,10 @@ export async function adminCreateEmployee({ email, password, name, position, pho
       name: String(name || '').trim() || 'Ажилтан',
       position: String(position || '').trim(),
       phone: String(phone || '').trim(),
+      normalizedPhone,
+      phoneVerified: false,
+      appPinConfigured: false,
+      status: 'ACTIVE',
       role: safeRole,
       must_change_password: true,
       localFallback: true,

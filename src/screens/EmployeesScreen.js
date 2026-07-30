@@ -16,6 +16,7 @@ import { Card, Button, Field, Badge, ScreenHeader, HeaderButton, EmptyState } fr
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { ROLES, roleLabel, canManageProfile, canAssignRoles } from '../lib/roles';
+import { localPhoneDigits, normalizeMongolianPhone } from '../lib/phone';
 
 const EMPTY = { name: '', last_name: '', email: '', password: '', position: '', phone: '', address: '', role: 'employee' };
 
@@ -90,10 +91,7 @@ export default function EmployeesScreen() {
       setError('Нэр шаардлагатай.');
       return;
     }
-    if (!editId && !form.email.trim()) {
-      setError('Нэр болон имэйл шаардлагатай.');
-      return;
-    }
+    try { normalizeMongolianPhone(form.phone); } catch (e) { setError(e.message); return; }
     if (form.password && form.password.length < 6) {
       setError('Нууц үг оруулбал 6+ тэмдэгт байх ёстой.');
       return;
@@ -123,22 +121,21 @@ export default function EmployeesScreen() {
         await load();
         return;
       }
-      const res = await adminCreateEmployee({
+      const normalizedPhone = normalizeMongolianPhone(form.phone);
+      const generatedEmail = `${normalizedPhone.slice(4)}@phone.gennetex.mn`;
+      await adminCreateEmployee({
         name: form.name.trim(),
-        email: form.email.trim(),
+        last_name: form.last_name.trim(),
+        email: form.email.trim() || generatedEmail,
         password: form.password || undefined,
         position: form.position.trim(),
         phone: form.phone.trim(),
         role: mayAssignRoles ? form.role : ROLES.EMPLOYEE,
       });
-      const email = form.email.trim();
       closeModal();
       Alert.alert(
         'Ажилтан бүртгэгдлээ',
-        `Дараах 1 удаагийн нэвтрэх мэдээллийг ажилтанд өгнө үү:\n\n` +
-          `Имэйл: ${email}\n` +
-          `Нууц үг: ${res.oneTimePassword}\n\n` +
-          `Ажилтан анх нэвтэрмэгц өөрийн нууц үгээ солино.`
+        `+976 ${form.phone.slice(0,4)} ${form.phone.slice(4)} дугаартай ажилтан бүртгэгдлээ. Ажилтан апп дотроос утсаа баталгаажуулж 4 оронтой PIN үүсгэнэ.`
       );
       setTimeout(load, 1200);
     } catch (e) {
@@ -210,13 +207,13 @@ export default function EmployeesScreen() {
                 </>
               ) : (
                 <>
-                  <Field label="Имэйл" autoCapitalize="none" keyboardType="email-address" value={form.email} onChangeText={(t) => setForm({ ...form, email: t })} />
+                  <Field label="Имэйл (заавал биш)" autoCapitalize="none" keyboardType="email-address" value={form.email} onChangeText={(t) => setForm({ ...form, email: t })} />
                   <Field label="Нууц үг (хоосон бол автоматаар үүснэ)" autoCapitalize="none" value={form.password} onChangeText={(t) => setForm({ ...form, password: t })} />
                   <Text style={styles.otpHint}>Хоосон орхивол 1 удаагийн нууц үг автоматаар үүсч, ажилтан анх нэвтэрмэгц өөрчилнө.</Text>
                 </>
               )}
               <Field label="Албан тушаал" value={form.position} onChangeText={(t) => setForm({ ...form, position: t })} />
-              <Field label="Утас" keyboardType="phone-pad" value={form.phone} onChangeText={(t) => setForm({ ...form, phone: t })} />
+              <Field label="Утас (+976)" keyboardType="number-pad" maxLength={8} value={localPhoneDigits(form.phone)} onChangeText={(t) => setForm({ ...form, phone: localPhoneDigits(t) })} />
               <Field label="Хаяг" value={form.address} onChangeText={(t) => setForm({ ...form, address: t })} />
               <Text style={styles.roleLabel}>Эрх</Text>
               {mayAssignRoles ? (

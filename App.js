@@ -48,6 +48,7 @@ import RequisitionScreen from './src/screens/RequisitionScreen';
 import AdminReportsScreen from './src/screens/AdminReportsScreen';
 import AdminPerformanceScreen from './src/screens/AdminPerformanceScreen';
 import AdminAppUsageScreen from './src/screens/AdminAppUsageScreen';
+import AdminVerificationRevenueScreen from './src/screens/AdminVerificationRevenueScreen';
 import AdminFeedbackScreen from './src/screens/AdminFeedbackScreen';
 import AdminOhaabScreen from './src/screens/AdminOhaabScreen';
 import FeedbackScreen from './src/screens/FeedbackScreen';
@@ -183,6 +184,7 @@ function AppStack() {
       <Stack.Screen name="AdminOhaab" component={AdminOhaabScreen} />
       <Stack.Screen name="AdminPerformance" component={AdminPerformanceScreen} />
       <Stack.Screen name="AdminAppUsage" component={AdminAppUsageScreen} />
+      <Stack.Screen name="AdminVerificationRevenue" component={AdminVerificationRevenueScreen} />
       <Stack.Screen name="Feedback" component={FeedbackScreen} />
       <Stack.Screen name="Ohaab" component={OhaabScreen} />
       <Stack.Screen name="AdminDevices" component={AdminDevicesScreen} />

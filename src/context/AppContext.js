@@ -10,6 +10,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import * as invApi from '../services/inventoryService';
 import * as staffApi from '../services/staffService';
 import * as authApi from '../services/authService';
+import * as employeeAuthApi from '../services/employeeAuthService';
 import * as fuelApi from '../services/fuelService';
 import * as serviceCallApi from '../services/serviceCallService';
 import { calculateFuel } from '../lib/fuelCalc';
@@ -147,6 +148,27 @@ export function AppProvider({ children }) {
       setProfile({ id: nextProfile.id, name: nextProfile.name, email: nextProfile.email, role: nextProfile.role });
       await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify({ id: nextProfile.id, name: nextProfile.name, email: nextProfile.email, role: nextProfile.role }));
     }
+    setAuthLoading(false);
+  };
+
+  const signInWithEmployeePin = async (phone, pin) => {
+    const token = await employeeAuthApi.loginWithPin(phone, pin);
+    const user = await employeeAuthApi.finishFirebaseLogin(token.customToken);
+    const nextProfile = await authApi.getProfile(user.uid, user.email);
+    if (!nextProfile) throw new Error('Ажилтны профайл олдсонгүй.');
+    setAuthProfile(nextProfile);
+    setSession({ user: { id: user.uid, email: user.email, user_metadata: { name: nextProfile.name, role: nextProfile.role } } });
+    setProfile({ id: user.uid, name: nextProfile.name, email: user.email, role: nextProfile.role });
+    setAuthLoading(false);
+  };
+
+  const completeEmployeeTokenLogin = async (customToken) => {
+    const user = await employeeAuthApi.finishFirebaseLogin(customToken);
+    const nextProfile = await authApi.getProfile(user.uid, user.email);
+    if (!nextProfile) throw new Error('Ажилтны профайл олдсонгүй.');
+    setAuthProfile(nextProfile);
+    setSession({ user: { id: user.uid, email: user.email, user_metadata: { name: nextProfile.name, role: nextProfile.role } } });
+    setProfile({ id: user.uid, name: nextProfile.name, email: user.email, role: nextProfile.role });
     setAuthLoading(false);
   };
 
@@ -555,6 +577,8 @@ export function AppProvider({ children }) {
     mustChangePassword,
     currentUser,
     signIn,
+    signInWithEmployeePin,
+    completeEmployeeTokenLogin,
     signOut,
     updateMyProfile,
     adminCreateEmployee,
