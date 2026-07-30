@@ -12,10 +12,11 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
   const { completeEmployeeTokenLogin } = require('../context/AppContext').useApp();
   const [mode, setMode] = useState('phone'); const [phone, setPhone] = useState('');
   const [session, setSession] = useState(null); const [pin, setPin] = useState(''); const [confirmPin, setConfirmPin] = useState('');
+  const [verificationPurpose, setVerificationPurpose] = useState('PHONE_ACTIVATION'); const [pendingPin, setPendingPin] = useState('');
   const [loading, setLoading] = useState(false); const [error, setError] = useState(''); const [seconds, setSeconds] = useState(0); const checking = useRef(false);
   const check = async () => {
     if (!session?.sessionId || checking.current) return; checking.current = true; setLoading(true);
-    try { const next = await api.checkVerification(session.sessionId); setSession((old) => ({ ...old, ...next })); if (next.status === 'VERIFIED') { setMode('pinSetup'); setError(''); } else if (next.status === 'EXPIRED') setError('Баталгаажуулах хугацаа дууссан байна.'); }
+    try { const next = await api.checkVerification(session.sessionId); setSession((old) => ({ ...old, ...next })); if (next.status === 'VERIFIED') { setError(''); if (verificationPurpose === 'PIN_SETUP') { const result = await api.setPin(session.sessionId, next.verificationToken, pendingPin); await completeEmployeeTokenLogin(result.customToken); } else { setMode('pinSetup'); } } else if (next.status === 'EXPIRED') setError('Баталгаажуулах хугацаа дууссан байна.'); }
     catch (e) { setError(e.message); } finally { checking.current = false; setLoading(false); }
   };
   useEffect(() => {
@@ -23,9 +24,9 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
     const timer = setInterval(() => { setSeconds(Math.max(0, Math.ceil((Date.parse(session.expiresAt) - Date.now()) / 1000))); check(); }, 3000);
     const sub = AppState.addEventListener('change', (state) => { if (state === 'active') check(); }); check();
     return () => { clearInterval(timer); sub.remove(); };
-  }, [mode, session?.sessionId]);
+  }, [mode, session?.sessionId, verificationPurpose, pendingPin]);
   const start = async () => {
-    try { normalizeMongolianPhone(phone); setLoading(true); setError(''); const next = await api.startVerification(phone, 'PHONE_ACTIVATION'); if (next.activated) { setMode('login'); return; } setSession(next); setMode('verify'); }
+    try { normalizeMongolianPhone(phone); setLoading(true); setError(''); setVerificationPurpose('PHONE_ACTIVATION'); const next = await api.startVerification(phone, 'PHONE_ACTIVATION'); if (next.activated) { setMode('login'); return; } setSession(next); setMode('verify'); }
     catch (e) { setError(e.message); } finally { setLoading(false); }
   };
   const login = async () => {
@@ -34,8 +35,9 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
     catch (e) { setError(e.message); } finally { setLoading(false); }
   };
   const savePin = async () => {
+    if (!/^\d{4}$/.test(pin)) return setError('Нэвтрэх код 4 оронтой байна.');
     if (pin !== confirmPin) return setError('PIN давталт тохирохгүй байна.');
-    try { setLoading(true); setError(''); const result = await api.setPin(session.sessionId, session.verificationToken, pin); await completeEmployeeTokenLogin(result.customToken); }
+    try { setLoading(true); setError(''); const next = await api.startVerification(phone, 'PIN_SETUP'); setPendingPin(pin); setVerificationPurpose('PIN_SETUP'); setSession(next); setMode('verify'); }
     catch (e) { setError(e.message); } finally { setLoading(false); }
   };
   const back = async () => { if (mode === 'verify' && session) await api.cancelVerification(session.sessionId).catch(() => {}); if (mode === 'phone') onBack?.(); else { setMode('phone'); setSession(null); setPin(''); setConfirmPin(''); setError(''); } };
@@ -45,7 +47,7 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
     {mode === 'verify' ? <Text style={s.subtitle}>{session?.displayInstruction}</Text> : null}
     {mode === 'pinSetup' ? <Text style={s.subtitle}>Мартахгүй 4 оронтой кодоо хоёр удаа оруулна уу</Text> : null}
     {mode === 'phone' && <View style={s.phoneRow}><Image source={{ uri: 'https://em-content.zobj.net/source/emoji-one/5/flag-for-mongolia_1f1f2-1f1f3.png' }} style={s.flag} resizeMode="contain" accessibilityLabel="Монгол Улсын далбаа"/><Text style={s.code}>+976</Text><TextInput value={phone} onChangeText={(v) => setPhone(localPhoneDigits(v))} keyboardType="number-pad" maxLength={8} placeholder="9911 2233" placeholderTextColor={colors.textFaint} style={s.phoneInput}/></View>}
-    {mode === 'verify' && <><TouchableOpacity style={s.codeCard} onPress={() => Linking.openURL(session.smsUri)}><Text style={s.smsCode}>{session.displayCode}</Text><Text style={s.shortcode}>144773 дугаарт илгээнэ</Text></TouchableOpacity><Text style={s.price}>SMS-ийн төлбөр 150₮. Та Messages апп дээр Send дарна.</Text><Text style={s.timer}>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</Text><TouchableOpacity style={s.secondary} onPress={() => Linking.openURL(session.smsUri)}><Text style={s.secondaryText}>Open Messages</Text></TouchableOpacity><TouchableOpacity style={s.secondary} onPress={check}><Text style={s.secondaryText}>Check verification</Text></TouchableOpacity></>}
+    {mode === 'verify' && <><TouchableOpacity style={s.codeCard} onPress={() => Linking.openURL(session.smsUri)}><Text style={s.smsCode}>{session.displayCode}</Text><Text style={s.shortcode}>144773 дугаарт илгээнэ</Text></TouchableOpacity><Text style={s.price}>SMS-ийн төлбөр 150₮. Код дээр дараад Messages апп-д Send дарна уу.</Text><Text style={s.timer}>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</Text></>}
     {mode === 'login' && <TextInput value={pin} onChangeText={(v) => setPin(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" secureTextEntry maxLength={4} placeholder="••••" placeholderTextColor={colors.textFaint} style={s.pin}/>}
     {mode === 'pinSetup' && <><TextInput value={pin} onChangeText={(v) => setPin(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" secureTextEntry maxLength={4} placeholder="••••" placeholderTextColor="#777" style={s.pin}/><TextInput value={confirmPin} onChangeText={(v) => setConfirmPin(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" secureTextEntry maxLength={4} placeholder="Кодоо давтах" placeholderTextColor="#777" style={s.pin}/></>}
     {!!error && <Text style={s.error}>{error}</Text>}

@@ -13,9 +13,17 @@ async function request(action, body = {}, authenticated = false) {
     if (!token) throw new Error('Админ нэвтрээгүй байна.');
     headers.Authorization = `Bearer ${token}`;
   }
-  const response = await fetch(`${BASE_URL}?action=${encodeURIComponent(action)}`, {
-    method: 'POST', headers, body: JSON.stringify(body),
-  });
+  let response;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      response = await fetch(`${BASE_URL}?action=${encodeURIComponent(action)}`, { method: 'POST', headers, body: JSON.stringify(body), signal: controller.signal });
+      break;
+    } catch (error) {
+      if (attempt === 1) throw new Error('Сүлжээний холболт тасарлаа. Интернэтээ шалгаад дахин оролдоно уу.');
+      await new Promise((resolve) => setTimeout(resolve, 700));
+    } finally { clearTimeout(timeout); }
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Сервертэй холбогдоход алдаа гарлаа.');
   return data;

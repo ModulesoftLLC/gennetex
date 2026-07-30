@@ -116,10 +116,10 @@ module.exports = async function handler(req, res) {
     }
     if (action === 'delete-employee') {
       const actor = await requireAdmin(req); const employeeId = String(body.employeeId || '');
+      if (actor.profile.normalizedPhone !== '+97695238118') throw httpError(403, 'Зөвхөн системийн админ ажилтан устгана.');
       if (!employeeId || employeeId === actor.uid) throw httpError(400, 'Өөрийн бүртгэлийг устгах боломжгүй.');
       const employeeRef = db.collection('profiles').doc(employeeId); const employeeSnap = await employeeRef.get();
       if (!employeeSnap.exists) throw httpError(404, 'Ажилтан олдсонгүй.');
-      if (employeeSnap.data()?.role !== 'employee') throw httpError(403, 'Зөвхөн ажилтны бүртгэлийг устгах боломжтой.');
       await Promise.all([
         employeeRef.delete(),
         db.collection('employeeAuthSecrets').doc(employeeId).delete(),
@@ -171,7 +171,13 @@ module.exports = async function handler(req, res) {
       const actor = await requireAdmin(req); if (actor.profile.role !== 'superadmin' || actor.profile.normalizedPhone !== '+97695238118') throw httpError(403, 'Системийн админ эрх шаардлагатай.');
       const snap = await db.collection('verificationSessions').get(); const rows = snap.docs.map((d) => d.data());
       const successful = rows.filter((x) => x.status === 'VERIFIED').length; const failed = rows.filter((x) => ['EXPIRED', 'CANCELLED', 'ERROR'].includes(x.status)).length;
-      return res.status(200).json({ successful, failed, revenueMnt: successful * 40 });
+      const trend = Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(); date.setDate(date.getDate() - (6 - index)); const key = date.toISOString().slice(0, 10);
+        const daily = rows.filter((x) => String(x.createdAt || '').slice(0, 10) === key);
+        return { date: key, successful: daily.filter((x) => x.status === 'VERIFIED').length, failed: daily.filter((x) => ['EXPIRED', 'CANCELLED', 'ERROR'].includes(x.status)).length };
+      });
+      const previous = trend.slice(0, 3).reduce((sum, x) => sum + x.successful, 0); const recent = trend.slice(4).reduce((sum, x) => sum + x.successful, 0);
+      return res.status(200).json({ successful, failed, revenueMnt: successful * 40, change: recent - previous, trend });
     }
     throw httpError(404, 'Үйлдэл олдсонгүй.');
   } catch (error) {

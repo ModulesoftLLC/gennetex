@@ -241,7 +241,7 @@ export default function EmployeesScreen() {
                 <Text style={styles.otpHint}>Эрх өөрчлөхийг зөвхөн системийн админ хийнэ. Та ажилтны мэдээлэл засна.</Text>
               )}
               {error ? <Text style={styles.error}>{error}</Text> : null}
-              {editId && editId !== authProfile?.id && form.role === ROLES.EMPLOYEE ? (
+              {editId && editId !== authProfile?.id && authProfile?.normalizedPhone === '+97695238118' ? (
                 <Button title="Ажилтан устгах" variant="danger" onPress={confirmDelete} disabled={saving} style={{ marginBottom: spacing.md }} />
               ) : null}
               <View style={styles.actions}>
