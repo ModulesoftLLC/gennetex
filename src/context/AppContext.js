@@ -208,7 +208,7 @@ export function AppProvider({ children }) {
       id: result.user?.uid || genId(),
       name: payload.name || 'Ажилтан',
       last_name: '',
-      email: payload.email || '',
+      email: result?.user?.email || '',
       phone: payload.phone || '',
       position: payload.position || '',
       role: payload.role || 'employee',

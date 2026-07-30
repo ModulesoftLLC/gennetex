@@ -18,12 +18,12 @@ import { useTheme, useStyles } from '../context/ThemeContext';
 import { ROLES, roleLabel, canManageProfile, canAssignRoles } from '../lib/roles';
 import { localPhoneDigits, normalizeMongolianPhone } from '../lib/phone';
 
-const EMPTY = { name: '', last_name: '', email: '', password: '', position: '', phone: '', address: '', role: 'employee' };
+const EMPTY = { name: '', last_name: '', position: '', phone: '', address: '', role: 'employee' };
 
 export default function EmployeesScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isAdmin, isSuperAdmin: isSuperAdminUser, authProfile, fetchEmployees, adminCreateEmployee, adminUpdateEmployee, adminResetUserPassword, adminDeleteEmployee } = useApp();
+  const { isAdmin, isSuperAdmin: isSuperAdminUser, authProfile, fetchEmployees, adminCreateEmployee, adminUpdateEmployee, adminDeleteEmployee } = useApp();
   const effectiveAdmin = Boolean(isAdmin);
   const mayAssignRoles = canAssignRoles(authProfile?.role);
   const [list, setList] = useState([]);
@@ -68,8 +68,6 @@ export default function EmployeesScreen() {
     setForm({
       name: item.name || '',
       last_name: item.last_name || '',
-      email: item.email || '',
-      password: '',
       position: item.position || '',
       phone: item.phone || '',
       address: item.address || '',
@@ -92,10 +90,6 @@ export default function EmployeesScreen() {
       return;
     }
     try { normalizeMongolianPhone(form.phone); } catch (e) { setError(e.message); return; }
-    if (form.password && form.password.length < 6) {
-      setError('Нууц үг оруулбал 6+ тэмдэгт байх ёстой.');
-      return;
-    }
     setError(null);
     setSaving(true);
     try {
@@ -108,26 +102,14 @@ export default function EmployeesScreen() {
           address: form.address.trim(),
           ...(mayAssignRoles ? { role: form.role } : {}),
         });
-        if (isSuperAdminUser && form.password.trim()) {
-          await adminResetUserPassword(editId, form.password.trim(), true);
-        }
         closeModal();
-        Alert.alert(
-          'Амжилттай',
-          isSuperAdminUser && form.password.trim()
-            ? 'Мэдээлэл болон нууц үг шинэчлэгдлээ.'
-            : 'Ажилтны мэдээлэл шинэчлэгдлээ.'
-        );
+        Alert.alert('Амжилттай', 'Ажилтны мэдээлэл шинэчлэгдлээ.');
         await load();
         return;
       }
-      const normalizedPhone = normalizeMongolianPhone(form.phone);
-      const generatedEmail = `${normalizedPhone.slice(4)}@phone.gennetex.mn`;
       await adminCreateEmployee({
         name: form.name.trim(),
         last_name: form.last_name.trim(),
-        email: form.email.trim() || generatedEmail,
-        password: form.password || undefined,
         position: form.position.trim(),
         phone: form.phone.trim(),
         role: mayAssignRoles ? form.role : ROLES.EMPLOYEE,
@@ -190,7 +172,7 @@ export default function EmployeesScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{item.name || '—'}</Text>
-                <Text style={styles.sub}>{item.position || 'Ажилтан'} · {item.email}</Text>
+                <Text style={styles.sub}>{item.position || 'Ажилтан'}</Text>
                 {item.phone ? <Text style={styles.phone}>{item.phone}</Text> : null}
               </View>
               <Badge text={roleLabel(item.role)} color={item.role === ROLES.ADMIN || item.role === ROLES.SUPERADMIN ? colors.accent : colors.primary} />
@@ -208,25 +190,9 @@ export default function EmployeesScreen() {
               <Text style={styles.title}>{editId ? 'Ажилтан засах' : 'Шинэ ажилтан нэмэх'}</Text>
               <Field label="Овог" value={form.last_name} onChangeText={(t) => setForm({ ...form, last_name: t })} />
               <Field label="Нэр" value={form.name} onChangeText={(t) => setForm({ ...form, name: t })} />
-              {editId ? (
-                <>
-                  <Field label="Имэйл" value={form.email} editable={false} style={{ opacity: 0.7 }} />
-                  {isSuperAdminUser ? (
-                    <>
-                      <Field label="Шинэ нууц үг (хоосон бол солихгүй)" autoCapitalize="none" value={form.password} onChangeText={(t) => setForm({ ...form, password: t })} />
-                      <Text style={styles.otpHint}>Системийн админ бүх хэрэглэгчийн нууц үгийг эндээс солино.</Text>
-                    </>
-                  ) : null}
-                </>
-              ) : (
-                <>
-                  <Field label="Имэйл (заавал биш)" autoCapitalize="none" keyboardType="email-address" value={form.email} onChangeText={(t) => setForm({ ...form, email: t })} />
-                  <Field label="Нууц үг (хоосон бол автоматаар үүснэ)" autoCapitalize="none" value={form.password} onChangeText={(t) => setForm({ ...form, password: t })} />
-                  <Text style={styles.otpHint}>Хоосон орхивол 1 удаагийн нууц үг автоматаар үүсч, ажилтан анх нэвтэрмэгц өөрчилнө.</Text>
-                </>
-              )}
               <Field label="Албан тушаал" value={form.position} onChangeText={(t) => setForm({ ...form, position: t })} />
               <Field label="Утас (+976)" keyboardType="number-pad" maxLength={8} value={localPhoneDigits(form.phone)} onChangeText={(t) => setForm({ ...form, phone: localPhoneDigits(t) })} />
+              <Text style={styles.otpHint}>Админ болон ажилтан аль аль нь энэ утасны дугаараа баталгаажуулж, 4 оронтой PIN-ээр нэвтэрнэ.</Text>
               <Field label="Хаяг" value={form.address} onChangeText={(t) => setForm({ ...form, address: t })} />
               <Text style={styles.roleLabel}>Эрх</Text>
               {mayAssignRoles ? (

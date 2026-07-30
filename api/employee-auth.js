@@ -60,7 +60,12 @@ async function requireAdmin(req) {
 }
 async function findEmployee(phone) {
   const snap = await getAdmin().firestore().collection('profiles').where('normalizedPhone', '==', phone).limit(1).get();
-  return snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() };
+  if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+  const legacy = await getAdmin().firestore().collection('profiles').where('phone', '==', phone.slice(4)).limit(1).get();
+  if (legacy.empty) return null;
+  const doc = legacy.docs[0];
+  await doc.ref.set({ normalizedPhone: phone, updatedAt: now() }, { merge: true });
+  return { id: doc.id, ...doc.data(), normalizedPhone: phone };
 }
 async function createVerifySession(employee, purpose) {
   const displayCode = verifyMn.randomNumericCode(4);
