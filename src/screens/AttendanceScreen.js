@@ -323,6 +323,15 @@ export default function AttendanceScreen() {
     setCameraVisible(true);
   };
 
+  const startAdminFaceEnrollment = () => {
+    setError(null);
+    setEnrolling(true);
+    setPendingRemote(false);
+    setPendingDistance(null);
+    setCapturedLoc({});
+    setCameraVisible(true);
+  };
+
   // Царай бүртгэх — 10 удаа selfie авна
   const handleEnrollCapture = async (photo) => {
     setBusy(true);
@@ -347,6 +356,11 @@ export default function AttendanceScreen() {
       setEnrolled(true);
       setEnrolling(false);
       setFaceUuid(await faceApi.getFaceUuid(profile.id));
+      if (isAdmin) {
+        setCameraVisible(false);
+        Alert.alert('Царай бүртгэгдлээ', 'Системийн админы нүүрийн бүртгэл амжилттай дууслаа. Одоо нүүрээр ирц баталгаажуулах боломжтой.');
+        return;
+      }
       const status = pendingRemote ? 'pending' : 'approved';
       await attApi.insertAttendance({
         staffId: profile.id,
@@ -583,10 +597,10 @@ export default function AttendanceScreen() {
           </Text>
         ) : null}
         {isCloud && !enrolled ? (
-          <Text style={styles.enrollHint}>
-             Анх удаа: царайгаа {faceApi.ENROLL_TARGET} удаа бүртгүүлнэ ({enrollCount}/
-            {faceApi.ENROLL_TARGET}). Дараа нь нэг удаа selfie авахад л таньж бүртгэнэ.
-          </Text>
+          <View style={styles.enrollBox}>
+            <Text style={styles.enrollHint}>Царайны бүртгэл: {enrollCount}/{faceApi.ENROLL_TARGET}. Дараа нь нэг selfie авахад таньж баталгаажуулна.</Text>
+            {isAdmin ? <Button title={enrollCount > 0 ? 'Нүүр бүртгэл үргэлжлүүлэх' : 'Нүүрээ бүртгүүлэх'} size="sm" style={{ marginTop: spacing.sm }} onPress={startAdminFaceEnrollment} /> : null}
+          </View>
         ) : isCloud ? (
           <Text style={styles.geoHint}> Царай бүртгэгдсэн. Selfie авахад таны царайг таньж бүртгэнэ.</Text>
         ) : null}
@@ -1054,6 +1068,7 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   privacyText: { color: colors.textMuted, fontSize: 13, lineHeight: 19 },
   geoHint: { color: colors.textMuted, fontSize: 12, marginTop: spacing.md, lineHeight: 17 },
   enrollHint: { color: colors.primary, fontSize: 12, marginTop: spacing.sm, lineHeight: 17, fontWeight: '600'},
+  enrollBox: { marginTop: spacing.sm, padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary + '35' },
   blockTitle: { color: colors.text, fontSize: 15, fontWeight: '800'},
   locHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.sm },
   locRow: {
