@@ -20,6 +20,7 @@ import {
 } from '../lib/callStatusColors';
 import { callTimeLabel, callDisplayId, callEffectiveDate } from '../lib/callSla';
 import CallFilterModal from '../components/CallFilterModal';
+import CallWorkspaceHeader from '../components/CallWorkspaceHeader';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 
@@ -183,10 +184,7 @@ export default function CallsMapScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader
-        title="Миний дуудлага"
-        subtitle={loading ? 'Шинэчилж байна...' : `${filtered.length} дуудлага · ${pending} хүлээгдэж буй`}
-      />
+      <CallWorkspaceHeader title="Миний дуудлага" userName={authProfile?.name || currentUser?.name} mode="list" onList={() => {}} onMap={() => navigation.navigate('Live')} />
 
       {!isCloud ? (
         <EmptyState text="Дуудлага хүлээн авахын тулд Supabase холболт шаардлагатай." />
@@ -208,6 +206,12 @@ export default function CallsMapScreen() {
             <TouchableOpacity style={styles.monthNav} onPress={() => shiftMonth(1)} hitSlop={8}>
               <Ionicons name="chevron-forward" size={20} color={colors.text} />
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.summaryRow}>
+            <View style={styles.summaryBox}><Text style={styles.summaryStrong}>{filtered.length}</Text><Text style={styles.summaryText}> илэрц байна</Text></View>
+            <TouchableOpacity style={styles.iconControl} onPress={() => setFilterOpen(true)}><Ionicons name="funnel-outline" size={24} color={colors.text}/></TouchableOpacity>
+            <TouchableOpacity style={styles.iconControl} onPress={load}><Ionicons name="refresh" size={27} color={colors.text}/></TouchableOpacity>
           </View>
 
           <View style={styles.scopeRow}>
@@ -294,6 +298,10 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  summaryRow:{flexDirection:'row',alignItems:'center',gap:10,paddingHorizontal:spacing.md,paddingTop:spacing.md},
+  summaryBox:{flex:1,flexDirection:'row',alignItems:'center',borderWidth:1,borderColor:colors.border,borderRadius:radius.md,paddingHorizontal:14,height:48,backgroundColor:colors.surface},
+  summaryStrong:{color:colors.text,fontSize:18,fontWeight:'900'},summaryText:{color:colors.text,fontSize:16},
+  iconControl:{width:48,height:48,borderRadius:radius.md,borderWidth:1,borderColor:colors.border,backgroundColor:colors.surface,alignItems:'center',justifyContent:'center'},
   monthNav: {
     width: 36,
     height: 36,

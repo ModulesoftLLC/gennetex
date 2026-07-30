@@ -27,6 +27,7 @@ export const cancelVerification = (sessionId) => request('cancel', { sessionId }
 export const setPin = (sessionId, verificationToken, pin) => request('set-pin', { sessionId, verificationToken, pin });
 export const loginWithPin = (phone, pin) => request('login', { phone, pin });
 export const registerEmployeePhone = (employee) => request('register', employee, true);
+export const deleteEmployee = (employeeId) => request('delete-employee', { employeeId }, true);
 export const getVerificationRevenue = () => request('revenue', {}, true);
 
 export async function verifyPhone(phone, options = {}) {

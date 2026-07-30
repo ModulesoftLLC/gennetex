@@ -8,15 +8,19 @@ import { STATUS_FILTERS, getCallStatusKey, callBadgeColor, callStatusLabelMn } f
 import * as serviceCallApi from '../services/serviceCallService';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
+import CallWorkspaceHeader from '../components/CallWorkspaceHeader';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 function typeMeta(key) {
   return CALL_TYPES.find((t) => t.key === key) || CALL_TYPES[CALL_TYPES.length - 1];
 }
 
 export default function AdminCallsScreen() {
+  const navigation = useNavigation();
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isCloud } = useApp();
+  const { isCloud, authProfile, currentUser } = useApp();
   const [calls, setCalls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -89,10 +93,9 @@ export default function AdminCallsScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader
-        title="Бүх дуудлага"
-        subtitle={loading ? 'Шинэчилж байна...' : `Нийт ${counts.all} · ${counts.pending} хүлээгдэж буй · ${counts.progress} явж байгаа · ${counts.done} дууссан`}
-      />
+      <CallWorkspaceHeader title="Бүх дуудлага" userName={authProfile?.name || currentUser?.name} mode="list" onList={() => {}} onMap={() => navigation.navigate('Live')} />
+
+      <View style={styles.overviewRow}><View style={styles.countBox}><Text style={styles.countStrong}>{filtered.length}</Text><Text style={styles.countText}> илэрц байна</Text></View><TouchableOpacity style={styles.squareBtn} onPress={load}><Ionicons name="refresh" size={27} color={colors.text}/></TouchableOpacity></View>
 
       <View style={styles.filterWrap}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
@@ -210,6 +213,7 @@ function Chip({ label, active, color, onPress }) {
 
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  overviewRow:{flexDirection:'row',gap:10,padding:spacing.md,paddingBottom:0},countBox:{flex:1,height:48,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,backgroundColor:colors.surface,flexDirection:'row',alignItems:'center',paddingHorizontal:14},countStrong:{color:colors.text,fontSize:18,fontWeight:'900'},countText:{color:colors.text,fontSize:16},squareBtn:{width:48,height:48,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,backgroundColor:colors.surface,alignItems:'center',justifyContent:'center'},
   filterWrap: { paddingVertical: spacing.sm, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
   chipRow: { paddingHorizontal: spacing.md, gap: spacing.sm },
   chip: {

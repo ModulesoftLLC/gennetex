@@ -23,7 +23,7 @@ const EMPTY = { name: '', last_name: '', email: '', password: '', position: '', 
 export default function EmployeesScreen() {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isAdmin, isSuperAdmin: isSuperAdminUser, authProfile, fetchEmployees, adminCreateEmployee, adminUpdateEmployee, adminResetUserPassword } = useApp();
+  const { isAdmin, isSuperAdmin: isSuperAdminUser, authProfile, fetchEmployees, adminCreateEmployee, adminUpdateEmployee, adminResetUserPassword, adminDeleteEmployee } = useApp();
   const effectiveAdmin = Boolean(isAdmin || authProfile?.email?.includes('admin') || authProfile?.email?.includes('superadmin') || authProfile?.role?.includes('admin') || authProfile?.role?.includes('superadmin'));
   const mayAssignRoles = canAssignRoles(authProfile?.role);
   const [list, setList] = useState([]);
@@ -145,6 +145,19 @@ export default function EmployeesScreen() {
     }
   };
 
+  const confirmDelete = () => {
+    const employee = list.find((item) => item.id === editId);
+    if (!employee || employee.role === ROLES.SUPERADMIN || employee.id === authProfile?.id) return;
+    Alert.alert('Ажилтан устгах', `${employee.last_name || ''} ${employee.name || ''} ажилтныг бүр мөсөн устгах уу?`, [
+      { text: 'Болих', style: 'cancel' },
+      { text: 'Устгах', style: 'destructive', onPress: async () => {
+        setSaving(true); setError(null);
+        try { await adminDeleteEmployee(employee.id); closeModal(); await load(); }
+        catch (e) { setError(e.message); } finally { setSaving(false); }
+      } },
+    ]);
+  };
+
   if (!effectiveAdmin) {
     return (
       <View style={styles.container}>
@@ -228,6 +241,9 @@ export default function EmployeesScreen() {
                 <Text style={styles.otpHint}>Эрх өөрчлөхийг зөвхөн системийн админ хийнэ. Та ажилтны мэдээлэл засна.</Text>
               )}
               {error ? <Text style={styles.error}>{error}</Text> : null}
+              {editId && editId !== authProfile?.id && form.role === ROLES.EMPLOYEE ? (
+                <Button title="Ажилтан устгах" variant="danger" onPress={confirmDelete} disabled={saving} style={{ marginBottom: spacing.md }} />
+              ) : null}
               <View style={styles.actions}>
                 <Button title="Болих" variant="ghost" style={{ flex: 1 }} onPress={closeModal} />
                 <Button title={saving ? '...' : editId ? 'Хадгалах' : 'Үүсгэх'} style={{ flex: 1 }} onPress={handleSave} disabled={saving} />

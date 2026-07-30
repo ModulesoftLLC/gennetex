@@ -227,6 +227,7 @@ export function AppProvider({ children }) {
   const adminResetUserPassword = async (userId, newPassword, forceChange = true) => {
     return authApi.adminResetUserPassword(userId, newPassword, forceChange);
   };
+  const adminDeleteEmployee = async (userId) => employeeAuthApi.deleteEmployee(userId);
 
   const changePassword = async (newPassword) => {
     await authApi.changeMyPassword(newPassword);
@@ -584,6 +585,7 @@ export function AppProvider({ children }) {
     adminCreateEmployee,
     adminUpdateEmployee,
     adminResetUserPassword,
+    adminDeleteEmployee,
     changePassword,
     fetchEmployees,
     inventory,

@@ -114,6 +114,19 @@ module.exports = async function handler(req, res) {
       await ref.set({ firstName: String(body.firstName || body.name || '').trim(), lastName: String(body.lastName || '').trim(), phone: normalizedPhone.slice(4), normalizedPhone, phoneVerified: false, appPinConfigured: false, status: 'ACTIVE', updatedAt: now(), createdAt: body.createdAt || now() }, { merge: true });
       return res.status(200).json({ ok: true, id: ref.id });
     }
+    if (action === 'delete-employee') {
+      const actor = await requireAdmin(req); const employeeId = String(body.employeeId || '');
+      if (!employeeId || employeeId === actor.uid) throw httpError(400, 'Өөрийн бүртгэлийг устгах боломжгүй.');
+      const employeeRef = db.collection('profiles').doc(employeeId); const employeeSnap = await employeeRef.get();
+      if (!employeeSnap.exists) throw httpError(404, 'Ажилтан олдсонгүй.');
+      if (employeeSnap.data()?.role !== 'employee') throw httpError(403, 'Зөвхөн ажилтны бүртгэлийг устгах боломжтой.');
+      await Promise.all([
+        employeeRef.delete(),
+        db.collection('employeeAuthSecrets').doc(employeeId).delete(),
+        getAdmin().auth().deleteUser(employeeId).catch((error) => { if (error.code !== 'auth/user-not-found') throw error; }),
+      ]);
+      return res.status(200).json({ ok: true });
+    }
     if (action === 'start') {
       const phone = normalizePhone(body.phone); const purpose = String(body.purpose || 'PHONE_ACTIVATION');
       if (!allowedPurposes.has(purpose)) throw httpError(400, 'Баталгаажуулалтын зорилго буруу.');
