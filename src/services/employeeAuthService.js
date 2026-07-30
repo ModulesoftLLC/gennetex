@@ -1,7 +1,9 @@
 import { firebaseAuth } from '../lib/firebase';
 import { signInWithCustomToken } from 'firebase/auth';
 
-const BASE_URL = String(process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || '').replace(/\/$/, '');
+const BASE_URL = String(
+  process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || 'https://adiya.site/api/employee-auth'
+).replace(/\/$/, '');
 
 async function request(action, body = {}, authenticated = false) {
   if (!BASE_URL) throw new Error('EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL тохируулаагүй байна.');
