@@ -254,7 +254,12 @@ export function AppProvider({ children }) {
   };
 
   // ---- Бараа материалын үйлдлүүд ----
+  const requireInventoryAdmin = () => {
+    if (!isAdmin) throw new Error('Зөвхөн админ энэ үйлдлийг хийх эрхтэй.');
+  };
+
   const addInventoryItem = async (item) => {
+    requireInventoryAdmin();
     const draft = { quantity: 0, price: 0, unit: 'ширхэг', ...item };
     if (isSupabaseConfigured) {
       try {
@@ -269,6 +274,7 @@ export function AppProvider({ children }) {
   };
 
   const updateInventoryItem = async (id, patch) => {
+    requireInventoryAdmin();
     setInventory((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
     if (isSupabaseConfigured) {
       try {
@@ -280,6 +286,7 @@ export function AppProvider({ children }) {
   };
 
   const adjustQuantity = async (id, delta) => {
+    requireInventoryAdmin();
     let next = 0;
     setInventory((prev) =>
       prev.map((it) => {
@@ -298,6 +305,7 @@ export function AppProvider({ children }) {
   };
 
   const removeInventoryItem = async (id) => {
+    requireInventoryAdmin();
     setInventory((prev) => prev.filter((it) => it.id !== id));
     if (isSupabaseConfigured) {
       try {
@@ -330,6 +338,7 @@ export function AppProvider({ children }) {
   };
 
   const giveItemToEmployee = async (item, employee, qty, photoUrl) => {
+    requireInventoryAdmin();
     const q = Math.max(1, Number(qty) || 0);
     const newQty = Math.max(0, item.quantity - q);
     setInventory((prev) => prev.map((it) => (it.id === item.id ? { ...it, quantity: newQty } : it)));

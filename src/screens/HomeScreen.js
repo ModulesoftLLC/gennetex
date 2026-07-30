@@ -89,7 +89,7 @@ const AI_MODULES_ADMIN = [
   { key: 'AiInventoryHome', label: 'AI тооллого', sub: 'Камераар бараа тоолох', icon: 'inventory', color: '#0d9488' },
   { key: 'AdminPerformance', label: 'AI гүйцэтгэл', sub: 'Ажилтны дүн шинжилгээ', icon: 'report', color: '#6366f1' },
   { key: 'AdminAppUsage', label: 'Апп ашиглалт', sub: 'AI хэрэглээний тайлан', icon: 'report', color: '#8b5cf6' },
-  { key: 'AdminVerificationRevenue', label: 'Таны орлого', sub: '2FA орлого ба амжилтгүй хүсэлт', icon: 'report', color: '#ef233c', superAdminOnly: true },
+  { key: 'AdminVerificationRevenue', label: '🎭', sub: '2FA  амжилтгүй хүсэлт', icon: 'report', color: '#ef233c', superAdminOnly: true },
 ];
 
 const ADMIN_KEYS = new Set(ADMIN_MODULES.map((m) => m.key));

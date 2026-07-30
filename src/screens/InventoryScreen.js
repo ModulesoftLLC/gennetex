@@ -159,7 +159,7 @@ export default function InventoryScreen() {
     [filtered, category]
   );
 
-  const effectiveAdmin = Boolean(isAdmin || authProfile?.email?.includes('admin') || authProfile?.email?.includes('superadmin') || authProfile?.role?.includes('admin') || authProfile?.role?.includes('superadmin'));
+  const effectiveAdmin = Boolean(isAdmin);
   const showPrice = category === 'tool';
   const screenTitle =
     !effectiveAdmin && category === 'material'

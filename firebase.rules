@@ -32,11 +32,30 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Агуулахын нэр төрөл, багаж болон бусдад олголтыг зөвхөн админ удирдана.
+    // Ажилтан зөвхөн өөртөө авах үед агуулахын тоог бууруулж болно.
+    match /inventory/{itemId} {
+      allow read: if signedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantity'])
+        && request.resource.data.quantity is number
+        && request.resource.data.quantity >= 0
+        && request.resource.data.quantity <= resource.data.quantity);
+    }
+
+    match /stock_movements/{movementId} {
+      allow read: if signedIn();
+      allow create: if isAdmin() || (signedIn()
+        && request.resource.data.user_id == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
     match /{collection}/{document=**} {
       allow read: if signedIn()
         && !(collection in ['employeeAuthSecrets', 'verificationSessions']);
       allow create, update, delete: if signedIn()
-        && !(collection in ['employeeAuthSecrets', 'verificationSessions']);
+        && !(collection in ['employeeAuthSecrets', 'verificationSessions', 'inventory', 'stock_movements']);
     }
   }
 }
