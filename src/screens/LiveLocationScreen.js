@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Platform, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from '../components/Map';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from '../components/Map';
 import { Badge, ScreenHeader, EmptyState } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { CALL_TYPES } from '../data/mockData';
@@ -90,6 +91,9 @@ export default function LiveLocationScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mapReady, setMapReady] = useState(false);
+  const [mapType, setMapType] = useState('standard');
+  const [onlineOnly, setOnlineOnly] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
   const mapRef = useRef(null);
 
   const load = async () => {
@@ -131,19 +135,21 @@ export default function LiveLocationScreen() {
     .filter(isValidCoordinate)
     .map((w, i) => ({ ...w, latitude: Number(w.latitude), longitude: Number(w.longitude), color: COLORS[i % COLORS.length], visit: latestVisitByUser[w.id], online: Date.now() - timestampMs(w.last_seen) <= ONLINE_MS }));
   const onlineCount = located.filter((w) => w.online).length;
+  const visibleWorkers = onlineOnly ? located.filter((w) => w.online) : located;
+  const selectedWorker = located.find((w) => w.id === selectedId) || null;
 
   const fitWorkers = () => {
-    if (!mapReady || !located.length) return;
-    if (located.length === 1) {
-      mapRef.current?.animateToRegion?.({ latitude: located[0].latitude, longitude: located[0].longitude, latitudeDelta: 0.015, longitudeDelta: 0.015 }, 450);
+    if (!mapReady || !visibleWorkers.length) return;
+    if (visibleWorkers.length === 1) {
+      mapRef.current?.animateToRegion?.({ latitude: visibleWorkers[0].latitude, longitude: visibleWorkers[0].longitude, latitudeDelta: 0.006, longitudeDelta: 0.006 }, 450);
       return;
     }
-    mapRef.current?.fitToCoordinates?.(located.map(({ latitude, longitude }) => ({ latitude, longitude })), {
+    mapRef.current?.fitToCoordinates?.(visibleWorkers.map(({ latitude, longitude }) => ({ latitude, longitude })), {
       edgePadding: { top: 70, right: 45, bottom: 250, left: 45 }, animated: true,
     });
   };
 
-  useEffect(() => { fitWorkers(); }, [mapReady, located.map((w) => `${w.id}:${w.latitude}:${w.longitude}`).join('|')]);
+  useEffect(() => { fitWorkers(); }, [mapReady, onlineOnly, located.map((w) => `${w.id}:${w.latitude}:${w.longitude}`).join('|')]);
 
   return (
     <View style={styles.container}>
@@ -160,27 +166,39 @@ export default function LiveLocationScreen() {
       <MapView
         ref={mapRef}
         style={styles.map}
-        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+        provider={PROVIDER_GOOGLE}
+        mapType={mapType}
         initialRegion={UB_REGION}
         showsUserLocation
         showsMyLocationButton
         showsCompass
+        showsScale
+        showsTraffic
+        showsBuildings
+        showsIndoors
         toolbarEnabled
         loadingEnabled
         onMapReady={() => setMapReady(true)}
       >
-        {located.map((w) => (
+        {selectedWorker && Number(selectedWorker.location_accuracy) > 0 ? <Circle
+          center={{ latitude: selectedWorker.latitude, longitude: selectedWorker.longitude }}
+          radius={Math.max(5, Number(selectedWorker.location_accuracy))}
+          strokeColor={colors.primary + 'CC'}
+          fillColor={colors.primary + '24'}
+          strokeWidth={2}
+        /> : null}
+        {visibleWorkers.map((w) => (
           <WorkerMarker
             key={w.id}
             worker={w}
             color={w.color}
             visit={w.visit}
-            onPress={() => mapRef.current?.animateToRegion?.({
+            onPress={() => { setSelectedId(w.id); mapRef.current?.animateToRegion?.({
               latitude: w.latitude,
               longitude: w.longitude,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            }, 400)}
+              latitudeDelta: 0.004,
+              longitudeDelta: 0.004,
+            }, 400); }}
           />
         ))}
       </MapView>
@@ -188,6 +206,14 @@ export default function LiveLocationScreen() {
       <TouchableOpacity style={styles.fitButton} onPress={fitWorkers} activeOpacity={0.85}>
         <Text style={styles.fitButtonText}>Бүгдийг харах</Text>
       </TouchableOpacity>
+      <View style={styles.mapTools}>
+        <TouchableOpacity style={[styles.mapTool, mapType === 'satellite' && styles.mapToolActive]} onPress={() => setMapType((value) => value === 'standard' ? 'satellite' : 'standard')} accessibilityLabel="Газрын зургийн төрлийг солих">
+          <Ionicons name="layers-outline" size={20} color={mapType === 'satellite' ? '#fff' : colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.mapTool, onlineOnly && styles.mapToolActive]} onPress={() => setOnlineOnly((value) => !value)} accessibilityLabel="Зөвхөн онлайн ажилтан">
+          <Ionicons name="pulse-outline" size={20} color={onlineOnly ? '#fff' : colors.text} />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.panel}>
         {loading ? (
@@ -205,6 +231,15 @@ export default function LiveLocationScreen() {
               <Tab active={tab === 'visits'} label={`Очсон лог (${visits.length})`} onPress={() => setTab('visits')} />
             </View>
 
+            {selectedWorker ? <View style={styles.locationDetail}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.detailName}>{selectedWorker.name || 'Ажилтан'}</Text>
+                <Text style={styles.detailMeta}>Нарийвчлал ±{Math.round(Number(selectedWorker.location_accuracy) || 0)}м · Хурд {Math.max(0, (Number(selectedWorker.location_speed) || 0) * 3.6).toFixed(1)} км/ц</Text>
+                <Text style={styles.detailMeta}>Чиглэл {Math.round(Number(selectedWorker.location_heading) || 0)}° · {selectedWorker.location_source === 'background' ? 'Background GPS' : 'Live GPS'} · {timeAgo(selectedWorker.last_seen)}</Text>
+              </View>
+              <TouchableOpacity onPress={() => setSelectedId(null)} style={styles.detailClose}><Ionicons name="close" size={18} color={colors.textMuted}/></TouchableOpacity>
+            </View> : null}
+
             <ScrollView style={{ maxHeight: 220 }}>
               {tab === 'workers' ? (
                 located.length === 0 ? (
@@ -215,12 +250,12 @@ export default function LiveLocationScreen() {
                       key={w.id}
                       style={styles.row}
                       activeOpacity={0.7}
-                      onPress={() => mapRef.current?.animateToRegion?.({
+                      onPress={() => { setSelectedId(w.id); mapRef.current?.animateToRegion?.({
                         latitude: w.latitude,
                         longitude: w.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                      }, 400)}
+                        latitudeDelta: 0.004,
+                        longitudeDelta: 0.004,
+                      }, 400); }}
                     >
                       <View style={[styles.rowAvatar, { borderColor: w.color }]}>
                         {w.avatar_url ? (
@@ -302,12 +337,19 @@ const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   },
   fitButton: { position: 'absolute', right: 16, top: 86, backgroundColor: colors.surface, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 10, borderWidth: 1, borderColor: colors.border, ...shadow.md },
   fitButtonText: { color: colors.primary, fontSize: 12, fontWeight: '800' },
+  mapTools: { position: 'absolute', right: 16, top: 132, gap: 8 },
+  mapTool: { width: 44, height: 44, borderRadius: 14, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', ...shadow.md },
+  mapToolActive: { backgroundColor: colors.primary, borderColor: colors.primary },
   stateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   errorCard: { padding: spacing.md, borderRadius: radius.md, backgroundColor: colors.danger + '12', borderWidth: 1, borderColor: colors.danger + '35' },
   errorText: { color: colors.danger, textAlign: 'center', fontSize: 13 },
   retryText: { color: colors.primary, textAlign: 'center', fontWeight: '800', marginTop: 6 },
   note: { color: colors.textMuted, textAlign: 'center', paddingVertical: spacing.md },
   tabs: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+  locationDetail: { flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary + '55', borderRadius: radius.md, padding: spacing.md, marginBottom: spacing.sm },
+  detailName: { color: colors.text, fontSize: 14, fontWeight: '800', marginBottom: 4 },
+  detailMeta: { color: colors.textMuted, fontSize: 11, lineHeight: 17 },
+  detailClose: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   tab: {
     flex: 1,
     paddingVertical: spacing.sm,

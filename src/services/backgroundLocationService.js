@@ -47,11 +47,11 @@ export async function configureBackgroundLocation(user) {
   if (background.status !== 'granted') return false;
   if (await Location.hasStartedLocationUpdatesAsync(BACKGROUND_LOCATION_TASK)) return true;
   await Location.startLocationUpdatesAsync(BACKGROUND_LOCATION_TASK, {
-    accuracy: Location.Accuracy.High,
-    timeInterval: 30000,
-    distanceInterval: 30,
-    deferredUpdatesInterval: 30000,
-    deferredUpdatesDistance: 30,
+    accuracy: Location.Accuracy.BestForNavigation,
+    timeInterval: 15000,
+    distanceInterval: 15,
+    deferredUpdatesInterval: 15000,
+    deferredUpdatesDistance: 15,
     pausesUpdatesAutomatically: false,
     showsBackgroundLocationIndicator: true,
     foregroundService: {

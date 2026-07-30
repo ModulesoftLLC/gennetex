@@ -1,5 +1,5 @@
 // Native (iOS/Android) — react-native-maps-г шууд ашиглана.
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-export { Marker, PROVIDER_GOOGLE };
+export { Circle, Marker, PROVIDER_GOOGLE };
 export default MapView;

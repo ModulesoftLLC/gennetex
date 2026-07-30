@@ -17,14 +17,17 @@ export async function updateMyLocation(userId, { latitude, longitude, accuracy, 
 }
 
 // Байршлын лог нэмэх (түүх)
-export async function logLocation({ userId, userName, latitude, longitude, speed }) {
+export async function logLocation({ userId, userName, latitude, longitude, accuracy, heading, speed, timestamp }) {
   // Supabase-ийн оронд Firebase-ийн insert функцийг ашиглана
   await firebaseInsert('location_logs', {
     user_id: userId,
     user_name: userName,
     latitude,
     longitude,
+    accuracy: accuracy ?? null,
+    heading: heading ?? null,
     speed: speed ?? null,
+    recorded_at: new Date(timestamp || Date.now()).toISOString(),
   });
 }
 

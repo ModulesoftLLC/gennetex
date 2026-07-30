@@ -5,8 +5,8 @@ import * as tracking from '../services/trackingService';
 import { distanceMeters } from '../lib/geo';
 import { configureBackgroundLocation, clearBackgroundLocationUser } from '../services/backgroundLocationService';
 
-const MIN_UPLOAD_MS = 15000; // хамгийн багадаа 15 сек тутам
-const MIN_MOVE_M = 30; // эсвэл 30м хөдөлбөл
+const MIN_UPLOAD_MS = 5000; // live map-д 5 сек тутам
+const MIN_MOVE_M = 10; // эсвэл 10м хөдөлбөл
 const ARRIVE_RADIUS_M = 120; // айлд "очсон" гэж тооцох радиус
 
 const validCoords = (coords) => Number.isFinite(coords?.latitude)
@@ -48,13 +48,13 @@ export default function LocationTracker() {
         // Эхлэнгүүт шууд нэг удаа байршил илгээх (хөдлөхийг хүлээхгүй)
         try {
           const first = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.High,
+            accuracy: Location.Accuracy.BestForNavigation,
           });
           await handle(first, true);
         } catch (e) {}
 
         watchRef.current = await Location.watchPositionAsync(
-          { accuracy: Location.Accuracy.High, timeInterval: 10000, distanceInterval: 20, mayShowUserSettingsDialog: true },
+          { accuracy: Location.Accuracy.BestForNavigation, timeInterval: 5000, distanceInterval: 10, mayShowUserSettingsDialog: true },
           (pos) => handle(pos),
           (reason) => setTrackingState?.({ active: false, reason: String(reason || 'location-unavailable') })
         );
@@ -87,7 +87,10 @@ export default function LocationTracker() {
             userId: currentUser.id,
             userName: currentUser.name,
             ...coord,
+            accuracy: pos.coords.accuracy,
+            heading: pos.coords.heading,
             speed: pos.coords.speed,
+            timestamp: pos.timestamp,
           });
           setTrackingState?.({ active: true, last: { ...coord, accuracy: pos.coords.accuracy, at: now } });
         } catch (e) {
