@@ -119,7 +119,9 @@ module.exports = async function handler(req, res) {
       if (!allowedPurposes.has(purpose)) throw httpError(400, 'Баталгаажуулалтын зорилго буруу.');
       const employee = await findEmployee(phone);
       if (!employee || employee.status === 'DISABLED') throw httpError(404, 'Бүртгэлгүй утасны дугаар байна.');
-      if (purpose === 'PHONE_ACTIVATION' && employee.appPinConfigured) throw httpError(409, 'Энэ дугаар аль хэдийн идэвхжсэн байна. PIN-ээр нэвтэрнэ үү.');
+      if (purpose === 'PHONE_ACTIVATION' && employee.appPinConfigured) {
+        return res.status(200).json({ activated: true });
+      }
       return res.status(200).json(publicSession(await createVerifySession(employee, purpose)));
     }
     if (action === 'check') {

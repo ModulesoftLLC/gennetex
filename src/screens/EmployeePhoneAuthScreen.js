@@ -25,7 +25,12 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
     return () => { clearInterval(timer); sub.remove(); };
   }, [mode, session?.sessionId]);
   const start = async () => {
-    try { normalizeMongolianPhone(phone); setLoading(true); setError(''); setSession(await api.startVerification(phone, 'PHONE_ACTIVATION')); setMode('verify'); }
+    try { normalizeMongolianPhone(phone); setLoading(true); setError(''); const next = await api.startVerification(phone, 'PHONE_ACTIVATION'); if (next.activated) { setMode('login'); return; } setSession(next); setMode('verify'); }
+    catch (e) { setError(e.message); } finally { setLoading(false); }
+  };
+  const login = async () => {
+    if (!/^\d{4}$/.test(pin)) return setError('Нэвтрэх код 4 оронтой байна.');
+    try { setLoading(true); setError(''); const result = await api.loginWithPin(phone, pin); await completeEmployeeTokenLogin(result.customToken); }
     catch (e) { setError(e.message); } finally { setLoading(false); }
   };
   const savePin = async () => {
@@ -36,13 +41,15 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
   const back = async () => { if (mode === 'verify' && session) await api.cancelVerification(session.sessionId).catch(() => {}); if (mode === 'phone') onBack?.(); else { setMode('phone'); setSession(null); setPin(''); setConfirmPin(''); setError(''); } };
   return <SafeAreaView style={s.safe}><AmbientBackground/><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}><ScrollView contentContainerStyle={s.wrap} keyboardShouldPersistTaps="handled">
     {onBack ? <TouchableOpacity onPress={back} style={s.back}><Text style={s.backText}>‹</Text></TouchableOpacity> : null}<Image source={require('../../assets/logo.png')} style={s.logo} resizeMode="contain" />
-    <Text style={s.title}>{mode === 'verify' ? 'Утас баталгаажуулах' : mode === 'pinSetup' ? 'Нэвтрэх код үүсгэх' : 'Утасны дугаараа оруулна уу'}</Text>
-    {mode !== 'phone' ? <Text style={s.subtitle}>{mode === 'verify' ? session?.displayInstruction : 'Мартахгүй 4 оронтой кодоо хоёр удаа оруулна уу'}</Text> : null}
+    <Text style={s.title}>{mode === 'verify' ? 'Утас баталгаажуулах' : mode === 'pinSetup' ? 'Нэвтрэх код үүсгэх' : mode === 'login' ? 'Нэвтрэх кодоо оруулна уу' : 'Утасны дугаараа оруулна уу'}</Text>
+    {mode !== 'phone' ? <Text style={s.subtitle}>{mode === 'verify' ? session?.displayInstruction : mode === 'login' ? '4 оронтой нэвтрэх кодоо оруулна уу' : 'Мартахгүй 4 оронтой кодоо хоёр удаа оруулна уу'}</Text> : null}
     {mode === 'phone' && <View style={s.phoneRow}><Image source={{ uri: 'https://em-content.zobj.net/source/emoji-one/5/flag-for-mongolia_1f1f2-1f1f3.png' }} style={s.flag} resizeMode="contain" accessibilityLabel="Монгол Улсын далбаа"/><Text style={s.code}>+976</Text><TextInput value={phone} onChangeText={(v) => setPhone(localPhoneDigits(v))} keyboardType="number-pad" maxLength={8} placeholder="9911 2233" placeholderTextColor={colors.textFaint} style={s.phoneInput}/></View>}
     {mode === 'verify' && <><TouchableOpacity style={s.codeCard} onPress={() => Linking.openURL(session.smsUri)}><Text style={s.smsCode}>{session.displayCode}</Text><Text style={s.shortcode}>144773 дугаарт илгээнэ</Text></TouchableOpacity><Text style={s.price}>SMS-ийн төлбөр 150₮. Та Messages апп дээр Send дарна.</Text><Text style={s.timer}>{Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, '0')}</Text><TouchableOpacity style={s.secondary} onPress={() => Linking.openURL(session.smsUri)}><Text style={s.secondaryText}>Open Messages</Text></TouchableOpacity><TouchableOpacity style={s.secondary} onPress={check}><Text style={s.secondaryText}>Check verification</Text></TouchableOpacity></>}
+    {mode === 'login' && <TextInput value={pin} onChangeText={(v) => setPin(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" secureTextEntry maxLength={4} placeholder="••••" placeholderTextColor={colors.textFaint} style={s.pin}/>} 
     {mode === 'pinSetup' && <><TextInput value={pin} onChangeText={(v) => setPin(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" secureTextEntry maxLength={4} placeholder="••••" placeholderTextColor="#777" style={s.pin}/><TextInput value={confirmPin} onChangeText={(v) => setConfirmPin(v.replace(/\D/g, '').slice(0, 4))} keyboardType="number-pad" secureTextEntry maxLength={4} placeholder="Кодоо давтах" placeholderTextColor="#777" style={s.pin}/></>}
     {!!error && <Text style={s.error}>{error}</Text>}
     {loading && <ActivityIndicator color={colors.primary} style={{ margin: 10 }}/>}{mode === 'phone' && <TouchableOpacity disabled={loading} style={s.primary} onPress={start}><Text style={s.primaryText}>Үргэлжлүүлэх</Text></TouchableOpacity>}
+    {mode === 'login' && <TouchableOpacity disabled={loading} style={s.primary} onPress={login}><Text style={s.primaryText}>Нэвтрэх</Text></TouchableOpacity>}
     {mode === 'pinSetup' && <TouchableOpacity disabled={loading} style={s.primary} onPress={savePin}><Text style={s.primaryText}>PIN хадгалах</Text></TouchableOpacity>}
   </ScrollView></KeyboardAvoidingView></SafeAreaView>;
 }
