@@ -13,6 +13,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
+import * as Network from 'expo-network';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Field, Badge, ScreenHeader, SectionTitle, EmptyState } from '../components/ui';
 import TimeSelect from '../components/TimeSelect';
@@ -176,8 +177,23 @@ export default function AttendanceScreen() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') return {};
-      const pos = await Location.getCurrentPositionAsync({});
-      return { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+      const [last, current, network, ip] = await Promise.all([
+        Location.getLastKnownPositionAsync({ maxAge: 15000, requiredAccuracy: 100 }).catch(() => null),
+        Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation }),
+        Network.getNetworkStateAsync().catch(() => ({})),
+        Network.getIpAddressAsync().catch(() => null),
+      ]);
+      const pos = last && Number(last.coords?.accuracy) < Number(current.coords?.accuracy) ? last : current;
+      const wifi = network?.type === Network.NetworkStateType.WIFI;
+      return {
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: pos.coords.accuracy ?? null,
+        capturedAt: new Date(pos.timestamp || Date.now()).toISOString(),
+        networkType: network?.type || 'UNKNOWN',
+        wifiConnected: wifi,
+        wifiPrefix: wifi && ip && ip !== '0.0.0.0' ? String(ip).split('.').slice(0, 3).join('.') : null,
+      };
     } catch {
       return {};
     }
@@ -186,12 +202,17 @@ export default function AttendanceScreen() {
   // Одоогийн байршлыг зөвшөөрөгдсөн цэгүүдтэй харьцуулна
   const evaluateLocation = (loc) => {
     const near = attApi.nearestAttendanceLocation(loc, locations);
-    if (!locations.length) return { mode: 'onsite', distance: null, locationName: null };
+    if (!locations.length) return { mode: 'onsite', distance: null, locationName: null, verificationMethod: 'face' };
     if (loc.latitude == null) return { mode: 'remote', distance: null, locationName: null };
+    const wifiMatched = !!(near.location?.wifi_prefix && loc.wifiConnected && near.location.wifi_prefix === loc.wifiPrefix);
+    const accurateGps = Number(loc.accuracy || 9999) <= Math.max(80, Number(near.location?.radius_m || 200));
+    const onsite = near.within && (accurateGps || wifiMatched);
     return {
-      mode: near.within ? 'onsite' : 'remote',
+      mode: onsite ? 'onsite' : 'remote',
       distance: near.distance,
-      locationName: near.name,
+      locationName: near.location?.name || null,
+      wifiMatched,
+      verificationMethod: wifiMatched ? 'face+gps+wifi' : accurateGps ? 'face+gps' : 'face',
     };
   };
 
@@ -274,10 +295,10 @@ export default function AttendanceScreen() {
   const startCheck = async (type) => {
     setError(null);
     const loc = await getLocation();
-    const { mode, distance, locationName } = evaluateLocation(loc);
+    const { mode, distance, locationName, wifiMatched, verificationMethod } = evaluateLocation(loc);
     setPendingType(type);
     setPendingDistance(distance);
-    setCapturedLoc({ ...loc, locationName });
+    setCapturedLoc({ ...loc, locationName, wifiMatched, verificationMethod });
 
     // Анх удаа — царай бүртгэх горим (10 удаа)
     if (isCloud && !enrolled) {
@@ -346,6 +367,10 @@ export default function AttendanceScreen() {
         locationName: capturedLoc?.locationName || null,
         latitude: capturedLoc?.latitude,
         longitude: capturedLoc?.longitude,
+        accuracyM: capturedLoc?.accuracy,
+        networkType: capturedLoc?.networkType,
+        wifiVerified: capturedLoc?.wifiMatched,
+        verificationMethod: capturedLoc?.verificationMethod,
       });
       await loadRecords();
       await loadMyDay();
@@ -372,8 +397,9 @@ export default function AttendanceScreen() {
       const loc = capturedLoc || {};
       const status = pendingRemote ? 'pending' : 'approved';
       if (isCloud) {
+        const photoUrl = await attApi.uploadSelfie(photo.uri, profile.id);
         // Царай таних шалгалт — зөвхөн тухайн ажилтны царайг зөвшөөрнө
-        const vr = await faceApi.verifyFace(photo.uri, faceUuid);
+        const vr = await faceApi.verifyFace(photoUrl);
         if (!vr.skipped && !vr.match) {
           setBusy(false);
           setCameraVisible(false);
@@ -383,7 +409,6 @@ export default function AttendanceScreen() {
           );
           return;
         }
-        const photoUrl = await attApi.uploadSelfie(photo.uri, profile.id);
         await attApi.insertAttendance({
           staffId: profile.id,
           staffName: profile.name,
@@ -396,6 +421,10 @@ export default function AttendanceScreen() {
           locationName: capturedLoc?.locationName || loc.locationName || null,
           latitude: loc.latitude,
           longitude: loc.longitude,
+          accuracyM: loc.accuracy,
+          networkType: loc.networkType,
+          wifiVerified: loc.wifiMatched,
+          verificationMethod: loc.verificationMethod,
         });
         await loadRecords();
         await loadMyDay();
@@ -456,6 +485,8 @@ export default function AttendanceScreen() {
         latitude: loc.latitude,
         longitude: loc.longitude,
         radius_m: Number(locForm.radius) || 200,
+        wifi_prefix: loc.wifiConnected ? loc.wifiPrefix : null,
+        wifi_enabled: !!(loc.wifiConnected && loc.wifiPrefix),
       });
       setLocModal(false);
       setLocForm({ name: '', radius: '200'});
@@ -555,7 +586,7 @@ export default function AttendanceScreen() {
         </View>
         {isCloud && locations.length > 0 ? (
           <Text style={styles.geoHint}>
-             {locations.map((l) => l.name).join(', ')} цэгийн ойролцоо байх шаардлагатай. Гадуур бол зайнаас хүсэлт илгээнэ.
+             {locations.map((l) => l.name).join(', ')} цэгийн GPS радиус болон боломжтой үед тухайн газрын Wi‑Fi-г давхар баталгаажуулна. Гадуур бол зайнаас хүсэлт илгээнэ.
           </Text>
         ) : null}
         {isCloud && !enrolled ? (
@@ -662,7 +693,7 @@ export default function AttendanceScreen() {
             locations.map((l) => (
               <View key={l.id} style={styles.locRow}>
                 <Text style={styles.locName}>{l.name}</Text>
-                <Text style={styles.locRadius}>{l.radius_m}м</Text>
+                <Text style={styles.locRadius}>{l.radius_m}м{l.wifi_enabled ? ' · Wi‑Fi ✓' : ''}</Text>
                 <TouchableOpacity onPress={() => removeLocation(l.id, l.name)} hitSlop={8}>
                   <Text style={styles.delete}>Устгах</Text>
                 </TouchableOpacity>
@@ -757,6 +788,8 @@ export default function AttendanceScreen() {
                 ) : null}
                 <View style={styles.tagRow}>
                   {item.is_remote ? <Badge text="Зайнаас" color={colors.accent} /> : null}
+                  {item.wifi_verified ? <Badge text="GPS + Wi‑Fi" color={colors.success} /> : null}
+                  {item.accuracy_m != null ? <Badge text={`±${Math.round(item.accuracy_m)}м`} color={colors.primary} /> : null}
                   {item.status === 'rejected' ? <Badge text="Татгалзсан" color={colors.danger} /> : null}
                 </View>
               </View>

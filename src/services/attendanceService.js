@@ -52,6 +52,10 @@ export async function insertAttendance(record) {
       photo_url: record.photoUrl || null,
       latitude: record.latitude ?? null,
       longitude: record.longitude ?? null,
+      accuracy_m: record.accuracyM ?? null,
+      network_type: record.networkType || null,
+      wifi_verified: !!record.wifiVerified,
+      verification_method: record.verificationMethod || 'face',
       status: record.status || 'approved',
       is_remote: record.isRemote || false,
       distance_m: record.distanceM ?? null,
@@ -88,6 +92,10 @@ export async function insertAttendance(record) {
       photo_url: record.photoUrl || null,
       latitude: record.latitude ?? null,
       longitude: record.longitude ?? null,
+      accuracy_m: record.accuracyM ?? null,
+      network_type: record.networkType || null,
+      wifi_verified: !!record.wifiVerified,
+      verification_method: record.verificationMethod || 'face',
       status: record.status || 'approved',
       is_remote: record.isRemote || false,
       distance_m: record.distanceM ?? null,
@@ -142,6 +150,8 @@ export async function insertAttendanceLocation(loc) {
       latitude: loc.latitude,
       longitude: loc.longitude,
       radius_m: loc.radius_m || 200,
+      wifi_prefix: loc.wifi_prefix || null,
+      wifi_enabled: !!loc.wifi_enabled,
     })
     .select()
     .single();

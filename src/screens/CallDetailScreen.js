@@ -43,7 +43,21 @@ import {
   slaAccentColor,
 } from '../lib/callSla';
 import { callStatusLabelMn, getCallStatusMeta } from '../lib/callStatusColors';
+import { distanceMeters } from '../lib/geo';
 import TeamCrewCard from '../components/TeamCrewCard';
+
+function smsComposerUrl(phone, message) {
+  const separator = Platform.OS === 'ios' ? '&' : '?';
+  return `sms:${String(phone || '').replace(/[^+\d]/g, '')}${separator}body=${encodeURIComponent(message)}`;
+}
+
+async function openSmsComposer(phone, message) {
+  if (!phone) return false;
+  const url = smsComposerUrl(phone, message);
+  if (!await Linking.canOpenURL(url)) throw new Error('Messages апп нээж чадсангүй.');
+  await Linking.openURL(url);
+  return true;
+}
 import * as vehicleApi from '../services/vehicleService';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
@@ -247,7 +261,18 @@ export default function CallDetailScreen() {
         Alert.alert('Байршил', 'GPS зөвшөөрөл шаардлагатай.');
         return;
       }
-      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.BestForNavigation });
+      if (call.latitude != null && call.longitude != null) {
+        const distance = distanceMeters(
+          { latitude: pos.coords.latitude, longitude: pos.coords.longitude },
+          { latitude: Number(call.latitude), longitude: Number(call.longitude) }
+        );
+        const allowedRadius = Math.max(200, Number(pos.coords.accuracy || 0) * 1.5);
+        if (distance > allowedRadius) {
+          Alert.alert('Хаяг дээр очоогүй байна', `Та дуудлагын цэгээс ойролцоогоор ${Math.round(distance)}м зайд байна. Цэг дээр очоод дахин бүртгэнэ үү.`);
+          return;
+        }
+      }
       let photoUrl = null;
       if (withPhoto) {
         const cam = await ImagePicker.requestCameraPermissionsAsync();
@@ -273,6 +298,12 @@ export default function CallDetailScreen() {
         faceVerified: false,
       });
       Alert.alert('Бүртгэгдлээ', `${call.customer} дээр очсоныг бүртгэлээ.`);
+      if (call.phone) {
+        await openSmsComposer(
+          call.phone,
+          `Сайн байна уу. Танайд ${currentUser.name || 'манай ажилтан'} ирлээ. Юнивишн болон Gennetex-ийн үйлчилгээг сонгосонд баярлалаа.`
+        ).catch((error) => Alert.alert('Мессеж', error.message));
+      }
     } catch (e) {
       Alert.alert('Алдаа', e.message);
     }
@@ -315,7 +346,16 @@ export default function CallDetailScreen() {
       const used = meta.materials?.length
         ? `\n${meta.materials.length} төрлийн бараа бүртгэгдлээ${deducted ? ` (${deducted} нь үлдэгдлээс хасагдлаа)` : ''}.`
         : '';
-      Alert.alert('Амжилттай', `Захиалга хаагдлаа.${used}`);
+      Alert.alert('Амжилттай', `Захиалга хаагдлаа.${used}`, [
+        { text: 'Хаах', style: 'cancel' },
+        ...(call.phone ? [{
+          text: 'Талархлын мессеж',
+          onPress: () => openSmsComposer(
+            call.phone,
+            'Манайхаар үйлчлүүлсэнд баярлалаа. Дахин үйлчлүүлээрэй. Юнивишн болон Gennetex-ийн үйлчилгээг сонгосонд баярлалаа.'
+          ).catch((error) => Alert.alert('Мессеж', error.message)),
+        }] : []),
+      ]);
     } catch (e) {
       Alert.alert('Алдаа', e.message || 'Захиалга хаахад алдаа гарлаа');
       throw e;

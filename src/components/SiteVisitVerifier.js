@@ -29,12 +29,12 @@ export default function SiteVisitVerifier() {
   const handleCapture = async (photo) => {
     setBusy(true);
     try {
-      const vr = await faceApi.verifyFace(photo.uri, faceUuid);
+      const photoUrl = await attApi.uploadSelfie(photo.uri, currentUser.id);
+      const vr = await faceApi.verifyFace(photoUrl);
       if (!vr.skipped && !vr.match) {
         Alert.alert('Царай таарсангүй', 'Таны бүртгэлтэй царайтай таарахгүй байна. Дахин оролдоно уу.');
         return;
       }
-      const photoUrl = await attApi.uploadSelfie(photo.uri, currentUser.id);
       await tracking.logVisit({
         ...pendingVisit,
         photoUrl,
