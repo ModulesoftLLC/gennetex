@@ -1,31 +1,10 @@
-import { supabase } from './supabase';
+import posts from '../data/posts';
 
 export async function fetchBlogPosts() {
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('id, title, slug, excerpt, featured_image, author_name, created_at')
-    .eq('published', true)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-
-  return Array.isArray(data) ? data : [];
+  return posts.filter((post) => post.published !== false);
 }
 
 export async function fetchBlogPostBySlug(slug) {
   if (!slug) return null;
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .select('id, title, slug, excerpt, content, featured_image, author_name, created_at, source_urls')
-    .eq('slug', slug)
-    .eq('published', true)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data || null;
+  return posts.find((post) => post.slug === slug && post.published !== false) || null;
 }
