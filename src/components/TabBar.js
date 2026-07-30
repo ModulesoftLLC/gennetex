@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing, radius } from '../theme';
 import { useTheme } from '../context/ThemeContext';
@@ -16,6 +16,8 @@ const ICONS = {
 export default function TabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  const compact = width < 360;
 
   return (
     <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
@@ -25,6 +27,7 @@ export default function TabBar({ state, descriptors, navigation }) {
           {
             backgroundColor: isDark ? 'rgba(18,33,49,0.92)' : 'rgba(255,255,255,0.95)',
             borderColor: colors.outlineVariant + '55',
+            width: Math.min(width - 24, 560),
           },
           Platform.select({
             android: { elevation: 6 },
@@ -58,36 +61,32 @@ export default function TabBar({ state, descriptors, navigation }) {
 
           const icon = ICONS[route.name] || 'home';
 
-          if (focused) {
-            return (
-              <TouchableOpacity
-                key={route.key}
-                accessibilityRole="button"
-                accessibilityState={{ selected: true }}
-                onPress={onPress}
-                onLongPress={onLongPress}
-                activeOpacity={0.85}
-                style={[styles.itemActive, { backgroundColor: colors.primaryContainer + '1a' }]}
-              >
-                <NavIcon name={icon} size={20} color={colors.primaryContainer} active activeColor={colors.primaryContainer} />
-                <Text style={[styles.labelActive, { color: colors.primaryContainer }]} numberOfLines={1}>
-                  {label}
-                </Text>
-              </TouchableOpacity>
-            );
-          }
-
           return (
             <TouchableOpacity
               key={route.key}
               accessibilityRole="button"
-              accessibilityState={{ selected: false }}
+              accessibilityState={{ selected: focused }}
+              accessibilityLabel={label}
               onPress={onPress}
               onLongPress={onLongPress}
-              activeOpacity={0.7}
-              style={styles.item}
+              activeOpacity={0.75}
+              style={[styles.item, focused && { backgroundColor: colors.primaryContainer + '18' }]}
             >
-              <NavIcon name={icon} size={22} color={colors.onSurfaceVariant} />
+              <NavIcon
+                name={icon}
+                size={21}
+                color={focused ? colors.primaryContainer : colors.onSurfaceVariant}
+                active={focused}
+                activeColor={colors.primaryContainer}
+              />
+              {!compact ? (
+                <Text
+                  style={[styles.label, { color: focused ? colors.primaryContainer : colors.textMuted }, focused && styles.labelActive]}
+                  numberOfLines={1}
+                >
+                  {label}
+                </Text>
+              ) : null}
             </TouchableOpacity>
           );
         })}
@@ -109,26 +108,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 24,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    marginHorizontal: spacing.lg,
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    marginHorizontal: spacing.md,
     gap: 4,
     borderWidth: 1,
   },
   item: {
-    width: 52,
-    height: 48,
+    flex: 1,
+    minWidth: 48,
+    height: 54,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 3,
   },
-  itemActive: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    height: 48,
-    borderRadius: radius.lg,
-  },
-  labelActive: { fontWeight: '800', fontSize: 14 },
+  label: { fontWeight: '600', fontSize: 10.5, lineHeight: 13 },
+  labelActive: { fontWeight: '800' },
 });

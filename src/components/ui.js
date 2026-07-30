@@ -5,22 +5,25 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { radius, spacing } from '../theme';
+import { layout, radius, spacing } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 
 export function Card({ children, style, elevated = true, borderless = false }) {
   const { colors, shadow } = useTheme();
+  const { width } = useWindowDimensions();
+  const compact = width < layout.compactBreakpoint;
   return (
     <View
       style={[
         {
           backgroundColor: colors.surface,
           borderRadius: radius.lg,
-          padding: spacing.lg,
+          padding: compact ? spacing.md : spacing.lg,
           marginBottom: spacing.md,
           borderWidth: 1,
           borderColor: borderless ? 'transparent' : colors.border,
@@ -42,6 +45,7 @@ export function Button({
   icon,
   style,
   disabled,
+  accessibilityLabel,
 }) {
   const { colors, gradients, shadow } = useTheme();
   const GRADIENT_MAP = {
@@ -65,7 +69,13 @@ export function Button({
 
   if (grad && !disabled) {
     return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={[style]}>
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.82}
+        style={[styles.btnOuter, style]}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel || title}
+      >
         <LinearGradient
           colors={grad}
           start={{ x: 0, y: 0 }}
@@ -92,14 +102,17 @@ export function Button({
         style,
       ]}
       onPress={disabled ? undefined : onPress}
-      activeOpacity={0.85}
+      activeOpacity={0.82}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel || title}
+      accessibilityState={{ disabled: Boolean(disabled) }}
     >
       {content}
     </TouchableOpacity>
   );
 }
 
-export function Field({ label, style, variant, labelStyle, inputStyle, ...props }) {
+export function Field({ label, style, variant, labelStyle, inputStyle, onFocus, onBlur, ...props }) {
   const { colors } = useTheme();
   const [focused, setFocused] = useState(false);
   return (
@@ -119,8 +132,15 @@ export function Field({ label, style, variant, labelStyle, inputStyle, ...props 
           focused && { borderWidth: 1.5 },
           inputStyle,
         ]}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        selectionColor={colors.primary}
+        onFocus={(event) => {
+          setFocused(true);
+          onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          onBlur?.(event);
+        }}
         {...props}
       />
     </View>
@@ -142,6 +162,8 @@ export function Badge({ text, color }) {
 export function ScreenHeader({ title, subtitle, right, icon, back, onBackPress }) {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
+  const compact = width < layout.compactBreakpoint;
   const showBack = back === undefined ? navigation.canGoBack() : back;
   const handleBack = () => {
     if (onBackPress) onBackPress();
@@ -155,7 +177,7 @@ export function ScreenHeader({ title, subtitle, right, icon, back, onBackPress }
       ]}
     >
       <SafeAreaView edges={['top']}>
-        <View style={styles.headerRow}>
+        <View style={[styles.headerRow, compact && right && styles.headerRowCompact]}>
           <View style={[styles.headerLeft, { flex: 1, minWidth: 0 }]}>
             {showBack ? (
               <TouchableOpacity
@@ -169,7 +191,7 @@ export function ScreenHeader({ title, subtitle, right, icon, back, onBackPress }
               <Text style={styles.headerIcon}>{icon}</Text>
             ) : null}
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={[styles.headerTitle, { color: colors.onSurface }]} numberOfLines={2}>
+              <Text style={[styles.headerTitle, compact && styles.headerTitleCompact, { color: colors.onSurface }]} numberOfLines={2}>
                 {title}
               </Text>
               {subtitle ? (
@@ -179,7 +201,11 @@ export function ScreenHeader({ title, subtitle, right, icon, back, onBackPress }
               ) : null}
             </View>
           </View>
-          {right ? <View style={styles.headerRight}>{right}</View> : null}
+          {right ? (
+            <View style={[styles.headerRight, compact && styles.headerRightCompact, compact && !showBack && styles.headerRightCompactNoBack]}>
+              {right}
+            </View>
+          ) : null}
         </View>
       </SafeAreaView>
     </View>
@@ -228,6 +254,8 @@ export function HeaderButton({ title, icon, onPress }) {
       style={[styles.headerBtn, { backgroundColor: colors.primarySoft, borderColor: colors.primaryContainer + '40' }]}
       onPress={onPress}
       activeOpacity={0.8}
+      accessibilityRole="button"
+      accessibilityLabel={title}
     >
       {icon ? <Text style={[styles.headerBtnIcon, { color: colors.primary }]}>{icon}</Text> : null}
       {title ? <Text style={[styles.headerBtnText, { color: colors.primary }]}>{title}</Text> : null}
@@ -241,17 +269,19 @@ export function formatMNT(value) {
 }
 
 const styles = StyleSheet.create({
+  btnOuter: { borderRadius: radius.pill },
   btn: {
     borderRadius: radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: layout.minTouchTarget,
   },
-  btnSm: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md },
-  btnMd: { paddingVertical: spacing.md, paddingHorizontal: spacing.lg },
-  btnLg: { paddingVertical: spacing.lg, paddingHorizontal: spacing.xl },
+  btnSm: { minHeight: 40, paddingVertical: spacing.sm, paddingHorizontal: spacing.md },
+  btnMd: { minHeight: 48, paddingVertical: 11, paddingHorizontal: spacing.lg },
+  btnLg: { minHeight: 54, paddingVertical: 14, paddingHorizontal: spacing.xl },
   btnRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   btnIcon: {},
-  btnText: { fontWeight: '700' },
+  btnText: { fontWeight: '800', letterSpacing: 0.1 },
   label: {
     marginBottom: spacing.xs,
     fontSize: 13,
@@ -260,9 +290,11 @@ const styles = StyleSheet.create({
   input: {
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: 11,
+    minHeight: 50,
     borderWidth: 1,
-    fontSize: 15,
+    fontSize: 16,
+    lineHeight: 22,
   },
   badge: {
     flexDirection: 'row',
@@ -278,7 +310,7 @@ const styles = StyleSheet.create({
   badgeText: { fontSize: 12, fontWeight: '700' },
   header: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.lg,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
   },
   headerRow: {
@@ -286,20 +318,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: spacing.sm,
+    minHeight: 58,
   },
+  headerRowCompact: { alignItems: 'stretch', flexDirection: 'column', gap: spacing.sm },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   headerRight: { flexShrink: 0, flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-end', gap: spacing.xs, maxWidth: '58%' },
+  headerRightCompact: { maxWidth: '100%', justifyContent: 'flex-start', paddingLeft: 50 },
+  headerRightCompactNoBack: { paddingLeft: 0 },
   headerIcon: { fontSize: 30 },
   backBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
   },
   backIcon: { fontSize: 28, fontWeight: '800', marginTop: -4 },
-  headerTitle: { fontSize: 22, fontWeight: '800', letterSpacing: -0.3 },
+  headerTitle: { fontSize: 22, lineHeight: 28, fontWeight: '800', letterSpacing: -0.35 },
+  headerTitleCompact: { fontSize: 20, lineHeight: 25 },
   headerSub: { fontSize: 13, marginTop: 2, fontWeight: '500' },
   statCard: {
     flex: 1,
@@ -326,7 +363,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyIconDot: { fontSize: 36, lineHeight: 40, fontWeight: '300' },
-  emptyText: { textAlign: 'center', fontSize: 14 },
+  emptyText: { textAlign: 'center', fontSize: 14, lineHeight: 21, maxWidth: 320 },
   headerBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -335,6 +372,8 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
     borderWidth: 1,
+    minHeight: 40,
+    justifyContent: 'center',
   },
   headerBtnIcon: { fontSize: 15 },
   headerBtnText: { fontWeight: '700', fontSize: 14 },

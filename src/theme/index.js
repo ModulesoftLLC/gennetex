@@ -17,6 +17,7 @@ export const spacing = {
   lg: 16,
   xl: 24,
   xxl: 32,
+  xxxl: 40,
 };
 
 export const radius = {
@@ -29,9 +30,17 @@ export const radius = {
 };
 
 export const typography = {
-  h1: { fontSize: 26, fontWeight: '800', color: colors.text, letterSpacing: -0.3 },
-  h2: { fontSize: 20, fontWeight: '800', color: colors.text },
-  h3: { fontSize: 16, fontWeight: '700', color: colors.text },
-  body: { fontSize: 15, color: colors.text },
-  muted: { fontSize: 13, color: colors.textMuted },
+  h1: { fontSize: 28, lineHeight: 34, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
+  h2: { fontSize: 21, lineHeight: 27, fontWeight: '800', color: colors.text, letterSpacing: -0.25 },
+  h3: { fontSize: 17, lineHeight: 23, fontWeight: '700', color: colors.text },
+  body: { fontSize: 15, lineHeight: 22, color: colors.text },
+  muted: { fontSize: 13, lineHeight: 19, color: colors.textMuted },
+};
+
+export const layout = {
+  compactBreakpoint: 390,
+  tabletBreakpoint: 768,
+  contentMaxWidth: 960,
+  formMaxWidth: 640,
+  minTouchTarget: 44,
 };
