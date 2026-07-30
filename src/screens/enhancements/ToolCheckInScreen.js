@@ -19,6 +19,7 @@ import {
   CONDITIONS,
   logToolCondition,
   requiresPhoto,
+  uploadToolConditionPhoto,
 } from '../../services/toolConditionService';
 
 export default function ToolCheckInScreen() {
@@ -49,6 +50,9 @@ export default function ToolCheckInScreen() {
     }
     setSaving(true);
     try {
+      const photoUrl = photoUri
+        ? await uploadToolConditionPhoto(photoUri, currentUser?.id)
+        : null;
       await logToolCondition({
         itemName: itemName.trim(),
         userId: currentUser?.id,
@@ -56,7 +60,7 @@ export default function ToolCheckInScreen() {
         direction,
         condition,
         note,
-        photoUrl: photoUri,
+        photoUrl,
       });
       Alert.alert('Амжилттай', 'Багажны нөхцөл бүртгэгдлээ');
       setItemName('');

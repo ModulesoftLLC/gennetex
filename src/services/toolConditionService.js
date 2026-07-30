@@ -3,7 +3,13 @@
  */
 import { supabase } from '../lib/supabase';
 import { isFlagOn } from '../lib/featureFlags';
-import { firebaseInsert, firebaseGetAll } from '../lib/firebaseAdapter';
+import { firebaseInsert, firebaseGetAll, firebaseUploadUri } from '../lib/firebaseAdapter';
+
+export async function uploadToolConditionPhoto(uri, userId) {
+  const owner = String(userId || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const path = `tool-condition/${owner}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+  return firebaseUploadUri(path, uri, 'image/jpeg');
+}
 
 export const CONDITIONS = [
   { key: 'ok', label: 'Хэвийн', color: '#16a34a' },

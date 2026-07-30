@@ -1,7 +1,6 @@
-import { decode } from 'base64-arraybuffer';
-import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import { supabase } from '../lib/supabase';
+import { firebaseUploadUri } from '../lib/firebaseAdapter';
 import * as notifyApi from './notificationService';
 
 const TABLE = 'job_contracts';
@@ -150,15 +149,8 @@ export async function signContract(contract, signatureSvg, { userName } = {}) {
   try {
     const html = buildContractHtml(signedContract, { signatureSvg });
     const { uri } = await Print.printToFileAsync({ html, margins: { top: 40, bottom: 40, left: 40, right: 40 } });
-    const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
     const path = `contracts/${contract.employee_id}/${contract.id}.pdf`;
-    const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, decode(base64), {
-      contentType: 'application/pdf',
-      upsert: true,
-    });
-    if (!upErr) {
-      pdfUrl = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-    }
+    pdfUrl = await firebaseUploadUri(`${BUCKET}/${path}`, uri, 'application/pdf');
   } catch (e) {
     // PDF амжилтгүй бол гарын үсэг + төлөв хадгална
   }

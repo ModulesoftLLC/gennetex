@@ -1,5 +1,3 @@
-import * as FileSystem from 'expo-file-system/legacy';
-import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
 import * as notifyApi from './notificationService';
 import {
@@ -10,7 +8,7 @@ import {
   firebaseSet,
   firebaseSubscribe,
   firebaseUpdate,
-  firebaseUploadFile,
+  firebaseUploadUri,
 } from '../lib/firebaseAdapter';
 
 const REACTIONS = ['like', 'love', 'care', 'haha', 'angry'];
@@ -22,11 +20,7 @@ export function isValidReaction(r) {
 async function uploadFeedMedia(uri, { folder = 'posts', mimeType = 'image/jpeg', fileName } = {}) {
   const extension = (fileName?.match(/\.([a-z0-9]+)$/i)?.[1]) || (mimeType.startsWith('video/') ? 'mp4' : 'jpg');
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${extension}`;
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-  const file = decode(base64);
-  return firebaseUploadFile(path, file, mimeType);
+  return firebaseUploadUri(path, uri, mimeType);
 }
 
 async function fetchAllUserIds(excludeId) {

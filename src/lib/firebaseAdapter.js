@@ -1,6 +1,8 @@
 import { collection, doc, getDoc, getDocs, query, where, orderBy, limit, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { ref, uploadBytes, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
 import { Buffer } from 'buffer';
+import * as FileSystem from 'expo-file-system/legacy';
+import { Platform } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as firebaseSignOut, sendPasswordResetEmail, updatePassword, onAuthStateChanged } from 'firebase/auth';
 import { firestoreDb, firebaseStorage, firebaseAuth } from './firebase';
 
@@ -296,6 +298,48 @@ export async function firebaseUploadFile(path, file, contentType = 'application/
     return getDownloadURL(storageRef);
   } catch (error) {
     console.warn('Firebase upload failed:', error?.message || error);
+    throw error;
+  }
+}
+
+/**
+ * React Native дээр Blob/ArrayBuffer үүсгэхгүйгээр local URI-г Firebase Storage руу upload хийнэ.
+ * Том зураг, video, PDF дээр санах ой хэтрэхээс хамгаална.
+ */
+export async function firebaseUploadUri(path, uri, contentType = 'application/octet-stream') {
+  if (!uri) throw new Error('Upload хийх файл олдсонгүй.');
+  try {
+    const storage = ensureStorage();
+    const storageRef = ref(storage, path);
+    if (Platform.OS === 'web') {
+      const response = await fetch(uri);
+      if (!response.ok) throw new Error(`Файл уншиж чадсангүй (${response.status})`);
+      await uploadBytes(storageRef, await response.blob(), { contentType });
+      return getDownloadURL(storageRef);
+    }
+
+    const bucket = String(process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || '').trim();
+    const user = firebaseAuth?.currentUser;
+    if (!bucket) throw new Error('Firebase Storage bucket тохируулаагүй байна.');
+    if (!user) throw new Error('Файл upload хийхийн тулд нэвтэрнэ үү.');
+    const token = await user.getIdToken();
+    const endpoint = `https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(bucket)}/o?uploadType=media&name=${encodeURIComponent(path)}`;
+    const result = await FileSystem.uploadAsync(endpoint, uri, {
+      httpMethod: 'POST',
+      uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+      headers: {
+        Authorization: `Firebase ${token}`,
+        'Content-Type': contentType,
+      },
+    });
+    if (result.status < 200 || result.status >= 300) {
+      let message = `Firebase Storage upload амжилтгүй (${result.status})`;
+      try { message = JSON.parse(result.body)?.error?.message || message; } catch (_) {}
+      throw new Error(message);
+    }
+    return getDownloadURL(storageRef);
+  } catch (error) {
+    console.warn('Firebase URI upload failed:', error?.message || error);
     throw error;
   }
 }

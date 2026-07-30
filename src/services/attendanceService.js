@@ -1,7 +1,5 @@
-import * as FileSystem from 'expo-file-system/legacy';
-import { decode } from 'base64-arraybuffer';
 import { supabase, isFirebaseOnly } from '../lib/supabase';
-import { firebaseCreate, firebaseList } from '../lib/firebaseAdapter';
+import { firebaseCreate, firebaseList, firebaseUploadUri } from '../lib/firebaseAdapter';
 import * as notifyApi from './notificationService';
 import { distanceMeters } from '../lib/geo';
 
@@ -13,30 +11,14 @@ const newestFirst = (rows) => [...(rows || [])].sort((a, b) => rowTime(b) - rowT
 
 // Селфи зургийг Supabase Storage-д байршуулж, нийтийн URL буцаана
 export async function uploadSelfie(uri, staffId) {
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
   const path = `${staffId || 'anon'}/${Date.now()}.jpg`;
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, decode(base64), { contentType: 'image/jpeg', upsert: true });
-  if (error) throw error;
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return firebaseUploadUri(`${BUCKET}/${path}`, uri, 'image/jpeg');
 }
 
 // Профайл зургийг avatars bucket-д байршуулж, нийтийн URL буцаана
 export async function uploadAvatar(uri, userId) {
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
   const path = `${userId || 'anon'}/avatar_${Date.now()}.jpg`;
-  const { error } = await supabase.storage
-    .from('avatars')
-    .upload(path, decode(base64), { contentType: 'image/jpeg', upsert: true });
-  if (error) throw error;
-  const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-  return data.publicUrl;
+  return firebaseUploadUri(`avatars/${path}`, uri, 'image/jpeg');
 }
 
 export function nearestAttendanceLocation(loc, locations = []) {

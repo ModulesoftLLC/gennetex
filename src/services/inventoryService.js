@@ -1,18 +1,12 @@
-import * as FileSystem from 'expo-file-system/legacy';
-import { decode } from 'base64-arraybuffer';
 import { MOVEMENT_TYPES, computeBalances, movementDelta } from '../lib/stockBalance';
-import { firebaseUploadFile, firebaseList, firebaseGetOne, firebaseCreate, firebaseUpdate, firebaseDelete, firebaseSet } from '../lib/firebaseAdapter';
+import { firebaseUploadUri, firebaseList, firebaseGetOne, firebaseCreate, firebaseUpdate, firebaseDelete, firebaseSet } from '../lib/firebaseAdapter';
 
 const TABLE = 'inventory';
 const BUCKET = 'inventory';
 
 async function uploadImage(uri, folder) {
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-  const bytes = decode(base64);
-  return firebaseUploadFile(path, bytes, 'image/jpeg');
+  return firebaseUploadUri(`inventory/${path}`, uri, 'image/jpeg');
 }
 
 export async function uploadInventoryImage(uri) {

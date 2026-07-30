@@ -7,6 +7,7 @@ import { computeBalances } from '../lib/stockBalance';
 import * as invApi from './inventoryService';
 import * as vehicleApi from './vehicleService';
 import * as notifyApi from './notificationService';
+import { firebaseUploadUri } from '../lib/firebaseAdapter';
 
 function utf8ToBase64(str) {
   const escaped = unescape(encodeURIComponent(str));
@@ -67,17 +68,8 @@ async function htmlToPdfFile(innerHtml) {
 }
 
 async function uploadReportPdf(localUri, userId, reportId) {
-  const base64 = await FileSystem.readAsStringAsync(localUri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
   const path = `${userId}/${reportId}.pdf`;
-  const { error } = await supabase.storage.from(SIG_BUCKET).upload(path, decode(base64), {
-    contentType: 'application/pdf',
-    upsert: true,
-  });
-  if (error) throw error;
-  const { data } = supabase.storage.from(SIG_BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return firebaseUploadUri(`${SIG_BUCKET}/${path}`, localUri, 'application/pdf');
 }
 
 export const REPORT_TYPES = {

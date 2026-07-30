@@ -66,7 +66,7 @@ export default function ProfileScreen() {
   const applyPickedImage = async (uri) => {
     if (!canEditAvatar) return;
     if (!isCloud || !authProfile) {
-      Alert.alert('Боломжгүй', 'Профайл зураг хадгалахад Supabase холболт шаардлагатай.');
+      Alert.alert('Боломжгүй', 'Профайл зураг хадгалахад серверийн холболт шаардлагатай.');
       return;
     }
     setUploading(true);

@@ -1,25 +1,11 @@
-import * as FileSystem from 'expo-file-system/legacy';
-import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
+import { firebaseUploadUri } from '../lib/firebaseAdapter';
 
 const BUCKET = 'ai-inventory';
 
 async function uploadImage(uri, folder = 'frames') {
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, decode(base64), { contentType: 'image/jpeg', upsert: true });
-  if (error) {
-    if (String(error.message).includes('Bucket not found')) {
-      throw new Error('AI Inventory storage байхгүй. migration_ai_inventory.sql ажиллуулна уу.');
-    }
-    throw error;
-  }
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return firebaseUploadUri(`${BUCKET}/${path}`, uri, 'image/jpeg');
 }
 
 // ---- Products (inventory хүснэгттэй синк) ----

@@ -1,7 +1,6 @@
-import * as FileSystem from 'expo-file-system/legacy';
-import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
 import * as notifyApi from './notificationService';
+import { firebaseUploadUri } from '../lib/firebaseAdapter';
 
 const TABLE = 'messages';
 const BUCKET = 'chat';
@@ -12,30 +11,7 @@ export async function uploadChatFile(uri, { room, mimeType, name } = {}) {
   const path = `${room || 'general'}/${Date.now()}_${safeName}`;
   const contentType = mimeType || 'application/octet-stream';
 
-  try {
-    const res = await fetch(uri);
-    const blob = await res.blob();
-    const { error } = await supabase.storage.from(BUCKET).upload(path, blob, {
-      contentType: blob.type || contentType,
-      upsert: true,
-    });
-    if (!error) {
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      return data.publicUrl;
-    }
-  } catch (e) {
-    // Blob upload алдаа — base64 fallback
-  }
-
-  const base64 = await FileSystem.readAsStringAsync(uri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
-  const { error } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, decode(base64), { contentType, upsert: true });
-  if (error) throw error;
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return firebaseUploadUri(`${BUCKET}/${path}`, uri, contentType);
 }
 
 export async function fetchMessages(room = 'general', limit = 100) {
