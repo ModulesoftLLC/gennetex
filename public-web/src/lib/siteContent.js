@@ -1,4 +1,3 @@
-import { supabase } from './supabase';
 import { DEFAULT_SITE_CONTENT } from './siteContentDefaults';
 
 function deepMerge(base, patch) {
@@ -24,22 +23,15 @@ export function mergeSiteContent(partial) {
 
 export async function fetchSiteContent() {
   try {
-    const { data, error } = await supabase
-      .from('public_site_content')
-      .select('content, updated_at')
-      .eq('id', 'main')
-      .maybeSingle();
-    if (error) {
-      console.warn('[siteContent]', error.message);
-      return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
-    }
-    if (!data) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+    const response = await fetch('/api/public-site', { headers: { Accept: 'application/json' } });
+    if (!response.ok) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+    const data = await response.json();
+    if (!data?.content) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
     return {
       content: mergeSiteContent(data.content || {}),
-      updatedAt: data.updated_at || null,
+      updatedAt: data.updatedAt || null,
     };
-  } catch (e) {
-    console.warn('[siteContent]', e);
+  } catch {
     return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
   }
 }
