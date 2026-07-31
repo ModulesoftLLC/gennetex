@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   Text,
@@ -88,6 +88,7 @@ export default function AttendanceScreen() {
   });
   const shiftAlertSent = useRef(false);
   const [employees, setEmployees] = useState([]);
+  const [attendanceEmployee, setAttendanceEmployee] = useState(null);
 
   const loadEmployees = useCallback(async () => {
     if (!isCloud || !isAdmin) return;
@@ -136,7 +137,7 @@ export default function AttendanceScreen() {
   const loadRecords = useCallback(async () => {
     if (!isCloud || !isAdmin) return;
     try {
-      setRecords(await attApi.fetchAttendance());
+      setRecords(await attApi.fetchAttendance(1000));
       setPending(await attApi.fetchPendingAttendance());
       await loadTodayShifts();
       await loadBreakSchedules();
@@ -751,6 +752,14 @@ export default function AttendanceScreen() {
         </View>
       ) : null}
 
+      {isAdmin && isCloud ? (
+        <AttendanceActivityPanel
+          employees={employees}
+          records={records}
+          onSelectEmployee={setAttendanceEmployee}
+        />
+      ) : null}
+
       {isAdmin ? (
         <SectionTitle style={{ marginTop: spacing.md }}> Бүх ажилчдын ирц</SectionTitle>
       ) : (
@@ -829,6 +838,12 @@ export default function AttendanceScreen() {
           setEnrolling(false);
         }}
         onCapture={handleCapture}
+      />
+
+      <EmployeeAttendanceModal
+        employee={attendanceEmployee}
+        records={records}
+        onClose={() => setAttendanceEmployee(null)}
       />
 
       {/* Зайнаас бүртгүүлэх хүсэлт */}
@@ -1041,6 +1056,176 @@ export default function AttendanceScreen() {
     </View>
   );
 }
+
+function attendanceTime(row) {
+  return row?.created_at?.toMillis?.() ?? row?.createdAt?.toMillis?.()
+    ?? new Date(row?.created_at || row?.createdAt || 0).getTime();
+}
+
+function localDayKey(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(date.getTime())) return '';
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function recentDays(count) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (count - index - 1));
+    return { key: localDayKey(date), label: `${date.getMonth() + 1}/${date.getDate()}` };
+  });
+}
+
+function approvedCheckIns(records) {
+  return (records || []).filter((row) => row.type === 'check_in' && row.status !== 'pending' && row.status !== 'rejected');
+}
+
+function recordEmployeeKey(row) {
+  return String(row?.staff_id || row?.staffId || row?.user_id || row?.userId || row?.staff_name || '').trim();
+}
+
+function employeeKey(employee) {
+  return String(employee?.id || employee?.user_id || employee?.uid || employee?.name || '').trim();
+}
+
+function recordsForEmployee(records, employee) {
+  const id = employeeKey(employee);
+  const name = String(employee?.name || '').trim().toLowerCase();
+  return approvedCheckIns(records).filter((row) => {
+    const rowId = recordEmployeeKey(row);
+    const rowName = String(row?.staff_name || '').trim().toLowerCase();
+    return (id && rowId === id) || (name && rowName === name);
+  });
+}
+
+function AttendanceActivityPanel({ employees, records, onSelectEmployee }) {
+  const styles = useStyles(makeAnalyticsStyles);
+  const { colors } = useTheme();
+  const days = useMemo(() => recentDays(7), []);
+  const checkIns = useMemo(() => approvedCheckIns(records), [records]);
+  const daily = useMemo(() => days.map((day) => {
+    const rows = checkIns.filter((row) => localDayKey(attendanceTime(row)) === day.key);
+    return { ...day, count: new Set(rows.map(recordEmployeeKey).filter(Boolean)).size };
+  }), [checkIns, days]);
+  const totalEmployees = employees.length;
+  const todayCount = daily[daily.length - 1]?.count || 0;
+  const activityRate = totalEmployees ? Math.round(todayCount / totalEmployees * 100) : 0;
+  const maxCount = Math.max(1, totalEmployees, ...daily.map((day) => day.count));
+  const employeeRows = useMemo(() => (employees || []).map((employee) => {
+    const own = recordsForEmployee(records, employee);
+    const recentKeys = new Set(days.map((day) => day.key));
+    const activeDays = new Set(own.map((row) => localDayKey(attendanceTime(row))).filter((key) => recentKeys.has(key))).size;
+    const latest = own.reduce((max, row) => Math.max(max, attendanceTime(row)), 0);
+    return { employee, activeDays, latest };
+  }).sort((a, b) => b.latest - a.latest || String(a.employee.name || '').localeCompare(String(b.employee.name || ''))), [employees, records, days]);
+
+  return (
+    <Card style={styles.panel}>
+      <View style={styles.titleRow}>
+        <View>
+          <Text style={styles.eyebrow}>ИРЦИЙН ИДЭВХ</Text>
+          <Text style={styles.title}>Нийт ажилтны график</Text>
+        </View>
+        <View style={styles.ratePill}><Text style={styles.rateText}>{activityRate}%</Text></View>
+      </View>
+      <View style={styles.metrics}>
+        <View style={styles.metric}><Text style={styles.metricValue}>{totalEmployees}</Text><Text style={styles.metricLabel}>Нийт ажилтан</Text></View>
+        <View style={styles.metric}><Text style={[styles.metricValue, { color: colors.success }]}>{todayCount}</Text><Text style={styles.metricLabel}>Өнөөдөр ирсэн</Text></View>
+        <View style={styles.metric}><Text style={[styles.metricValue, { color: colors.warning }]}>{Math.max(0, totalEmployees - todayCount)}</Text><Text style={styles.metricLabel}>Ирцгүй</Text></View>
+      </View>
+      <View style={styles.chart}>
+        {daily.map((day) => (
+          <View key={day.key} style={styles.barColumn}>
+            <Text style={styles.barValue}>{day.count}</Text>
+            <View style={styles.barTrack}>
+              <View style={[styles.barFill, { height: `${Math.max(day.count ? 10 : 2, day.count / maxCount * 100)}%` }]} />
+            </View>
+            <Text style={styles.barLabel}>{day.label}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={styles.sectionLabel}>Ажилтан дээр дарж 30 хоногийн график харах</Text>
+      {employeeRows.length ? employeeRows.map(({ employee, activeDays }) => (
+        <TouchableOpacity key={employeeKey(employee)} style={styles.employeeRow} onPress={() => onSelectEmployee(employee)} activeOpacity={0.78}>
+          <View style={styles.employeeAvatar}><Text style={styles.employeeLetter}>{String(employee.name || '?').charAt(0).toUpperCase()}</Text></View>
+          <View style={{ flex: 1 }}><Text style={styles.employeeName}>{employee.name || 'Ажилтан'}</Text><Text style={styles.employeeMeta}>Сүүлийн 7 хоног · {activeDays} өдөр идэвхтэй</Text></View>
+          <Text style={styles.employeeDays}>{activeDays}/7</Text>
+          <Text style={styles.chevron}>›</Text>
+        </TouchableOpacity>
+      )) : <Text style={styles.empty}>Ажилтны мэдээлэл алга.</Text>}
+    </Card>
+  );
+}
+
+function EmployeeAttendanceModal({ employee, records, onClose }) {
+  const styles = useStyles(makeAnalyticsStyles);
+  const { colors } = useTheme();
+  const days = useMemo(() => recentDays(30), [employee?.id]);
+  const own = useMemo(() => employee ? recordsForEmployee(records, employee) : [], [employee, records]);
+  const daySet = useMemo(() => new Set(own.map((row) => localDayKey(attendanceTime(row)))), [own]);
+  const remoteCount = own.filter((row) => row.is_remote).length;
+  const wifiCount = own.filter((row) => row.wifi_verified).length;
+  const last14 = days.slice(-14);
+  return (
+    <Modal visible={!!employee} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalSheet}>
+          <View style={styles.modalHandle} />
+          <View style={styles.modalHeader}>
+            <View><Text style={styles.eyebrow}>АЖИЛТНЫ ИРЦ</Text><Text style={styles.modalTitle}>{employee?.name || 'Ажилтан'}</Text></View>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}><Text style={styles.closeText}>×</Text></TouchableOpacity>
+          </View>
+          <View style={styles.metrics}>
+            <View style={styles.metric}><Text style={[styles.metricValue, { color: colors.success }]}>{daySet.size}</Text><Text style={styles.metricLabel}>Ирсэн өдөр</Text></View>
+            <View style={styles.metric}><Text style={styles.metricValue}>{own.length}</Text><Text style={styles.metricLabel}>Нийт check-in</Text></View>
+            <View style={styles.metric}><Text style={[styles.metricValue, { color: colors.accent }]}>{remoteCount}</Text><Text style={styles.metricLabel}>Зайнаас</Text></View>
+          </View>
+          <Text style={styles.sectionLabel}>Сүүлийн 14 хоног</Text>
+          <View style={styles.miniChart}>
+            {last14.map((day) => {
+              const active = daySet.has(day.key);
+              return <View key={day.key} style={styles.miniColumn}><View style={[styles.miniBar, active && styles.miniBarActive]} /><Text style={styles.miniLabel}>{day.label.split('/')[1]}</Text></View>;
+            })}
+          </View>
+          <View style={styles.summaryLine}><Text style={styles.summaryLabel}>GPS + Wi‑Fi баталгаатай</Text><Text style={styles.summaryValue}>{wifiCount}</Text></View>
+          <View style={styles.summaryLine}><Text style={styles.summaryLabel}>Сүүлд бүртгэсэн</Text><Text style={styles.summaryValue}>{own.length ? new Date(Math.max(...own.map(attendanceTime))).toLocaleDateString('mn-MN') : '—'}</Text></View>
+          <Button title="Хаах" variant="ghost" style={{ marginTop: spacing.lg }} onPress={onClose} />
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const makeAnalyticsStyles = ({ colors }) => StyleSheet.create({
+  panel:{marginTop:spacing.md,borderWidth:1,borderColor:colors.primary+'35'},
+  titleRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},
+  eyebrow:{color:colors.primary,fontSize:10,fontWeight:'900',letterSpacing:1.2},
+  title:{color:colors.text,fontSize:18,fontWeight:'900',marginTop:3},
+  ratePill:{minWidth:58,height:38,borderRadius:radius.full,backgroundColor:colors.primary+'18',alignItems:'center',justifyContent:'center'},
+  rateText:{color:colors.primary,fontSize:16,fontWeight:'900'},
+  metrics:{flexDirection:'row',gap:spacing.sm,marginTop:spacing.lg},
+  metric:{flex:1,minHeight:68,borderRadius:radius.md,backgroundColor:colors.surfaceAlt,padding:spacing.sm,justifyContent:'center'},
+  metricValue:{color:colors.text,fontSize:22,fontWeight:'900'},
+  metricLabel:{color:colors.textMuted,fontSize:10,lineHeight:14,marginTop:2},
+  chart:{height:150,flexDirection:'row',alignItems:'flex-end',gap:6,marginTop:spacing.lg,paddingTop:8},
+  barColumn:{flex:1,height:'100%',alignItems:'center'},
+  barValue:{color:colors.text,fontSize:10,fontWeight:'800',height:16},
+  barTrack:{flex:1,width:'72%',borderRadius:8,backgroundColor:colors.surfaceAlt,overflow:'hidden',justifyContent:'flex-end'},
+  barFill:{width:'100%',borderRadius:8,backgroundColor:colors.primary},
+  barLabel:{color:colors.textMuted,fontSize:9,marginTop:5},
+  sectionLabel:{color:colors.textMuted,fontSize:11,fontWeight:'800',marginTop:spacing.lg,marginBottom:spacing.sm},
+  employeeRow:{minHeight:62,flexDirection:'row',alignItems:'center',gap:10,borderTopWidth:1,borderTopColor:colors.border},
+  employeeAvatar:{width:36,height:36,borderRadius:18,backgroundColor:colors.primary+'18',alignItems:'center',justifyContent:'center'},
+  employeeLetter:{color:colors.primary,fontWeight:'900'},employeeName:{color:colors.text,fontSize:14,fontWeight:'800'},employeeMeta:{color:colors.textMuted,fontSize:11,marginTop:2},
+  employeeDays:{color:colors.primary,fontSize:12,fontWeight:'900'},chevron:{color:colors.textMuted,fontSize:24},empty:{color:colors.textMuted,fontSize:13,paddingVertical:spacing.md},
+  modalOverlay:{flex:1,backgroundColor:'#000000bb',justifyContent:'flex-end'},modalSheet:{backgroundColor:colors.surface,borderTopLeftRadius:radius.xl,borderTopRightRadius:radius.xl,padding:spacing.xl,paddingBottom:32},
+  modalHandle:{width:40,height:4,borderRadius:2,backgroundColor:colors.borderHi,alignSelf:'center',marginBottom:spacing.lg},modalHeader:{flexDirection:'row',alignItems:'center',justifyContent:'space-between'},modalTitle:{color:colors.text,fontSize:23,fontWeight:'900',marginTop:3},
+  closeButton:{width:38,height:38,borderRadius:19,backgroundColor:colors.surfaceAlt,alignItems:'center',justifyContent:'center'},closeText:{color:colors.text,fontSize:28,lineHeight:31},
+  miniChart:{height:96,flexDirection:'row',alignItems:'flex-end',gap:4},miniColumn:{flex:1,alignItems:'center'},miniBar:{width:'100%',height:12,borderRadius:4,backgroundColor:colors.surfaceAlt},miniBarActive:{height:62,backgroundColor:colors.success},miniLabel:{color:colors.textMuted,fontSize:8,marginTop:4},
+  summaryLine:{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingVertical:spacing.md,borderBottomWidth:1,borderBottomColor:colors.border},summaryLabel:{color:colors.textMuted,fontSize:13},summaryValue:{color:colors.text,fontSize:13,fontWeight:'800'},
+});
 
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
