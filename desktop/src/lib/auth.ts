@@ -8,12 +8,14 @@ async function request(action:string,body:Record<string,unknown>={},authenticate
   const headers:Record<string,string>={'Content-Type':'application/json'};
   if(authenticated){const token=await auth.currentUser?.getIdToken();if(!token)throw new Error('Админ нэвтрээгүй байна.');headers.Authorization=`Bearer ${token}`;}
   let response:Response|undefined;
-  let requestFetch:typeof globalThis.fetch=globalThis.fetch.bind(globalThis);
+  const requestClients:Array<typeof globalThis.fetch>=[globalThis.fetch.bind(globalThis)];
   if(typeof window!=='undefined'&&'__TAURI_INTERNALS__' in window){
     const httpPlugin=await import('@tauri-apps/plugin-http');
-    requestFetch=httpPlugin.fetch;
+    requestClients.unshift(httpPlugin.fetch);
   }
-  for(let attempt=0;attempt<2;attempt+=1){try{response=await requestFetch(`${endpoint}?action=${encodeURIComponent(action)}`,{method:'POST',headers,body:JSON.stringify(body)});break;}catch(error){if(attempt===1)throw new Error(`Сервертэй холбогдож чадсангүй (${endpoint}). ${error instanceof Error?error.message:'Native HTTP хүсэлт амжилтгүй.'}`);await new Promise(resolve=>setTimeout(resolve,600));}}
+  let lastError:unknown;
+  for(const requestFetch of requestClients){for(let attempt=0;attempt<2;attempt+=1){try{response=await requestFetch(`${endpoint}?action=${encodeURIComponent(action)}`,{method:'POST',headers,body:JSON.stringify(body)});break;}catch(error){lastError=error;if(attempt===0)await new Promise(resolve=>setTimeout(resolve,400));}}if(response)break;}
+  if(!response)throw new Error(`Сервертэй холбогдож чадсангүй (${endpoint}). ${lastError instanceof Error?lastError.message:'HTTP хүсэлт амжилтгүй.'}`);
   const payload=await response!.json().catch(()=>({}));if(!response!.ok)throw new Error(payload.error||'Сервертэй холбогдоход алдаа гарлаа.');return payload;
 }
 async function finishLogin(customToken:string){const result=await signInWithCustomToken(auth,customToken);const snap=await getDoc(doc(db,'profiles',result.user.uid));if(!snap.exists())throw new Error('Админы профайл олдсонгүй.');const profile={id:snap.id,...snap.data()} as Profile;if(!['admin','superadmin'].includes(String(profile.role))){await signOut(auth);throw new Error('Desktop ERP-д зөвхөн админ нэвтэрнэ.');}return profile;}
