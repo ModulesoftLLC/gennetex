@@ -113,7 +113,8 @@
         {
           "statusBarColor": "#0b1220"
         }
-      ]
+      ],
+      "onnxruntime-react-native"
     ],
     "extra": {
       "eas": {

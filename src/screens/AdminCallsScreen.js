@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Linking, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Linking, Platform, Alert, TextInput, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Badge, ScreenHeader, EmptyState } from '../components/ui';
@@ -12,6 +12,9 @@ import CallWorkspaceHeader from '../components/CallWorkspaceHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { callPhone, composeSms } from '../lib/contactActions';
+import { normalizeRole, ROLES } from '../lib/roles';
+
+const EMPTY_CALL = { customer: '', phone: '', address: '', problem: '', type: 'repair', assigneeId: '' };
 
 function typeMeta(key) {
   return CALL_TYPES.find((t) => t.key === key) || CALL_TYPES[CALL_TYPES.length - 1];
@@ -21,11 +24,68 @@ export default function AdminCallsScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
-  const { isCloud, authProfile, currentUser } = useApp();
+  const { isCloud, authProfile, currentUser, fetchEmployees } = useApp();
   const [calls, setCalls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [selected, setSelected] = useState(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [draft, setDraft] = useState(EMPTY_CALL);
+  const [assignees, setAssignees] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
+
+  const openCreate = async () => {
+    setDraft({ ...EMPTY_CALL, assigneeId: authProfile?.id || '' });
+    setFormError('');
+    setCreateOpen(true);
+    try {
+      const rows = await fetchEmployees();
+      const viewerRole = normalizeRole(authProfile?.role);
+      const allowed = (rows || []).filter((person) =>
+        viewerRole === ROLES.SUPERADMIN || normalizeRole(person.role) !== ROLES.SUPERADMIN
+      );
+      if (authProfile && !allowed.some((person) => person.id === authProfile.id)) allowed.unshift(authProfile);
+      setAssignees(allowed);
+    } catch (error) {
+      setFormError(error.message || 'Ажилтны жагсаалт ачаалсангүй.');
+    }
+  };
+
+  const saveCall = async () => {
+    if (!draft.customer.trim() || !draft.phone.trim() || !draft.problem.trim()) {
+      setFormError('Харилцагч, утас, дуудлагын мэдээллийг бүрэн оруулна уу.');
+      return;
+    }
+    const assignee = assignees.find((person) => person.id === draft.assigneeId);
+    if (!assignee) {
+      setFormError('Дуудлага хариуцах ажилтныг сонгоно уу.');
+      return;
+    }
+    setSaving(true);
+    setFormError('');
+    try {
+      await serviceCallApi.createServiceCall({
+        customer: draft.customer,
+        phone: draft.phone,
+        address: draft.address,
+        problem: draft.problem,
+        type: draft.type,
+        engineer_id: assignee.id,
+        engineer_name: assignee.name || assignee.email || 'Ажилтан',
+        assignee_role: assignee.role,
+        creator_role: authProfile?.role,
+        created_by: authProfile?.id,
+        created_by_name: authProfile?.name || currentUser?.name,
+      });
+      setCreateOpen(false);
+      await load();
+    } catch (error) {
+      setFormError(error.message || 'Дуудлага бүртгэж чадсангүй.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const load = useCallback(async () => {
     if (!isCloud) return;
@@ -96,7 +156,7 @@ export default function AdminCallsScreen() {
     <View style={styles.container}>
       <CallWorkspaceHeader title="Бүх дуудлага" userName={authProfile?.name || currentUser?.name} mode="list" onList={() => {}} onMap={() => navigation.navigate('Live')} />
 
-      <View style={styles.overviewRow}><View style={styles.countBox}><Text style={styles.countStrong}>{filtered.length}</Text><Text style={styles.countText}> илэрц байна</Text></View><TouchableOpacity style={styles.squareBtn} onPress={load}><Ionicons name="refresh" size={27} color={colors.text}/></TouchableOpacity></View>
+      <View style={styles.overviewRow}><View style={styles.countBox}><Text style={styles.countStrong}>{filtered.length}</Text><Text style={styles.countText}> илэрц байна</Text></View><TouchableOpacity style={styles.addBtn} onPress={openCreate}><Ionicons name="add" size={22} color="#fff"/><Text style={styles.addBtnText}>Дуудлага бүртгэх</Text></TouchableOpacity><TouchableOpacity style={styles.squareBtn} onPress={load}><Ionicons name="refresh" size={27} color={colors.text}/></TouchableOpacity></View>
 
       <View style={styles.filterWrap}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
@@ -212,8 +272,33 @@ export default function AdminCallsScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal visible={createOpen} transparent animationType="slide" onRequestClose={() => setCreateOpen(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.createModal}>
+            <View style={styles.createHeader}><View><Text style={styles.modalTitle}>Дуудлага бүртгэх</Text><Text style={styles.createSub}>Дуудлагыг өөртөө эсвэл ажилтанд хуваарилна</Text></View><TouchableOpacity onPress={() => setCreateOpen(false)}><Ionicons name="close" size={26} color={colors.text}/></TouchableOpacity></View>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.form}>
+              <Field label="Харилцагч / айл *" value={draft.customer} onChangeText={(value) => setDraft((old) => ({ ...old, customer: value }))} styles={styles}/>
+              <Field label="Утасны дугаар *" value={draft.phone} onChangeText={(value) => setDraft((old) => ({ ...old, phone: value.replace(/[^0-9+]/g, '') }))} keyboardType="phone-pad" styles={styles}/>
+              <Field label="Хаяг" value={draft.address} onChangeText={(value) => setDraft((old) => ({ ...old, address: value }))} styles={styles}/>
+              <Field label="Дуудлагын мэдээлэл *" value={draft.problem} onChangeText={(value) => setDraft((old) => ({ ...old, problem: value }))} multiline styles={styles}/>
+              <Text style={styles.fieldLabel}>Дуудлагын төрөл</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.optionRow}>{CALL_TYPES.map((type) => <TouchableOpacity key={type.key} style={[styles.option, draft.type === type.key && { backgroundColor: type.color, borderColor: type.color }]} onPress={() => setDraft((old) => ({ ...old, type: type.key }))}><Text style={[styles.optionText, draft.type === type.key && styles.optionTextActive]}>{type.label}</Text></TouchableOpacity>)}</ScrollView>
+              <Text style={styles.fieldLabel}>Хариуцах ажилтан *</Text>
+              <View style={styles.assigneeList}>{assignees.map((person) => { const active = draft.assigneeId === person.id; return <TouchableOpacity key={person.id} style={[styles.assignee, active && styles.assigneeActive]} onPress={() => setDraft((old) => ({ ...old, assigneeId: person.id }))}><View style={[styles.radio, active && styles.radioActive]}>{active ? <View style={styles.radioDot}/> : null}</View><View style={{flex:1}}><Text style={styles.assigneeName}>{person.id === authProfile?.id ? 'Би · ' : ''}{person.name || person.email}</Text><Text style={styles.assigneeRole}>{normalizeRole(person.role) === ROLES.SUPERADMIN ? 'Системийн админ' : normalizeRole(person.role) === ROLES.ADMIN ? 'Админ' : 'Ажилтан'}</Text></View></TouchableOpacity>})}</View>
+              {formError ? <Text style={styles.formError}>{formError}</Text> : null}
+              <Button title={saving ? 'Хадгалж байна...' : 'Дуудлага хадгалах'} disabled={saving} onPress={saveCall}/>
+              {saving ? <ActivityIndicator color={colors.primary}/> : null}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
+}
+
+function Field({ label, styles, multiline, ...props }) {
+  return <View><Text style={styles.fieldLabel}>{label}</Text><TextInput {...props} multiline={multiline} placeholderTextColor="#94a3b8" style={[styles.input, multiline && styles.textarea]}/></View>;
 }
 
 function Detail({ label, value, styles }) {
@@ -241,6 +326,7 @@ function Chip({ label, active, color, onPress }) {
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   overviewRow:{flexDirection:'row',gap:10,padding:spacing.md,paddingBottom:0},countBox:{flex:1,height:48,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,backgroundColor:colors.surface,flexDirection:'row',alignItems:'center',paddingHorizontal:14},countStrong:{color:colors.text,fontSize:18,fontWeight:'900'},countText:{color:colors.text,fontSize:16},squareBtn:{width:48,height:48,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,backgroundColor:colors.surface,alignItems:'center',justifyContent:'center'},
+  addBtn:{height:48,paddingHorizontal:13,borderRadius:radius.md,backgroundColor:colors.primary,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:5},addBtnText:{color:'#fff',fontSize:12,fontWeight:'800'},
   filterWrap: { paddingVertical: spacing.sm, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
   chipRow: { paddingHorizontal: spacing.md, gap: spacing.sm },
   chip: {
@@ -278,4 +364,5 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   statusBtns: { flexDirection: 'row', gap: spacing.sm },
   contactActions: { flexDirection: 'row', gap: spacing.sm },
   phoneHint: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
+  createModal:{backgroundColor:colors.surface,borderRadius:radius.xl,maxHeight:'92%',overflow:'hidden'},createHeader:{padding:spacing.lg,paddingBottom:spacing.md,flexDirection:'row',justifyContent:'space-between',alignItems:'flex-start',borderBottomWidth:1,borderBottomColor:colors.border},createSub:{color:colors.textMuted,fontSize:12,marginTop:-8},form:{padding:spacing.lg,gap:spacing.md,paddingBottom:32},fieldLabel:{color:colors.text,fontSize:13,fontWeight:'800',marginBottom:7},input:{minHeight:48,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,paddingHorizontal:14,color:colors.text,backgroundColor:colors.surfaceAlt,fontSize:15},textarea:{minHeight:88,paddingTop:12,textAlignVertical:'top'},optionRow:{gap:8},option:{paddingHorizontal:13,paddingVertical:9,borderWidth:1,borderColor:colors.border,borderRadius:radius.pill,backgroundColor:colors.surfaceAlt},optionText:{color:colors.textMuted,fontSize:12,fontWeight:'700'},optionTextActive:{color:'#fff'},assigneeList:{borderWidth:1,borderColor:colors.border,borderRadius:radius.md,overflow:'hidden'},assignee:{minHeight:58,paddingHorizontal:13,flexDirection:'row',alignItems:'center',gap:11,borderBottomWidth:StyleSheet.hairlineWidth,borderBottomColor:colors.border},assigneeActive:{backgroundColor:colors.primarySoft},radio:{width:21,height:21,borderRadius:11,borderWidth:2,borderColor:colors.border,alignItems:'center',justifyContent:'center'},radioActive:{borderColor:colors.primary},radioDot:{width:11,height:11,borderRadius:6,backgroundColor:colors.primary},assigneeName:{color:colors.text,fontSize:14,fontWeight:'800'},assigneeRole:{color:colors.textMuted,fontSize:11,marginTop:2},formError:{color:colors.danger,fontSize:13,lineHeight:18},
 });

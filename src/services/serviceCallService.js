@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import * as notifyApi from './notificationService';
+import { isRegularAdmin, normalizeRole, ROLES } from '../lib/roles';
 
 const TABLE = 'service_calls';
 
@@ -93,6 +94,9 @@ export async function fetchServiceCalls({ engineerId, engineerName } = {}) {
 }
 
 export async function createServiceCall(payload) {
+  if (isRegularAdmin(payload.creator_role) && normalizeRole(payload.assignee_role) === ROLES.SUPERADMIN) {
+    throw new Error('Энгийн админ системийн админд дуудлага өгөх эрхгүй.');
+  }
   const row = {
     customer: String(payload.customer || '').trim(),
     phone: payload.phone?.trim() || null,
@@ -105,6 +109,7 @@ export async function createServiceCall(payload) {
     longitude: payload.longitude ?? null,
     status: 'Хүлээгдэж буй',
     created_by: payload.created_by || null,
+    created_by_name: payload.created_by_name?.trim() || null,
   };
   const { data, error } = await supabase.from(TABLE).insert(row).select().single();
   if (error) throw error;

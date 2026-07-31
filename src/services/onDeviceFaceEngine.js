@@ -19,7 +19,7 @@ let recognizerSession;
 
 function runtime() {
   if (!NativeModules.Onnxruntime) {
-    throw new Error('Нүүр таних AI нь Expo Go-д ажиллахгүй. Gennetex development эсвэл production build ашиглана уу.');
+    throw new Error('Нүүр таних native AI модуль энэ хувилбарт ачаалагдсангүй. Аппыг хамгийн сүүлийн хувилбараар шинэчлээд дахин нээнэ үү.');
   }
   if (!ort) ort = require('onnxruntime-react-native');
   return ort;
