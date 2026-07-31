@@ -25,7 +25,8 @@ export default function FaceEnrollmentGateScreen({ initialCount = 0, onComplete 
     if (busy || !currentUser?.id) return;
     setBusy(true); setError('');
     try {
-      const photoUrl = await attendance.uploadSelfie(photo.uri, currentUser.id);
+      // Cloud upload түр тасарсан ч local AI embedding бүртгэлийг зогсоохгүй.
+      const photoUrl = await attendance.uploadSelfie(photo.uri, currentUser.id).catch(() => null);
       const result = await face.insertEnrollment({ photoUrl, localUri: photo.uri });
       const next = Number(result.count ?? count + 1);
       setCount(next);
@@ -53,7 +54,7 @@ export default function FaceEnrollmentGateScreen({ initialCount = 0, onComplete 
       <Button title="Камер үргэлжлүүлэх" onPress={() => setCamera(true)} />
       <Button title="Гарах" variant="ghost" style={{ marginTop: spacing.sm }} onPress={signOut} />
     </View>
-    <SelfieCamera visible={camera} busy={busy} auto autoDelayMs={1600} progressText={`Нүүр бүртгэл ${count}/${face.ENROLL_TARGET}`} hint={HINTS[count % HINTS.length]} onCapture={capture} onClose={() => { setCamera(false); signOut(); }} />
+    <SelfieCamera visible={camera} busy={busy} auto autoDelayMs={2600} progressText={`Нүүр бүртгэл ${count}/${face.ENROLL_TARGET}`} hint={HINTS[count % HINTS.length]} onCapture={capture} onClose={() => { setCamera(false); signOut(); }} />
   </SafeAreaView>;
 }
 

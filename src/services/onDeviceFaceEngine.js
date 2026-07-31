@@ -177,9 +177,31 @@ function normalized(values) {
   return vector.map((value) => Number((value / length).toFixed(7)));
 }
 
+// Expo Go болон зарим OEM Android дээр ONNX native module байхгүй үед
+// selfie-ийн төв хэсгээс privacy-safe local descriptor үүсгэнэ.
+function fallbackEmbedding(image) {
+  const size = 24;
+  const values = [];
+  const left = Math.floor(image.width * 0.2);
+  const top = Math.floor(image.height * 0.12);
+  const width = Math.floor(image.width * 0.6);
+  const height = Math.floor(image.height * 0.76);
+  for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) {
+    const sx = Math.min(image.width - 1, left + Math.floor((x + 0.5) * width / size));
+    const sy = Math.min(image.height - 1, top + Math.floor((y + 0.5) * height / size));
+    const i = (sy * image.width + sx) * 4;
+    values.push((image.data[i] * 0.299 + image.data[i + 1] * 0.587 + image.data[i + 2] * 0.114) / 255);
+  }
+  const mean = values.reduce((sum, n) => sum + n, 0) / values.length;
+  return normalized(values.map((n) => n - mean));
+}
+
 export async function createFaceEmbedding(uri) {
   if (!String(uri || '').startsWith('file:')) throw new Error('Нүүр танихад төхөөрөмжийн selfie зураг шаардлагатай.');
   const image = await decodeJpeg(uri);
+  if (!NativeModules.Onnxruntime) {
+    return { embedding: fallbackEmbedding(image), quality: 0.85, fallback: true };
+  }
   const { engine, detectorSession: detector, recognizerSession: recognizer } = await sessions();
   const detectorInput = resizeRgbTensor(image, DETECTOR_SIZE);
   const detectorOutputs = await detector.run({

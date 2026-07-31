@@ -28,8 +28,9 @@ export default function SelfieCamera({
     try {
       setCapturing(true);
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.6,
-        skipProcessing: true,
+        quality: 0.75,
+        skipProcessing: false,
+        exif: false,
       });
       onCapture?.(photo);
     } catch (e) {
