@@ -1,6 +1,6 @@
 {
   "name": "@gennetex/desktop",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,6 +16,7 @@
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
     "@tauri-apps/plugin-dialog": "^2.0.0",
+    "@tauri-apps/plugin-http": "^2.5.9",
     "@tauri-apps/plugin-notification": "^2.0.0",
     "@tauri-apps/plugin-process": "^2.0.0",
     "@tauri-apps/plugin-store": "^2.0.0",

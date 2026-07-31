@@ -116,23 +116,23 @@ try {
 
 // 4) Desktop татах хуудсууд → adiya.site/win, adiya.site/mac
 try {
-  const base = 'https://github.com/ModulesoftLLC/gennetex/releases/download/desktop-v1.0.6';
+  const base = 'https://github.com/ModulesoftLLC/gennetex/releases/download/desktop-v1.0.7';
   const pages = {
     win: {
       title: 'Gennetex ERP — Windows',
-      subtitle: 'Windows 10/11 · x64 · v1.0.6',
+      subtitle: 'Windows 10/11 · x64 · v1.0.7',
       downloads: [
-        ['Setup EXE', `${base}/Gennetex-ERP-1.0.6-Windows-x64-Setup.exe`, 'Ердийн суулгагч'],
-        ['Enterprise MSI', `${base}/Gennetex-ERP-1.0.6-Windows-x64.msi`, 'Байгууллагын суулгагч'],
-        ['Portable EXE', `${base}/Gennetex-ERP-1.0.6-Windows-x64-Portable.exe`, 'Суулгахгүй шууд ажиллуулна'],
+        ['Setup EXE', `${base}/Gennetex-ERP-1.0.7-Windows-x64-Setup.exe`, 'Ердийн суулгагч'],
+        ['Enterprise MSI', `${base}/Gennetex-ERP-1.0.7-Windows-x64.msi`, 'Байгууллагын суулгагч'],
+        ['Portable EXE', `${base}/Gennetex-ERP-1.0.7-Windows-x64-Portable.exe`, 'Суулгахгүй шууд ажиллуулна'],
       ],
     },
     mac: {
       title: 'Gennetex ERP — macOS',
-      subtitle: 'macOS 14+ · v1.0.6',
+      subtitle: 'macOS 14+ · v1.0.7',
       downloads: [
-        ['Apple Silicon DMG', `${base}/Gennetex-ERP-1.0.6-macOS-Apple-Silicon.dmg`, 'M1/M2/M3/M4 болон шинэ Mac'],
-        ['Intel DMG', `${base}/Gennetex-ERP-1.0.6-macOS-Intel.dmg`, 'Intel x64 Mac'],
+        ['Apple Silicon DMG', `${base}/Gennetex-ERP-1.0.7-macOS-Apple-Silicon.dmg`, 'M1/M2/M3/M4 болон шинэ Mac'],
+        ['Intel DMG', `${base}/Gennetex-ERP-1.0.7-macOS-Intel.dmg`, 'Intel x64 Mac'],
       ],
     },
   };
