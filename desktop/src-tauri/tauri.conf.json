@@ -1,7 +1,7 @@
 {
   "$schema":"https://schema.tauri.app/config/2",
   "productName":"Gennetex ERP",
-  "version":"1.0.4",
+  "version":"1.0.5",
   "identifier":"com.gennetex.erp.desktop",
   "build":{"beforeDevCommand":"npm run dev","devUrl":"http://localhost:1420","beforeBuildCommand":"npm run build","frontendDist":"../dist"},
   "app":{"windows":[{"label":"main","title":"Gennetex Enterprise ERP","width":1440,"height":900,"minWidth":1024,"minHeight":700,"center":true,"decorations":true,"resizable":true,"fullscreen":false,"transparent":false}],"security":{"csp":"default-src 'self'; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://adiya.site; img-src 'self' asset: https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self'"}},

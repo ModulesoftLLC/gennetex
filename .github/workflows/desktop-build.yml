@@ -36,7 +36,7 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.EXPO_PUBLIC_FIREBASE_APP_ID }}
-          VITE_EMPLOYEE_AUTH_API_URL: https://adiya.site/api/employee-auth
+          VITE_EMPLOYEE_AUTH_API_URL: https://gennetex.vercel.app/api/employee-auth
         with:
           projectPath: desktop
           tagName: desktop-v__VERSION__

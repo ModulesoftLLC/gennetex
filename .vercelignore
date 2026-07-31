@@ -11,3 +11,15 @@ dist/
 public-web/dist/
 *.log
 .env*
+desktop/node_modules/
+desktop/dist/
+desktop/src-tauri/target/
+desktop/windows/*.exe
+desktop/windows/*.msi
+desktop/macos/*.dmg
+win/
+macos/
+.expo-export*/
+.release-*/
+.release-*.zip
+release-assets/

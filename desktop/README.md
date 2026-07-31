@@ -2,6 +2,8 @@
 
 Native-capable Tauri 2 desktop client using the same Firebase project, phone/PIN authentication API and role model as mobile. Only `admin` and `superadmin` profiles may enter.
 
+Authentication API: `https://gennetex.vercel.app/api/employee-auth` (Verify.mn + Firebase custom tokens).
+
 ## Local setup
 
 1. Copy `.env.example` to `.env` and use the same public Firebase values as the mobile build.
