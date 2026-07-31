@@ -17,12 +17,6 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'superadmin';
     }
 
-    function isRegularAdmin() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
-        && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
-    }
-
     match /profiles/{userId} {
       allow read: if signedIn();
       allow create: if signedIn() && (request.auth.uid == userId || isAdmin());
