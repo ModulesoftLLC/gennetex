@@ -11,6 +11,18 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role in ['admin', 'superadmin'];
     }
 
+    function isSuperAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'superadmin';
+    }
+
+    function isRegularAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/profiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'admin';
+    }
+
     match /profiles/{userId} {
       allow read: if signedIn();
       allow create: if signedIn() && (request.auth.uid == userId || isAdmin());
@@ -61,6 +73,19 @@ service cloud.firestore {
     match /vehicles/{vehicleId} {
       allow read: if signedIn();
       allow create, update, delete: if isAdmin();
+    }
+
+    match /service_calls/{callId} {
+      allow read: if signedIn();
+      allow create: if isAdmin()
+        && request.resource.data.created_by == request.auth.uid
+        && request.resource.data.engineer_id is string
+        && exists(/databases/$(database)/documents/profiles/$(request.resource.data.engineer_id))
+        && (isSuperAdmin()
+          || get(/databases/$(database)/documents/profiles/$(request.resource.data.engineer_id)).data.role != 'superadmin');
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.engineer_id == request.auth.uid);
+      allow delete: if isAdmin();
     }
 
     match /{collection}/{document=**} {

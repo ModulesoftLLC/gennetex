@@ -1,0 +1,6 @@
+import { collection,onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
+import type { ErpRecord } from '../types';
+const timestamp=(row:ErpRecord)=>{const value=row.created_at||row.createdAt;if(typeof value==='string')return Date.parse(value)||0;if(value&&typeof value==='object'&&'toDate'in value&&typeof value.toDate==='function')return value.toDate().getTime();return 0;};
+export function subscribeCollection(name:string,onData:(rows:ErpRecord[])=>void,max=500){return onSnapshot(collection(db,name),snap=>{const rows=snap.docs.map(d=>({id:d.id,...d.data()} as ErpRecord)).sort((a,b)=>timestamp(b)-timestamp(a)).slice(0,max);localStorage.setItem(`gennetex-cache:${name}`,JSON.stringify(rows));onData(rows);},()=>{const cached=localStorage.getItem(`gennetex-cache:${name}`);onData(cached?JSON.parse(cached):[]);});}
+export function subscribeProfiles(onData:(rows:ErpRecord[])=>void){return onSnapshot(collection(db,'profiles'),snap=>{const rows=snap.docs.map(d=>({id:d.id,...d.data()} as ErpRecord));localStorage.setItem('gennetex-cache:profiles',JSON.stringify(rows));onData(rows);},()=>{const cached=localStorage.getItem('gennetex-cache:profiles');onData(cached?JSON.parse(cached):[]);});}

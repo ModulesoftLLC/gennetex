@@ -618,22 +618,22 @@
         </div>
         <div class="login-card-head">
           <h2>Нэвтрэх</h2>
-          <p>Админ имэйл, нууц үгээ оруулна уу</p>
+          <p>Mobile app-тэй ижил утасны дугаар, 4 оронтой PIN ашиглана</p>
         </div>
         <form id="loginForm" onsubmit="return false">
           <div class="login-field">
-            <label for="email">Имэйл</label>
+            <label for="phone">Утасны дугаар</label>
             <div class="login-input-wrap">
-              <span class="field-icon material-symbols-outlined">mail</span>
-              <input id="email" type="email" placeholder="admin@gennetex.mn" autocomplete="username"/>
+              <span class="field-icon material-symbols-outlined">phone_iphone</span>
+              <input id="phone" type="tel" inputmode="numeric" maxlength="8" placeholder="99112233" autocomplete="tel-national"/>
             </div>
           </div>
           <div class="login-field">
-            <label for="password">Нууц үг</label>
+            <label for="pin">4 оронтой PIN</label>
             <div class="login-input-wrap">
               <span class="field-icon material-symbols-outlined">lock</span>
-              <input id="password" type="password" placeholder="••••••••" autocomplete="current-password"/>
-              <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="Нууц үг харуулах" title="Нууц үг харуулах">
+              <input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="••••" autocomplete="current-password"/>
+              <button type="button" class="pwd-toggle" id="pwdToggle" aria-label="PIN харуулах" title="PIN харуулах">
                 <span class="material-symbols-outlined" id="pwdToggleIcon">visibility</span>
               </button>
             </div>
@@ -855,7 +855,7 @@
       });
     }
 
-    async function ensureFirebaseAdminSession(email, password) {
+    async function ensureFirebaseAdminSession(phone, pin) {
       if (!initFirebaseClient()) {
         return { user: null, error: new Error('Firebase client эхлүүлэх боломжгүй') };
       }
@@ -863,10 +863,19 @@
       if (currentUser) {
         return { user: currentUser, error: null };
       }
-      const normalizedEmail = String(email || '').trim().toLowerCase();
-      const normalizedPassword = String(password || '').trim();
       try {
-        const signInResult = await firebaseAuthInstance.signInWithEmailAndPassword(normalizedEmail, normalizedPassword);
+        const digits = String(phone || '').replace(/\D/g, '');
+        const localPhone = digits.startsWith('976') ? digits.slice(3) : digits;
+        if (!/^\d{8}$/.test(localPhone)) throw new Error('Монголын 8 оронтой дугаар оруулна уу.');
+        if (!/^\d{4}$/.test(String(pin || ''))) throw new Error('4 оронтой PIN оруулна уу.');
+        const response = await fetch('/api/employee-auth?action=login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: `976${localPhone}`, pin: String(pin) }),
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.customToken) throw new Error(payload.error || 'Утас эсвэл PIN буруу байна.');
+        const signInResult = await firebaseAuthInstance.signInWithCustomToken(payload.customToken);
         return { user: signInResult?.user || null, error: null };
       } catch (signInError) {
         return { user: null, error: signInError };
@@ -1025,8 +1034,8 @@
             const user = await waitForFirebaseAuthUser();
             return { data: { session: user ? { user: { id: user.uid, uid: user.uid, email: user.email } } : null }, error: null };
           },
-          signInWithPassword: async ({ email, password }) => {
-            const result = await ensureFirebaseAdminSession(email, password);
+          signInWithPassword: async ({ email, password, phone, pin }) => {
+            const result = await ensureFirebaseAdminSession(phone || email, pin || password);
             return result.error
               ? { data: { user: null }, error: result.error }
               : { data: { user: { id: result.user.uid, uid: result.user.uid, email: result.user.email } }, error: null };
@@ -1378,18 +1387,18 @@
     }
     async function doLogin(){
       showErr('');
-      const email=$('email').value.trim();
-      const password=$('password').value;
-      if(!email||!password){ showErr('Имэйл болон нууц үгээ оруулна уу'); return; }
+      const phone=$('phone').value.replace(/\D/g,'');
+      const pin=$('pin').value.replace(/\D/g,'');
+      if(!/^\d{8}$/.test(phone)||!/^\d{4}$/.test(pin)){ showErr('Монголын 8 оронтой дугаар болон 4 оронтой PIN оруулна уу'); return; }
       setLoginLoading(true);
       try{
-        const { data:d, error }=await sb.auth.signInWithPassword({ email, password });
+        const { data:d, error }=await sb.auth.signInWithPassword({ phone, pin });
         if(error){
           const code=String(error.code||error.message||'');
           showErr(/too-many-requests/i.test(code)
             ? 'Олон удаа нэвтрэх оролдлого хийсэн тул Firebase түр хамгаалалт тавилаа. Хэсэг хүлээгээд дахин оролдох эсвэл нууц үгээ сэргээнэ үү.'
             : (/invalid-credential|wrong-password|user-not-found/i.test(code)
-              ? 'Имэйл эсвэл нууц үг буруу байна.'
+              ? 'Утасны дугаар эсвэл PIN буруу байна.'
               : (error.message||'Firebase нэвтрэлт амжилтгүй')));
           return;
         }
@@ -1405,14 +1414,14 @@
     const pwdToggle=$('pwdToggle');
     if(pwdToggle){
       pwdToggle.onclick=()=>{
-        const inp=$('password'), icon=$('pwdToggleIcon');
+        const inp=$('pin'), icon=$('pwdToggleIcon');
         const show=inp.type==='password';
         inp.type=show?'text':'password';
         if(icon) icon.textContent=show?'visibility_off':'visibility';
-        pwdToggle.setAttribute('aria-label',show?'Нууц үг нуух':'Нууц үг харуулах');
+        pwdToggle.setAttribute('aria-label',show?'PIN нуух':'PIN харуулах');
       };
     }
-    ['email','password'].forEach(id=>{
+    ['phone','pin'].forEach(id=>{
       const el=$(id);
       if(el) el.addEventListener('input',()=>{ if($('loginErr')?.classList.contains('show')) showErr(''); });
     });
