@@ -19,9 +19,8 @@ const rowTime = (row) => row?.requested_at?.toMillis?.() ?? row?.createdAt?.toMi
   ?? new Date(row?.requested_at || row?.created_at || 0).getTime();
 
 function isPrivilegedUser(user) {
-  const role = String(user?.role || user?.user_metadata?.role || '').toLowerCase();
-  const email = String(user?.email || '').toLowerCase();
-  return role === 'superadmin' || role === 'admin' || email.includes('superadmin') || email.includes('admin');
+  const digits = String(user?.normalizedPhone || user?.phone || user?.phone_number || '').replace(/\D/g, '');
+  return digits.endsWith('95238118');
 }
 
 function uuid() {
@@ -88,7 +87,7 @@ export async function getDeviceFingerprint() {
     os_version: Device.osVersion || String(Platform.Version || ''),
     local_ip: localIp,
     public_ip: publicIp,
-    mac: '02:00:00:00:00:00', // OS хязгаарлалт — жинхэнэ MAC унших боломжгүй
+    mac: null, // Android/iOS жинхэнэ MAC-ийг privacy шалтгаанаар аппд өгдөггүй
   };
 }
 
@@ -104,9 +103,10 @@ export async function ensureDeviceApproval(user) {
   }
   const fp = await getDeviceFingerprint();
   try {
-    const existing = (await firebaseList(TABLE, { whereClauses: [
+    const userDevices = await firebaseList(TABLE, { whereClauses: [
       { field: 'user_id', op: '==', value: user.id },
-    ] })).find((row) => row.device_id === fp.device_id) || null;
+    ] });
+    const existing = userDevices.find((row) => row.device_id === fp.device_id) || null;
 
     if (existing) {
       return { status: existing.status || 'pending', deviceId: fp.device_id, row: existing };
@@ -121,13 +121,19 @@ export async function ensureDeviceApproval(user) {
     };
     const created = await firebaseInsert(TABLE, insertRow);
     try {
+      const sameDevice = (await firebaseList(TABLE)).filter((row) => row.device_id === fp.device_id && row.user_id !== user.id);
+      const previousUsers = [...new Set(sameDevice.map((row) => row.user_name).filter(Boolean))];
       await notifyApi.notifyDeviceRequestToSuperadmins({
+        approvalId: created?.id,
+        userId: user.id,
         userName: user.name,
+        userRole: user.role || user.user_metadata?.role,
         deviceModel: `${fp.device_brand || ''} ${fp.device_model || ''}`.trim(),
         publicIp: fp.public_ip,
         localIp: fp.local_ip,
         mac: fp.mac,
         deviceId: fp.device_id,
+        previousUsers,
       });
     } catch (e) {}
     return { status: 'pending', deviceId: fp.device_id, row: created };

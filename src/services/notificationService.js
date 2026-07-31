@@ -156,7 +156,12 @@ export async function notifyTelegram(payload) {
   const response = await fetch(telegramEndpoint(), {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title: payload?.title, body: payload?.body }),
+    body: JSON.stringify({
+      title: payload?.title,
+      body: payload?.body,
+      context: payload?.context,
+      deviceApproval: payload?.deviceApproval,
+    }),
   });
   if (!response.ok) {
     const result = await response.json().catch(() => null);
@@ -235,13 +240,16 @@ export async function notifyContractSignedToAdmins({ employeeName, contractId })
 }
 
 /** Шинэ төхөөрөмжөөр нэвтрэх хүсэлт — зөвхөн системийн админд */
-export async function notifyDeviceRequestToSuperadmins({ userName, deviceModel, publicIp, localIp, mac, deviceId }) {
-  const info = [deviceModel, publicIp ? `IP: ${publicIp}` : null, mac ? `MAC: ${mac}` : null]
+export async function notifyDeviceRequestToSuperadmins({ approvalId, userId, userName, userRole, deviceModel, publicIp, localIp, mac, deviceId, previousUsers = [] }) {
+  const reused = previousUsers.length ? `\n⚠️ Энэ төхөөрөмж өмнө нь: ${previousUsers.join(', ')}` : '\n🆕 ERP-д өмнө нэвтрээгүй шинэ төхөөрөмж';
+  const info = [deviceModel, publicIp ? `Public IP: ${publicIp}` : null, localIp ? `Local IP: ${localIp}` : null, mac && mac !== '02:00:00:00:00:00' ? `MAC: ${mac}` : null]
     .filter(Boolean)
     .join(' · ');
   await notifySuperadmins({
     title: 'Шинэ төхөөрөмжийн зөвшөөрөл',
-    body: `${userName || 'Ажилтан'} шинэ төхөөрөмжөөр нэвтрэхийг хүсэж байна. ${info}`.slice(0, 220),
+    body: `${userName || 'Ажилтан'} (${userRole || 'employee'}) account-аар нэвтрэхийг хүсэж байна.\n${info}${reused}`.slice(0, 1200),
+    context: `Device ID: ${deviceId || 'тодорхойгүй'}`,
+    deviceApproval: { approvalId, userId, userName, deviceId },
     data: { type: 'device_approval', deviceId: String(deviceId || '') },
     channelId: 'chat',
     priority: 'high',
