@@ -3,6 +3,23 @@ const path = require('path');
 
 const config = getDefaultConfig(__dirname);
 
+// Mobile Metro must never crawl desktop build output. Cargo/Tauri atomically
+// creates and removes `target*` temporary directories while compiling; Metro's
+// Windows fallback watcher used to race those removals and crash with ENOENT on
+// a real Expo Go device. Keep every desktop-generated tree outside its graph.
+const escapeForRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const desktopRoot = escapeForRegex(path.resolve(__dirname, 'desktop'));
+config.resolver.blockList = [
+  new RegExp(`${desktopRoot}[\\\\/]src-tauri[\\\\/]target[^\\\\/]*([\\\\/].*)?$`),
+  new RegExp(`${desktopRoot}[\\\\/]node_modules([\\\\/].*)?$`),
+  new RegExp(`${desktopRoot}[\\\\/]dist([\\\\/].*)?$`),
+];
+
+// Metro 0.83 removed this legacy Expo default; leaving it in emits a validation warning.
+if (config.watcher && Object.prototype.hasOwnProperty.call(config.watcher, 'unstable_workerThreads')) {
+  delete config.watcher.unstable_workerThreads;
+}
+
 // GramJS (telegram) → React Native дээр ажиллуулахад шаардлагатай
 // Node built-in модулиудыг цэвэр-JS шим руу mapping хийнэ.
 const shimDir = path.resolve(__dirname, 'src/lib/telegram/shims');
