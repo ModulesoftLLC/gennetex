@@ -100,7 +100,7 @@ try {
   const appVer = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8')).expo.version || '';
   const appDir = path.join(dist, 'app');
   fs.mkdirSync(appDir, { recursive: true });
-  const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/latest/download/gennetex.apk';
+  const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/download/android-v1.0.4-build11-901cf8b/gennetex.apk';
   const page = buildAppDownloadPage(appVer, apkUrl, {
     build: 'local release',
     size: '72.44 MB',
@@ -116,23 +116,23 @@ try {
 
 // 4) Desktop татах хуудсууд → adiya.site/win, adiya.site/mac
 try {
-  const base = 'https://github.com/ModulesoftLLC/gennetex/releases/download/desktop-v1.0.7';
+  const base = 'https://github.com/ModulesoftLLC/gennetex/releases/download/desktop-v1.0.8';
   const pages = {
     win: {
       title: 'Gennetex ERP — Windows',
-      subtitle: 'Windows 10/11 · x64 · v1.0.7',
+      subtitle: 'Windows 10/11 · x64 · v1.0.8',
       downloads: [
-        ['Setup EXE', `${base}/Gennetex-ERP-1.0.7-Windows-x64-Setup.exe`, 'Ердийн суулгагч'],
-        ['Enterprise MSI', `${base}/Gennetex-ERP-1.0.7-Windows-x64.msi`, 'Байгууллагын суулгагч'],
-        ['Portable EXE', `${base}/Gennetex-ERP-1.0.7-Windows-x64-Portable.exe`, 'Суулгахгүй шууд ажиллуулна'],
+        ['Setup EXE', `${base}/Gennetex-ERP-1.0.8-Windows-x64-Setup.exe`, 'Ердийн суулгагч'],
+        ['Enterprise MSI', `${base}/Gennetex-ERP-1.0.8-Windows-x64.msi`, 'Байгууллагын суулгагч'],
+        ['Portable EXE', `${base}/Gennetex-ERP-1.0.8-Windows-x64-Portable.exe`, 'Суулгахгүй шууд ажиллуулна'],
       ],
     },
     mac: {
       title: 'Gennetex ERP — macOS',
-      subtitle: 'macOS 14+ · v1.0.7',
+      subtitle: 'macOS 14+ · v1.0.8',
       downloads: [
-        ['Apple Silicon DMG', `${base}/Gennetex-ERP-1.0.7-macOS-Apple-Silicon.dmg`, 'M1/M2/M3/M4 болон шинэ Mac'],
-        ['Intel DMG', `${base}/Gennetex-ERP-1.0.7-macOS-Intel.dmg`, 'Intel x64 Mac'],
+        ['Apple Silicon DMG', `${base}/Gennetex-ERP-1.0.8-macOS-Apple-Silicon.dmg`, 'M1/M2/M3/M4 болон шинэ Mac'],
+        ['Intel DMG', `${base}/Gennetex-ERP-1.0.8-macOS-Intel.dmg`, 'Intel x64 Mac'],
       ],
     },
   };

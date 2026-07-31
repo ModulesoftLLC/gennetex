@@ -1,7 +1,6 @@
 import { signInWithCustomToken,signOut } from 'firebase/auth';
 import { doc,getDoc } from 'firebase/firestore';
 import { auth,db } from './firebase';
-import { fetch as nativeFetch } from '@tauri-apps/plugin-http';
 import type { Profile } from '../types';
 const endpoint=String(import.meta.env.VITE_EMPLOYEE_AUTH_API_URL||'https://gennetex.vercel.app/api/employee-auth').replace(/\/$/,'');
 export const normalizePhone=(value:string)=>{const digits=value.replace(/\D/g,'');const local=digits.startsWith('976')?digits.slice(3):digits;if(!/^\d{8}$/.test(local))throw new Error('Монголын 8 оронтой дугаар оруулна уу.');return `976${local}`;};
@@ -9,7 +8,11 @@ async function request(action:string,body:Record<string,unknown>={},authenticate
   const headers:Record<string,string>={'Content-Type':'application/json'};
   if(authenticated){const token=await auth.currentUser?.getIdToken();if(!token)throw new Error('Админ нэвтрээгүй байна.');headers.Authorization=`Bearer ${token}`;}
   let response:Response|undefined;
-  const requestFetch=typeof window!=='undefined'&&'__TAURI_INTERNALS__' in window?nativeFetch:globalThis.fetch;
+  let requestFetch:typeof globalThis.fetch=globalThis.fetch.bind(globalThis);
+  if(typeof window!=='undefined'&&'__TAURI_INTERNALS__' in window){
+    const httpPlugin=await import('@tauri-apps/plugin-http');
+    requestFetch=httpPlugin.fetch;
+  }
   for(let attempt=0;attempt<2;attempt+=1){try{response=await requestFetch(`${endpoint}?action=${encodeURIComponent(action)}`,{method:'POST',headers,body:JSON.stringify(body)});break;}catch(error){if(attempt===1)throw new Error(`Сервертэй холбогдож чадсангүй (${endpoint}). ${error instanceof Error?error.message:'Native HTTP хүсэлт амжилтгүй.'}`);await new Promise(resolve=>setTimeout(resolve,600));}}
   const payload=await response!.json().catch(()=>({}));if(!response!.ok)throw new Error(payload.error||'Сервертэй холбогдоход алдаа гарлаа.');return payload;
 }
