@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Linking, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Linking, Platform, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Badge, ScreenHeader, EmptyState } from '../components/ui';
@@ -11,6 +11,7 @@ import { useTheme, useStyles } from '../context/ThemeContext';
 import CallWorkspaceHeader from '../components/CallWorkspaceHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { callPhone, composeSms } from '../lib/contactActions';
 
 function typeMeta(key) {
   return CALL_TYPES.find((t) => t.key === key) || CALL_TYPES[CALL_TYPES.length - 1];
@@ -117,6 +118,7 @@ export default function AdminCallsScreen() {
         <ScrollView contentContainerStyle={styles.list}>
           {filtered.map((call) => {
             const tm = typeMeta(call.type);
+            const phone = serviceCallApi.serviceCallPhone(call);
             return (
               <TouchableOpacity key={call.id} activeOpacity={0.85} onPress={() => setSelected(call)}>
                 <Card style={styles.callCard}>
@@ -135,6 +137,24 @@ export default function AdminCallsScreen() {
                   {call.address ? (
                     <Text style={styles.addr} numberOfLines={1}>{call.address}</Text>
                   ) : null}
+                  <View style={styles.quickActions}>
+                    <TouchableOpacity
+                      style={[styles.quickAction, !phone && styles.quickActionDisabled]}
+                      disabled={!phone}
+                      onPress={() => callPhone(phone).catch((error) => Alert.alert('Дуудлага', error.message))}
+                    >
+                      <Ionicons name="call" size={17} color="#fff" />
+                      <Text style={styles.quickActionText}>Залгах</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.quickAction, styles.quickMessage, !phone && styles.quickActionDisabled]}
+                      disabled={!phone}
+                      onPress={() => composeSms(phone, `Сайн байна уу. ${currentUser?.name || 'Gennetex-ийн ажилтан'} холбогдож байна.`).catch((error) => Alert.alert('Мессеж', error.message))}
+                    >
+                      <Ionicons name="chatbubble" size={16} color="#fff" />
+                      <Text style={styles.quickActionText}>Мессеж</Text>
+                    </TouchableOpacity>
+                  </View>
                 </Card>
               </TouchableOpacity>
             );
@@ -147,20 +167,25 @@ export default function AdminCallsScreen() {
           <View style={styles.modalContent}>
             {selected && (
               <ScrollView>
+                {(() => {
+                  const phone = serviceCallApi.serviceCallPhone(selected);
+                  return <>
                 <Text style={styles.modalTitle}>{selected.customer}</Text>
                 <View style={styles.badgeRow}>
                   <Badge text={typeMeta(selected.type).label} color={typeMeta(selected.type).color} />
                   <Badge text={callStatusLabelMn(selected)} color={callBadgeColor(selected)} />
                 </View>
                 <Detail label="Инженер" value={selected.engineer || '—'} styles={styles} />
-                <Detail label="Утас" value={selected.phone || '—'} styles={styles} />
+                <Detail label="Утас" value={phone || 'Дугаар бүртгэгдээгүй'} styles={styles} />
                 <Detail label="Хаяг" value={selected.address || '—'} styles={styles} />
                 <Detail label="Асуудал" value={selected.problem || '—'} styles={styles} />
 
                 <View style={{ gap: spacing.sm, marginTop: spacing.md }}>
-                  {selected.phone ? (
-                    <Button title="Залгах" variant="success" onPress={() => Linking.openURL(`tel:${selected.phone}`)} />
-                  ) : null}
+                  <View style={styles.contactActions}>
+                    <Button title="Залгах" variant="success" style={{ flex: 1 }} disabled={!phone} onPress={() => callPhone(phone).catch((error) => Alert.alert('Дуудлага', error.message))} />
+                    <Button title="Мессеж" style={{ flex: 1 }} disabled={!phone} onPress={() => composeSms(phone, `Сайн байна уу. ${currentUser?.name || 'Gennetex-ийн ажилтан'} холбогдож байна.`).catch((error) => Alert.alert('Мессеж', error.message))} />
+                  </View>
+                  {!phone ? <Text style={styles.phoneHint}>Энэ дуудлагад хэрэглэгчийн утасны дугаар хадгалагдаагүй байна.</Text> : null}
                   {selected.latitude != null && selected.longitude != null ? (
                     <Button title="Google Maps-аар харах" onPress={() => openMaps(selected)} />
                   ) : null}
@@ -180,6 +205,8 @@ export default function AdminCallsScreen() {
                   </View>
                   <Button title="Хаах" variant="ghost" onPress={() => setSelected(null)} />
                 </View>
+                  </>;
+                })()}
               </ScrollView>
             )}
           </View>
@@ -236,6 +263,11 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   metaLabel: { color: colors.textFaint, fontSize: 13 },
   metaValue: { color: colors.text, fontSize: 13, fontWeight: '700' },
   addr: { color: colors.textFaint, fontSize: 12, marginTop: 4 },
+  quickActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
+  quickAction: { flex: 1, minHeight: 40, borderRadius: radius.md, backgroundColor: '#16a34a', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7 },
+  quickMessage: { backgroundColor: '#2563eb' },
+  quickActionDisabled: { opacity: 0.38 },
+  quickActionText: { color: '#fff', fontSize: 13, fontWeight: '800' },
   modalOverlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'center', padding: spacing.lg },
   modalContent: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.xl, maxHeight: '85%' },
   modalTitle: { color: colors.text, fontSize: 20, fontWeight: '800', marginBottom: spacing.md },
@@ -244,4 +276,6 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   detailLabel: { color: colors.textFaint, fontSize: 14, width: 72 },
   detailValue: { color: colors.text, fontSize: 15, flex: 1, fontWeight: '600' },
   statusBtns: { flexDirection: 'row', gap: spacing.sm },
+  contactActions: { flexDirection: 'row', gap: spacing.sm },
+  phoneHint: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: 'center' },
 });

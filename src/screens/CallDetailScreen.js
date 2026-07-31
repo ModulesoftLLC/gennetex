@@ -19,7 +19,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
 import { useApp } from '../context/AppContext';
 import { CALL_TYPES } from '../data/mockData';
-import { siteKindMeta } from '../services/serviceCallService';
+import { serviceCallPhone, siteKindMeta } from '../services/serviceCallService';
 import CloseCallModal, { CLOSE_TYPES } from '../components/CloseCallModal';
 import TransferCallModal from '../components/TransferCallModal';
 import * as tracking from '../services/trackingService';
@@ -145,6 +145,7 @@ export default function CallDetailScreen() {
   const [teamCrew, setTeamCrew] = useState(null);
   const [myStock, setMyStock] = useState([]);
   const [tick, setTick] = useState(0);
+  const contactPhone = serviceCallPhone(call);
 
   const canAct = canPerformCallActions(call, currentUser, isAdmin);
   const sharedView = isSharedCallView(call, currentUser, isAdmin);
@@ -287,9 +288,9 @@ export default function CallDetailScreen() {
         faceVerified: false,
       });
       Alert.alert('Бүртгэгдлээ', `${call.customer} дээр очсоныг бүртгэлээ.`);
-      if (call.phone) {
+      if (contactPhone) {
         await composeSms(
-          call.phone,
+          contactPhone,
           `Сайн байна уу. Танайд ${currentUser.name || 'манай ажилтан'} ирлээ. Юнивишн болон Gennetex-ийн үйлчилгээг сонгосонд баярлалаа.`
         ).catch((error) => Alert.alert('Мессеж', error.message));
       }
@@ -337,10 +338,10 @@ export default function CallDetailScreen() {
         : '';
       Alert.alert('Амжилттай', `Захиалга хаагдлаа.${used}`, [
         { text: 'Хаах', style: 'cancel' },
-        ...(call.phone ? [{
+        ...(contactPhone ? [{
           text: 'Талархлын мессеж',
           onPress: () => composeSms(
-            call.phone,
+            contactPhone,
             'Манайхаар үйлчлүүлсэнд баярлалаа. Дахин үйлчлүүлээрэй. Юнивишн болон Gennetex-ийн үйлчилгээг сонгосонд баярлалаа.'
           ).catch((error) => Alert.alert('Мессеж', error.message)),
         }] : []),
@@ -433,7 +434,7 @@ export default function CallDetailScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.summary}>
           <View style={styles.sumCol}>
-            <Text style={styles.sumVal}>{call.phone || '—'}</Text>
+            <Text style={styles.sumVal}>{contactPhone || '—'}</Text>
             <Text style={styles.sumSub}>Улаанбаатар</Text>
           </View>
           <View style={styles.sumCol}>
@@ -446,20 +447,21 @@ export default function CallDetailScreen() {
           </View>
         </View>
 
-        {call.phone ? <View style={styles.contactCard}>
+        <View style={styles.contactCard}>
           <View style={styles.contactInfo}>
             <View style={styles.contactIcon}><Ionicons name="person" size={20} color={colors.primary} /></View>
-            <View style={{ flex: 1 }}><Text style={styles.contactName} numberOfLines={1}>{call.customer || 'Харилцагч'}</Text><Text style={styles.contactPhone}>{call.phone}</Text></View>
+            <View style={{ flex: 1 }}><Text style={styles.contactName} numberOfLines={1}>{call.customer || 'Харилцагч'}</Text><Text style={styles.contactPhone}>{contactPhone || 'Дугаар бүртгэгдээгүй'}</Text></View>
           </View>
           <View style={styles.contactActions}>
-            <TouchableOpacity style={[styles.contactButton, styles.callButton]} onPress={() => callPhone(call.phone).catch((error) => Alert.alert('Дуудлага', error.message))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаар руу залгах`}>
+            <TouchableOpacity disabled={!contactPhone} style={[styles.contactButton, styles.callButton, !contactPhone && styles.contactButtonDisabled]} onPress={() => callPhone(contactPhone).catch((error) => Alert.alert('Дуудлага', error.message))} accessibilityRole="button" accessibilityLabel={`${contactPhone} дугаар руу залгах`}>
               <Ionicons name="call" size={21} color="#fff"/><Text style={styles.contactButtonText}>Залгах</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.contactButton, styles.messageButton]} onPress={() => composeSms(call.phone, `Сайн байна уу. ${currentUser?.name || 'Gennetex-ийн ажилтан'} холбогдож байна.`).catch((error) => Alert.alert('Мессеж', error.message))} accessibilityRole="button" accessibilityLabel={`${call.phone} дугаарт мессеж бичих`}>
+            <TouchableOpacity disabled={!contactPhone} style={[styles.contactButton, styles.messageButton, !contactPhone && styles.contactButtonDisabled]} onPress={() => composeSms(contactPhone, `Сайн байна уу. ${currentUser?.name || 'Gennetex-ийн ажилтан'} холбогдож байна.`).catch((error) => Alert.alert('Мессеж', error.message))} accessibilityRole="button" accessibilityLabel={`${contactPhone} дугаарт мессеж бичих`}>
               <Ionicons name="chatbubble" size={20} color="#fff"/><Text style={styles.contactButtonText}>Мессеж</Text>
             </TouchableOpacity>
           </View>
-        </View> : null}
+          {!contactPhone ? <Text style={styles.phoneMissing}>Админ энэ дуудлагад утасны дугаар бүртгээгүй байна.</Text> : null}
+        </View>
 
         <View style={styles.card}>
           <Accordion title="Мэдээлэл" open={infoOpen} onToggle={() => setInfoOpen((v) => !v)}>
@@ -498,9 +500,9 @@ export default function CallDetailScreen() {
               <InfoRow label="Илгээсэн админ" value={call.created_by_name || '—'} />
               <InfoRow
                 label="Утасны дугаар 1"
-                value={call.phone}
-                link={call.phone ? `tel:${normalizeContactPhone(call.phone)}` : null}
-                copyValue={call.phone}
+                value={contactPhone}
+                link={contactPhone ? `tel:${normalizeContactPhone(contactPhone)}` : null}
+                copyValue={contactPhone}
               />
               <InfoRow label="Тайлбар" value={call.problem} />
               <View style={styles.infoRow}>
@@ -589,8 +591,8 @@ export default function CallDetailScreen() {
                 setTransferOpen(true);
               }}
             />
-            {call.phone ? (
-              <MenuBtn color="#22c55e" label={`Залгах · ${call.phone}`} onPress={() => callPhone(call.phone).catch((error) => Alert.alert('Дуудлага', error.message))} />
+            {contactPhone ? (
+              <MenuBtn color="#22c55e" label={`Залгах · ${contactPhone}`} onPress={() => callPhone(contactPhone).catch((error) => Alert.alert('Дуудлага', error.message))} />
             ) : null}
             <MenuBtn color="#1677ff" label="Google Maps-аар чиглүүлэх" onPress={openMaps} />
             <MenuBtn
@@ -693,9 +695,11 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   contactPhone:{color:colors.textMuted,fontSize:13,marginTop:2},
   contactActions:{flexDirection:'row',gap:spacing.sm},
   contactButton:{flex:1,height:48,borderRadius:radius.md,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8},
+  contactButtonDisabled:{opacity:0.38},
   callButton:{backgroundColor:colors.success},
   messageButton:{backgroundColor:colors.primary},
   contactButtonText:{color:'#fff',fontSize:14,fontWeight:'800'},
+  phoneMissing:{color:colors.danger,fontSize:12,lineHeight:18,textAlign:'center',marginTop:spacing.sm},
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.md,

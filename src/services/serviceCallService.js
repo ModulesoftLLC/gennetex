@@ -12,12 +12,27 @@ export function siteKindMeta(key) {
   return SITE_KINDS.find((s) => s.key === (key || 'ail')) || SITE_KINDS[0];
 }
 
+/** Firebase/Supabase болон хуучин import-уудын утасны field нэршлийг нэгтгэнэ. */
+export function serviceCallPhone(call) {
+  return String(
+    call?.phone ||
+    call?.customer_phone ||
+    call?.customerPhone ||
+    call?.phone_number ||
+    call?.phoneNumber ||
+    call?.mobile ||
+    call?.contact_phone ||
+    call?.contactPhone ||
+    ''
+  ).trim();
+}
+
 export function mapServiceCallRow(r) {
   if (!r) return null;
   return {
     id: r.id,
     customer: r.customer,
-    phone: r.phone || '',
+    phone: serviceCallPhone(r),
     address: r.address || '',
     problem: r.problem || '',
     type: r.call_type || 'other',
