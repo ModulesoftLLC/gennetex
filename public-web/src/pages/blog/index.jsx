@@ -73,10 +73,10 @@ export default function BlogIndex() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.32em] text-graphite-400">Блог</p>
-                <h2 className="text-3xl font-semibold text-graphite-50">Сүүлийн нийтлэл</h2>
+                <h2 className="text-3xl font-semibold text-graphite-50">Сүүлийн 7 хоногийн AI, IT мэдээ</h2>
               </div>
               <div className="hidden rounded-full border border-graphite-800 bg-graphite-900/70 px-4 py-2 text-sm text-graphite-300 md:block">
-                Сэтгүүлчийн буулт
+                Монгол хэлээр · Эх сурвалжтай
               </div>
             </div>
 
