@@ -2,8 +2,9 @@ import { firebaseAuth } from '../lib/firebase';
 import { signInWithCustomToken } from 'firebase/auth';
 
 const BASE_URL = String(
-  process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || 'https://adiya.site/api/employee-auth'
+  process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || 'https://gennetex.vercel.app/api/employee-auth'
 ).replace(/\/$/, '');
+const ENDPOINTS = [...new Set([BASE_URL, 'https://gennetex.vercel.app/api/employee-auth'])];
 
 async function request(action, body = {}, authenticated = false) {
   if (!BASE_URL) throw new Error('EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL тохируулаагүй байна.');
@@ -13,17 +14,14 @@ async function request(action, body = {}, authenticated = false) {
     if (!token) throw new Error('Админ нэвтрээгүй байна.');
     headers.Authorization = `Bearer ${token}`;
   }
-  let response;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
-    try {
-      response = await fetch(`${BASE_URL}?action=${encodeURIComponent(action)}`, { method: 'POST', headers, body: JSON.stringify(body), signal: controller.signal });
-      break;
-    } catch (error) {
-      if (attempt === 1) throw new Error('Сүлжээний холболт тасарлаа. Интернэтээ шалгаад дахин оролдоно уу.');
-      await new Promise((resolve) => setTimeout(resolve, 700));
-    } finally { clearTimeout(timeout); }
+  let response; let lastError;
+  for (const endpoint of ENDPOINTS) for (let attempt = 0; attempt < 2 && !response; attempt += 1) {
+    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 20000);
+    try { response = await fetch(`${endpoint}?action=${encodeURIComponent(action)}`, { method: 'POST', headers, body: JSON.stringify(body), signal: controller.signal }); }
+    catch (error) { lastError = error; if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 700)); }
+    finally { clearTimeout(timeout); }
   }
+  if (!response) throw new Error(`Сүлжээний холболт тасарлаа. ${lastError?.message || 'API хүсэлт амжилтгүй.'}`);
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Сервертэй холбогдоход алдаа гарлаа.');
   return data;
