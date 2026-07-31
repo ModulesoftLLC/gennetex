@@ -97,18 +97,14 @@ if (fs.existsSync(logo)) {
 
 // 3) Апп татах хуудас → dist-web/app/index.html (adiya.site/app)
 try {
-  const versionSrc = fs.readFileSync(path.join(root, 'src/version.js'), 'utf8');
-  const major = /major:\s*(\d+)/.exec(versionSrc);
-  const minor = /minor:\s*(\d+)/.exec(versionSrc);
-  const patch = /patch:\s*(\d+)/.exec(versionSrc);
-  const appVer = major && minor && patch ? `${major[1]}.${minor[1]}.${patch[1]}` : '';
+  const appVer = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8')).expo.version || '';
   const appDir = path.join(dist, 'app');
   fs.mkdirSync(appDir, { recursive: true });
   const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/latest/download/gennetex.apk';
   const page = buildAppDownloadPage(appVer, apkUrl, {
-    build: '11',
-    size: '60.70 MB',
-    sha256: '2A34FB1F6CAC88BFB9ED07A3944D45F1FF15A6695CAAD77D8532DE3C748F5E0B',
+    build: 'local release',
+    size: '72.44 MB',
+    sha256: '5B1696A4118AA97CF8BF4BA7F99FEFCCA76D64A8D1546F5529B913FDAD6D1683',
     updated: '2026-07-31',
   });
   fs.writeFileSync(path.join(appDir, 'index.html'), page);
@@ -116,6 +112,39 @@ try {
   console.log('[build-web] Апп татах хуудас: /app');
 } catch (e) {
   console.warn('[build-web] /app хуудас үүсгэж чадсангүй:', e.message);
+}
+
+// 4) Desktop татах хуудсууд → adiya.site/win, adiya.site/mac
+try {
+  const base = 'https://github.com/ModulesoftLLC/gennetex/releases/download/desktop-v1.0.6';
+  const pages = {
+    win: {
+      title: 'Gennetex ERP — Windows',
+      subtitle: 'Windows 10/11 · x64 · v1.0.6',
+      downloads: [
+        ['Setup EXE', `${base}/Gennetex-ERP-1.0.6-Windows-x64-Setup.exe`, 'Ердийн суулгагч'],
+        ['Enterprise MSI', `${base}/Gennetex-ERP-1.0.6-Windows-x64.msi`, 'Байгууллагын суулгагч'],
+        ['Portable EXE', `${base}/Gennetex-ERP-1.0.6-Windows-x64-Portable.exe`, 'Суулгахгүй шууд ажиллуулна'],
+      ],
+    },
+    mac: {
+      title: 'Gennetex ERP — macOS',
+      subtitle: 'macOS 14+ · v1.0.6',
+      downloads: [
+        ['Apple Silicon DMG', `${base}/Gennetex-ERP-1.0.6-macOS-Apple-Silicon.dmg`, 'M1/M2/M3/M4 болон шинэ Mac'],
+        ['Intel DMG', `${base}/Gennetex-ERP-1.0.6-macOS-Intel.dmg`, 'Intel x64 Mac'],
+      ],
+    },
+  };
+  Object.entries(pages).forEach(([route, config]) => {
+    const dir = path.join(dist, route);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'index.html'), buildDesktopDownloadPage(config));
+    if (fs.existsSync(logo)) fs.copyFileSync(logo, path.join(dir, 'logo.png'));
+  });
+  console.log('[build-web] Desktop татах хуудсууд: /win, /mac');
+} catch (e) {
+  console.warn('[build-web] Desktop татах хуудас үүсгэж чадсангүй:', e.message);
 }
 
 console.log('[build-web] Бэлэн. Гаралт:', dist);
@@ -188,4 +217,9 @@ function buildAppDownloadPage(version, apkUrl, release = {}) {
   </div>
 </body>
 </html>`;
+}
+
+function buildDesktopDownloadPage({ title, subtitle, downloads }) {
+  const buttons = downloads.map(([label, url, description]) => `<a href="${url}"><strong>${label}</strong><span>${description}</span></a>`).join('');
+  return `<!doctype html><html lang="mn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(145deg,#070b14,#111d35);color:#eef3ff;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.card{width:min(92vw,620px);padding:38px;border:1px solid #ffffff20;border-radius:28px;background:#101827dd;box-shadow:0 30px 90px #0008}img{width:76px;height:76px;border-radius:20px}h1{margin:22px 0 8px;font-size:30px}p{color:#a9b7d3;margin:0 0 26px}.downloads{display:grid;gap:12px}a{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:17px 19px;border-radius:16px;background:#5b5cf0;color:#fff;text-decoration:none;transition:.2s}a:hover{transform:translateY(-2px);background:#7172ff}a span{font-size:12px;opacity:.8;text-align:right}.foot{margin-top:24px;font-size:12px;color:#71809e}</style></head><body><main class="card"><img src="./logo.png" alt="Gennetex"><h1>${title}</h1><p>${subtitle} · Admin only · Firebase ERP</p><div class="downloads">${buttons}</div><div class="foot">Verify.mn нэвтрэлт · Нэгдсэн mobile/web/desktop өгөгдөл</div></main></body></html>`;
 }
