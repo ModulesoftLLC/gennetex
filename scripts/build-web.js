@@ -105,7 +105,12 @@ try {
   const appDir = path.join(dist, 'app');
   fs.mkdirSync(appDir, { recursive: true });
   const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/latest/download/gennetex.apk';
-  const page = buildAppDownloadPage(appVer, apkUrl);
+  const page = buildAppDownloadPage(appVer, apkUrl, {
+    build: '7',
+    size: '45.40 MB',
+    sha256: '540A46A35B5E9C3559E2B88917A436D1BDA28CADB3C98DD3AF154417552738F5',
+    updated: '2026-07-30',
+  });
   fs.writeFileSync(path.join(appDir, 'index.html'), page);
   if (fs.existsSync(logo)) fs.copyFileSync(logo, path.join(appDir, 'logo.png'));
   console.log('[build-web] Апп татах хуудас: /app');
@@ -115,7 +120,7 @@ try {
 
 console.log('[build-web] Бэлэн. Гаралт:', dist);
 
-function buildAppDownloadPage(version, apkUrl) {
+function buildAppDownloadPage(version, apkUrl, release = {}) {
   const v = version ? `v${version}` : '';
   return `<!DOCTYPE html>
 <html lang="mn">
@@ -139,6 +144,8 @@ function buildAppDownloadPage(version, apkUrl) {
   .logo { width: 96px; height: 80px; object-fit: contain; margin-bottom: 20px; }
   h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
   .ver { color: #7c93b8; font-size: 13px; margin-bottom: 24px; }
+  .release { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: -12px 0 20px; }
+  .pill { padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.06); color: #aebfda; font-size: 12px; }
   .btn {
     display: flex; align-items: center; justify-content: center; gap: 10px;
     width: 100%; padding: 16px; border-radius: 14px; text-decoration: none;
@@ -158,7 +165,11 @@ function buildAppDownloadPage(version, apkUrl) {
   <div class="card">
     <img class="logo" src="./logo.png" alt="Gennetex" onerror="this.style.display='none'" />
     <h1>Gennetex апп</h1>
-    <div class="ver">${v ? 'Хувилбар ' + v : 'Android аппликейшн'}</div>
+    <div class="ver">${v ? 'Хувилбар ' + v : 'Android аппликейшн'}${release.build ? ' · Build ' + release.build : ''}</div>
+    <div class="release">
+      ${release.size ? `<span class="pill">APK · ${release.size}</span>` : ''}
+      ${release.updated ? `<span class="pill">Шинэчилсэн · ${release.updated}</span>` : ''}
+    </div>
     <a class="btn" href="${apkUrl}">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Android APK татах
@@ -173,7 +184,7 @@ function buildAppDownloadPage(version, apkUrl) {
       </ol>
     </div>
     <div class="os">📱 Зөвхөн Android (7.0+). iOS удахгүй.</div>
-    <div class="note">Modulesoft LLC · Gennetex ERP</div>
+    <div class="note">${release.sha256 ? `SHA-256 · ${release.sha256.slice(0, 12)}…${release.sha256.slice(-12)}<br/>` : ''}Modulesoft LLC · Gennetex ERP</div>
   </div>
 </body>
 </html>`;
