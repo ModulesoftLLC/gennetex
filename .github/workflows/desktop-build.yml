@@ -12,9 +12,9 @@ jobs:
         include:
           - platform: windows-latest
             args: ''
-          - platform: macos-14
+          - platform: macos-15
             args: '--target aarch64-apple-darwin'
-          - platform: macos-13
+          - platform: macos-15-intel
             args: '--target x86_64-apple-darwin'
     runs-on: ${{ matrix.platform }}
     steps:
@@ -53,3 +53,25 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+      - name: Collect Windows installers
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force desktop/windows | Out-Null
+          Get-ChildItem desktop/src-tauri/target/release/bundle -Recurse -File |
+            Where-Object Extension -in '.exe','.msi' |
+            Copy-Item -Destination desktop/windows -Force
+      - name: Collect macOS installers
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          mkdir -p desktop/macos
+          find desktop/src-tauri/target -type f -name '*.dmg' -exec cp {} desktop/macos/ \;
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gennetex-${{ matrix.platform }}-installers
+          path: |
+            desktop/windows/*.exe
+            desktop/windows/*.msi
+            desktop/macos/*.dmg
+          if-no-files-found: error

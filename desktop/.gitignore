@@ -1,6 +1,10 @@
 node_modules/
 dist/
+windows/*.exe
+windows/*.msi
+macos/*.dmg
 src-tauri/target/
+src-tauri/gen/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts

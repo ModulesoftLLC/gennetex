@@ -6,3 +6,5 @@ The shared Tauri source in `desktop/src-tauri` generates both installers on `win
 - WiX `.msi` for enterprise deployment
 
 The application supports Windows 10/11, WebView2 bootstrap, high DPI, resize/minimum window constraints, tray lifecycle and native notifications. Signing certificates are supplied only through GitHub Actions secrets.
+
+Run `npm run desktop:build:windows` and then `npm run desktop:collect:windows` to place the installable files in this directory with SHA-256 hashes.

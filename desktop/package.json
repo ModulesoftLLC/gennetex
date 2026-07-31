@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "desktop:dev": "tauri dev",
-    "desktop:build": "tauri build"
+    "desktop:build": "tauri build",
+    "desktop:build:windows": "tauri build --bundles nsis,msi --config src-tauri/tauri.local.conf.json",
+    "desktop:collect:windows": "powershell -ExecutionPolicy Bypass -File scripts/collect-windows.ps1"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
