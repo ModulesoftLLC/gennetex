@@ -106,9 +106,9 @@ try {
   fs.mkdirSync(appDir, { recursive: true });
   const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/latest/download/gennetex.apk';
   const page = buildAppDownloadPage(appVer, apkUrl, {
-    build: '8',
-    size: '45.40 MB',
-    sha256: 'B34A8D7212620B40598DC508E728F2692CD116E0DA371F242A206E310BFF3837',
+    build: '11',
+    size: '60.70 MB',
+    sha256: '2A34FB1F6CAC88BFB9ED07A3944D45F1FF15A6695CAAD77D8532DE3C748F5E0B',
     updated: '2026-07-31',
   });
   fs.writeFileSync(path.join(appDir, 'index.html'), page);
