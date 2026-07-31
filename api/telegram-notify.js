@@ -59,7 +59,8 @@ async function ensureWebhook(req) {
 }
 
 function telegramChats() {
-  return [...new Set([process.env.TELEGRAM_CHAT_ID, process.env.TELEGRAM_LOG_GROUP_ID].map((v) => String(v || '').trim()).filter(Boolean))];
+  const admins = String(process.env.TELEGRAM_ADMIN_USER_IDS || '').split(',');
+  return [...new Set([process.env.TELEGRAM_CHAT_ID, process.env.TELEGRAM_LOG_GROUP_ID, ...admins].map((v) => String(v || '').trim()).filter(Boolean))];
 }
 
 function allowedTelegramChat(id) {
@@ -118,8 +119,15 @@ async function handleCommand(req, res) {
   if (!message?.chat?.id || !command.startsWith('/')) return false;
   if (String(req.headers['x-telegram-bot-api-secret-token'] || '') !== webhookSecret()) return res.status(403).json({ error: 'Invalid Telegram webhook secret' });
   const chatId = message.chat.id;
-  if (!allowedTelegramChat(chatId)) return res.status(403).json({ error: 'Telegram chat not allowed' });
   const db = getAdmin().firestore();
+  if (!allowedTelegramChat(chatId)) {
+    const adminSnap = await db.collection('telegram_bot_admins').doc(String(message.from?.id || chatId)).get();
+    if (!adminSnap.exists || adminSnap.data()?.authorized !== true) {
+      await sendTelegram(chatId, '⛔ Энэ Telegram хэрэглэгч ERP admin command ашиглах эрхгүй. Admin notification дахь TEST «Зөвшөөрөх» товчийг эхлээд дарна уу.');
+      res.status(200).json({ ok: true, authorized: false });
+      return true;
+    }
+  }
   if (command === '/start' || command === '/help' || command === '/commands') {
     await sendTelegram(chatId, ['🤖 Gennetex ERP командууд', '/log — сүүлийн системийн үйлдлүүд', '/irts — өнөөдрийн ирц', '/bairshil — бүх ажилтны Google Maps + PDF', '/ajiltan — ажилтны тоо', '/device — хүлээгдэж буй төхөөрөмж', '/status — ERP API төлөв'].join('\n'));
   } else if (command === '/log') {
@@ -178,6 +186,15 @@ async function handleCallback(req, res) {
   const testMatch = String(callback.data || '').match(/^device:test:(approved|rejected)$/);
   if (testMatch) {
     const approved = testMatch[1] === 'approved';
+    if (approved && callback.from?.id) {
+      await getAdmin().firestore().collection('telegram_bot_admins').doc(String(callback.from.id)).set({
+        authorized: true,
+        telegram_id: String(callback.from.id),
+        username: clean(callback.from.username || callback.from.first_name, 100),
+        authorized_at: new Date().toISOString(),
+        source: 'device-approval-test',
+      }, { merge: true });
+    }
     await telegramCall('answerCallbackQuery', { callback_query_id: callback.id, text: approved ? 'TEST: Зөвшөөрөх товч ажиллалаа' : 'TEST: Татгалзах товч ажиллалаа', show_alert: true });
     if (callback.message?.chat?.id) await sendTelegram(callback.message.chat.id, approved ? '✅ TEST — Зөвшөөрөх товч амжилттай ажиллалаа.' : '❌ TEST — Татгалзах товч амжилттай ажиллалаа.');
     res.status(200).json({ ok: true, test: true });
