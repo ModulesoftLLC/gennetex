@@ -100,12 +100,12 @@ try {
   const appVer = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8')).expo.version || '';
   const appDir = path.join(dist, 'app');
   fs.mkdirSync(appDir, { recursive: true });
-  const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/download/android-v1.0.4-build11-901cf8b/gennetex.apk';
+  const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/download/android-v1.0.5-build2/app-release.apk';
   const page = buildAppDownloadPage(appVer, apkUrl, {
-    build: 'local release',
-    size: '72.44 MB',
-    sha256: '5B1696A4118AA97CF8BF4BA7F99FEFCCA76D64A8D1546F5529B913FDAD6D1683',
-    updated: '2026-07-31',
+    build: '2',
+    size: '72.45 MB',
+    sha256: 'AEC3B6C9919E49E43C2C6598F1ED193617606954E3F0C90EE1B6A6FDAEC25F0D',
+    updated: '2026-08-01',
   });
   fs.writeFileSync(path.join(appDir, 'index.html'), page);
   if (fs.existsSync(logo)) fs.copyFileSync(logo, path.join(appDir, 'logo.png'));
