@@ -106,6 +106,22 @@ async function checkSession(id) {
   return { ...session, ...patch };
 }
 
+async function proxyEmployeeAuth(req, res, target) {
+  const url = new URL(target);
+  Object.entries(req.query || {}).forEach(([key, value]) => {
+    url.searchParams.set(key, Array.isArray(value) ? value[0] : String(value));
+  });
+  const headers = { 'Content-Type': 'application/json' };
+  if (req.headers.authorization) headers.Authorization = req.headers.authorization;
+  const upstream = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(req.body || {}),
+  });
+  res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json; charset=utf-8');
+  return res.status(upstream.status).send(await upstream.text());
+}
+
 module.exports = async function handler(req, res) {
   // Native Tauri clients use `http://tauri.localhost` / `tauri://localhost`
   // origins, so the API must explicitly allow cross-origin JSON + bearer auth.
@@ -115,6 +131,15 @@ module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  const proxyTarget = String(process.env.EMPLOYEE_AUTH_PROXY_URL || '').trim();
+  if (proxyTarget) {
+    try {
+      return await proxyEmployeeAuth(req, res, proxyTarget);
+    } catch (error) {
+      console.error('employee-auth proxy failed', { message: error.message });
+      return res.status(502).json({ error: 'Баталгаажуулалтын сервертэй холбогдож чадсангүй.' });
+    }
+  }
   try {
     const action = String(req.query.action || ''); const body = req.body || {}; const db = getAdmin().firestore();
     if (action === 'register') {
