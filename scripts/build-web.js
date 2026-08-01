@@ -100,11 +100,11 @@ try {
   const appVer = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8')).expo.version || '';
   const appDir = path.join(dist, 'app');
   fs.mkdirSync(appDir, { recursive: true });
-  const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/download/android-v1.0.5-build2/app-release.apk';
+  const apkUrl = 'https://github.com/ModulesoftLLC/gennetex/releases/download/android-v1.0.6-build3/app-release.apk';
   const page = buildAppDownloadPage(appVer, apkUrl, {
-    build: '2',
+    build: '3',
     size: '72.45 MB',
-    sha256: 'AEC3B6C9919E49E43C2C6598F1ED193617606954E3F0C90EE1B6A6FDAEC25F0D',
+    sha256: '353558BC7A82368696C6CF50DBBA5C6830F43884D97D112DC3F1AFF13789EB0A',
     updated: '2026-08-01',
   });
   fs.writeFileSync(path.join(appDir, 'index.html'), page);
