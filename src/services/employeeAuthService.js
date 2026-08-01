@@ -1,14 +1,10 @@
 import { firebaseAuth } from '../lib/firebase';
 import { signInWithCustomToken } from 'firebase/auth';
 
-const BASE_URL = String(
-  process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || 'https://gennetex.vercel.app/api/employee-auth'
-).replace(/\/$/, '');
-const ENDPOINTS = [...new Set([
-  BASE_URL,
-  'https://gennetex.vercel.app/api/employee-auth',
-  'https://adiya.site/api/employee-auth',
-])];
+const CANONICAL_URL = 'https://gennetex.vercel.app/api/employee-auth';
+const BASE_URL = String(process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || CANONICAL_URL).replace(/\/$/, '');
+const ENDPOINTS = [...new Set([CANONICAL_URL, BASE_URL])]
+  .filter((endpoint) => !/^https:\/\/adiya\.site(?:\/|$)/i.test(endpoint));
 
 async function request(action, body = {}, authenticated = false) {
   if (!BASE_URL) throw new Error('EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL тохируулаагүй байна.');
