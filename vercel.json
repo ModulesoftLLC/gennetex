@@ -14,10 +14,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/employee-auth", "destination": "https://gennetex.vercel.app/api/employee-auth" },
-    { "source": "/api/employee-aut", "destination": "https://gennetex.vercel.app/api/employee-auth" },
-    { "source": "/api/emplooyee-aut", "destination": "https://gennetex.vercel.app/api/employee-auth" },
-    { "source": "/api/emolooyee-aut", "destination": "https://gennetex.vercel.app/api/employee-auth" },
     { "source": "/gennetex/admin", "destination": "/gennetex/admin/index.html" },
     { "source": "/app", "destination": "/app/index.html" },
     { "source": "/win", "destination": "/win/index.html" },
