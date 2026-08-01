@@ -58,7 +58,9 @@ export async function createFirebaseUserWithoutChangingSession(email, password) 
   const secondaryName = `employee-create-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const secondaryApp = initializeApp(config, secondaryName);
   try {
-    const secondaryAuth = getAuth(secondaryApp);
+    const secondaryAuth = authPersistence
+      ? initializeAuth(secondaryApp, { persistence: authPersistence })
+      : getAuth(secondaryApp);
     const { user } = await createUserWithEmailAndPassword(secondaryAuth, email, password);
     await firebaseSignOut(secondaryAuth);
     return user;

@@ -7,6 +7,7 @@ import {
   STAFF,
 } from '../data/mockData';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { firebaseWatchAuth } from '../lib/firebaseAdapter';
 import * as invApi from '../services/inventoryService';
 import * as staffApi from '../services/staffService';
 import * as authApi from '../services/authService';
@@ -108,11 +109,45 @@ export function AppProvider({ children }) {
 
   // ---- Auth: session + профайл сонсох ----
   useEffect(() => {
-    if (!isSupabaseConfigured) {
+    let active = true;
+    setAuthLoading(true);
+    let unsubscribe = () => {};
+    try {
+      unsubscribe = firebaseWatchAuth(async (user) => {
+        if (!active) return;
+        if (!user) {
+          setAuthProfile(null);
+          setSession(null);
+          setProfile(null);
+          setAuthLoading(false);
+          return;
+        }
+        try {
+          const nextProfile = await authApi.getProfile(user.uid, user.email);
+          if (!nextProfile) throw new Error('Ажилтны профайл олдсонгүй.');
+          if (!active) return;
+          setAuthProfile(nextProfile);
+          setSession({ user: { id: user.uid, email: user.email, user_metadata: { name: nextProfile.name, role: nextProfile.role } } });
+          setProfile({ id: user.uid, name: nextProfile.name, email: user.email, role: nextProfile.role });
+        } catch (error) {
+          console.warn('Firebase session profile restore failed:', error?.message || error);
+          if (active) {
+            setAuthProfile(null);
+            setSession(null);
+            setProfile(null);
+          }
+        } finally {
+          if (active) setAuthLoading(false);
+        }
+      });
+    } catch (error) {
+      console.warn('Firebase session restore failed:', error?.message || error);
       setAuthLoading(false);
-      return;
     }
-    setAuthLoading(false);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, []);
 
   // Debugging: log current auth + profile state to help diagnose missing engineers/calls
