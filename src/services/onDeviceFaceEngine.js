@@ -11,7 +11,9 @@ const RECOGNIZER_URL = 'https://media.githubusercontent.com/media/opencv/opencv_
 const DETECTOR_SIZE = 320;
 const FACE_SIZE = 112;
 const SCORE_THRESHOLD = 0.82;
-export const FACE_MATCH_THRESHOLD = 0.42;
+export const FACE_MATCH_THRESHOLD = 0.32;
+export const NATIVE_FACE_ENGINE = 'opencv-sface-v1';
+export const FALLBACK_FACE_ENGINE = 'local-image-descriptor-v1';
 
 let ort;
 let detectorSession;
@@ -200,19 +202,38 @@ export async function createFaceEmbedding(uri) {
   if (!String(uri || '').startsWith('file:')) throw new Error('Нүүр танихад төхөөрөмжийн selfie зураг шаардлагатай.');
   const image = await decodeJpeg(uri);
   if (!NativeModules.Onnxruntime) {
-    return { embedding: fallbackEmbedding(image), quality: 0.85, fallback: true };
+    return {
+      embedding: fallbackEmbedding(image),
+      quality: 0.85,
+      fallback: true,
+      engine: FALLBACK_FACE_ENGINE,
+    };
   }
-  const { engine, detectorSession: detector, recognizerSession: recognizer } = await sessions();
-  const detectorInput = resizeRgbTensor(image, DETECTOR_SIZE);
-  const detectorOutputs = await detector.run({
-    [detector.inputNames[0]]: new engine.Tensor('float32', detectorInput, [1, 3, DETECTOR_SIZE, DETECTOR_SIZE]),
-  });
-  const face = detectBestFace(detectorOutputs);
-  const aligned = alignedFaceTensor(detectorInput, face.landmarks);
-  const recognitionOutputs = await recognizer.run({
-    [recognizer.inputNames[0]]: new engine.Tensor('float32', aligned, [1, 3, FACE_SIZE, FACE_SIZE]),
-  });
-  return { embedding: normalized(recognitionOutputs[recognizer.outputNames[0]].data), quality: face.score };
+  try {
+    const { engine, detectorSession: detector, recognizerSession: recognizer } = await sessions();
+    const detectorInput = resizeRgbTensor(image, DETECTOR_SIZE);
+    const detectorOutputs = await detector.run({
+      [detector.inputNames[0]]: new engine.Tensor('float32', detectorInput, [1, 3, DETECTOR_SIZE, DETECTOR_SIZE]),
+    });
+    const face = detectBestFace(detectorOutputs);
+    const aligned = alignedFaceTensor(detectorInput, face.landmarks);
+    const recognitionOutputs = await recognizer.run({
+      [recognizer.inputNames[0]]: new engine.Tensor('float32', aligned, [1, 3, FACE_SIZE, FACE_SIZE]),
+    });
+    return {
+      embedding: normalized(recognitionOutputs[recognizer.outputNames[0]].data),
+      quality: face.score,
+      engine: NATIVE_FACE_ENGINE,
+    };
+  } catch (error) {
+    console.warn('Native face engine failed; using the on-device fallback:', error?.message || error);
+    return {
+      embedding: fallbackEmbedding(image),
+      quality: 0.85,
+      fallback: true,
+      engine: FALLBACK_FACE_ENGINE,
+    };
+  }
 }
 
 export function cosineSimilarity(left, right) {
