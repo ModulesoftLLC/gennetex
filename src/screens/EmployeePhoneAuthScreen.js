@@ -59,7 +59,7 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
     return () => { clearInterval(timer); sub.remove(); };
   }, [mode, session?.sessionId, verificationPurpose, pendingPin]);
   const start = async () => {
-    try { normalizeMongolianPhone(phone); setLoading(true); setError(''); setVerificationPurpose('PHONE_ACTIVATION'); const next = await api.startVerification(phone, 'PHONE_ACTIVATION'); if (next.activated) { setMode('login'); return; } setSession(next); setMode('verify'); }
+    try { normalizeMongolianPhone(phone); setError(''); setMode('login'); }
     catch (e) { setError(e.message); } finally { setLoading(false); }
   };
   const login = async (enteredPin = pin) => {
