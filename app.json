@@ -4,7 +4,7 @@
     "name": "Gennetex ERP",
     "slug": "gennetex",
     "scheme": "gennetex-erp",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./ios/GennetexERP/Images.xcassets/AppIcon.appiconset/App-Icon-1024x1024@1x.png",

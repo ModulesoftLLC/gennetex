@@ -338,15 +338,21 @@ export default function AttendanceScreen() {
     setBusy(true);
     setError(null);
     try {
-      const photoUrl = await attApi.uploadSelfie(photo.uri, profile.id);
-      await faceApi.insertEnrollment({
+      let photoUrl = null;
+      try {
+        photoUrl = await attApi.uploadSelfie(photo.uri, profile.id);
+      } catch (uploadError) {
+        console.warn('Face enrollment selfie upload failed; continuing with local enrollment:', uploadError?.message || uploadError);
+      }
+      const enrollment = await faceApi.insertEnrollment({
         userId: profile.id,
         userName: profile.name,
         photoUrl,
         localUri: photo.uri,
       });
-      const next = enrollCount + 1;
+      const next = Number(enrollment.count ?? enrollCount + 1);
       setEnrollCount(next);
+      if (enrollment.syncWarning) setError(enrollment.syncWarning);
 
       if (next < faceApi.ENROLL_TARGET) {
         // Камер нээлттэй хэвээр — дараагийн зураг
@@ -354,7 +360,12 @@ export default function AttendanceScreen() {
       }
 
       // 10 хүрсэн — бүртгэл дуусч, ирцээ бас бүртгэнэ
-      await faceApi.setFaceEnrolled(profile.id);
+      try {
+        await faceApi.setFaceEnrolled(profile.id);
+      } catch (syncError) {
+        console.warn('Face enrollment completion profile sync failed:', syncError?.message || syncError);
+        setError('Нүүр бүртгэл энэ төхөөрөмжид дууссан. Серверийн синк дараа дахин оролдоно.');
+      }
       setEnrolled(true);
       setEnrolling(false);
       setFaceUuid(await faceApi.getFaceUuid(profile.id));

@@ -30,8 +30,14 @@ export default function FaceEnrollmentGateScreen({ initialCount = 0, onComplete 
       const result = await face.insertEnrollment({ photoUrl, localUri: photo.uri });
       const next = Number(result.count ?? count + 1);
       setCount(next);
+      if (result.syncWarning) setError(result.syncWarning);
       if (result.complete || next >= face.ENROLL_TARGET) {
-        await updateMyProfile({ face_enrolled: true });
+        try {
+          await updateMyProfile({ face_enrolled: true });
+        } catch (syncError) {
+          console.warn('Face enrollment completion profile sync failed:', syncError?.message || syncError);
+          setError('Нүүр бүртгэл энэ төхөөрөмжид дууссан. Серверийн синк дараа дахин оролдоно.');
+        }
         setCamera(false);
         Alert.alert('Бүртгэл амжилттай', 'Таны царай 10 удаагийн өгөгдлөөр хамгаалагдан бүртгэгдлээ.', [{ text: 'Апп руу орох', onPress: onComplete }]);
       }
