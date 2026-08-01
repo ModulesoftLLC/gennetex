@@ -868,13 +868,40 @@
         const localPhone = digits.startsWith('976') ? digits.slice(3) : digits;
         if (!/^\d{8}$/.test(localPhone)) throw new Error('Монголын 8 оронтой дугаар оруулна уу.');
         if (!/^\d{4}$/.test(String(pin || ''))) throw new Error('4 оронтой PIN оруулна уу.');
-        const response = await fetch('/api/employee-auth?action=login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone: `976${localPhone}`, pin: String(pin) }),
-        });
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok || !payload.customToken) throw new Error(payload.error || 'Утас эсвэл PIN буруу байна.');
+        const endpoints = [...new Set([
+          'https://gennetex.vercel.app/api/employee-auth',
+          `${location.origin.replace(/\/$/, '')}/api/employee-auth`,
+        ])];
+        let payload;
+        let lastError;
+        for (const endpoint of endpoints) {
+          let response;
+          try {
+            response = await fetch(`${endpoint}?action=login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ phone: `976${localPhone}`, pin: String(pin) }),
+            });
+          } catch (requestError) {
+            lastError = requestError;
+            continue;
+          }
+          const contentType = response.headers.get('content-type') || '';
+          const candidate = contentType.includes('application/json')
+            ? await response.json().catch(() => ({}))
+            : {};
+          if (response.ok && candidate.customToken) {
+            payload = candidate;
+            break;
+          }
+          if (response.status < 500 && contentType.includes('application/json')) {
+            throw new Error(candidate.error || 'Утас эсвэл PIN буруу байна.');
+          }
+          lastError = new Error(`${endpoint} HTTP ${response.status}`);
+        }
+        if (!payload?.customToken) {
+          throw lastError || new Error('Нэвтрэх серверт холбогдож чадсангүй. Дахин оролдоно уу.');
+        }
         const signInResult = await firebaseAuthInstance.signInWithCustomToken(payload.customToken);
         return { user: signInResult?.user || null, error: null };
       } catch (signInError) {

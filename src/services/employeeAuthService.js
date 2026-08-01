@@ -4,7 +4,11 @@ import { signInWithCustomToken } from 'firebase/auth';
 const BASE_URL = String(
   process.env.EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL || 'https://gennetex.vercel.app/api/employee-auth'
 ).replace(/\/$/, '');
-const ENDPOINTS = [...new Set([BASE_URL, 'https://gennetex.vercel.app/api/employee-auth'])];
+const ENDPOINTS = [...new Set([
+  BASE_URL,
+  'https://gennetex.vercel.app/api/employee-auth',
+  'https://adiya.site/api/employee-auth',
+])];
 
 async function request(action, body = {}, authenticated = false) {
   if (!BASE_URL) throw new Error('EXPO_PUBLIC_EMPLOYEE_AUTH_API_URL тохируулаагүй байна.');
@@ -15,11 +19,31 @@ async function request(action, body = {}, authenticated = false) {
     headers.Authorization = `Bearer ${token}`;
   }
   let response; let lastError;
-  for (const endpoint of ENDPOINTS) for (let attempt = 0; attempt < 2 && !response; attempt += 1) {
-    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 20000);
-    try { response = await fetch(`${endpoint}?action=${encodeURIComponent(action)}`, { method: 'POST', headers, body: JSON.stringify(body), signal: controller.signal }); }
-    catch (error) { lastError = error; if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 700)); }
-    finally { clearTimeout(timeout); }
+  for (const endpoint of ENDPOINTS) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+      try {
+        const candidate = await fetch(`${endpoint}?action=${encodeURIComponent(action)}`, {
+          method: 'POST', headers, body: JSON.stringify(body), signal: controller.signal,
+        });
+        // A stale deployment often returns an HTML 404/500 page. Continue to the
+        // canonical API instead of presenting that response as a server outage.
+        const contentType = candidate.headers?.get?.('content-type') || '';
+        if ([404, 405, 408, 429].includes(candidate.status) || candidate.status >= 500 || !contentType.includes('application/json')) {
+          lastError = new Error(`${endpoint} HTTP ${candidate.status}`);
+          continue;
+        }
+        response = candidate;
+        break;
+      } catch (error) {
+        lastError = error;
+        if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 700));
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+    if (response) break;
   }
   if (!response) throw new Error(`Сүлжээний холболт тасарлаа. ${lastError?.message || 'API хүсэлт амжилтгүй.'}`);
   const data = await response.json().catch(() => ({}));

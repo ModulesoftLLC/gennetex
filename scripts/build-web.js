@@ -48,7 +48,7 @@ if (fs.existsSync(logo)) {
 // 1) React + Tailwind public site build
 console.log('[build-web] Public site build (Vite)...');
 try {
-  execSync('npm install', { cwd: publicWeb, stdio: 'inherit' });
+  execSync('npm install --include=dev', { cwd: publicWeb, stdio: 'inherit' });
   execSync('npm run build', { cwd: publicWeb, stdio: 'inherit' });
 } catch (e) {
   console.error('[build-web] Public site build алдаа:', e.message);
