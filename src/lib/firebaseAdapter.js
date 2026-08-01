@@ -328,7 +328,7 @@ export async function firebaseUploadUri(path, uri, contentType = 'application/oc
       httpMethod: 'POST',
       uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
       headers: {
-        Authorization: `Firebase ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': contentType,
       },
     });
