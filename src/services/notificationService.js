@@ -116,7 +116,7 @@ async function sendExpoPush(messages) {
   if (!messages?.length) return;
   for (let i = 0; i < messages.length; i += 100) {
     const chunk = messages.slice(i, i + 100);
-    await fetch('https://exp.host/--/api/v2/push/send', {
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -125,6 +125,10 @@ async function sendExpoPush(messages) {
       },
       body: JSON.stringify(chunk),
     });
+    const result = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(`Expo push HTTP ${response.status}`);
+    const failed = (result?.data || []).find((ticket) => ticket.status === 'error');
+    if (failed) throw new Error(failed.message || failed.details?.error || 'Expo push илгээж чадсангүй.');
   }
 }
 
@@ -187,7 +191,9 @@ export async function notifyUsers(userIds, payload) {
   try {
     const tokens = await fetchTokensForUsers(userIds);
     await notifyTokens(tokens, payload);
-  } catch (e) {}
+  } catch (error) {
+    console.warn('Push notification send failed:', error?.message || error);
+  }
 }
 
 export async function notifyAdmins(payload) {

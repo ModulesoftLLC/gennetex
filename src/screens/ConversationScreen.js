@@ -242,7 +242,8 @@ export default function ConversationScreen() {
       }
       setText('');
       try {
-        await chatApi.sendMessage({ room, senderId: me.id, senderName: me.name, content: body });
+        const created = await chatApi.sendMessage({ room, senderId: me.id, senderName: me.name, content: body });
+        setMessages((prev) => (prev.some((message) => message.id === created.id) ? prev : [...prev, created]));
       } catch (e) {
         setError(e.message);
       }
@@ -304,7 +305,8 @@ export default function ConversationScreen() {
       if (!body || !me) return;
       setVoicePreview('');
       try {
-        await chatApi.sendMessage({ room, senderId: me.id, senderName: me.name, content: body });
+        const created = await chatApi.sendMessage({ room, senderId: me.id, senderName: me.name, content: body });
+        setMessages((prev) => (prev.some((message) => message.id === created.id) ? prev : [...prev, created]));
       } catch (e) {
         setError(e.message);
         Alert.alert('Алдаа', e.message);
@@ -318,7 +320,7 @@ export default function ConversationScreen() {
     setUploading(true);
     try {
       const url = await chatApi.uploadChatFile(uri, { room, mimeType, name });
-      await chatApi.sendMessage({
+      const created = await chatApi.sendMessage({
         room,
         senderId: me.id,
         senderName: me.name,
@@ -327,6 +329,7 @@ export default function ConversationScreen() {
         attachmentType: type,
         attachmentName: name,
       });
+      setMessages((prev) => (prev.some((message) => message.id === created.id) ? prev : [...prev, created]));
     } catch (e) {
       setError(e.message);
       Alert.alert('Алдаа', e.message);

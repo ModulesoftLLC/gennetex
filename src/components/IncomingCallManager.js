@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 import { useApp } from '../context/AppContext';
 import VideoCallModal from './VideoCallModal';
 import CallScreen from './CallScreen';
@@ -42,10 +43,11 @@ export default function IncomingCallManager() {
       const createdAtMs = parseTimestamp(call.created_at) || Date.now();
       const fresh = Date.now() - createdAtMs < 60000;
       if (!fresh) return;
+      if (incomingRef.current?.id === call.id) return;
+      incomingRef.current = call;
       setIncoming(call);
-      if (useNative) {
-        // Утасны жинхэнэ дуудлагын дэлгэц (өөрийн ringtone-той)
-        showNativeIncomingCall(call);
+      if (useNative && AppState.currentState !== 'active') {
+        if (!showNativeIncomingCall(call)) await startIncomingCallAlert(call.caller_name);
       } else {
         await startIncomingCallAlert(call.caller_name);
       }
@@ -113,17 +115,14 @@ export default function IncomingCallManager() {
 
   return (
     <>
-      {/* Native ажиллахгүй үед (iOS г.м) л апп доторх дуудлагын дэлгэц харуулна */}
-      {!useNative ? (
-        <CallScreen
-          visible={!!incoming}
-          mode="incoming"
-          name={caller}
-          video
-          onAccept={() => acceptCall(incoming)}
-          onDecline={() => declineCall(incoming, 'declined')}
-        />
-      ) : null}
+      <CallScreen
+        visible={!!incoming}
+        mode="incoming"
+        name={caller}
+        video
+        onAccept={() => acceptCall(incoming)}
+        onDecline={() => declineCall(incoming, 'declined')}
+      />
 
       <VideoCallModal
         visible={!!inCall}
