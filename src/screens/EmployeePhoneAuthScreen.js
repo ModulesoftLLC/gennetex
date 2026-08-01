@@ -49,7 +49,7 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
   const [loading, setLoading] = useState(false); const [error, setError] = useState(''); const [seconds, setSeconds] = useState(0); const checking = useRef(false);
   const check = async () => {
     if (!session?.sessionId || checking.current) return; checking.current = true; setLoading(true);
-    try { const next = await api.checkVerification(session.sessionId); setSession((old) => ({ ...old, ...next })); if (next.status === 'VERIFIED') { setError(''); if (verificationPurpose === 'PIN_SETUP') { const result = await api.setPin(session.sessionId, next.verificationToken, pendingPin); await completeEmployeeTokenLogin(result.customToken); } else { setMode('pinSetup'); } } else if (next.status === 'EXPIRED') setError('Баталгаажуулах хугацаа дууссан байна.'); }
+    try { const next = await api.checkVerification(session.sessionId); setSession((old) => ({ ...old, ...next })); if (next.status === 'VERIFIED') { setError(''); if (verificationPurpose === 'PIN_SETUP') { const result = await api.setPin(session.sessionId, next.verificationToken, pendingPin); await completeEmployeeTokenLogin(result.customToken); } else if (next.customToken) { await completeEmployeeTokenLogin(next.customToken); } else { setMode('pinSetup'); } } else if (next.status === 'EXPIRED') setError('Баталгаажуулах хугацаа дууссан байна.'); }
     catch (e) { setError(e.message); } finally { checking.current = false; setLoading(false); }
   };
   useEffect(() => {
@@ -59,7 +59,7 @@ export default function EmployeePhoneAuthScreen({ onBack }) {
     return () => { clearInterval(timer); sub.remove(); };
   }, [mode, session?.sessionId, verificationPurpose, pendingPin]);
   const start = async () => {
-    try { normalizeMongolianPhone(phone); setError(''); setMode('login'); }
+    try { normalizeMongolianPhone(phone); setLoading(true); setError(''); setVerificationPurpose('PHONE_ACTIVATION'); const next = await api.startVerification(phone, 'PHONE_ACTIVATION'); setSession(next); setMode('verify'); }
     catch (e) { setError(e.message); } finally { setLoading(false); }
   };
   const login = async (enteredPin = pin) => {

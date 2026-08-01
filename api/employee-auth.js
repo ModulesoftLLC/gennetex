@@ -169,9 +169,6 @@ module.exports = async function handler(req, res) {
       if (!allowedPurposes.has(purpose)) throw httpError(400, 'Баталгаажуулалтын зорилго буруу.');
       const employee = await findEmployee(phone);
       if (!employee || employee.status === 'DISABLED') throw httpError(404, 'Бүртгэлгүй утасны дугаар байна.');
-      if (purpose === 'PHONE_ACTIVATION' && (employee.appPinConfigured || phone === '+97695238118')) {
-        return res.status(200).json({ activated: true });
-      }
       return res.status(200).json(publicSession(await createVerifySession(employee, purpose)));
     }
     if (action === 'check') {
@@ -180,6 +177,12 @@ module.exports = async function handler(req, res) {
         const raw = crypto.randomBytes(32).toString('base64url');
         await db.collection('verificationSessions').doc(session.id).update({ verificationTokenHash: tokenHash(raw), tokenExpiresAt: new Date(Date.now() + 10 * 60e3).toISOString() });
         result.verificationToken = raw;
+        if (session.purpose === 'PHONE_ACTIVATION') {
+          const employee = (await db.collection('profiles').doc(session.employeeId).get()).data();
+          if (employee?.appPinConfigured || session.phone === '+97695238118') {
+            result.customToken = await getAdmin().auth().createCustomToken(session.employeeId);
+          }
+        }
       }
       return res.status(200).json(result);
     }
