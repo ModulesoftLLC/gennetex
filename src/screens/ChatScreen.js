@@ -135,10 +135,9 @@ export default function ChatScreen() {
   const load = useCallback(async () => {
     if (!isCloud || !me?.id) return;
     try {
-      const [emps, convs] = await Promise.all([
-        fetchEmployees().catch(() => []),
-        chatApi.fetchMyConversations(me.id).catch(() => []),
-      ]);
+      const emps = await fetchEmployees();
+      await chatApi.recoverDirectConversations(me.id, emps);
+      const convs = await chatApi.fetchMyConversations(me.id);
       setEmployees(emps.filter((e) => e.id !== me.id));
       setConversations(convs);
       setError(null);

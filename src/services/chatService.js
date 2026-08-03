@@ -125,6 +125,53 @@ export async function getOrCreateDirect(me, other) {
   return conv;
 }
 
+// Хуучин алдаатай array insert-ээс үүссэн membership-үүдийг dm_key-ээр сэргээнэ.
+// dm_key-г задалдаггүй тул underscore-той хэрэглэгчийн ID ч найдвартай ажиллана.
+export async function recoverDirectConversations(userId, users = []) {
+  if (!userId || !users.length) return;
+  const usersByKey = new Map(
+    users
+      .filter((user) => user?.id && user.id !== userId)
+      .map((user) => [dmKey(userId, user.id), user])
+  );
+  if (!usersByKey.size) return;
+
+  const { data: conversations, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('is_group', false);
+  if (error) throw error;
+
+  const broken = (conversations || []).filter((conversation) => usersByKey.has(conversation.dm_key));
+  if (!broken.length) return;
+
+  const { data: existing, error: membersError } = await supabase
+    .from('conversation_members')
+    .select('conversation_id, user_id')
+    .in('conversation_id', broken.map((conversation) => conversation.id));
+  if (membersError) throw membersError;
+
+  const memberKeys = new Set(
+    (existing || []).map((member) => `${member.conversation_id}:${member.user_id}`)
+  );
+  const rows = [];
+  broken.forEach((conversation) => {
+    const other = usersByKey.get(conversation.dm_key);
+    [userId, other.id].forEach((memberId) => {
+      if (!memberKeys.has(`${conversation.id}:${memberId}`)) {
+        rows.push({
+          conversation_id: conversation.id,
+          user_id: memberId,
+          user_name: memberId === userId ? '' : other.name || 'Ажилтан',
+        });
+      }
+    });
+  });
+  if (!rows.length) return;
+  const { error: insertError } = await supabase.from('conversation_members').insert(rows);
+  if (insertError) throw insertError;
+}
+
 // Групп үүсгэх
 export async function createGroup(me, name, members) {
   const { data: conv, error } = await supabase
@@ -165,7 +212,7 @@ export async function fetchMyConversations(userId) {
   // Сүүлийн мессежүүд
   const { data: lastMsgs } = await supabase
     .from(TABLE)
-    .select('room, content, created_at, sender_name, attachment_type')
+    .select('room, content, created_at, sender_id, sender_name, attachment_type')
     .in('room', ids)
     .order('created_at', { ascending: false });
 
