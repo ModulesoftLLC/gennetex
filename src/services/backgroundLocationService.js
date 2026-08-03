@@ -36,7 +36,9 @@ if (!TaskManager.isTaskDefined(BACKGROUND_LOCATION_TASK)) {
         user_name: user.name || null,
         ...payload,
       });
-    } catch (_) {}
+    } catch (updateError) {
+      console.warn('Background location update failed:', updateError?.message || updateError);
+    }
   });
 }
 

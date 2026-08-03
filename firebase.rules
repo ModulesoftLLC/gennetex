@@ -24,7 +24,8 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'avatar_url', 'latitude', 'longitude', 'last_seen', 'face_uuid', 'faceUuid',
           'face_enrolled', 'faceEnrolled', 'must_change_password', 'report_signature_url',
-          'telegram_user_id', 'telegram_username', 'telegram_linked_at', 'updatedAt'
+          'telegram_user_id', 'telegram_username', 'telegram_linked_at', 'updatedAt',
+          'location_accuracy', 'location_heading', 'location_speed', 'location_source'
         ]));
       allow delete: if isAdmin();
     }
