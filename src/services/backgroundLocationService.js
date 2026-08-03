@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { Platform } from 'react-native';
-import { firebaseInsert, firebaseUpdate } from '../lib/firebaseAdapter';
+import { firebaseInsert, firebaseUpdate, firebaseWaitForAuthenticatedUser } from '../lib/firebaseAdapter';
 
 export const BACKGROUND_LOCATION_TASK = 'gennetex-background-location-v1';
 const TRACKING_USER_KEY = '@gennetex_tracking_user_v1';
@@ -30,6 +30,10 @@ if (!TaskManager.isTaskDefined(BACKGROUND_LOCATION_TASK)) {
       location_source: 'background',
     };
     try {
+      const authUser = await firebaseWaitForAuthenticatedUser();
+      if (authUser.uid !== user.id) {
+        throw new Error('Background location user does not match Firebase session');
+      }
       await firebaseUpdate('profiles', user.id, payload);
       await firebaseInsert('location_logs', {
         user_id: user.id,

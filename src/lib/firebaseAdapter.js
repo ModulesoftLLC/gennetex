@@ -55,6 +55,36 @@ export function firebaseWatchAuth(onChange) {
   return onAuthStateChanged(auth, onChange);
 }
 
+export async function firebaseWaitForAuthenticatedUser() {
+  const auth = ensureAuth();
+  if (auth.currentUser) return auth.currentUser;
+
+  return new Promise((resolve, reject) => {
+    let unsubscribe = () => {};
+    const timeout = setTimeout(() => {
+      unsubscribe();
+      reject(new Error('Firebase authentication session did not restore in time'));
+    }, 10000);
+    unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        clearTimeout(timeout);
+        unsubscribe();
+        if (user) {
+          resolve(user);
+        } else {
+          reject(new Error('Firebase authentication session is unavailable'));
+        }
+      },
+      (error) => {
+        clearTimeout(timeout);
+        unsubscribe();
+        reject(error);
+      }
+    );
+  });
+}
+
 function normalizeFirestoreField(field) {
   return typeof field === 'string' ? field : field;
 }
