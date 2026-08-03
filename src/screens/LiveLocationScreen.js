@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from '../components/Map';
 import { Badge, ScreenHeader, EmptyState } from '../components/ui';
 import { useApp } from '../context/AppContext';
@@ -82,6 +83,7 @@ function WorkerMarker({ worker, color, visit, onPress }) {
 }
 
 export default function LiveLocationScreen() {
+  const navigation = useNavigation();
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   const { isCloud, isAdmin, trackingState, authProfile, profile } = useApp();
@@ -156,10 +158,16 @@ export default function LiveLocationScreen() {
       <ScreenHeader title={isAdmin ? 'Ажилчдын хяналт' : 'Байршил'}
         subtitle={`Firebase · ${onlineCount} online · ${located.length} байршилтай`}
         right={
-          <Badge
-            text={trackingState?.active ? 'Илгээж байна' : 'Идэвхгүй'}
-            color={trackingState?.active ? colors.success : colors.textFaint}
-          />
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.kmlButton} onPress={() => navigation.navigate('KmlMap')}>
+              <Ionicons name="layers-outline" size={17} color={colors.primary} />
+              <Text style={styles.kmlButtonText}>KML</Text>
+            </TouchableOpacity>
+            <Badge
+              text={trackingState?.active ? 'Илгээж байна' : 'Идэвхгүй'}
+              color={trackingState?.active ? colors.success : colors.textFaint}
+            />
+          </View>
         }
       />
 
@@ -325,6 +333,9 @@ function Tab({ active, label, onPress }) {
 
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  kmlButton: { flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 8, paddingVertical: 5, borderRadius: 8, backgroundColor: colors.primarySoft },
+  kmlButtonText: { color: colors.primary, fontSize: 11, fontWeight: '800' },
   map: { flex: 1 },
   panel: {
     padding: spacing.lg,

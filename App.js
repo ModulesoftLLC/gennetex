@@ -21,6 +21,7 @@ import InventoryScreen from './src/screens/InventoryScreen';
 import FuelScreen from './src/screens/FuelScreen';
 import FleetFuelScreen from './src/screens/FleetFuelScreen';
 import LiveLocationScreen from './src/screens/LiveLocationScreen';
+import KmlMapScreen from './src/screens/KmlMapScreen';
 import CallsMapScreen from './src/screens/CallsMapScreen';
 import AdminCallsScreen from './src/screens/AdminCallsScreen';
 import AdminVisitsScreen from './src/screens/AdminVisitsScreen';
@@ -161,6 +162,7 @@ function AppStack() {
       <Stack.Screen name="Fuel" component={FuelScreen} />
       <Stack.Screen name="FleetFuel" component={FleetFuelScreen} />
       <Stack.Screen name="Live" component={LiveLocationScreen} />
+      <Stack.Screen name="KmlMap" component={KmlMapScreen} />
       <Stack.Screen name="Calls" component={CallsMapScreen} />
       <Stack.Screen name="AdminCalls" component={AdminCallsScreen} />
       <Stack.Screen name="AdminVisits" component={AdminVisitsScreen} />

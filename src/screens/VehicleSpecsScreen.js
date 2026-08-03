@@ -141,7 +141,7 @@ export default function VehicleSpecsScreen({ navigation }) {
     };
 
     // fines: [Улсын дугаар, Хаана, Зөрчил, Мөнгөн дүн, Огноо, Төлөв]
-    return finesRows.slice(0, 30).map((r, idx) => ({
+    return finesRows.map((r, idx) => ({
       id: `${idx}-${r[4] || ''}-${r[3] || ''}`,
       plate: r[0] || plate,
       where: r[1] || '',
@@ -219,7 +219,7 @@ export default function VehicleSpecsScreen({ navigation }) {
           {fineWithDriver.length ? (
             <Card style={styles.fineCard}>
               <Text style={styles.fineTitle}>Торгууль (ажилтан)</Text>
-              {fineWithDriver.slice(0, 10).map((x) => (
+              {fineWithDriver.map((x) => (
                 <View key={x.id} style={styles.fineRow}>
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.fineLine} numberOfLines={1}>
