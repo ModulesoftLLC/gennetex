@@ -9,6 +9,7 @@ import {
   firebaseGetOne,
   firebaseList,
   firebaseCreate,
+  firebaseSet,
   firebaseUpdate,
   firebaseDelete,
   firebaseUploadFile,
@@ -100,6 +101,7 @@ class SupabaseCompatBuilder {
     this.countOptions = null;
     this.operation = 'select';
     this.payload = null;
+    this.upsertOptions = null;
     this.result = null;
   }
 
@@ -182,6 +184,13 @@ class SupabaseCompatBuilder {
     return this;
   }
 
+  upsert(payload, options = {}) {
+    this.operation = 'upsert';
+    this.payload = payload;
+    this.upsertOptions = options;
+    return this;
+  }
+
   update(payload) {
     this.operation = 'update';
     this.payload = payload;
@@ -198,6 +207,29 @@ class SupabaseCompatBuilder {
       if (this.operation === 'insert') {
         this.result = await firebaseCreate(this.table, this.payload || {});
         return { data: normalizeRow(this.result), error: null };
+      }
+
+      if (this.operation === 'upsert') {
+        const rows = Array.isArray(this.payload) ? this.payload : [this.payload || {}];
+        const conflictFields = String(this.upsertOptions?.onConflict || '')
+          .split(',')
+          .map((field) => field.trim())
+          .filter(Boolean);
+        const saved = await Promise.all(rows.map(async (row) => {
+          if (row.id !== undefined && row.id !== null) {
+            return firebaseSet(this.table, String(row.id), row);
+          }
+          if (conflictFields.length) {
+            const existing = await firebaseList(this.table, {
+              whereClauses: conflictFields.map((field) => ({ field, op: '==', value: row[field] })),
+              limitCount: 1,
+            });
+            if (existing[0]) return firebaseUpdate(this.table, existing[0].id, row);
+          }
+          return firebaseCreate(this.table, row);
+        }));
+        const normalized = saved.map(normalizeRow);
+        return { data: maybeSingle ? normalized[0] || null : normalized, error: null };
       }
 
       if (this.operation === 'update') {

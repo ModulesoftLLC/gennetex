@@ -38,8 +38,10 @@ let logoDataUriCache = null;
 
 async function getLogoDataUri() {
   if (logoDataUriCache) return logoDataUriCache;
-  const [asset] = await Asset.loadAsync(require('../../assets/report-logo.png'));
-  const localUri = asset.localUri || asset.uri;
+  const asset = Asset.fromModule(require('../../assets/report-logo.png'));
+  await asset.downloadAsync();
+  const localUri = asset.localUri;
+  if (!localUri?.startsWith('file:')) return null;
   const base64 = await FileSystem.readAsStringAsync(localUri, {
     encoding: FileSystem.EncodingType.Base64,
   });
