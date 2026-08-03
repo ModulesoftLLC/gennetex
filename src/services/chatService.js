@@ -83,6 +83,24 @@ function dmKey(a, b) {
   return ['dm', ...[a, b].sort()].join('_');
 }
 
+async function ensureDirectMembers(conversation, me, other) {
+  const existing = await fetchConversationMembers(conversation.id);
+  const memberIds = new Set(existing.map((member) => member.user_id));
+  const missing = [
+    { id: me.id, name: me.name },
+    { id: other.id, name: other.name },
+  ].filter((member) => !memberIds.has(member.id))
+    .map((member) => ({
+      conversation_id: conversation.id,
+      user_id: member.id,
+      user_name: member.name,
+    }));
+  if (missing.length) {
+    const { error } = await supabase.from('conversation_members').insert(missing);
+    if (error) throw error;
+  }
+}
+
 // 1:1 яриа олох эсвэл үүсгэх
 export async function getOrCreateDirect(me, other) {
   const key = dmKey(me.id, other.id);
@@ -91,7 +109,10 @@ export async function getOrCreateDirect(me, other) {
     .select('*')
     .eq('dm_key', key)
     .maybeSingle();
-  if (found) return found;
+  if (found) {
+    await ensureDirectMembers(found, me, other);
+    return found;
+  }
 
   const { data: conv, error } = await supabase
     .from('conversations')
@@ -100,10 +121,7 @@ export async function getOrCreateDirect(me, other) {
     .single();
   if (error) throw error;
 
-  await supabase.from('conversation_members').insert([
-    { conversation_id: conv.id, user_id: me.id, user_name: me.name },
-    { conversation_id: conv.id, user_id: other.id, user_name: other.name },
-  ]);
+  await ensureDirectMembers(conv, me, other);
   return conv;
 }
 

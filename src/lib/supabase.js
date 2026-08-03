@@ -205,8 +205,10 @@ class SupabaseCompatBuilder {
   async _execute(maybeSingle) {
     try {
       if (this.operation === 'insert') {
-        this.result = await firebaseCreate(this.table, this.payload || {});
-        return { data: normalizeRow(this.result), error: null };
+        const rows = Array.isArray(this.payload) ? this.payload : [this.payload || {}];
+        const saved = await Promise.all(rows.map((row) => firebaseCreate(this.table, row)));
+        const normalized = saved.map(normalizeRow);
+        return { data: maybeSingle ? normalized[0] || null : normalized, error: null };
       }
 
       if (this.operation === 'upsert') {
