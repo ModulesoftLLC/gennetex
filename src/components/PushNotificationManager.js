@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import { registerBackgroundCallTask } from '../services/incomingCallBackgroundTask';
 import {
   isNativeIncomingCallAvailable,
+  initNativeIncomingCallListeners,
   showNativeIncomingCallFromPush,
 } from '../services/nativeIncomingCallService';
 
@@ -36,6 +37,7 @@ export default function PushNotificationManager() {
 
     // App хаалттай/background үед дуудлагын push ирвэл утасны native
     // дуудлагын дэлгэц гаргах background task-ийг бүртгэнэ.
+    initNativeIncomingCallListeners();
     registerBackgroundCallTask();
 
     // Миний ярианууд — foreground чат мэдэгдэл

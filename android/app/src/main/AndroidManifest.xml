@@ -3,6 +3,7 @@
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
   <uses-permission android:name="android.permission.CAMERA"/>
+  <uses-permission android:name="android.permission.CALL_PHONE"/>
   <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
@@ -55,6 +56,9 @@
         <data android:scheme="exp+gennetex"/>
       </intent-filter>
     </activity>
+    <activity android:name="com.reactnativefullscreennotificationincomingcall.IncomingCallActivity" android:theme="@style/incomingCall" android:launchMode="singleTask" android:excludeFromRecents="true" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true"/>
+    <activity android:name="com.reactnativefullscreennotificationincomingcall.NotificationReceiverActivity" android:theme="@style/incomingCall" android:launchMode="singleTask" android:excludeFromRecents="true" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true"/>
+    <service android:name="com.reactnativefullscreennotificationincomingcall.IncomingCallService" android:enabled="true" android:stopWithTask="false" android:foregroundServiceType="phoneCall" android:exported="false"/>
     <uses-library android:name="org.apache.http.legacy" android:required="false"/>
   </application>
 </manifest>
