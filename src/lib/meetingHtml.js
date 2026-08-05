@@ -22,6 +22,9 @@ export function buildMeetingHtml({
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
   <style>
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:#0b0f1a;color:#fff;font-family:system-ui,-apple-system,sans-serif}
@@ -51,6 +54,8 @@ export function buildMeetingHtml({
   <script>
     const SUPABASE_URL = ${JSON.stringify(supabaseUrl)};
     const SUPABASE_KEY = ${JSON.stringify(supabaseKey)};
+    // FIREBASE_CONFIG is intentionally null here; replace during deployment/build with your Firebase project config
+    const FIREBASE_CONFIG = null;
     const MEETING_ID = ${JSON.stringify(safeId)};
     const DISPLAY_NAME = ${JSON.stringify(safeName)};
     const IS_HOST = ${isHost ? 'true' : 'false'};
@@ -61,8 +66,52 @@ export function buildMeetingHtml({
     const peersEl = document.getElementById('peers');
     const setStatus = (t) => { statusEl.textContent = t || ''; };
     const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const channel = sb.channel('meeting-' + MEETING_ID, { config: { broadcast: { self: false } } });
+
+    // Signaling backend: prefer Supabase if configured, otherwise fall back to Firebase Realtime Database (placeholders)
+    let sb = null;
+    let channel = null;
+    let firebaseApp = null;
+    let firebaseDb = null;
+    let firebaseAuth = null;
+    let firebaseSignalRef = null;
+
+    function initFirebaseIfAvailable() {
+      if (!window.firebase || !FIREBASE_CONFIG) return false;
+      try {
+        firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+        firebaseDb = firebase.database();
+        firebaseAuth = firebase.auth();
+        // attempt anonymous auth
+        firebaseAuth.signInAnonymously().catch(() => {});
+        firebaseSignalRef = firebaseDb.ref('meetings/' + MEETING_ID + '/signals');
+        // listen for incoming signals
+        firebaseSignalRef.on('child_added', (snap) => {
+          const msg = snap.val();
+          if (!msg || msg.from === MY_ID) return;
+          try { handleSignal(msg.payload || msg); } catch (e) {}
+        });
+        return true;
+      } catch (e) {
+        console.warn('Firebase init failed', e);
+        return false;
+      }
+    }
+
+    const useSupabase = SUPABASE_URL && SUPABASE_URL.length;
+    if (useSupabase) {
+      try {
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        channel = sb.channel('meeting-' + MEETING_ID, { config: { broadcast: { self: false } } });
+      } catch (e) {
+        console.warn('Supabase init failed', e);
+        sb = null;
+        channel = null;
+      }
+    } else {
+      // try Firebase (placeholders must be replaced in deployment)
+      initFirebaseIfAvailable();
+    }
+
     const peers = new Map();
     let localStream = null;
     let ended = false;
@@ -71,7 +120,13 @@ export function buildMeetingHtml({
       if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage('close');
     }
     function send(payload) {
-      channel.send({ type: 'broadcast', event: 'signal', payload });
+      if (channel) {
+        channel.send({ type: 'broadcast', event: 'signal', payload });
+      } else if (firebaseSignalRef) {
+        try { firebaseSignalRef.push({ from: MY_ID, payload: payload, ts: Date.now() }); } catch (e) {}
+      } else {
+        console.warn('No signaling backend available');
+      }
     }
     function updatePeerCount() {
       if (!IS_HOST || !peersEl) return;
