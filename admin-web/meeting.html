@@ -39,7 +39,7 @@
     </div>
   </div>
   <script>
-    const SUPABASE_URL = 'https://xhxyrzzgmksjlibfrmlx.supabase.co';
+    const SUPABASE_URL = (window.SUPABASE_URL || '').trim();
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeHlyenpnbWtzamxpYmZybWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODEwMjYsImV4cCI6MjA5ODQ1NzAyNn0.nYWs_N09RLHvhmEUCdbS6M8yvthsKJ5TkXjdRv4VMag';
     const params = new URLSearchParams(location.search);
     const MEETING_ID = String(params.get('id') || '').replace(/[^a-zA-Z0-9-]/g, '');
@@ -67,8 +67,20 @@
     const setStatus = (t) => { statusEl.textContent = t || ''; };
 
     const ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const channel = sb.channel('meeting-' + MEETING_ID, { config: { broadcast: { self: false } } });
+    let sb = null;
+    let channel = null;
+    if (SUPABASE_URL && SUPABASE_URL.includes('.supabase.co') && SUPABASE_KEY) {
+      try {
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        channel = sb.channel('meeting-' + MEETING_ID, { config: { broadcast: { self: false } } });
+      } catch (e) {
+        console.warn('Failed to initialize Supabase client:', e);
+        sb = null;
+        channel = null;
+      }
+    } else {
+      console.warn('Supabase realtime not configured; realtime disabled');
+    }
     const peers = new Map();
     let localStream = null;
     let ended = false;
@@ -219,7 +231,11 @@
       peers.forEach((pc) => { try { pc.close(); } catch (e) {} });
       peers.clear();
       stopLocal();
-      await sb.from('meetings').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', MEETING_ID).eq('status', 'active');
+      if (sb) {
+        await sb.from('meetings').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', MEETING_ID).eq('status', 'active');
+      } else {
+        try { fetch('/api/meetings/end', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ id: MEETING_ID }) }); } catch(e) {}
+      }
       location.href = 'index.html';
     }
 
@@ -234,19 +250,24 @@
     document.getElementById('shareBtn').onclick = startShare;
     document.getElementById('camBtn').onclick = startCamera;
 
-    channel
-      .on('broadcast', { event: 'signal' }, ({ payload }) => handleSignal(payload))
-      .subscribe((status) => {
-        if (status !== 'SUBSCRIBED') return;
-        if (IS_HOST) {
-          setStatus('Камер нээж байна...');
-          startCamera();
-        } else {
-          setStatus('Live-д холбогдож байна...');
-          send({ type: 'join', from: MY_ID, name: DISPLAY_NAME });
-          setTimeout(() => { if (!ended) send({ type: 'join', from: MY_ID, name: DISPLAY_NAME }); }, 2000);
-        }
-      });
+    if (channel) {
+      channel
+        .on('broadcast', { event: 'signal' }, ({ payload }) => handleSignal(payload))
+        .subscribe((status) => {
+          if (status !== 'SUBSCRIBED') return;
+          if (IS_HOST) {
+            setStatus('Камер нээж байна...');
+            startCamera();
+          } else {
+            setStatus('Live-д холбогдож байна...');
+            send({ type: 'join', from: MY_ID, name: DISPLAY_NAME });
+            setTimeout(() => { if (!ended) send({ type: 'join', from: MY_ID, name: DISPLAY_NAME }); }, 2000);
+          }
+        });
+    } else {
+      setStatus('Realtime үйлчилгээн идэвхгүй байна');
+      console.warn('Realtime channel not initialized; either Supabase not configured or using Firebase migration.');
+    }
   </script>
 </body>
 </html>
