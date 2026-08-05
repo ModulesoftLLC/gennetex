@@ -22,7 +22,21 @@ export function mergeSiteContent(partial) {
   return deepMerge(DEFAULT_SITE_CONTENT, partial || {});
 }
 
+async function fetchFromServerApi() {
+  try {
+    const r = await fetch('/api/public-site', { headers: { Accept: 'application/json' } });
+    if (!r.ok) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+    const json = await r.json().catch(() => ({}));
+    if (!json || !json.content) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+    return { content: mergeSiteContent(json.content), updatedAt: json.updatedAt || null };
+  } catch (e) {
+    console.warn('[siteContent] server API fetch failed', e);
+    return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+  }
+}
+
 export async function fetchSiteContent() {
+  // Try Supabase first; on network/DNS failures fall back to serverless API which uses Firebase.
   try {
     const { data, error } = await supabase
       .from('public_site_content')
@@ -30,7 +44,11 @@ export async function fetchSiteContent() {
       .eq('id', 'main')
       .maybeSingle();
     if (error) {
-      console.warn('[siteContent]', error.message);
+      // If supabase had a network error, try server API
+      console.warn('[siteContent] supabase error', error?.message || error);
+      if (/Failed to fetch|ENOTFOUND|ENODATA|ENETUNREACH/i.test(String(error?.message || ''))) {
+        return fetchFromServerApi();
+      }
       return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
     }
     if (!data) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
@@ -39,8 +57,9 @@ export async function fetchSiteContent() {
       updatedAt: data.updated_at || null,
     };
   } catch (e) {
-    console.warn('[siteContent]', e);
-    return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
+    console.warn('[siteContent] supabase fetch failed', e);
+    // network / DNS error -> fallback to server API
+    return fetchFromServerApi();
   }
 }
 
