@@ -4,7 +4,10 @@ const admin = require('firebase-admin');
 function getAdmin() {
   if (!admin.apps.length) {
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    if (!raw) throw new Error('FIREBASE_SERVICE_ACCOUNT_JSON is required');
+    if (!raw) {
+      // Firebase service account not provided — allow caller to handle unconfigured state.
+      return null;
+    }
     admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) });
   }
   return admin;
@@ -21,9 +24,12 @@ function clean(value, max = 500) {
 
 module.exports = async function handler(req, res) {
   try {
-    const db = getAdmin().firestore();
+    const adm = getAdmin();
+    const db = adm ? adm.firestore() : null;
 
     if (req.method === 'GET') {
+      // If Firestore not configured, return null content so frontend falls back to defaults
+      if (!db) return send(res, 200, { content: null, updatedAt: null });
       const snap = await db.collection('publicSiteContent').doc('main').get();
       if (!snap.exists) return send(res, 200, { content: null, updatedAt: null });
       const data = snap.data() || {};
@@ -34,6 +40,9 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
+      // Disallow POST when Firestore/admin SDK not configured
+      if (!db) return send(res, 503, { error: 'Server not configured for submissions' });
+
       const form = req.body?.form;
       const general = form?.general;
       const name = clean(general?.firstName, 120);
