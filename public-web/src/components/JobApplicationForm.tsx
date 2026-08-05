@@ -342,7 +342,23 @@ export default function JobApplicationForm({ embedded = false }: { embedded?: bo
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <Field title="Төрсөн он">
-                <input className={inputCls} inputMode="numeric" value={form.general.birthYear} onChange={(e) => setGeneral({ birthYear: e.target.value })} />
+                <div className="flex space-x-2">
+  <select className={inputCls} value={form.general.birthYear} onChange={(e) => setGeneral({ birthYear: e.target.value })}>
+    <option value="">Он</option>
+    {Array.from({ length: 100 }).map((_, i) => {
+      const y = new Date().getFullYear() - i;
+      return <option key={y} value={String(y)}>{y}</option>;
+    })}
+  </select>
+  <select className={inputCls} value={form.general.birthMonth} onChange={(e) => setGeneral({ birthMonth: e.target.value })}>
+    <option value="">Сар</option>
+    {Array.from({ length: 12 }).map((_, i) => <option key={i+1} value={String(i+1)}>{i+1}</option>)}
+  </select>
+  <select className={inputCls} value={form.general.birthDay} onChange={(e) => setGeneral({ birthDay: e.target.value })}>
+    <option value="">Өдөр</option>
+    {Array.from({ length: 31 }).map((_, i) => <option key={i+1} value={String(i+1)}>{i+1}</option>)}
+  </select>
+</div>
               </Field>
               <Field title="Сар">
                 <input className={inputCls} inputMode="numeric" value={form.general.birthMonth} onChange={(e) => setGeneral({ birthMonth: e.target.value })} />
@@ -354,7 +370,31 @@ export default function JobApplicationForm({ embedded = false }: { embedded?: bo
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Field title="Төрсөн аймаг/хот">
-                <input className={inputCls} value={form.general.birthProvince} onChange={(e) => setGeneral({ birthProvince: e.target.value })} />
+                <select className={inputCls} value={form.general.birthProvince} onChange={(e) => setGeneral({ birthProvince: e.target.value })}>
+  <option value="">Аймаг/Хот</option>
+  <option value="Улаанбаатар">Улаанбаатар</option>
+  <option value="Архангай">Архангай</option>
+  <option value="Баян-Өлгий">Баян-Өлгий</option>
+  <option value="Баянхонгор">Баянхонгор</option>
+  <option value="Булган">Булган</option>
+  <option value="Говь-Алтай">Говь-Алтай</option>
+  <option value="Говьсүмбэр">Говьсүмбэр</option>
+  <option value="Дархан-Уул">Дархан-Уул</option>
+  <option value="Дорнод">Дорнод</option>
+  <option value="Дорноговь">Дорноговь</option>
+  <option value="Дундговь">Дундговь</option>
+  <option value="Завхан">Завхан</option>
+  <option value="Ховд">Ховд</option>
+  <option value="Хөвсгөл">Хөвсгөл</option>
+  <option value="Хэнтий">Хэнтий</option>
+  <option value="Орхон">Орхон</option>
+  <option value="Өвөрхангай">Өвөрхангай</option>
+  <option value="Өмнөговь">Өмнөговь</option>
+  <option value="Сүхбаатар">Сүхбаатар</option>
+  <option value="Сэлэнгэ">Сэлэнгэ</option>
+  <option value="Төв">Төв</option>
+  <option value="Увс">Увс</option>
+</select>
               </Field>
               <Field title="Сум/дүүрэг">
                 <input className={inputCls} value={form.general.birthDistrict} onChange={(e) => setGeneral({ birthDistrict: e.target.value })} />
@@ -367,7 +407,17 @@ export default function JobApplicationForm({ embedded = false }: { embedded?: bo
                 </select>
               </Field>
               <Field title="Цусны бүлэг">
-                <input className={inputCls} value={form.general.bloodType} onChange={(e) => setGeneral({ bloodType: e.target.value })} placeholder="ж: I, II, III, IV" />
+                <select className={inputCls} value={form.general.bloodType} onChange={(e) => setGeneral({ bloodType: e.target.value })}>
+  <option value="">Цусны бүлэг</option>
+  <option value="A+">A+</option>
+  <option value="A-">A-</option>
+  <option value="B+">B+</option>
+  <option value="B-">B-</option>
+  <option value="AB+">AB+</option>
+  <option value="AB-">AB-</option>
+  <option value="O+">O+</option>
+  <option value="O-">O-</option>
+</select>
               </Field>
             </div>
 
