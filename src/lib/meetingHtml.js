@@ -58,7 +58,7 @@ export function buildMeetingHtml({
     const FIREBASE_CONFIG = null;
     const MEETING_ID = ${JSON.stringify(safeId)};
     const DISPLAY_NAME = ${JSON.stringify(safeName)};
-    const IS_HOST = ${isHost ? 'true' : 'false'};
+    const IS_HOST = ${JSON.stringify(isHost)};
     const MY_ID = IS_HOST ? 'host' : ('p_' + Math.random().toString(36).slice(2) + Date.now().toString(36));
 
     const video = document.getElementById('video');
