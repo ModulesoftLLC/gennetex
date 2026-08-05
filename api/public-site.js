@@ -4,11 +4,13 @@ const admin = require('firebase-admin');
 function getAdmin() {
   if (!admin.apps.length) {
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    if (!raw) {
-      // Return null instead of throwing to allow handler to give a clearer HTTP response
+    if (!raw) return null; // don't throw during module load
+    try {
+      admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) });
+    } catch (e) {
+      console.error('[public-site] failed to initialize Firebase admin', e && e.message ? e.message : e);
       return null;
     }
-    admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) });
   }
   return admin;
 }
@@ -24,15 +26,13 @@ function clean(value, max = 500) {
 
 module.exports = async function handler(req, res) {
   try {
-    const fbAdmin = getAdmin();
-    if (!fbAdmin) {
-      // Helpful error for missing env config (do NOT leak secret values)
-      return send(res, 500, {
-        error: 'Server configuration error: FIREBASE_SERVICE_ACCOUNT_JSON is not set. Set this environment variable in Vercel (Settings → Environment Variables) with the Firebase service account JSON to enable this API.'
-      });
+    const adminInstance = getAdmin();
+    if (!adminInstance) {
+      console.error('[public-site] FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid');
+      return send(res, 500, { error: 'Server not configured: FIREBASE_SERVICE_ACCOUNT_JSON is missing or invalid. Set the full Firebase service account JSON as the FIREBASE_SERVICE_ACCOUNT_JSON environment variable in Vercel and redeploy.' });
     }
 
-    const db = fbAdmin.firestore();
+    const db = adminInstance.firestore();
 
     if (req.method === 'GET') {
       const snap = await db.collection('publicSiteContent').doc('main').get();
@@ -76,7 +76,7 @@ module.exports = async function handler(req, res) {
     res.setHeader('Allow', 'GET, POST');
     return send(res, 405, { error: 'Method not allowed' });
   } catch (error) {
-    console.error('[public-site]', error?.message || error);
+    console.error('[public-site]', error && (error.message || error));
     return send(res, 500, { error: 'Сервертэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.' });
   }
 };
