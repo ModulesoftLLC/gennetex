@@ -3,12 +3,39 @@ const admin = require('firebase-admin');
 
 function getAdmin() {
   if (!admin.apps.length) {
-    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    if (!raw) return null; // don't throw during module load
+    // Support either raw JSON or base64-encoded JSON to avoid issues with env editors.
+    let raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    const rawB64 = process.env.FIREBASE_SERVICE_ACCOUNT_JSON_B64;
+    if (!raw && rawB64) {
+      try {
+        raw = Buffer.from(rawB64, 'base64').toString('utf8');
+      } catch (err) {
+        console.error('[public-site] FIREBASE_SERVICE_ACCOUNT_JSON_B64 decode error:', err.message);
+        return null;
+      }
+    }
+
+    if (!raw) {
+      // Firebase service account not provided — allow caller to handle unconfigured state.
+      return null;
+    }
+
+    let creds;
     try {
-      admin.initializeApp({ credential: admin.credential.cert(JSON.parse(raw)) });
-    } catch (e) {
-      console.error('[public-site] failed to initialize Firebase admin', e && e.message ? e.message : e);
+      creds = JSON.parse(raw);
+    } catch (err) {
+      // Malformed JSON in env — log and treat as unconfigured so caller can handle it.
+      console.error('[public-site] FIREBASE_SERVICE_ACCOUNT_JSON parse error:', err.message);
+      return null;
+    }
+    // Some deploys store private_key with escaped newlines; convert to real newlines if present.
+    if (creds && creds.private_key && creds.private_key.includes('\\n')) {
+      creds.private_key = creds.private_key.replace(/\\n/g, '\n');
+    }
+    try {
+      admin.initializeApp({ credential: admin.credential.cert(creds) });
+    } catch (err) {
+      console.error('[public-site] Firebase initialize error:', err.message);
       return null;
     }
   }
@@ -26,15 +53,12 @@ function clean(value, max = 500) {
 
 module.exports = async function handler(req, res) {
   try {
-    const adminInstance = getAdmin();
-    if (!adminInstance) {
-      console.error('[public-site] FIREBASE_SERVICE_ACCOUNT_JSON missing or invalid');
-      return send(res, 500, { error: 'Server not configured: FIREBASE_SERVICE_ACCOUNT_JSON is missing or invalid. Set the full Firebase service account JSON as the FIREBASE_SERVICE_ACCOUNT_JSON environment variable in Vercel and redeploy.' });
-    }
-
-    const db = adminInstance.firestore();
+    const adm = getAdmin();
+    const db = adm ? adm.firestore() : null;
 
     if (req.method === 'GET') {
+      // If Firestore not configured, return null content so frontend falls back to defaults
+      if (!db) return send(res, 200, { content: null, updatedAt: null });
       const snap = await db.collection('publicSiteContent').doc('main').get();
       if (!snap.exists) return send(res, 200, { content: null, updatedAt: null });
       const data = snap.data() || {};
@@ -45,6 +69,9 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
+      // Disallow POST when Firestore/admin SDK not configured
+      if (!db) return send(res, 503, { error: 'Server not configured for submissions' });
+
       const form = req.body?.form;
       const general = form?.general;
       const name = clean(general?.firstName, 120);
@@ -76,7 +103,7 @@ module.exports = async function handler(req, res) {
     res.setHeader('Allow', 'GET, POST');
     return send(res, 405, { error: 'Method not allowed' });
   } catch (error) {
-    console.error('[public-site]', error && (error.message || error));
+    console.error('[public-site]', error?.message || error);
     return send(res, 500, { error: 'Сервертэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.' });
   }
 };
