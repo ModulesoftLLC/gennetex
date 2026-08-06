@@ -22,33 +22,30 @@ export function mergeSiteContent(partial) {
   return deepMerge(DEFAULT_SITE_CONTENT, partial || {});
 }
 
-async function fetchFromServerApi() {
-  try {
-    const r = await fetch('/api/public-site', { headers: { Accept: 'application/json' } });
-    if (!r.ok) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
-    const json = await r.json().catch(() => ({}));
-    if (!json || !json.content) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
-    return { content: mergeSiteContent(json.content), updatedAt: json.updatedAt || null };
-  } catch (e) {
-    console.warn('[siteContent] server API fetch failed', e);
-    return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
-  }
-}
-
 export async function fetchSiteContent() {
-  // Try Supabase first; on network/DNS failures fall back to serverless API which uses Firebase.
+  // Prefer server-side API which uses Firebase; fall back to Supabase client if server unavailable.
   try {
+    try {
+      const resp = await fetch('/api/public-site', { method: 'GET', headers: { 'Accept': 'application/json' } });
+      if (resp && resp.ok) {
+        const json = await resp.json();
+        if (json && (json.content || json.updatedAt)) {
+          return { content: mergeSiteContent(json.content || {}), updatedAt: json.updatedAt || null };
+        }
+      }
+    } catch (err) {
+      // swallow and fallback to supabase below
+      console.warn('[siteContent] server API request failed, falling back to supabase:', err);
+    }
+
+    // Fallback: direct Supabase client (legacy)
     const { data, error } = await supabase
       .from('public_site_content')
       .select('content, updated_at')
       .eq('id', 'main')
       .maybeSingle();
     if (error) {
-      // If supabase had a network error, try server API
-      console.warn('[siteContent] supabase error', error?.message || error);
-      if (/Failed to fetch|ENOTFOUND|ENODATA|ENETUNREACH/i.test(String(error?.message || ''))) {
-        return fetchFromServerApi();
-      }
+      console.warn('[siteContent]', error.message);
       return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
     }
     if (!data) return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
@@ -57,9 +54,8 @@ export async function fetchSiteContent() {
       updatedAt: data.updated_at || null,
     };
   } catch (e) {
-    console.warn('[siteContent] supabase fetch failed', e);
-    // network / DNS error -> fallback to server API
-    return fetchFromServerApi();
+    console.warn('[siteContent]', e);
+    return { content: DEFAULT_SITE_CONTENT, updatedAt: null };
   }
 }
 
