@@ -1,0 +1,154 @@
+
+{
+  "header": {
+    "reportVersion": 5,
+    "event": "Entering the V8 API without proper locking in place",
+    "trigger": "FatalError",
+    "filename": "report.20260805.193041.20560.0.304.json",
+    "dumpEventTime": "2026-08-05T19:30:41Z",
+    "dumpEventTimeStamp": "1785929441375",
+    "processId": 20560,
+    "threadId": null,
+    "cwd": "C:\\Users\\work pc\\Desktop\\test\\test",
+    "commandLine": [
+      "C:\\Users\\work pc\\AppData\\Local\\Microsoft\\WinGet\\Links\\copilot.exe",
+      "--no-warnings",
+      "--report-on-fatalerror",
+      "--optimize-for-size",
+      "--expose-gc",
+      "--no-maglev",
+      "--no-sparkplug",
+      "C:\\Users\\work pc\\AppData\\Local\\Microsoft\\WinGet\\Links\\copilot.exe"
+    ],
+    "nodejsVersion": "v24.18.1",
+    "wordSize": 64,
+    "arch": "x64",
+    "platform": "win32",
+    "componentVersions": {
+      "acorn": "8.16.0",
+      "ada": "3.4.4",
+      "amaro": "1.1.9",
+      "ares": "1.34.6",
+      "brotli": "1.2.0",
+      "cldr": "48.0",
+      "icu": "78.3",
+      "llhttp": "9.4.3",
+      "merve": "1.2.2",
+      "modules": "137",
+      "napi": "10",
+      "nbytes": "0.1.4",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.69.0",
+      "nghttp3": "",
+      "ngtcp2": "",
+      "node": "24.18.1",
+      "openssl": "3.5.7",
+      "simdjson": "4.6.4",
+      "simdutf": "6.4.0",
+      "sqlite": "3.53.1",
+      "tz": "2026b",
+      "undici": "7.29.0",
+      "unicode": "17.0",
+      "uv": "1.52.1",
+      "uvwasi": "0.0.23",
+      "v8": "13.6.233.17-node.50",
+      "zlib": "1.3.1-e00f703",
+      "zstd": "1.5.7"
+    },
+    "release": {
+      "name": "node",
+      "lts": "Krypton",
+      "headersUrl": "https://nodejs.org/download/release/v24.18.1/node-v24.18.1-headers.tar.gz",
+      "sourceUrl": "https://nodejs.org/download/release/v24.18.1/node-v24.18.1.tar.gz",
+      "libUrl": "https://nodejs.org/download/release/v24.18.1/win-x64/node.lib"
+    },
+    "osName": "Windows_NT",
+    "osRelease": "10.0.19045",
+    "osVersion": "Windows 10 Home",
+    "osMachine": "x86_64",
+    "cpus": [
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 93946156,
+        "nice": 0,
+        "sys": 88986515,
+        "idle": 358363953,
+        "irq": 3214515
+      },
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 87699484,
+        "nice": 0,
+        "sys": 31276500,
+        "idle": 422320640,
+        "irq": 419578
+      },
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 122608406,
+        "nice": 0,
+        "sys": 83301343,
+        "idle": 335386875,
+        "irq": 824296
+      },
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 100771687,
+        "nice": 0,
+        "sys": 37212218,
+        "idle": 403312718,
+        "irq": 285421
+      },
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 106885234,
+        "nice": 0,
+        "sys": 53855187,
+        "idle": 380556203,
+        "irq": 679562
+      },
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 116173218,
+        "nice": 0,
+        "sys": 64726140,
+        "idle": 360397140,
+        "irq": 446578
+      },
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 143961906,
+        "nice": 0,
+        "sys": 58866281,
+        "idle": 338468312,
+        "irq": 352359
+      },
+      {
+        "model": "Intel(R) Core(TM) i7-4790 CPU @ 3.60GHz",
+        "speed": 3592,
+        "user": 173060578,
+        "nice": 0,
+        "sys": 67112656,
+        "idle": 301123265,
+        "irq": 274218
+      }
+    ],
+    "networkInterfaces": [
+      {
+        "name": "Tailscale",
+        "internal": false,
+        "mac": "00:00:00:00:00:00",
+        "address": "fe80::d8ff:5060:f230:9168",
+        "netmask": "ffff:ffff:ffff:ffff::",
+        "family": "IPv6",
+        "scopeid": 5
+      },
+      {
+     
