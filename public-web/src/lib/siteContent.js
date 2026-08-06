@@ -23,7 +23,22 @@ export function mergeSiteContent(partial) {
 }
 
 export async function fetchSiteContent() {
+  // Prefer server-side API which uses Firebase; fall back to Supabase client if server unavailable.
   try {
+    try {
+      const resp = await fetch('/api/public-site', { method: 'GET', headers: { 'Accept': 'application/json' } });
+      if (resp && resp.ok) {
+        const json = await resp.json();
+        if (json && (json.content || json.updatedAt)) {
+          return { content: mergeSiteContent(json.content || {}), updatedAt: json.updatedAt || null };
+        }
+      }
+    } catch (err) {
+      // swallow and fallback to supabase below
+      console.warn('[siteContent] server API request failed, falling back to supabase:', err);
+    }
+
+    // Fallback: direct Supabase client (legacy)
     const { data, error } = await supabase
       .from('public_site_content')
       .select('content, updated_at')
