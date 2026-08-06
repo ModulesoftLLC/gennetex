@@ -1,4 +1,3 @@
-import { supabase } from './supabase';
 import type { JobApplicationFormData } from '../types/jobApplication';
 
 const FORM_MARKER = '[[GENNETEX_FORM]]';
@@ -38,44 +37,24 @@ function buildMessage(data: JobApplicationFormData, sanitized: ReturnType<typeof
   return summary || null;
 }
 
-function friendlyError(error: { message?: string; code?: string }) {
-  const msg = error.message || 'Илгээхэд алдаа гарлаа.';
+function friendlyError(error: any) {
+  const msg = typeof error === 'string' ? error : error?.message || 'Илгээхэд алдаа гарлаа.';
   if (/form_data|signature_svg|signed_at|photo_url|schema cache/i.test(msg)) {
     return 'Серверийн тохиргоо дутуу байна. Үндсэн мэдээлэл хадгалагдах болно — дахин оролдоно уу.';
   }
-  if (/row-level security|permission|policy/i.test(msg)) {
+  if (/permission|policy|unauthorized|403|401/i.test(msg)) {
     return 'Зөвшөөрөлгүй хүсэлт. Дахин оролдоно уу.';
   }
-  if (/job_applications/i.test(msg) && /does not exist|байхгүй/i.test(msg)) {
-    return 'Анкетын хүснэгт байхгүй байна. Админ migration_job_applications.sql ажиллуулна уу.';
+  if (/не найден|not found|404/i.test(msg)) {
+    return 'Серверийн байршил олдсонгүй. Админд хэлнэ үү.';
   }
   return msg;
 }
 
-function missingExtendedColumns(error: { message?: string }) {
-  return /form_data|signature_svg|signed_at|photo_url|schema cache/i.test(error.message || '');
-}
-
-function dataUrlToUpload(dataUrl: string) {
+function dataUrlToBase64(dataUrl: string): string | null {
   const m = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
   if (!m) return null;
-  const mime = m[1];
-  const bin = atob(m[2]);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  const ext = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
-  return { bytes, mime, ext };
-}
-
-async function uploadApplicationPhoto(dataUrl: string) {
-  const parsed = dataUrlToUpload(dataUrl);
-  if (!parsed) return null;
-  const path = `web/${Date.now()}-${Math.random().toString(36).slice(2, 9)}.${parsed.ext}`;
-  const { error } = await supabase.storage
-    .from('job-applications')
-    .upload(path, parsed.bytes, { contentType: parsed.mime, upsert: false });
-  if (error) return null;
-  return supabase.storage.from('job-applications').getPublicUrl(path).data.publicUrl;
+  return m[2];
 }
 
 export async function submitJobApplication(data: JobApplicationFormData) {
@@ -85,39 +64,32 @@ export async function submitJobApplication(data: JobApplicationFormData) {
 
   const sanitized = sanitizeFormData(data);
   const signedAt = data.signedAt || new Date().toISOString();
-  let photoUrl: string | null = null;
+  let photoBase64: string | null = null;
   if (g.photoDataUrl?.startsWith('data:')) {
-    photoUrl = await uploadApplicationPhoto(g.photoDataUrl);
-  } else if (g.photoDataUrl?.startsWith('http')) {
-    photoUrl = g.photoDataUrl;
+    photoBase64 = dataUrlToBase64(g.photoDataUrl);
   }
 
-  const baseRow = {
-    name,
-    last_name: g.clanName.trim() || null,
-    phone: g.phoneMobile.trim() || null,
-    email: g.email.trim() || null,
-    position: data.jobInterest.position.trim() || null,
-    message: buildMessage(data, sanitized),
-    source: 'web',
-    status: 'new',
+  const payload = {
+    form: sanitized,
+    signatureSvg: data.signatureSvg?.trim() || null,
+    signedAt: signedAt,
+    photoAttached: Boolean(photoBase64),
+    photoBase64: photoBase64,
   };
 
-  const fullRow = {
-    ...baseRow,
-    form_data: sanitized,
-    signature_svg: data.signatureSvg?.trim() || null,
-    signed_at: signedAt,
-    photo_url: photoUrl,
-  };
+  const response = await fetch('/api/public-site', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
 
-  // .select() ашиглахгүй — anon SELECT эрхгүй тул RETURNING алдаа гардаг
-  let { error } = await supabase.from('job_applications').insert(fullRow);
-  if (error && missingExtendedColumns(error)) {
-    ({ error } = await supabase.from('job_applications').insert(baseRow));
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(friendlyError(errorData.error || response.statusText));
   }
 
-  if (error) throw new Error(friendlyError(error));
+  const result = await response.json();
+  if (!result.ok) throw new Error(friendlyError(result.error || 'Илгээхэд алдаа гарлаа'));
 }
 
 /** Админ / харах талд — form_data эсвэл message доторх JSON */

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { HERO_GIF_URL, HERO_POSTER_URL } from '../lib/supabase';
+
+const HERO_GIF_URL = '/hero-network.gif';
+const HERO_POSTER_URL = '/hero-network-poster.jpg';
 
 const MARQUEE_ITEMS = [
   'Шилэн кабель',
