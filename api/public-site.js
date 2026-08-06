@@ -103,7 +103,9 @@ module.exports = async function handler(req, res) {
     res.setHeader('Allow', 'GET, POST');
     return send(res, 405, { error: 'Method not allowed' });
   } catch (error) {
-    console.error('[public-site]', error?.message || error);
-    return send(res, 500, { error: 'Сервертэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.' });
+    console.error('[public-site] full error:', error);
+    // Return a terse user message and include the error message in `debug` to help troubleshooting.
+    // Remove `debug` before shipping to production if it may expose sensitive details.
+    return send(res, 500, { error: 'Сервертэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.', debug: String(error?.message || error) });
   }
 };
