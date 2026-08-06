@@ -11,11 +11,16 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 // Нэвтрэлт (Google sign-in) шаарддаггүй нээлттэй Jitsi сервер.
 // meet.jit.si нь өрөө үүсгэхэд Google auth шаарддаг болсон тул ашиглахгүй.
@@ -73,6 +78,9 @@ function buildHtml(room, name) {
 
 export default function VideoCallModal({ visible, room, name, onClose }) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
   return (
@@ -122,10 +130,14 @@ export default function VideoCallModal({ visible, room, name, onClose }) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: '#000'},
   topBar: {
     flexDirection: 'row',

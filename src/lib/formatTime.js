@@ -1,14 +1,20 @@
 const TZ = 'Asia/Ulaanbaatar';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 function dayKeyInTz(value) {
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return '';
   return d.toLocaleDateString('en-CA', { timeZone: TZ });
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export function formatTime(value) {
   const d = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(d.getTime())) return '';
@@ -31,6 +37,9 @@ export function formatDate(value) {
   });
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 export function formatConvTime(value) {
   const d = value instanceof Date ? value : new Date(value);
@@ -90,5 +99,8 @@ export function formatRelativeTime(value) {
     timeZone: TZ,
   });
 }
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)

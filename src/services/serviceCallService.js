@@ -4,6 +4,9 @@ import * as notifyApi from './notificationService';
 const TABLE = 'service_calls';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export const SITE_KINDS = [
   { key: 'ail', label: 'Айл' },
   { key: 'baiguulga', label: 'Байгууллага' },
@@ -13,8 +16,11 @@ export function siteKindMeta(key) {
   return SITE_KINDS.find((s) => s.key === (key || 'ail')) || SITE_KINDS[0];
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export function mapServiceCallRow(r) {
   if (!r) return null;
   return {
@@ -24,6 +30,7 @@ export function mapServiceCallRow(r) {
     address: r.address || '',
     problem: r.problem || '',
     type: r.call_type || 'other',
+<<<<<<< HEAD
 <<<<<<< HEAD
     site_kind: r.site_kind || 'ail',
     engineer: r.engineer_name || '',
@@ -42,13 +49,28 @@ export function mapServiceCallRow(r) {
     created_at: r.created_at,
     updated_at: r.updated_at || null,
 =======
+=======
+    site_kind: r.site_kind || 'ail',
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     engineer: r.engineer_name || '',
     engineer_id: r.engineer_id,
+    partner_engineer_id: r.partner_engineer_id || null,
+    partner_engineer_name: r.partner_engineer_name || null,
+    team_name: r.team_name || null,
     latitude: r.latitude,
     longitude: r.longitude,
     status: r.status || 'Хүлээгдэж буй',
+    close_meta: r.close_meta || null,
+    scheduled_at: r.scheduled_at || null,
+    sla_deadline: r.sla_deadline || null,
+    created_by: r.created_by || null,
+    created_by_name: r.created_by_name || null,
     created_at: r.created_at,
+<<<<<<< HEAD
 >>>>>>> c08b25b (first commit)
+=======
+    updated_at: r.updated_at || null,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   };
 }
 
@@ -133,6 +155,9 @@ export async function updateServiceCallStatus(id, status) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 /** Дурын багана шинэчлэх (status, close_meta, scheduled_at гэх мэт) */
 export async function updateServiceCall(id, patch) {
   const { data, error } = await supabase
@@ -145,6 +170,7 @@ export async function updateServiceCall(id, patch) {
   return mapServiceCallRow(data);
 }
 
+<<<<<<< HEAD
 export function subscribeServiceCalls(onChange) {
   // Суваг бүр өвөрмөц нэртэй — олон дэлгэц/context зэрэг subscribe хийхэд
   // "cannot add postgres_changes callbacks after subscribe()" алдаа гарахгүй.
@@ -152,10 +178,19 @@ export function subscribeServiceCalls(onChange) {
   const channel = supabase
     .channel(topic)
 =======
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export function subscribeServiceCalls(onChange) {
+  // Суваг бүр өвөрмөц нэртэй — олон дэлгэц/context зэрэг subscribe хийхэд
+  // "cannot add postgres_changes callbacks after subscribe()" алдаа гарахгүй.
+  const topic = `service-calls-sync-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const channel = supabase
+<<<<<<< HEAD
     .channel('service-calls-sync')
 >>>>>>> c08b25b (first commit)
+=======
+    .channel(topic)
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, () => onChange())
     .subscribe();
   return () => supabase.removeChannel(channel);

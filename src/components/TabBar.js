@@ -2,26 +2,36 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 =======
 import { colors, spacing, radius } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import NavIcon from './NavIcon';
 
 const ICONS = {
   Home: 'home',
   Attendance: 'attendance',
 <<<<<<< HEAD
+<<<<<<< HEAD
   Feed: 'feed',
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  Feed: 'feed',
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   Chat: 'chat',
   Profile: 'profile',
 };
 
 export default function TabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
+<<<<<<< HEAD
 <<<<<<< HEAD
   const { colors, isDark } = useTheme();
 
@@ -51,6 +61,30 @@ export default function TabBar({ state, descriptors, navigation }) {
     <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       <View style={styles.bar}>
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors, isDark } = useTheme();
+
+  return (
+    <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+      <View
+        style={[
+          styles.bar,
+          {
+            backgroundColor: isDark ? 'rgba(18,33,49,0.92)' : 'rgba(255,255,255,0.95)',
+            borderColor: colors.outlineVariant + '55',
+          },
+          Platform.select({
+            android: { elevation: 6 },
+            ios: {
+              shadowColor: colors.glowShadow,
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: isDark ? 0.15 : 0.06,
+              shadowRadius: 16,
+            },
+          }),
+        ]}
+      >
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
           const label = options.title ?? route.name;
@@ -82,6 +116,7 @@ export default function TabBar({ state, descriptors, navigation }) {
                 onLongPress={onLongPress}
                 activeOpacity={0.85}
 <<<<<<< HEAD
+<<<<<<< HEAD
                 style={[styles.itemActive, { backgroundColor: colors.primaryContainer + '1a' }]}
               >
                 <NavIcon name={icon} size={20} color={colors.primaryContainer} active activeColor={colors.primaryContainer} />
@@ -92,6 +127,12 @@ export default function TabBar({ state, descriptors, navigation }) {
                 <NavIcon name={icon} size={20} color={colors.primary} active />
                 <Text style={styles.labelActive} numberOfLines={1}>
 >>>>>>> c08b25b (first commit)
+=======
+                style={[styles.itemActive, { backgroundColor: colors.primaryContainer + '1a' }]}
+              >
+                <NavIcon name={icon} size={20} color={colors.primaryContainer} active activeColor={colors.primaryContainer} />
+                <Text style={[styles.labelActive, { color: colors.primaryContainer }]} numberOfLines={1}>
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -109,10 +150,14 @@ export default function TabBar({ state, descriptors, navigation }) {
               style={styles.item}
             >
 <<<<<<< HEAD
+<<<<<<< HEAD
               <NavIcon name={icon} size={22} color={colors.onSurfaceVariant} />
 =======
               <NavIcon name={icon} size={22} color={colors.textFaint} />
 >>>>>>> c08b25b (first commit)
+=======
+              <NavIcon name={icon} size={22} color={colors.onSurfaceVariant} />
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
             </TouchableOpacity>
           );
         })}
@@ -134,15 +179,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     backgroundColor: colors.surface,
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     borderRadius: 24,
     paddingHorizontal: 8,
     paddingVertical: 8,
     marginHorizontal: spacing.lg,
     gap: 4,
     borderWidth: 1,
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
     borderColor: colors.border,
@@ -156,6 +205,8 @@ const styles = StyleSheet.create({
       },
     }),
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   },
   item: {
     width: 52,
@@ -172,6 +223,7 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: radius.lg,
 <<<<<<< HEAD
+<<<<<<< HEAD
   },
   labelActive: { fontWeight: '800', fontSize: 14 },
 =======
@@ -179,4 +231,8 @@ const styles = StyleSheet.create({
   },
   labelActive: { color: colors.primary, fontWeight: '800', fontSize: 14 },
 >>>>>>> c08b25b (first commit)
+=======
+  },
+  labelActive: { fontWeight: '800', fontSize: 14 },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 });

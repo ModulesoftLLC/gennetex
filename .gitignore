@@ -2,9 +2,13 @@ node_modules/
 .expo/
 dist/
 <<<<<<< HEAD
+<<<<<<< HEAD
 dist-web/
 =======
 >>>>>>> c08b25b (first commit)
+=======
+dist-web/
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 web-build/
 npm-debug.*
 *.jks
@@ -16,11 +20,16 @@ npm-debug.*
 .DS_Store
 .env
 <<<<<<< HEAD
+<<<<<<< HEAD
 fcm-service-account.json
 supabase/.temp/
 .cursor/
 public-web/node_modules/
 public-web/dist/
+=======
+fcm-service-account.json
+.cursor/
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 .aider*
 .vercel
 .env*

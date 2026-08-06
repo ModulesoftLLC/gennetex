@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { Card, ScreenHeader, EmptyState, Badge } from '../components/ui';
 import { movementTypeLabel } from '../lib/stockBalance';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 
@@ -16,6 +17,14 @@ import { colors, spacing, radius } from '../theme';
 
 export default function StockLogScreen() {
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+
+export default function StockLogScreen() {
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { isAdmin, isCloud, fetchStockMovements } = useApp();
   const [rows, setRows] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -91,10 +100,14 @@ export default function StockLogScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bg },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   icon: {

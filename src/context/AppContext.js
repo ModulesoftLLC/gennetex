@@ -15,10 +15,14 @@ import * as serviceCallApi from '../services/serviceCallService';
 import { calculateFuel } from '../lib/fuelCalc';
 import { withoutSampleByName, withoutSampleCalls } from '../lib/sampleNames';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { isAdminRole, isSuperAdmin, canTakeServiceCalls } from '../lib/roles';
 =======
 import { isAdminRole, isSuperAdmin } from '../lib/roles';
 >>>>>>> c08b25b (first commit)
+=======
+import { isAdminRole, isSuperAdmin, canTakeServiceCalls } from '../lib/roles';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 const AppContext = createContext(null);
 
@@ -285,10 +289,14 @@ export function AppProvider({ children }) {
 
   // Бараа олгох (ажилтан авах) — тоо хасаж, лог үүсгэнэ
 <<<<<<< HEAD
+<<<<<<< HEAD
   const withdrawItem = async (item, qty, photoUrl) => {
 =======
   const withdrawItem = async (item, qty) => {
 >>>>>>> c08b25b (first commit)
+=======
+  const withdrawItem = async (item, qty, photoUrl) => {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     const q = Math.max(1, Number(qty) || 0);
     const newQty = Math.max(0, item.quantity - q);
     setInventory((prev) => prev.map((it) => (it.id === item.id ? { ...it, quantity: newQty } : it)));
@@ -300,9 +308,13 @@ export function AppProvider({ children }) {
           userName: currentUser?.name,
           qty: q,
 <<<<<<< HEAD
+<<<<<<< HEAD
           photoUrl,
 =======
 >>>>>>> c08b25b (first commit)
+=======
+          photoUrl,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         });
       } catch (e) {
         setSyncError(e.message);
@@ -312,6 +324,9 @@ export function AppProvider({ children }) {
   };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const giveItemToEmployee = async (item, employee, qty, photoUrl) => {
     const q = Math.max(1, Number(qty) || 0);
     const newQty = Math.max(0, item.quantity - q);
@@ -333,8 +348,11 @@ export function AppProvider({ children }) {
     return newQty;
   };
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const fetchStockMovements = async (mineOnly) => {
     if (!isSupabaseConfigured) return [];
     return mineOnly
@@ -417,10 +435,14 @@ export function AppProvider({ children }) {
   const refreshCalls = useCallback(async (profile = authProfile) => {
     if (!isSupabaseConfigured) return;
 <<<<<<< HEAD
+<<<<<<< HEAD
     if (!profile || !canTakeServiceCalls(profile)) {
 =======
     if (!profile || isAdminRole(profile.role)) {
 >>>>>>> c08b25b (first commit)
+=======
+    if (!profile || !canTakeServiceCalls(profile)) {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       setCalls([]);
       return;
     }
@@ -434,14 +456,19 @@ export function AppProvider({ children }) {
       setSyncError(e.message);
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
   }, [authProfile?.id, authProfile?.name, authProfile?.role, authProfile?.can_take_calls]);
 =======
   }, [authProfile?.id, authProfile?.name, authProfile?.role]);
 >>>>>>> c08b25b (first commit)
+=======
+  }, [authProfile?.id, authProfile?.name, authProfile?.role, authProfile?.can_take_calls]);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   useEffect(() => {
     if (!loaded || !isSupabaseConfigured || !authProfile) return;
     refreshCalls(authProfile);
+<<<<<<< HEAD
 <<<<<<< HEAD
   }, [loaded, authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
 
@@ -452,13 +479,20 @@ export function AppProvider({ children }) {
   }, [authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
 =======
   }, [loaded, authProfile?.id, authProfile?.role]);
+=======
+  }, [loaded, authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !authProfile || isAdminRole(authProfile.role)) return;
+    if (!isSupabaseConfigured || !authProfile || !canTakeServiceCalls(authProfile)) return;
     const unsub = serviceCallApi.subscribeServiceCalls(() => refreshCalls(authProfile));
     return unsub;
+<<<<<<< HEAD
   }, [authProfile?.id, authProfile?.role]);
 >>>>>>> c08b25b (first commit)
+=======
+  }, [authProfile?.id, authProfile?.role, authProfile?.can_take_calls]);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   const addCall = async (call) => {
     if (isSupabaseConfigured) {
@@ -487,6 +521,9 @@ export function AppProvider({ children }) {
   };
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const closeCall = async (id, meta) => {
     const by = authProfile?.name || currentUser?.name || 'Инженер';
     const existing = calls.find((c) => c.id === id)?.close_meta || {};
@@ -526,8 +563,11 @@ export function AppProvider({ children }) {
     return patch;
   };
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   // ---- Бензиний тооцоо (локал) ----
   const updateFuelSettings = async (patch) => {
     const next = { ...fuelSettings, ...patch };
@@ -598,9 +638,13 @@ export function AppProvider({ children }) {
     removeInventoryItem,
     withdrawItem,
 <<<<<<< HEAD
+<<<<<<< HEAD
     giveItemToEmployee,
 =======
 >>>>>>> c08b25b (first commit)
+=======
+    giveItemToEmployee,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     consumeItem,
     fetchMyStock,
     fetchStockMovements,
@@ -613,10 +657,15 @@ export function AppProvider({ children }) {
     addCall,
     updateCallStatus,
 <<<<<<< HEAD
+<<<<<<< HEAD
     closeCall,
     transferCall,
 =======
 >>>>>>> c08b25b (first commit)
+=======
+    closeCall,
+    transferCall,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     refreshCalls,
     fuelSettings,
     updateFuelSettings,

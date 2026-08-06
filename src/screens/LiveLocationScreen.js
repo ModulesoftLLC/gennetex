@@ -5,11 +5,16 @@ import { Badge, ScreenHeader, EmptyState } from '../components/ui';
 import { useApp } from '../context/AppContext';
 import { CALL_TYPES } from '../data/mockData';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing, radius, shadow } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import * as tracking from '../services/trackingService';
 
 function callTypeLabel(key) {
@@ -44,9 +49,13 @@ function timeAgo(ts) {
 
 function WorkerMarker({ worker, color, visit, onPress }) {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const [tracks, setTracks] = useState(!!worker.avatar_url);
 
   return (
@@ -82,10 +91,15 @@ function WorkerMarker({ worker, color, visit, onPress }) {
 
 export default function LiveLocationScreen() {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { isCloud, isAdmin, trackingState } = useApp();
   const [workers, setWorkers] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -244,9 +258,13 @@ export default function LiveLocationScreen() {
 
 function Tab({ active, label, onPress }) {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   return (
     <TouchableOpacity
       style={[styles.tab, active && styles.tabActive]}
@@ -259,10 +277,14 @@ function Tab({ active, label, onPress }) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bg },
   map: { flex: 1 },
   panel: {

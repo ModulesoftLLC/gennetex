@@ -18,10 +18,16 @@ import { useApp } from '../context/AppContext';
 import VideoCallModal from './VideoCallModal';
 import * as callApi from '../services/callService';
 import { startIncomingCallAlert, stopIncomingCallAlert } from '../services/callAlertService';
+<<<<<<< HEAD
 import { colors, spacing, radius } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 export default function IncomingCallManager() {
+  const styles = useStyles(makeStyles);
   const { isCloud, currentUser } = useApp();
   const [incoming, setIncoming] = useState(null);
   const [inCall, setInCall] = useState(null);
@@ -193,7 +199,7 @@ export default function IncomingCallManager() {
 <<<<<<< HEAD
 =======
 
-const styles = StyleSheet.create({
+const makeStyles = ({ colors }) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#000000dd', alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   card: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.xl, alignItems: 'center', width: '100%'},
   avatar: {

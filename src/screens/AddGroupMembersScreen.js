@@ -4,20 +4,30 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, Button, EmptyState } from '../components/ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing, radius } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import * as chatApi from '../services/chatService';
 import { isOnline, formatLastSeen } from '../lib/online';
 
 export default function AddGroupMembersScreen() {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const navigation = useNavigation();
   const route = useRoute();
   const { conversationId, title } = route.params || {};
@@ -102,10 +112,14 @@ export default function AddGroupMembersScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bg },
   hint: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md, lineHeight: 19 },
   row: {

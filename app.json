@@ -4,10 +4,14 @@
     "slug": "gennetex-erp",
 <<<<<<< HEAD
     "scheme": "gennetex-erp",
+<<<<<<< HEAD
     "version": "1.0.4",
 =======
     "version": "1.0.0",
 >>>>>>> c08b25b (first commit)
+=======
+    "version": "0.4.8",
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/logo.png",
@@ -102,9 +106,12 @@
           "sounds": [
             "./assets/sounds/incoming-call.wav"
           ]
+<<<<<<< HEAD
 =======
           "sounds": []
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         }
       ],
       [

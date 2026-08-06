@@ -86,6 +86,9 @@ export default function PushNotificationManager() {
         memberRooms.current = new Set((data || []).map((m) => m.conversation_id));
       })
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, async (payload) => {
         const post = payload.new;
         if (!post || post.author_id === currentUser.id) return;
@@ -166,8 +169,11 @@ export default function PushNotificationManager() {
           });
         }
       })
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       .subscribe();
 
     receivedSub.current = Notifications.addNotificationReceivedListener(async (notification) => {

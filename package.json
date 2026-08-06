@@ -1,6 +1,10 @@
 {
   "name": "gennetex-erp",
+<<<<<<< HEAD
   "version": "1.0.4",
+=======
+  "version": "0.4.8",
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client",

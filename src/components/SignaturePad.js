@@ -2,11 +2,16 @@ import React, { useRef, useState, useCallback } from 'react';
 import { View, PanResponder, StyleSheet, Text } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing, radius } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 const VIEW_W = 600;
 const VIEW_H = 220;
@@ -32,10 +37,15 @@ export default function SignaturePad({ onChange }) {
   const pathsRef = useRef([]);
   const layout = useRef({ width: 300, height: 220 });
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   const scalePoint = useCallback((x, y) => {
     const { width, height } = layout.current;
@@ -121,10 +131,14 @@ export default function SignaturePad({ onChange }) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   label: { color: colors.textMuted, fontSize: 13, fontWeight: '600', marginBottom: spacing.sm },
   pad: {
     height: VIEW_H,

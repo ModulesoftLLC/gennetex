@@ -5,10 +5,15 @@ import Constants from 'expo-constants';
 import { supabase } from '../lib/supabase';
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 export const CALLS_CHANNEL = 'calls';
 
 =======
 >>>>>>> c08b25b (first commit)
+=======
+export const CALLS_CHANNEL = 'calls';
+
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {
     const type = notification.request.content.data?.type;
@@ -23,10 +28,14 @@ Notifications.setNotificationHandler({
 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 export async function ensureChannels() {
 =======
 async function ensureChannels() {
 >>>>>>> c08b25b (first commit)
+=======
+export async function ensureChannels() {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   if (Platform.OS !== 'android') return;
   await Notifications.setNotificationChannelAsync('chat', {
     name: 'Чат мессеж',
@@ -38,6 +47,7 @@ async function ensureChannels() {
     name: 'Видео дуудлага',
     importance: Notifications.AndroidImportance.MAX,
     vibrationPattern: [0, 800, 400, 800, 400, 800],
+<<<<<<< HEAD
 <<<<<<< HEAD
     sound: 'incoming-call.wav',
     bypassDnd: true,
@@ -55,6 +65,18 @@ async function ensureChannels() {
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
   });
 >>>>>>> c08b25b (first commit)
+=======
+    sound: 'incoming-call.wav',
+    bypassDnd: true,
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  });
+  await Notifications.setNotificationChannelAsync('feed', {
+    name: 'Пост / сэтгэгдэл',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 200, 120, 200],
+    sound: 'default',
+  });
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 }
 
 // Утсан дээр push token авах
@@ -120,14 +142,20 @@ async function fetchAdminTokens() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 async function fetchSuperadminTokens() {
   const { data: admins } = await supabase.from('profiles').select('id').eq('role', 'superadmin');
   if (!admins?.length) return [];
   return fetchTokensForUsers(admins.map((a) => a.id));
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 async function sendExpoPush(messages) {
   if (!messages?.length) return;
   for (let i = 0; i < messages.length; i += 100) {
@@ -145,10 +173,14 @@ async function sendExpoPush(messages) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 async function notifyTokens(tokens, { title, body, data, channelId, priority, sound }) {
 =======
 async function notifyTokens(tokens, { title, body, data, channelId, priority }) {
 >>>>>>> c08b25b (first commit)
+=======
+async function notifyTokens(tokens, { title, body, data, channelId, priority, sound }) {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   if (!tokens.length) return;
   await sendExpoPush(
     tokens.map((to) => ({
@@ -156,10 +188,14 @@ async function notifyTokens(tokens, { title, body, data, channelId, priority }) 
       title,
       body,
 <<<<<<< HEAD
+<<<<<<< HEAD
       sound: sound || 'default',
 =======
       sound: 'default',
 >>>>>>> c08b25b (first commit)
+=======
+      sound: sound || 'default',
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       priority: priority || 'high',
       channelId: channelId || 'chat',
       data: data || {},
@@ -196,6 +232,9 @@ export async function notifyAdmins(payload) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export async function notifySuperadmins(payload) {
   try {
     const tokens = await fetchSuperadminTokens();
@@ -267,8 +306,11 @@ export async function notifyDeviceDecisionToUser(userId, { status }) {
   });
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 // Чат мессеж — бусад гишүүдэд push
 export async function notifyChatMembers(conversationId, senderId, { senderName, content, attachmentType }) {
   const { data: members } = await supabase
@@ -295,6 +337,9 @@ export async function notifyChatMembers(conversationId, senderId, { senderName, 
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 /** SLA хэтэрсэн — бүх инженерт яаралтай push */
 export async function notifySlaExceededToEngineers(engineerIds, call) {
   const ids = [...new Set((engineerIds || []).filter(Boolean))];
@@ -332,8 +377,11 @@ export async function notifyServiceCallAssigned(engineerId, { engineerName, cust
   });
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 // Видео дуудлага — ringtone + TTS push
 export async function notifyIncomingCall(calleeId, { callerName, room, callId }) {
   const name = callerName || 'Ажилтан';
@@ -341,9 +389,13 @@ export async function notifyIncomingCall(calleeId, { callerName, room, callId })
     title: `${name} залгаж байна`,
     body: 'Видео дуудлага — хариулахын тулд нээнэ үү',
 <<<<<<< HEAD
+<<<<<<< HEAD
     sound: 'incoming-call.wav',
 =======
 >>>>>>> c08b25b (first commit)
+=======
+    sound: 'incoming-call.wav',
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     data: { type: 'call', room, callId, callerName: name },
     channelId: 'calls',
     priority: 'high',
@@ -359,6 +411,9 @@ export async function notifyRemoteAttendance({ staffName, note }) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export async function notifyFeedbackToAdmins({ fromName, kind, preview, feedbackId, mentionedNames = [] }) {
   const mention = mentionedNames.length ? ` · ${mentionedNames.join(', ')}` : '';
   await notifyAdmins({
@@ -370,8 +425,11 @@ export async function notifyFeedbackToAdmins({ fromName, kind, preview, feedback
   });
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export async function notifyOffSiteCheckIn({ staffName, locationName, distanceM }) {
   const where = locationName ? `"${locationName}"-аас` : 'ажлын байршлаас';
   await notifyAdmins({

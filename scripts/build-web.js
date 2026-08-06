@@ -3,20 +3,34 @@
  * Vercel deploy бэлдэх скрипт:
  *   dist-web/                 → adiya.site (нийтийн танилцуулга сайт)
  *   dist-web/gennetex/admin/  → adiya.site/gennetex/admin (админ хяналтын самбар)
+<<<<<<< HEAD
  */
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { syncAdminEnv } = require('./sync-admin-env');
+=======
+ *
+ * Ингэснээр эх кодод admin-web/, public-web/ тусдаа хэвээр үлдэж, зөвхөн
+ * гаралт (dist-web) дээр нэгтгэгдэнэ.
+ */
+const fs = require('fs');
+const path = require('path');
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, 'dist-web');
 const publicWeb = path.join(root, 'public-web');
+<<<<<<< HEAD
 const publicWebDist = path.join(publicWeb, 'dist');
 const publicWebPublic = path.join(publicWeb, 'public');
 const adminWeb = path.join(root, 'admin-web');
 const logo = path.join(root, 'assets', 'logo.png');
 const reportLogo = path.join(root, 'assets', 'report-logo.png');
+=======
+const adminWeb = path.join(root, 'admin-web');
+const logo = path.join(root, 'assets', 'logo.png');
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 function rimraf(p) {
   if (fs.existsSync(p)) fs.rmSync(p, { recursive: true, force: true });
@@ -32,6 +46,7 @@ console.log('[build-web] Цэвэрлэж байна:', dist);
 rimraf(dist);
 fs.mkdirSync(dist, { recursive: true });
 
+<<<<<<< HEAD
 // Copy logos to deploy paths (admin + fallback)
 if (fs.existsSync(logo)) {
   fs.mkdirSync(publicWebPublic, { recursive: true });
@@ -64,11 +79,20 @@ console.log('[build-web] dist-web руу хуулж байна');
 copyDir(publicWebDist, dist);
 
 if (fs.existsSync(logo) && !fs.existsSync(path.join(dist, 'logo.png'))) {
+=======
+// 1) Нийтийн сайт → dist-web/
+console.log('[build-web] Нийтийн сайт хуулж байна (public-web → dist-web)');
+copyDir(publicWeb, dist);
+
+// Лого — нийтийн сайтад
+if (fs.existsSync(logo)) {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   fs.copyFileSync(logo, path.join(dist, 'logo.png'));
 }
 
 // 2) Админ самбар → dist-web/gennetex/admin/
 const adminDest = path.join(dist, 'gennetex', 'admin');
+<<<<<<< HEAD
 console.log('[build-web] Админ самбар (admin-web → gennetex/admin)');
 copyDir(adminWeb, adminDest);
 syncAdminEnv(path.join(adminDest, 'index.html'));
@@ -178,3 +202,9 @@ function buildAppDownloadPage(version, apkUrl) {
 </body>
 </html>`;
 }
+=======
+console.log('[build-web] Админ самбар хуулж байна (admin-web → dist-web/gennetex/admin)');
+copyDir(adminWeb, adminDest);
+
+console.log('[build-web] Бэлэн. Гаралт:', dist);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)

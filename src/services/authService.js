@@ -144,14 +144,20 @@ export async function adminUpdateEmployee(userId, patch) {
     clean.role = nextRole;
   }
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   if (patch.can_take_calls !== undefined) {
     if (!isSuperAdmin(viewerRole)) {
       throw new Error('Дуудлагаар явах эрхийг зөвхөн системийн админ өгнө.');
     }
     clean.can_take_calls = !!patch.can_take_calls;
   }
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { data, error } = await supabase
     .from('profiles')
     .update(clean)

@@ -15,6 +15,7 @@ import {
 } from '../components/ui';
 import BarcodeScanner from '../components/BarcodeScanner';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { VEHICLES } from '../data/mockData';
@@ -30,13 +31,22 @@ export default function VehicleScreen() {
   const styles = useStyles(makeStyles);
 =======
 import { colors, spacing, radius } from '../theme';
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import { VEHICLES } from '../data/mockData';
 import { distanceMeters } from '../lib/geo';
 import { calculateFuel, isDrivingSpeed, formatIdle } from '../lib/fuelCalc';
 import * as vehicleApi from '../services/vehicleService';
 
 export default function VehicleScreen() {
+<<<<<<< HEAD
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const navigation = useNavigation();
   const route = useRoute();
   const { isAdmin, isCloud, currentUser, authProfile, fuelSettings, addFuelLog } = useApp();
@@ -617,9 +627,13 @@ export default function VehicleScreen() {
 
 function InfoCol({ label, value }) {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   return (
     <View style={styles.infoCol}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -629,12 +643,16 @@ function InfoCol({ label, value }) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   help: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md, lineHeight: 19 },
   vehHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},
 =======
 const styles = StyleSheet.create({
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bg },
   help: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md, lineHeight: 19 },
   vehHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},

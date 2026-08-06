@@ -7,15 +7,20 @@ import {
   TextInput,
   TouchableOpacity,
 <<<<<<< HEAD
+<<<<<<< HEAD
   Pressable,
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  Pressable,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   KeyboardAvoidingView,
   Platform,
   Image,
   Linking,
   ActivityIndicator,
   Alert,
+<<<<<<< HEAD
 <<<<<<< HEAD
   StatusBar,
 } from 'react-native';
@@ -30,13 +35,17 @@ import VideoCallModal from '../components/VideoCallModal';
 import CallScreen from '../components/CallScreen';
 import ActiveTripsBanner from '../components/ActiveTripsBanner';
 =======
+=======
+  StatusBar,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { Video, ResizeMode } from 'expo-av';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { useApp } from '../context/AppContext';
-import { ScreenHeader, HeaderButton, EmptyState } from '../components/ui';
+import { useTheme, useStyles } from '../context/ThemeContext';
 import VideoCallModal from '../components/VideoCallModal';
 >>>>>>> c08b25b (first commit)
 import * as chatApi from '../services/chatService';
@@ -45,6 +54,7 @@ import VoiceMessageButton from '../components/VoiceMessageButton';
 import ChatImagePreview from '../components/ChatImagePreview';
 import ChatVideoPreview from '../components/ChatVideoPreview';
 import { setActiveChatRoom } from '../lib/chatFocus';
+<<<<<<< HEAD
 <<<<<<< HEAD
 import { formatTime, formatChatDay, isSameChatDay } from '../lib/formatTime';
 import { isOnline, formatLastSeen } from '../lib/online';
@@ -80,16 +90,43 @@ function ChatImage({ uri, onPress }) {
 =======
 import { formatTime } from '../lib/formatTime';
 import { colors, spacing, radius } from '../theme';
+=======
+import { formatTime, formatChatDay, isSameChatDay } from '../lib/formatTime';
+import { isOnline, formatLastSeen } from '../lib/online';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
-const IMAGE_MAX_W = 260;
-const IMAGE_MAX_H = 340;
+const AVATAR_COLORS = [
+  '#E17076', '#7BC862', '#E5CA77', '#65AADD',
+  '#A695E7', '#EE7AAE', '#6EC9CB', '#FAA774',
+];
+
+function initials(name = '') {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.trim().charAt(0).toUpperCase() || '?';
+}
+
+function avatarColor(name = '') {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+}
+
+const IMAGE_MAX_W = 240;
+const IMAGE_MAX_H = 320;
 
 function ChatImage({ uri, onPress }) {
+  const styles = useStyles(makeStyles);
   const [size, setSize] = useState({ width: IMAGE_MAX_W, height: IMAGE_MAX_W * 0.75 });
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let active = true;
+<<<<<<< HEAD
 >>>>>>> c08b25b (first commit)
+=======
+    setFailed(false);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     Image.getSize(
       uri,
       (w, h) => {
@@ -107,12 +144,18 @@ function ChatImage({ uri, onPress }) {
         setSize({ width: Math.round(width), height: Math.round(height) });
       },
 <<<<<<< HEAD
+<<<<<<< HEAD
       () => {
         if (active) setSize({ width: IMAGE_MAX_W, height: IMAGE_MAX_W * 0.75 });
       }
 =======
       () => {}
 >>>>>>> c08b25b (first commit)
+=======
+      () => {
+        if (active) setSize({ width: IMAGE_MAX_W, height: IMAGE_MAX_W * 0.75 });
+      }
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     );
     return () => {
       active = false;
@@ -120,6 +163,9 @@ function ChatImage({ uri, onPress }) {
   }, [uri]);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   if (failed) {
     return (
       <TouchableOpacity onPress={() => Linking.openURL(uri)} style={styles.mediaFallback}>
@@ -128,8 +174,11 @@ function ChatImage({ uri, onPress }) {
     );
   }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.92}>
       <Image
@@ -137,14 +186,19 @@ function ChatImage({ uri, onPress }) {
         style={[styles.msgImage, { width: size.width, height: size.height }]}
         resizeMode="cover"
 <<<<<<< HEAD
+<<<<<<< HEAD
         onError={() => setFailed(true)}
 =======
 >>>>>>> c08b25b (first commit)
+=======
+        onError={() => setFailed(true)}
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       />
     </TouchableOpacity>
   );
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 const VIDEO_THUMB_W = 220;
 const VIDEO_THUMB_H = 124;
@@ -158,10 +212,16 @@ function ChatVideo({ onPress }) {
 =======
 const VIDEO_THUMB_W = 240;
 const VIDEO_THUMB_H = 136;
+=======
+const VIDEO_THUMB_W = 220;
+const VIDEO_THUMB_H = 124;
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
-function ChatVideo({ uri, onPress }) {
+function ChatVideo({ onPress }) {
+  const styles = useStyles(makeStyles);
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.92} style={styles.videoThumb}>
+<<<<<<< HEAD
       <Video
         source={{ uri }}
         style={styles.videoThumbPlayer}
@@ -172,12 +232,19 @@ function ChatVideo({ uri, onPress }) {
       <View style={styles.playBadge}>
         <Text style={styles.playIcon}></Text>
 >>>>>>> c08b25b (first commit)
+=======
+      <View style={styles.videoPlayCircle}>
+        <Ionicons name="play" size={22} color="#fff" style={{ marginLeft: 2 }} />
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       </View>
     </TouchableOpacity>
   );
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 function MessageTime({ time, edited, mine, overlay }) {
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
@@ -197,6 +264,7 @@ function MessageTime({ time, edited, mine, overlay }) {
   );
 }
 
+<<<<<<< HEAD
 export default function ConversationScreen() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -209,6 +277,14 @@ export default function ConversationScreen() {
   const route = useRoute();
   const { conversationId, title, isGroup, otherUser } = route.params || {};
 >>>>>>> c08b25b (first commit)
+=======
+export default function ConversationScreen() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+  const { conversationId, title, isGroup, otherUser, memberCount, groupAvatarUrl: initialGroupAvatar } = route.params || {};
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { currentUser, isCloud } = useApp();
   const me = currentUser;
   const room = conversationId;
@@ -229,6 +305,9 @@ export default function ConversationScreen() {
   const [previewImage, setPreviewImage] = useState(null);
   const [previewVideo, setPreviewVideo] = useState(null);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const [groupAvatarUrl, setGroupAvatarUrl] = useState(initialGroupAvatar || null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const listRef = useRef(null);
@@ -242,10 +321,13 @@ export default function ConversationScreen() {
     ? formatLastSeen(otherUser.last_seen)
     : 'хувийн чат';
 
+<<<<<<< HEAD
 =======
   const listRef = useRef(null);
 
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const load = useCallback(async () => {
     if (!isCloud || !room) return;
     try {
@@ -279,6 +361,9 @@ export default function ConversationScreen() {
 
   useEffect(() => {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     if (!isGroup || !isCloud || !room) return;
     let active = true;
     chatApi.fetchConversation(room).then((conv) => {
@@ -290,8 +375,11 @@ export default function ConversationScreen() {
   }, [isGroup, isCloud, room]);
 
   useEffect(() => {
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     if (messages.length) {
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
     }
@@ -338,10 +426,14 @@ export default function ConversationScreen() {
     (item) => {
       Alert.alert('Устгах уу?', 'Энэ мессежийг бүрмөсөн устгах уу?', [
 <<<<<<< HEAD
+<<<<<<< HEAD
         { text: 'Болих', style: 'cancel' },
 =======
         { text: 'Болих', style: 'cancel'},
 >>>>>>> c08b25b (first commit)
+=======
+        { text: 'Болих', style: 'cancel' },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         {
           text: 'Устгах',
           style: 'destructive',
@@ -370,10 +462,14 @@ export default function ConversationScreen() {
       }
       options.push({ text: 'Устгах', style: 'destructive', onPress: () => confirmDelete(item) });
 <<<<<<< HEAD
+<<<<<<< HEAD
       options.push({ text: 'Болих', style: 'cancel' });
 =======
       options.push({ text: 'Болих', style: 'cancel'});
 >>>>>>> c08b25b (first commit)
+=======
+      options.push({ text: 'Болих', style: 'cancel' });
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       Alert.alert('Мессеж', 'Юу хийх вэ?', options);
     },
     [me, startEdit, confirmDelete]
@@ -429,10 +525,14 @@ export default function ConversationScreen() {
     if (!res.canceled) {
       const a = res.assets[0];
 <<<<<<< HEAD
+<<<<<<< HEAD
       sendAttachment({ uri: a.uri, type: 'image', mimeType: a.mimeType || 'image/jpeg', name: a.fileName || 'image.jpg' });
 =======
       sendAttachment({ uri: a.uri, type: 'image', mimeType: a.mimeType || 'image/jpeg', name: a.fileName || 'image.jpg'});
 >>>>>>> c08b25b (first commit)
+=======
+      sendAttachment({ uri: a.uri, type: 'image', mimeType: a.mimeType || 'image/jpeg', name: a.fileName || 'image.jpg' });
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     }
   };
 
@@ -472,15 +572,22 @@ export default function ConversationScreen() {
       { text: 'Видео', onPress: pickVideo },
       { text: 'Файл', onPress: pickFile },
 <<<<<<< HEAD
+<<<<<<< HEAD
       { text: 'Болих', style: 'cancel' },
 =======
       { text: 'Болих', style: 'cancel'},
 >>>>>>> c08b25b (first commit)
+=======
+      { text: 'Болих', style: 'cancel' },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     ]);
   };
 
   const handleCall = async () => {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     if (isGroup) {
       setCallVisible(true);
       await send('Групп видео дуудлага эхэллээ.');
@@ -490,6 +597,7 @@ export default function ConversationScreen() {
       Alert.alert('Дуудлага', 'Хэн рүү залгахаа олсонгүй.');
       return;
     }
+<<<<<<< HEAD
     try {
       const call = await callApi.startCall({
         room,
@@ -671,47 +779,165 @@ export default function ConversationScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={0}
 =======
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     setCallVisible(true);
-    // 1:1 бол нөгөө хэрэглэгч рүү "залгаж байна"дохио явуулна
-    if (!isGroup && otherUser?.id) {
-      try {
-        await callApi.startCall({ room, caller: me, callee: otherUser });
-      } catch (e) {}
+    try {
+      await callApi.startCall({
+        room,
+        caller: { id: me.id, name: me.name },
+        callee: { id: otherUser.id, name: otherUser.name },
+      });
+      await send('Видео дуудлага руу залгаж байна...');
+    } catch (e) {
+      setCallVisible(false);
+      Alert.alert('Дуудлага', e.message || 'Залгахад алдаа гарлаа');
     }
-    await send(isGroup ? 'Групп видео дуудлага эхэллээ.' : 'Видео дуудлага руу залгаж байна...');
   };
+
+  const changeGroupAvatar = () => {
+    if (!isGroup || !room) return;
+    Alert.alert('Группын зураг', 'Зураг сонгох арга', [
+      { text: 'Цуцлах', style: 'cancel' },
+      { text: 'Зургийн сан', onPress: pickGroupAvatarFromLibrary },
+      { text: 'Камер', onPress: takeGroupAvatarPhoto },
+    ]);
+  };
+
+  const applyGroupAvatar = async (uri) => {
+    if (!uri || !room) return;
+    setUploadingAvatar(true);
+    try {
+      const url = await chatApi.uploadGroupAvatar(uri, room);
+      await chatApi.updateConversation(room, { avatar_url: url });
+      setGroupAvatarUrl(url);
+    } catch (e) {
+      Alert.alert('Алдаа', e.message);
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const pickGroupAvatarFromLibrary = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Зөвшөөрөл', 'Зургийн санд хандах зөвшөөрөл өгнө үү.');
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.65,
+    });
+    if (!res.canceled) applyGroupAvatar(res.assets[0].uri);
+  };
+
+  const takeGroupAvatarPhoto = async () => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Зөвшөөрөл', 'Камерт хандах зөвшөөрөл өгнө үү.');
+      return;
+    }
+    const res = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.65,
+    });
+    if (!res.canceled) applyGroupAvatar(res.assets[0].uri);
+  };
+
+  const displayName = title || 'Чат';
+  const headerAvatarUri = isGroup ? groupAvatarUrl : otherUser?.avatar_url;
+  const headerAvatarBg = avatarColor(displayName);
 
   return (
     <View style={styles.container}>
-      <ScreenHeader
-        title={title || 'Чат'}
-        subtitle={isGroup ? 'Групп яриа' : otherUser?.name || ''}
-        right={
-          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            {isGroup ? (
-              <HeaderButton title="Нэмэх"
-                onPress={() =>
-                  navigation.navigate('AddGroupMembers', { conversationId: room, title })
-                }
-              />
-            ) : null}
-            <HeaderButton title="Дуудлага" onPress={handleCall} />
-          </View>
-        }
-      />
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <SafeAreaView edges={['top']} style={styles.headerSafe}>
+        <View style={styles.header}>
+          <Pressable style={styles.headerBack} onPress={() => navigation.goBack()} hitSlop={10}>
+            <Ionicons name="chevron-back" size={28} color="#fff" />
+          </Pressable>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+          <TouchableOpacity
+            style={styles.headerIdentity}
+            activeOpacity={0.8}
+            onPress={() =>
+              navigation.navigate('ChatShared', {
+                conversationId: room,
+                title: displayName,
+              })
+            }
+            onLongPress={isGroup ? changeGroupAvatar : undefined}
+          >
+            <View style={[styles.headerAvatar, { backgroundColor: headerAvatarBg }]}>
+              {uploadingAvatar ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : headerAvatarUri ? (
+                <Image source={{ uri: headerAvatarUri }} style={styles.headerAvatarImg} />
+              ) : (
+                <Text style={styles.headerAvatarText}>{initials(displayName)}</Text>
+              )}
+            </View>
+            <View style={styles.headerTextCol}>
+              <Text style={styles.headerTitle} numberOfLines={1}>{displayName}</Text>
+              <Text style={[styles.headerSub, peerOnline && styles.headerSubOnline]} numberOfLines={1}>
+                {headerSubtitle}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.headerActions}>
+            <Pressable
+              style={styles.headerIconBtn}
+              onPress={() =>
+                navigation.navigate('ChatShared', {
+                  conversationId: room,
+                  title: displayName,
+                })
+              }
+              hitSlop={8}
+            >
+              <Ionicons name="folder-outline" size={22} color="#fff" />
+            </Pressable>
+            {isGroup ? (
+              <Pressable
+                style={styles.headerIconBtn}
+                onPress={() => navigation.navigate('AddGroupMembers', { conversationId: room, title })}
+                hitSlop={8}
+              >
+                <Ionicons name="person-add-outline" size={22} color="#fff" />
+              </Pressable>
+            ) : null}
+            <Pressable style={styles.headerIconBtn} onPress={handleCall} hitSlop={8}>
+              <Ionicons name="videocam" size={24} color="#fff" />
+            </Pressable>
+          </View>
+        </View>
+      </SafeAreaView>
+
+      {error ? (
+        <View style={styles.errorBar}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : null}
 
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+<<<<<<< HEAD
         keyboardVerticalOffset={90}
 >>>>>>> c08b25b (first commit)
+=======
+        keyboardVerticalOffset={0}
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       >
         <FlatList
           ref={listRef}
           data={messages}
           keyExtractor={(m) => m.id}
+<<<<<<< HEAD
 <<<<<<< HEAD
           style={styles.chatBg}
           contentContainerStyle={[styles.messageList, !messages.length && styles.messageListEmpty]}
@@ -880,84 +1106,179 @@ export default function ConversationScreen() {
 =======
           contentContainerStyle={{ padding: spacing.lg, paddingBottom: spacing.md }}
           renderItem={({ item }) => {
+=======
+          style={styles.chatBg}
+          contentContainerStyle={[styles.messageList, !messages.length && styles.messageListEmpty]}
+          renderItem={({ item, index }) => {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
             const mine = item.sender_id === me?.id;
-            const hasImage = item.attachment_type === 'image'&& item.attachment_url;
-            const hasVideo = item.attachment_type === 'video'&& item.attachment_url;
-            const mediaOnly = (hasImage || hasVideo) && !item.content;
+            const hasImage = item.attachment_type === 'image' && item.attachment_url;
+            const hasVideo = item.attachment_type === 'video' && item.attachment_url;
+            const hasFile = item.attachment_type === 'file' && item.attachment_url;
+            const mediaOnly = (hasImage || hasVideo) && !item.content && !hasFile;
+            const prev = messages[index - 1];
+            const next = messages[index + 1];
+            const showDate = !prev || !isSameChatDay(prev.created_at, item.created_at);
+            const sameSenderAsPrev = prev && prev.sender_id === item.sender_id && !showDate;
+            const sameSenderAsNext = next && next.sender_id === item.sender_id && isSameChatDay(next.created_at, item.created_at);
+            const showAvatar = !mine && isGroup && !sameSenderAsNext;
+            const showSender = !mine && isGroup && !sameSenderAsPrev;
+
             return (
-              <View style={[styles.bubbleRow, mine ? styles.rowMine : styles.rowOther]}>
-                <TouchableOpacity
-                  activeOpacity={mine ? 0.85 : 1}
-                  onLongPress={mine ? () => openMessageActions(item) : undefined}
-                  delayLongPress={400}
-                >
-                  <View
-                    style={[
-                      styles.bubble,
-                      mediaOnly
-                        ? styles.bubbleImageOnly
-                        : mine
-                        ? styles.bubbleMine
-                        : styles.bubbleOther,
-                    ]}
-                  >
-                    {!mine && !mediaOnly ? <Text style={styles.sender}>{item.sender_name}</Text> : null}
-                    {!mine && mediaOnly ? (
-                      <Text style={[styles.sender, styles.senderOnImage]}>{item.sender_name}</Text>
-                    ) : null}
-                    {hasImage ? (
-                      <ChatImage uri={item.attachment_url} onPress={() => setPreviewImage(item.attachment_url)} />
-                    ) : null}
-                    {hasVideo ? (
-                      <ChatVideo uri={item.attachment_url} onPress={() => setPreviewVideo(item.attachment_url)} />
-                    ) : null}
-                    {item.attachment_type === 'file'&& item.attachment_url ? (
-                      <TouchableOpacity
-                        style={[styles.fileChip, mine && styles.fileChipMine]}
-                        onPress={() => Linking.openURL(item.attachment_url)}
-                        activeOpacity={0.85}
-                      >
-                        <Text style={styles.fileIcon}></Text>
-                        <Text style={[styles.fileName, mine && styles.msgTextMine]} numberOfLines={1}>
-                          {item.attachment_name || 'Файл'}
-                        </Text>
-                      </TouchableOpacity>
-                    ) : null}
-                    {item.content ? (
-                      <Text style={[styles.msgText, mine && styles.msgTextMine]}>
-                        {item.content}
-                        <Text style={[styles.msgTimeInline, mine && styles.msgTimeMine]}>
-                          {item.edited_at ? 'зассан · ' : ''}{formatTime(item.created_at)}
-                        </Text>
-                      </Text>
-                    ) : mediaOnly ? (
-                      <Text style={[styles.imageTime, mine && styles.imageTimeMine]}>
-                        {item.edited_at ? 'зассан · ' : ''}
-                        {formatTime(item.created_at)}
-                      </Text>
-                    ) : (
-                      <View style={styles.msgMeta}>
-                        {item.edited_at ? (
-                          <Text style={[styles.msgEdited, mine && styles.msgEditedMine]}>зассан</Text>
-                        ) : null}
-                        <Text style={[styles.msgTime, mine && styles.msgTimeMine]}>{formatTime(item.created_at)}</Text>
-                      </View>
-                    )}
+              <View>
+                {showDate ? (
+                  <View style={styles.dateChipWrap}>
+                    <View style={styles.dateChip}>
+                      <Text style={styles.dateChipText}>{formatChatDay(item.created_at)}</Text>
+                    </View>
                   </View>
-                </TouchableOpacity>
+                ) : null}
+                <View
+                  style={[
+                    styles.bubbleRow,
+                    mine ? styles.rowMine : styles.rowOther,
+                    sameSenderAsPrev ? styles.bubbleRowTight : null,
+                  ]}
+                >
+                  {!mine && isGroup ? (
+                    showAvatar ? (
+                      <View style={[styles.msgAvatar, { backgroundColor: avatarColor(item.sender_name) }]}>
+                        <Text style={styles.msgAvatarText}>{initials(item.sender_name)}</Text>
+                      </View>
+                    ) : (
+                      <View style={styles.msgAvatarSpacer} />
+                    )
+                  ) : null}
+                  <TouchableOpacity
+                    activeOpacity={0.85}
+                    onPress={() => {
+                      const m = String(item.content || '').match(/#meeting:([a-f0-9-]{36})/i);
+                      if (m?.[1]) {
+                        navigation.navigate('Meeting', {
+                          openMeetingId: m[1],
+                          openMeetingHost: item.sender_name,
+                          openMeetingHostId: item.sender_id,
+                        });
+                      }
+                    }}
+                    onLongPress={mine ? () => openMessageActions(item) : undefined}
+                    delayLongPress={400}
+                    style={styles.bubbleTouch}
+                  >
+                    <View
+                      style={[
+                        styles.bubble,
+                        mediaOnly ? styles.bubbleMedia : mine ? styles.bubbleMine : styles.bubbleOther,
+                        mine && !sameSenderAsNext && styles.bubbleMineTail,
+                        !mine && !sameSenderAsNext && styles.bubbleOtherTail,
+                      ]}
+                    >
+                      {showSender ? (
+                        <Text
+                          style={[
+                            styles.sender,
+                            { color: avatarColor(item.sender_name) },
+                            mediaOnly && styles.senderOnMedia,
+                          ]}
+                        >
+                          {item.sender_name}
+                        </Text>
+                      ) : null}
+                      {hasImage ? (
+                        <View style={styles.mediaWrap}>
+                          <ChatImage uri={item.attachment_url} onPress={() => setPreviewImage(item.attachment_url)} />
+                          {mediaOnly ? (
+                            <MessageTime
+                              time={formatTime(item.created_at)}
+                              edited={!!item.edited_at}
+                              mine={mine}
+                              overlay
+                            />
+                          ) : null}
+                        </View>
+                      ) : null}
+                      {hasVideo ? (
+                        <View style={styles.mediaWrap}>
+                          <ChatVideo onPress={() => setPreviewVideo(item.attachment_url)} />
+                          {mediaOnly ? (
+                            <MessageTime
+                              time={formatTime(item.created_at)}
+                              edited={!!item.edited_at}
+                              mine={mine}
+                              overlay
+                            />
+                          ) : null}
+                        </View>
+                      ) : null}
+                      {hasFile ? (
+                        <TouchableOpacity
+                          style={[styles.fileChip, mine && styles.fileChipMine]}
+                          onPress={() => Linking.openURL(item.attachment_url)}
+                          activeOpacity={0.85}
+                        >
+                          <View style={[styles.fileIconWrap, mine && styles.fileIconWrapMine]}>
+                            <Ionicons name="document" size={20} color="#fff" />
+                          </View>
+                          <View style={styles.fileMeta}>
+                            <Text style={styles.fileName} numberOfLines={1}>
+                              {item.attachment_name || 'Файл'}
+                            </Text>
+                            <Text style={styles.fileSub}>Файл</Text>
+                          </View>
+                        </TouchableOpacity>
+                      ) : null}
+                      {item.content ? (
+                        <View style={styles.msgContentWrap}>
+                          <Text style={[styles.msgText, mine && styles.msgTextMine]}>{item.content}</Text>
+                          <MessageTime
+                            time={formatTime(item.created_at)}
+                            edited={!!item.edited_at}
+                            mine={mine}
+                          />
+                        </View>
+                      ) : hasFile ? (
+                        <View style={styles.fileTimeWrap}>
+                          <MessageTime
+                            time={formatTime(item.created_at)}
+                            edited={!!item.edited_at}
+                            mine={mine}
+                          />
+                        </View>
+                      ) : null}
+                    </View>
+                  </TouchableOpacity>
+                </View>
               </View>
             );
           }}
-          ListEmptyComponent={<EmptyState text="Мессеж алга. Эхний мессежээ бичээрэй."/>}
+          ListEmptyComponent={
+            <View style={styles.emptyWrap}>
+              <View style={styles.emptyCard}>
+                <Ionicons name="chatbubbles-outline" size={36} color={colors.primary} />
+                <Text style={styles.emptyTitle}>Мессеж алга</Text>
+                <Text style={styles.emptySub}>Эхний мессежээ бичээрэй</Text>
+              </View>
+            </View>
+          }
         />
 
-        <View style={styles.composer}>
+        <SafeAreaView edges={['bottom']} style={styles.composerSafe}>
           {editingId ? (
             <View style={styles.editBar}>
+<<<<<<< HEAD
               <Text style={styles.editLabel}>Мессеж засаж байна</Text>
               <TouchableOpacity onPress={cancelEdit}>
                 <Text style={styles.editCancel}>Болих</Text>
 >>>>>>> c08b25b (first commit)
+=======
+              <View style={styles.editBarAccent} />
+              <View style={styles.editBarBody}>
+                <Text style={styles.editLabel}>Засах</Text>
+                <Text style={styles.editPreview} numberOfLines={1}>{text}</Text>
+              </View>
+              <TouchableOpacity onPress={cancelEdit} hitSlop={10}>
+                <Ionicons name="close" size={22} color={colors.textMuted} />
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
               </TouchableOpacity>
             </View>
           ) : null}
@@ -967,6 +1288,7 @@ export default function ConversationScreen() {
               <Text style={styles.voiceText} numberOfLines={2}>
                 {voicePreview || 'Ярьж байна...'}
               </Text>
+<<<<<<< HEAD
 <<<<<<< HEAD
               <Text style={styles.voiceHint}>Суллана</Text>
             </View>
@@ -989,26 +1311,32 @@ export default function ConversationScreen() {
               placeholder={voiceActive ? 'Ярьж байна...' : 'Мессеж'}
 =======
               <Text style={styles.voiceHint}>Суллана — шууд илгээнэ</Text>
+=======
+              <Text style={styles.voiceHint}>Суллана</Text>
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
             </View>
           ) : null}
           <View style={styles.inputRow}>
-            <TouchableOpacity style={styles.attachBtn} onPress={chooseAttachment} disabled={uploading || voiceActive}>
+            <TouchableOpacity
+              style={[styles.toolBtn, (uploading || voiceActive) && styles.toolBtnDisabled]}
+              onPress={chooseAttachment}
+              disabled={uploading || voiceActive}
+              accessibilityLabel="Хавсаргах"
+            >
               {uploading ? (
                 <ActivityIndicator size="small" color={colors.primary} />
               ) : (
-                <Text style={styles.attachIcon}></Text>
+                <Ionicons name="attach" size={26} color={colors.textMuted} style={styles.attachIcon} />
               )}
             </TouchableOpacity>
-            <VoiceMessageButton
-              disabled={uploading}
-              onPartial={setVoicePreview}
-              onFinal={sendVoiceText}
-              onListeningChange={setVoiceActive}
-            />
             <TextInput
               style={styles.input}
+<<<<<<< HEAD
               placeholder={voiceActive ? 'Ярьж байна...' : 'Бичих эсвэл MIC дарж ярина'}
 >>>>>>> c08b25b (first commit)
+=======
+              placeholder={voiceActive ? 'Ярьж байна...' : 'Мессеж'}
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
               placeholderTextColor={colors.textMuted}
               value={text}
               onChangeText={setText}
@@ -1016,6 +1344,9 @@ export default function ConversationScreen() {
               editable={!voiceActive}
             />
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
             {text.trim() || editingId ? (
               <TouchableOpacity
                 style={[styles.sendBtn, voiceActive && styles.toolBtnDisabled]}
@@ -1039,6 +1370,7 @@ export default function ConversationScreen() {
                 telegram
               />
             )}
+<<<<<<< HEAD
           </View>
         </SafeAreaView>
 =======
@@ -1052,6 +1384,10 @@ export default function ConversationScreen() {
           </View>
         </View>
 >>>>>>> c08b25b (first commit)
+=======
+          </View>
+        </SafeAreaView>
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       </KeyboardAvoidingView>
 
       <ChatImagePreview uri={previewImage} onClose={() => setPreviewImage(null)} />
@@ -1080,6 +1416,9 @@ export default function ConversationScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.primary },
   flex: { flex: 1, backgroundColor: colors.background },
@@ -1179,6 +1518,7 @@ const makeStyles = ({ colors }) => StyleSheet.create({
   bubbleMineTail: { borderBottomRightRadius: 4 },
   bubbleOtherTail: { borderBottomLeftRadius: 4 },
   bubbleMedia: {
+<<<<<<< HEAD
     backgroundColor: 'transparent',
     paddingHorizontal: 0,
     paddingTop: 0,
@@ -1327,87 +1667,154 @@ const styles = StyleSheet.create({
   bubbleMine: { backgroundColor: colors.primary, borderTopRightRadius: 2 },
   bubbleOther: { backgroundColor: colors.surface, borderTopLeftRadius: 2, borderWidth: 1, borderColor: colors.border },
   bubbleImageOnly: {
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     backgroundColor: 'transparent',
-    padding: 0,
-    borderWidth: 0,
-    overflow: 'visible',
+    paddingHorizontal: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    overflow: 'hidden',
   },
-  sender: { color: colors.primary, fontSize: 12, fontWeight: '700', marginBottom: 2 },
-  senderOnImage: { marginBottom: spacing.xs, marginLeft: 2 },
-  msgText: { color: colors.text, fontSize: 15, lineHeight: 20 },
-  msgTextMine: { color: '#fff'},
+  sender: { fontSize: 13, fontWeight: '700', marginBottom: 2 },
+  senderOnMedia: {
+    marginBottom: 4,
+    marginLeft: 2,
+    textShadowColor: 'rgba(255,255,255,0.7)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 3,
+  },
+  msgText: { color: colors.text, fontSize: 16, lineHeight: 21, flexShrink: 1 },
+  msgTextMine: { color: colors.onPrimaryContainer },
+  msgContentWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'flex-end',
+    columnGap: 8,
+    rowGap: 0,
+  },
+  mediaWrap: { position: 'relative', borderRadius: 12, overflow: 'hidden' },
   msgImage: {
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceAlt,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.06)',
   },
-  imageTime: {
-    color: colors.textMuted,
-    fontSize: 10,
-    marginTop: 4,
-    alignSelf: 'flex-end',
-    marginRight: 2,
+  mediaFallback: {
+    width: IMAGE_MAX_W,
+    minHeight: 80,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
   },
-  imageTimeMine: { color: colors.textFaint },
+  mediaFallbackText: { color: colors.primary, fontWeight: '600' },
   videoThumb: {
     width: VIDEO_THUMB_W,
     height: VIDEO_THUMB_H,
-    borderRadius: radius.md,
+    borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#111827',
-  },
-  videoThumbPlayer: { width: '100%', height: '100%'},
-  playBadge: {
-    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#2A3A4A',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.28)',
   },
-  playIcon: { color: '#fff', fontSize: 36, marginLeft: 4 },
+  videoPlayCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   fileChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.bg,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    marginBottom: 4,
-    maxWidth: 220,
+    gap: 10,
+    minWidth: 180,
+    maxWidth: 240,
+    paddingVertical: 4,
   },
-  fileChipMine: { backgroundColor: 'rgba(255,255,255,0.2)'},
-  fileIcon: { fontSize: 18 },
-  fileName: { color: colors.text, fontSize: 14, flexShrink: 1 },
-  msgTimeInline: { color: colors.textMuted, fontSize: 10, lineHeight: 20 },
-  msgTime: { color: colors.textMuted, fontSize: 10 },
-  msgTimeMine: { color: 'rgba(255,255,255,0.8)'},
-  msgMeta: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, alignSelf: 'flex-end'},
-  msgEdited: { color: colors.textMuted, fontSize: 10, fontStyle: 'italic'},
-  msgEditedMine: { color: 'rgba(255,255,255,0.65)'},
+  fileChipMine: {},
+  fileIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fileIconWrapMine: { backgroundColor: colors.success },
+  fileMeta: { flex: 1, minWidth: 0 },
+  fileName: { color: colors.text, fontSize: 15, fontWeight: '600' },
+  fileSub: { color: colors.textMuted, fontSize: 12, marginTop: 1 },
+  fileTimeWrap: { alignSelf: 'flex-end', marginTop: 2 },
+  timeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+    marginTop: 2,
+    paddingLeft: 8,
+  },
+  timeRowOverlay: {
+    position: 'absolute',
+    right: 6,
+    bottom: 6,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginLeft: 0,
+    marginTop: 0,
+  },
+  timeText: { color: colors.textMuted, fontSize: 11 },
+  timeTextMine: { color: colors.onPrimaryContainer },
+  timeTextOverlay: { color: '#fff' },
+  checkIcon: { marginLeft: 2 },
+  emptyWrap: { alignItems: 'center', paddingHorizontal: 24 },
+  emptyCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    paddingVertical: 24,
+    paddingHorizontal: 28,
+    alignItems: 'center',
+    gap: 6,
+  },
+  emptyTitle: { color: colors.text, fontSize: 16, fontWeight: '700', marginTop: 4 },
+  emptySub: { color: colors.textMuted, fontSize: 13 },
+  composerSafe: { backgroundColor: colors.surface },
   editBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: 4,
-    backgroundColor: colors.primary + '15',
-  },
-  editLabel: { color: colors.primary, fontSize: 13, fontWeight: '600'},
-  editCancel: { color: colors.danger, fontSize: 13, fontWeight: '600'},
-  composer: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     backgroundColor: colors.surface,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
+  editBarAccent: {
+    width: 3,
+    alignSelf: 'stretch',
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+  },
+  editBarBody: { flex: 1, minWidth: 0 },
+  editLabel: { color: colors.primary, fontSize: 13, fontWeight: '700' },
+  editPreview: { color: colors.textMuted, fontSize: 13, marginTop: 1 },
   voiceBar: {
     flexDirection: 'row',
     alignItems: 'center',
+<<<<<<< HEAD
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
     paddingBottom: 4,
     backgroundColor: colors.danger + '12',
 >>>>>>> c08b25b (first commit)
+=======
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: colors.surface,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   },
   voiceDot: {
     width: 8,
@@ -1415,6 +1822,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.danger,
   },
+<<<<<<< HEAD
 <<<<<<< HEAD
   voiceText: { flex: 1, color: colors.text, fontSize: 14, fontWeight: '600' },
   voiceHint: { color: colors.textMuted, fontSize: 12 },
@@ -1464,41 +1872,57 @@ const styles = StyleSheet.create({
 =======
   voiceText: { flex: 1, color: colors.text, fontSize: 14, fontWeight: '600'},
   voiceHint: { color: colors.textMuted, fontSize: 11 },
+=======
+  voiceText: { flex: 1, color: colors.text, fontSize: 14, fontWeight: '600' },
+  voiceHint: { color: colors.textMuted, fontSize: 12 },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: spacing.md,
-    gap: spacing.sm,
+    paddingHorizontal: 6,
+    paddingTop: 6,
+    paddingBottom: 6,
+    gap: 4,
+    backgroundColor: colors.surface,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
   },
   input: {
     flex: 1,
-    backgroundColor: colors.bg,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    backgroundColor: colors.surfaceContainerHigh,
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingTop: Platform.OS === 'ios' ? 9 : 7,
+    paddingBottom: Platform.OS === 'ios' ? 9 : 7,
     color: colors.text,
-    maxHeight: 100,
-    borderWidth: 1,
+    maxHeight: 110,
+    minHeight: 40,
+    fontSize: 16,
+    lineHeight: 20,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: colors.border,
   },
-  attachBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: radius.md,
-    backgroundColor: colors.bg,
-    borderWidth: 1,
-    borderColor: colors.border,
+  toolBtn: {
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  attachIcon: { fontSize: 24, color: colors.primary, lineHeight: 26 },
+  toolBtnDisabled: { opacity: 0.4 },
+  attachIcon: { transform: [{ rotate: '45deg' }] },
   sendBtn: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: radius.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.success,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+<<<<<<< HEAD
   sendBtnDisabled: { opacity: 0.45 },
   sendText: { color: '#fff', fontWeight: '700' },
 >>>>>>> c08b25b (first commit)
+=======
+  sendIconOffset: { marginLeft: 2 },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 });

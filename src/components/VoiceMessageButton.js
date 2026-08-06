@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Pressable, StyleSheet, Platform, Alert, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme, useStyles } from '../context/ThemeContext';
@@ -7,6 +8,11 @@ import { useTheme, useStyles } from '../context/ThemeContext';
 import { Text, Pressable, StyleSheet, Platform, Alert, View } from 'react-native';
 import { colors, spacing } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { Pressable, StyleSheet, Platform, Alert, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 const LOCALES = ['mn-MN', 'en-US'];
 
@@ -18,10 +24,14 @@ async function loadSpeechModule() {
     if (!M) return null;
     try {
 <<<<<<< HEAD
+<<<<<<< HEAD
       if (typeof M.isRecognitionAvailable === 'function' && !M.isRecognitionAvailable()) return null;
 =======
       if (typeof M.isRecognitionAvailable === 'function'&& !M.isRecognitionAvailable()) return null;
 >>>>>>> c08b25b (first commit)
+=======
+      if (typeof M.isRecognitionAvailable === 'function' && !M.isRecognitionAvailable()) return null;
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     } catch (e) {
       return null;
     }
@@ -41,9 +51,13 @@ export default function VoiceMessageButton({
   onPartial,
   onListeningChange,
 <<<<<<< HEAD
+<<<<<<< HEAD
   telegram = false,
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  telegram = false,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 }) {
   const [listening, setListening] = useState(false);
   const mounted = useRef(true);
@@ -52,10 +66,15 @@ export default function VoiceMessageButton({
   const modRef = useRef(null);
   const subsRef = useRef([]);
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   const setListeningState = useCallback(
     (v) => {
@@ -124,10 +143,14 @@ export default function VoiceMessageButton({
     Alert.alert(
       'Development build шаардлагатай',
 <<<<<<< HEAD
+<<<<<<< HEAD
       'Дуу хоолойгоор бичих нь Expo Go дээр ажиллахгүй.\n\nAndroid: eas build --profile development --platform android\nДараа нь: npx expo start --dev-client'
 =======
       'Hold-to-talk (MIC) нь Expo Go дээр ажиллахгүй.\n\nУтсан дээрээ суулгах:\n• iOS: npx expo run:ios\n• Android: npx expo run:android\n\nДараа нь: npx expo start --dev-client'
 >>>>>>> c08b25b (first commit)
+=======
+      'Дуу хоолойгоор бичих нь Expo Go дээр ажиллахгүй.\n\nAndroid: eas build --profile development --platform android\nДараа нь: npx expo start --dev-client'
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     );
   };
 
@@ -190,15 +213,22 @@ export default function VoiceMessageButton({
   if (Platform.OS === 'web') return null;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const idleColor = telegram ? '#4FAE4E' : colors.primary;
   const idleBg = telegram ? 'transparent' : colors.primarySoft;
 
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const idleColor = telegram ? '#4FAE4E' : colors.primary;
+  const idleBg = telegram ? 'transparent' : colors.primarySoft;
+
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   return (
     <Pressable
       style={({ pressed }) => [
         styles.btn,
+<<<<<<< HEAD
 <<<<<<< HEAD
         { backgroundColor: idleBg },
         listening && styles.btnActive,
@@ -207,6 +237,11 @@ export default function VoiceMessageButton({
         listening && styles.btnActive,
         pressed && !listening && styles.btnPressed,
 >>>>>>> c08b25b (first commit)
+=======
+        { backgroundColor: idleBg },
+        listening && styles.btnActive,
+        pressed && !listening && (telegram ? styles.btnPressedTg : styles.btnPressed),
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         disabled && styles.btnDisabled,
       ]}
       onPressIn={start}
@@ -216,19 +251,26 @@ export default function VoiceMessageButton({
       accessibilityHint="Удаан дарж ярина"
     >
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       <Ionicons
         name={listening ? 'mic' : 'mic-outline'}
         size={telegram ? 26 : 22}
         color={listening ? '#fff' : idleColor}
       />
+<<<<<<< HEAD
 =======
       <Text style={[styles.icon, listening && styles.iconActive]}>{listening ? '●' : 'MIC'}</Text>
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       {listening ? <View style={styles.pulse} /> : null}
     </Pressable>
   );
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   btn: {
@@ -251,28 +293,31 @@ const makeStyles = ({ colors }) => StyleSheet.create({
     borderColor: 'rgba(229,57,53,0.45)',
 =======
 const styles = StyleSheet.create({
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   btn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.primarySoft,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: colors.primary,
   },
-  btnPressed: { backgroundColor: colors.primary + '33'},
-  btnActive: { backgroundColor: colors.danger + '28', borderColor: colors.danger },
+  btnPressed: { backgroundColor: colors.primary + '22' },
+  btnPressedTg: { opacity: 0.7 },
+  btnActive: { backgroundColor: '#E53935' },
   btnDisabled: { opacity: 0.4 },
-  icon: { color: colors.primary, fontSize: 12, fontWeight: '800', letterSpacing: 0.5 },
-  iconActive: { color: colors.danger },
   pulse: {
     position: 'absolute',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     borderWidth: 2,
+<<<<<<< HEAD
     borderColor: colors.danger + '88',
 >>>>>>> c08b25b (first commit)
+=======
+    borderColor: 'rgba(229,57,53,0.45)',
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   },
 });

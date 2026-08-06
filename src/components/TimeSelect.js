@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { TIME_OPTIONS } from '../lib/timeOptions';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 
@@ -22,6 +23,14 @@ import { colors, spacing, radius } from '../theme';
 export default function TimeSelect({ label, value, onChange, placeholder = 'Сонгох', allowClear = true }) {
   const [open, setOpen] = useState(false);
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+
+export default function TimeSelect({ label, value, onChange, placeholder = 'Сонгох', allowClear = true }) {
+  const [open, setOpen] = useState(false);
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   const pick = (t) => {
     onChange(t);
@@ -63,10 +72,14 @@ export default function TimeSelect({ label, value, onChange, placeholder = 'Со
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   wrap: { flex: 1 },
   label: { color: colors.textMuted, fontSize: 11, fontWeight: '700', marginBottom: 4 },
   box: {

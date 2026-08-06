@@ -1,13 +1,21 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
 =======
 >>>>>>> c08b25b (first commit)
+=======
+import * as FileSystem from 'expo-file-system/legacy';
+import { decode } from 'base64-arraybuffer';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import { supabase } from '../lib/supabase';
 import { MOVEMENT_TYPES, computeBalances, movementDelta } from '../lib/stockBalance';
 
 const TABLE = 'inventory';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 const BUCKET = 'inventory';
 
 async function uploadImage(uri, folder) {
@@ -30,8 +38,11 @@ export async function uploadInventoryImage(uri) {
 export async function uploadMovementPhoto(uri) {
   return uploadImage(uri, 'movements');
 }
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 export async function fetchInventory() {
   const { data, error } = await supabase
@@ -64,9 +75,13 @@ export async function insertInventory(item) {
       price: item.price,
       barcode: item.barcode || null,
 <<<<<<< HEAD
+<<<<<<< HEAD
       image_url: item.image_url || null,
 =======
 >>>>>>> c08b25b (first commit)
+=======
+      image_url: item.image_url || null,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       category: item.category || 'material',
     })
     .select()
@@ -93,10 +108,14 @@ export async function deleteInventory(id) {
 
 // Бараа олгох: тоо хасаад олголтын лог үүсгэнэ
 <<<<<<< HEAD
+<<<<<<< HEAD
 export async function withdrawInventory({ item, userId, userName, qty, photoUrl }) {
 =======
 export async function withdrawInventory({ item, userId, userName, qty }) {
 >>>>>>> c08b25b (first commit)
+=======
+export async function withdrawInventory({ item, userId, userName, qty, photoUrl }) {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const newQty = Math.max(0, (Number(item.quantity) || 0) - qty);
   await updateInventory(item.id, { quantity: newQty });
   const { error } = await supabase.from('stock_movements').insert({
@@ -108,9 +127,13 @@ export async function withdrawInventory({ item, userId, userName, qty }) {
     quantity: qty,
     movement_type: MOVEMENT_TYPES.WITHDRAW,
 <<<<<<< HEAD
+<<<<<<< HEAD
     photo_url: photoUrl || null,
 =======
 >>>>>>> c08b25b (first commit)
+=======
+    photo_url: photoUrl || null,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   });
   if (error) throw error;
   return newQty;

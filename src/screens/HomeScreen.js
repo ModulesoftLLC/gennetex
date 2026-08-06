@@ -1,14 +1,20 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Animated, Easing, useWindowDimensions } from 'react-native';
 =======
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 >>>>>>> c08b25b (first commit)
+=======
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Animated, Easing } from 'react-native';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import NavIcon from '../components/NavIcon';
+<<<<<<< HEAD
 <<<<<<< HEAD
 import { spacing, radius, colors as C } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
@@ -27,18 +33,31 @@ const EMPLOYEE_MODULES = [
 =======
 import { colors, spacing, radius, shadow } from '../theme';
 import { roleLabel } from '../lib/roles';
+=======
+import { spacing, radius, colors as C } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+import { roleLabel, canTakeServiceCalls } from '../lib/roles';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import * as tracking from '../services/trackingService';
 import * as vehicleApi from '../services/vehicleService';
 import { countTodayCheckIns } from '../services/attendanceService';
+import * as ohaabApi from '../services/ohaabService';
+import * as meetingApi from '../services/meetingService';
 import { formatTime, formatDate } from '../lib/formatTime';
 
 const EMPLOYEE_MODULES = [
+<<<<<<< HEAD
   { key: 'Inventory', label: 'Бараа авах', icon: 'inventory', color: colors.primary },
 >>>>>>> c08b25b (first commit)
+=======
+  { key: 'Ohaab', label: 'ХААБ заавар', icon: 'attendance', color: '#b45309' },
+  { key: 'Inventory', label: 'Бараа авах', icon: 'inventory', color: C.primary },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   { key: 'MyStock', label: 'Миний үлдэгдэл', icon: 'allocation', color: '#16a34a'},
   { key: 'Tools', label: 'Багаж авах', icon: 'tools', color: '#ea580c'},
   { key: 'MyTools', label: 'Миний багаж', icon: 'allocation', color: '#ca8a04'},
   { key: 'SiteWork', label: 'Ажлын байр', icon: 'location', color: '#059669'},
+<<<<<<< HEAD
 <<<<<<< HEAD
   { key: 'MyContract', label: 'Миний гэрээ', icon: 'report', color: '#0f766e'},
   { key: 'EmployeeDirectory', label: 'Ажилтны мэдээлэл', icon: 'employees', color: '#0d9488'},
@@ -107,27 +126,57 @@ const AI_MODULES_ADMIN = [
   { key: 'AdminPerformance', label: 'AI гүйцэтгэл', sub: 'Ажилтны дүн шинжилгээ', icon: 'report', color: '#6366f1' },
   { key: 'AdminAppUsage', label: 'Апп ашиглалт', sub: 'AI хэрэглээний тайлан', icon: 'report', color: '#8b5cf6' },
 =======
+=======
+  { key: 'MyContract', label: 'Миний гэрээ', icon: 'report', color: '#0f766e'},
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   { key: 'EmployeeDirectory', label: 'Ажилтны мэдээлэл', icon: 'employees', color: '#0d9488'},
-  { key: 'Vehicle', label: 'Машин (код)', icon: 'vehicle', color: colors.warning },
-  { key: 'Fuel', label: 'Бензин тооцоо', icon: 'fuel', color: colors.success },
+  { key: 'Vehicle', label: 'Машин (код)', icon: 'vehicle', color: C.warning },
+  { key: 'Fuel', label: 'Бензин тооцоо', icon: 'fuel', color: C.success },
   { key: 'Calls', label: 'Дуудлага', icon: 'calls', color: '#0891b2'},
+  { key: 'Meeting', label: 'Хурал', icon: 'chat', color: '#0F766E'},
   { key: 'Attendance', label: 'Ирц', icon: 'attendance', color: '#db2777'},
   { key: 'MyShift', label: 'Хуваарь харах', icon: 'clock', color: '#2563eb'},
   { key: 'EmployeeReport', label: 'Ажилтан тайлан', icon: 'report', color: '#1e3a5f'},
+  { key: 'Feedback', label: 'Санал гомдол', icon: 'report', color: '#dc2626'},
   { key: 'Chat', label: 'Чат', icon: 'chat', color: '#7c3aed'},
 ];
 
 const ADMIN_MODULES = [
-  { key: 'Employees', label: 'Ажилтан бүртгэх', icon: 'employees', color: colors.primary },
+  { key: 'AdminOhaab', label: 'ХААБ заавар', icon: 'attendance', color: '#b45309' },
+  { key: 'Employees', label: 'Ажилтан бүртгэх', icon: 'employees', color: C.primary },
+  { key: 'AdminApplications', label: 'Ажлын байрны анкет', icon: 'employees', color: '#0369a1'},
+  { key: 'AdminContracts', label: 'Хөдөлмөрийн гэрээ', icon: 'report', color: '#0f766e'},
   { key: 'AdminReports', label: 'Тайлан', icon: 'report', color: '#1e3a5f'},
+  { key: 'AdminFeedback', label: 'Санал гомдол', icon: 'report', color: '#dc2626'},
   { key: 'EmployeeDirectory', label: 'Ажилтны мэдээлэл', icon: 'employees', color: '#0d9488'},
   { key: 'SiteWork', label: 'Ажлын байр / баг', icon: 'location', color: '#059669'},
-  { key: 'VehiclesAdmin', label: 'Машин / QR', icon: 'qr', color: colors.warning },
-  { key: 'Live', label: 'Байршил хяналт', icon: 'location', color: colors.success },
-  { key: 'Inventory', label: 'Бараа материал', icon: 'inventory', color: colors.primary },
+  { key: 'AdminCalls', label: 'Бүх дуудлага', icon: 'calls', color: '#0891b2'},
+  { key: 'AdminVisits', label: 'Очсон лог', icon: 'location', color: '#0d9488'},
+  { key: 'Requisition', label: 'Шаардах хуудас', icon: 'report', color: '#0369a1'},
+  { key: 'VehiclesAdmin', label: 'Машин / QR', icon: 'qr', color: C.warning },
+  { key: 'Live', label: 'Байршил хяналт', icon: 'location', color: C.success },
+  { key: 'Inventory', label: 'Бараа материал', icon: 'inventory', color: C.primary },
   { key: 'Tools', label: 'Багаж', icon: 'tools', color: '#ea580c'},
+<<<<<<< HEAD
   { key: 'ToolAllocation', label: 'Ажилтны үлдэгдэл', icon: 'allocation', color: colors.accent },
 >>>>>>> c08b25b (first commit)
+=======
+  { key: 'ToolAllocation', label: 'Ажилтны үлдэгдэл', icon: 'allocation', color: C.accent },
+];
+
+// AI боломжуудыг тусад нь тод хэсэг болгож харуулна
+const AI_MODULES_EMPLOYEE = [
+  { key: 'GennetexAi', label: 'Gennetex AI', sub: 'Асуулт асууж чатлах', icon: 'chat', color: '#7c3aed' },
+  { key: 'AiInventoryHome', label: 'AI тооллого', sub: 'Камераар бараа тоолох', icon: 'inventory', color: '#0d9488' },
+];
+
+const AI_MODULES_ADMIN = [
+  { key: 'AiAdmin', label: 'AI Админ туслах', sub: 'Хянах · ажил хуваарилах · Excel', icon: 'ai', color: '#4f46e5' },
+  { key: 'GennetexAi', label: 'Gennetex AI', sub: 'Асуулт асууж чатлах', icon: 'chat', color: '#7c3aed' },
+  { key: 'AiInventoryHome', label: 'AI тооллого', sub: 'Камераар бараа тоолох', icon: 'inventory', color: '#0d9488' },
+  { key: 'AdminPerformance', label: 'AI гүйцэтгэл', sub: 'Ажилтны дүн шинжилгээ', icon: 'report', color: '#6366f1' },
+  { key: 'AdminAppUsage', label: 'Апп ашиглалт', sub: 'AI хэрэглээний тайлан', icon: 'report', color: '#8b5cf6' },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 ];
 
 const ADMIN_KEYS = new Set(ADMIN_MODULES.map((m) => m.key));
@@ -144,6 +193,7 @@ function greeting() {
 export default function HomeScreen() {
   const navigation = useNavigation();
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { colors } = useTheme();
   const { width: SCREEN_WIDTH } = useWindowDimensions();
   const styles = useStyles(makeStyles);
@@ -151,10 +201,16 @@ export default function HomeScreen() {
 =======
   const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees } = useApp();
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+  const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, fetchEmployees, currentUser } = useApp();
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const name = authProfile?.name || profile?.name || 'Ажилтан';
 
   const [stats, setStats] = useState({ employees: 0, online: 0, vehicles: 0, checkins: 0 });
   const [now, setNow] = useState(() => new Date());
+<<<<<<< HEAD
 <<<<<<< HEAD
   const [ohaabSignedToday, setOhaabSignedToday] = useState(true);
 
@@ -166,6 +222,9 @@ export default function HomeScreen() {
   const aiCardWidth = Math.floor((availableWidth - tileGap) - 1) / 2;
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const [ohaabSignedToday, setOhaabSignedToday] = useState(true);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 30_000);
@@ -174,6 +233,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     useCallback(() => {
+<<<<<<< HEAD
 <<<<<<< HEAD
       let active = true;
       (async () => {
@@ -191,6 +251,19 @@ export default function HomeScreen() {
       let active = true;
       (async () => {
 >>>>>>> c08b25b (first commit)
+=======
+      let active = true;
+      (async () => {
+        if (isCloud && currentUser?.id) {
+          try {
+            const signed = await ohaabApi.hasTodayAck(currentUser.id);
+            if (active) setOhaabSignedToday(signed);
+          } catch (e) {
+            if (active) setOhaabSignedToday(true);
+          }
+        }
+        if (!isAdmin || !isCloud) return;
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         try {
           const [emps, workers, vehicles, checkins] = await Promise.all([
             fetchEmployees().catch(() => []),
@@ -210,14 +283,19 @@ export default function HomeScreen() {
         active = false;
       };
 <<<<<<< HEAD
+<<<<<<< HEAD
     }, [isAdmin, isCloud, fetchEmployees, currentUser?.id])
 =======
     }, [isAdmin, isCloud, fetchEmployees])
 >>>>>>> c08b25b (first commit)
+=======
+    }, [isAdmin, isCloud, fetchEmployees, currentUser?.id])
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   );
 
   const dateStr = formatDate(now);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   // Админ дуудлагаар явах эрхтэй эсэх (superadmin эрх өгсөн үед)
   const canTakeCalls = canTakeServiceCalls(authProfile);
@@ -264,13 +342,56 @@ export default function HomeScreen() {
   const badgeScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
 
 =======
+=======
+  // Админ дуудлагаар явах эрхтэй эсэх (superadmin эрх өгсөн үед)
+  const canTakeCalls = canTakeServiceCalls(authProfile);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const serviceModules = useMemo(
     () =>
-      (isAdmin ? EMPLOYEE_MODULES.filter((m) => !ADMIN_KEYS.has(m.key) && !ADMIN_HIDDEN_KEYS.has(m.key)) : EMPLOYEE_MODULES),
-    [isAdmin]
+      isAdmin
+        ? EMPLOYEE_MODULES.filter(
+            (m) =>
+              !ADMIN_KEYS.has(m.key) &&
+              (!ADMIN_HIDDEN_KEYS.has(m.key) || (m.key === 'Calls' && canTakeCalls))
+          )
+        : EMPLOYEE_MODULES,
+    [isAdmin, canTakeCalls]
   );
 
+<<<<<<< HEAD
 >>>>>>> c08b25b (first commit)
+=======
+  const aiModules = isAdmin ? AI_MODULES_ADMIN : AI_MODULES_EMPLOYEE;
+  const adminModules = useMemo(
+    () =>
+      isSuperAdmin
+        ? [...ADMIN_MODULES, { key: 'AdminDevices', label: 'Төхөөрөмж зөвшөөрөл', icon: 'employees', color: '#b45309' }]
+        : ADMIN_MODULES,
+    [isSuperAdmin]
+  );
+
+  const mountAnim = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(mountAnim, {
+      toValue: 1,
+      duration: 480,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [mountAnim, pulse]);
+  const aiSlide = mountAnim.interpolate({ inputRange: [0, 1], outputRange: [16, 0] });
+  const badgeScale = pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
+
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const go = (m) => {
     if (m.key === 'Vehicle') {
       navigation.navigate('Vehicle', { autoScan: true });
@@ -300,12 +421,19 @@ export default function HomeScreen() {
   );
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const renderAiCard = (m, i) => (
     <AiCard key={`${m.key}-${i}`} m={m} styles={styles} width={aiCardWidth} onPress={() => go(m)} />
   );
 
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const renderAiCard = (m, i) => (
+    <AiCard key={`${m.key}-${i}`} m={m} styles={styles} onPress={() => go(m)} />
+  );
+
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   return (
     <View style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.header}>
@@ -335,8 +463,11 @@ export default function HomeScreen() {
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
 <<<<<<< HEAD
+<<<<<<< HEAD
         <TodayDashboard />
 
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         {isCloud && !ohaabSignedToday ? (
           <TouchableOpacity
             style={styles.ohaabBanner}
@@ -354,8 +485,11 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ) : null}
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         <View style={styles.clockCard}>
           <View style={{ flex: 1 }}>
             <Text style={styles.clockLabel}>Өнөөдрийн ирц</Text>
@@ -368,6 +502,9 @@ export default function HomeScreen() {
         </View>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         <Animated.View style={{ opacity: mountAnim, transform: [{ translateY: aiSlide }] }}>
           <View style={styles.aiHeaderRow}>
             <View style={styles.aiTitleWrap}>
@@ -383,8 +520,11 @@ export default function HomeScreen() {
           <View style={styles.aiGrid}>{aiModules.map(renderAiCard)}</View>
         </Animated.View>
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         {isAdmin ? (
           <>
             <View style={styles.adminHeaderRow}>
@@ -415,10 +555,14 @@ export default function HomeScreen() {
             </TouchableOpacity>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             <View style={styles.grid}>{adminModules.map(renderTile)}</View>
 =======
             <View style={styles.grid}>{ADMIN_MODULES.map(renderTile)}</View>
 >>>>>>> c08b25b (first commit)
+=======
+            <View style={styles.grid}>{adminModules.map(renderTile)}</View>
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
           </>
         ) : (
           <Text style={styles.welcomeSub}>Доорх үйлчилгээнүүдээс сонгон ажлаа үргэлжлүүлнэ үү.</Text>
@@ -432,14 +576,22 @@ export default function HomeScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 function AiCard({ m, styles, width, onPress }) {
+=======
+function AiCard({ m, styles, onPress }) {
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const scale = useRef(new Animated.Value(1)).current;
   const pressIn = () =>
     Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
   const pressOut = () =>
     Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 6 }).start();
   return (
+<<<<<<< HEAD
     <Animated.View style={{ width, transform: [{ scale }] }}>
+=======
+    <Animated.View style={{ width: '48%', transform: [{ scale }] }}>
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       <TouchableOpacity
         style={[styles.aiCard, { borderColor: m.color + '40', backgroundColor: m.color + '10' }]}
         activeOpacity={0.9}
@@ -459,9 +611,12 @@ function AiCard({ m, styles, width, onPress }) {
 
 function Stat({ icon, value, label, color }) {
   const styles = useStyles(makeStyles);
+<<<<<<< HEAD
 =======
 function Stat({ icon, value, label, color }) {
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   return (
     <View style={styles.statCard}>
       <View style={[styles.statIcon, { backgroundColor: color + '14'}]}>
@@ -478,6 +633,7 @@ function Stat({ icon, value, label, color }) {
 const TILE_GAP = spacing.md;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   header: {
@@ -488,6 +644,12 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.surface,
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+  header: {
+    backgroundColor: colors.surfaceDim,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
@@ -629,6 +791,9 @@ const styles = StyleSheet.create({
   },
   tileLabel: { color: colors.text, fontSize: 12, fontWeight: '600', textAlign: 'center', lineHeight: 16 },
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   aiHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   aiTitleWrap: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   aiBadge: {
@@ -688,6 +853,9 @@ const styles = StyleSheet.create({
   ohaabTitle: { color: '#fff', fontWeight: '800', fontSize: 15 },
   ohaabSub: { color: 'rgba(255,255,255,0.92)', fontSize: 12, marginTop: 2, lineHeight: 16 },
   ohaabArrow: { color: '#fff', fontSize: 22, fontWeight: '800' },
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 });

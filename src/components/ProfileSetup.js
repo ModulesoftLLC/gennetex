@@ -3,20 +3,29 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Field } from './ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 // Профайл байхгүй үед нэрээ оруулах карт
 export default function ProfileSetup({ title = 'Та хэн бэ?'}) {
   const { saveProfile } = useApp();
   const [name, setName] = useState('');
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   return (
     <View style={styles.wrap}>
@@ -41,10 +50,14 @@ export default function ProfileSetup({ title = 'Та хэн бэ?'}) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   wrap: { flex: 1, justifyContent: 'center', padding: spacing.lg },
   title: { color: colors.text, fontSize: 20, fontWeight: '800', marginBottom: spacing.xs },
   sub: { color: colors.textMuted, marginBottom: spacing.lg },

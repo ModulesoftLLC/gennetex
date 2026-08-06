@@ -33,6 +33,7 @@ import {
 } from '../lib/breakSchedule';
 import { distanceMeters } from '../lib/geo';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 
@@ -46,6 +47,15 @@ import { colors, spacing, radius } from '../theme';
 export default function AttendanceScreen() {
   const navigation = useNavigation();
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+
+export default function AttendanceScreen() {
+  const navigation = useNavigation();
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { currentUser, isCloud, isAdmin, fetchEmployees } = useApp();
   const profile = currentUser;
   const [cameraVisible, setCameraVisible] = useState(false);
@@ -1009,12 +1019,17 @@ export default function AttendanceScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 =======
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   heroCard: { marginTop: spacing.lg },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.lg },
   faceCircle: {

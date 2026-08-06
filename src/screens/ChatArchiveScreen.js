@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { ScreenHeader, EmptyState } from '../components/ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 import * as chatApi from '../services/chatService';
@@ -16,6 +17,14 @@ import * as chatApi from '../services/chatService';
 
 export default function ChatArchiveScreen() {
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+import * as chatApi from '../services/chatService';
+
+export default function ChatArchiveScreen() {
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { currentUser, isCloud } = useApp();
   const [files, setFiles] = useState([]);
 
@@ -65,10 +74,14 @@ export default function ChatArchiveScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bg },
   row: {
     flexDirection: 'row',

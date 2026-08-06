@@ -7,6 +7,7 @@ import NavIcon from '../components/NavIcon';
 import { requestAllAppPermissions, markOnboardingComplete } from '../services/permissionsService';
 import { enablePushForUser } from '../services/notificationService';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { colors as palette, spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 
@@ -20,14 +21,26 @@ const ITEMS = [
   { icon: 'chat', color: colors.primary, title: 'Мэдэгдэл', desc: 'Чат, ирц, дуудлагын мэдэгдэл хүлээн авах'},
   { icon: 'location', color: colors.success, title: 'Байршил', desc: 'Ажлын байршил real-time хянах'},
 >>>>>>> c08b25b (first commit)
+=======
+import { colors as palette, spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+
+const ITEMS = [
+  { icon: 'chat', color: palette.primary, title: 'Мэдэгдэл', desc: 'Чат, ирц, дуудлагын мэдэгдэл хүлээн авах'},
+  { icon: 'location', color: palette.success, title: 'Байршил', desc: 'Ажлын байршил real-time хянах'},
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   { icon: 'attendance', color: '#db2777', title: 'Камер', desc: 'Ирц бүртгэх, баркод унших'},
 ];
 
 export default function OnboardingPermissionsScreen({ onComplete }) {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { currentUser } = useApp();
   const [loading, setLoading] = useState(false);
 
@@ -95,10 +108,14 @@ export default function OnboardingPermissionsScreen({ onComplete }) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   bg: { flex: 1, backgroundColor: colors.bgAlt },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   card: {

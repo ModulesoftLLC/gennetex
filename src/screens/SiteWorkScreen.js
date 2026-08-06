@@ -4,20 +4,30 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useApp } from '../context/AppContext';
 import { Card, Button, Field, ScreenHeader, SectionTitle, Badge } from '../components/ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing, radius } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useTheme, useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import * as siteWorkApi from '../services/siteWorkService';
 import { elapsedSeconds, formatDuration } from '../lib/online';
 
 export default function SiteWorkScreen() {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { colors } = useTheme();
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const { colors } = useTheme();
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { currentUser, authProfile, isCloud } = useApp();
   const [ctx, setCtx] = useState(null);
   const [session, setSession] = useState(null);
@@ -231,10 +241,14 @@ export default function SiteWorkScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bg },
   help: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'},

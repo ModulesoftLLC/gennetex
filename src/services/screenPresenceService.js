@@ -39,8 +39,12 @@ const SCREEN_LABELS = {
   ChatArchive: 'Чат архив',
   ChatShared: 'Хуваалцсан файл',
   AdminReports: 'Тайлан (админ)',
+<<<<<<< HEAD
   VehiclesAdmin: 'Машины мэдээлэл солих',
   VehicleSpecs: 'Машины оншилгоо',
+=======
+  VehiclesAdmin: 'Машин / QR',
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   ToolAllocation: 'Үлдэгдэл',
   AiInventoryHome: 'AI Inventory',
   InventoryCamera: 'AI камер',

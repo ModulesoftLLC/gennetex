@@ -7,9 +7,15 @@
 export const VERSION_SEGMENT_MAX = 10;
 
 export const APP_VERSION = {
+<<<<<<< HEAD
   major: 1,
   minor: 0,
   patch: 4,
+=======
+  major: 0,
+  minor: 4,
+  patch: 8,
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 };
 
 export function formatAppVersion(v = APP_VERSION) {

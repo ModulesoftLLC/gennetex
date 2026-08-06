@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+<<<<<<< HEAD
   "installCommand": "cd public-web && npm install",
   "buildCommand": "node scripts/build-web.js",
   "outputDirectory": "dist-web",
@@ -22,4 +23,11 @@
     { "source": "/contact", "destination": "/index.html" },
     { "source": "/careers", "destination": "/index.html" }
   ]
+=======
+  "installCommand": "echo \"Static site — no npm install\"",
+  "buildCommand": "node scripts/build-web.js",
+  "outputDirectory": "dist-web",
+  "framework": null,
+  "cleanUrls": true
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 }

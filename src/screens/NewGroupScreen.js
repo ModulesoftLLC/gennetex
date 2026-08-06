@@ -5,6 +5,7 @@ import { useApp } from '../context/AppContext';
 import { ScreenHeader, Field, Button, EmptyState } from '../components/ui';
 import * as chatApi from '../services/chatService';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 
@@ -15,6 +16,13 @@ import { colors, spacing, radius } from '../theme';
 
 export default function NewGroupScreen() {
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+
+export default function NewGroupScreen() {
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const navigation = useNavigation();
   const { currentUser, fetchEmployees } = useApp();
   const me = currentUser;
@@ -97,10 +105,14 @@ export default function NewGroupScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bg },
   error: { color: colors.danger, marginTop: spacing.sm },
   row: {

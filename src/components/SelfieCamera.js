@@ -3,11 +3,16 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity, ActivityIndicator } fr
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Button } from './ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 export default function SelfieCamera({
   visible,
@@ -24,9 +29,13 @@ export default function SelfieCamera({
   const [capturing, setCapturing] = useState(false);
   const [countdown, setCountdown] = useState(null);
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   const takePhoto = async () => {
     if (!cameraRef.current || capturing) return;
@@ -121,10 +130,14 @@ export default function SelfieCamera({
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: '#000'},
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl },
   msg: { color: colors.text, fontSize: 16, textAlign: 'center', marginBottom: spacing.lg },

@@ -15,6 +15,7 @@ import { ScreenHeader, Button, Card } from '../components/ui';
 import SignaturePad from '../components/SignaturePad';
 import NavIcon from '../components/NavIcon';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { colors as palette, spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 import * as reportApi from '../services/reportService';
@@ -25,13 +26,21 @@ const TYPES = [
   { key: 'vehicle', icon: 'vehicle', color: palette.warning },
 =======
 import { colors, spacing, radius, shadow } from '../theme';
+=======
+import { colors as palette, spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import * as reportApi from '../services/reportService';
 
 const TYPES = [
-  { key: 'material', icon: 'inventory', color: colors.primary },
+  { key: 'material', icon: 'inventory', color: palette.primary },
   { key: 'tool', icon: 'tools', color: '#ea580c'},
+<<<<<<< HEAD
   { key: 'vehicle', icon: 'vehicle', color: colors.warning },
 >>>>>>> c08b25b (first commit)
+=======
+  { key: 'vehicle', icon: 'vehicle', color: palette.warning },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 ];
 
 function previewLines(report) {
@@ -53,9 +62,13 @@ function previewLines(report) {
 
 export default function EmployeeReportScreen() {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { authProfile, currentUser, isCloud, updateMyProfile } = useApp();
   const [preview, setPreview] = useState(null);
   const [loadingType, setLoadingType] = useState(null);
@@ -254,10 +267,14 @@ export default function EmployeeReportScreen() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: colors.bgAlt },
   body: { padding: spacing.lg, paddingBottom: 40 },
   logoWrap: { alignItems: 'center', marginBottom: spacing.lg },

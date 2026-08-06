@@ -65,6 +65,7 @@ function syncPackageLock(version) {
 function syncAdminHtml(version) {
   let html = fs.readFileSync(ADMIN_HTML, 'utf8');
   html = html.replace(
+<<<<<<< HEAD
     /(<span id="appVersionFoot">ЖЕННЕТЕКС )v[\d.]+(<\/span>)/,
     `$1v${version}$2`,
   );
@@ -82,6 +83,11 @@ function syncAdminHtml(version) {
       `<meta name="admin-build-version" content="${version}"/>\n  <meta name="viewport"`,
     );
   }
+=======
+    /(<div class="foot">Gennetex ERP )v[\d.]+(<\/div>)/,
+    `$1v${version}$2`,
+  );
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   fs.writeFileSync(ADMIN_HTML, html);
 }
 

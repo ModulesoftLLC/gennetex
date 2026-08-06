@@ -7,11 +7,16 @@ import * as faceApi from '../services/faceService';
 import * as tracking from '../services/trackingService';
 import { Button } from './ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing, radius } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 // Байршилд очсон үед царайгаар баталгаажуулж, админд зураг харагдана
 export default function SiteVisitVerifier() {
@@ -20,9 +25,13 @@ export default function SiteVisitVerifier() {
   const [busy, setBusy] = useState(false);
   const [faceUuid, setFaceUuid] = React.useState(null);
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   React.useEffect(() => {
     if (!isCloud || !currentUser?.id) return;
@@ -88,10 +97,14 @@ export default function SiteVisitVerifier() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   overlay: { flex: 1, backgroundColor: '#000000bb', justifyContent: 'flex-end'},
   sheet: {
     backgroundColor: colors.surface,

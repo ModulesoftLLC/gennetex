@@ -14,8 +14,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { spacing, radius } from '../theme';
 import { useTheme, useStyles } from '../context/ThemeContext';
 import { searchEmptyText } from '../lib/erpMessages';
+<<<<<<< HEAD
 import { suggestMaterialsForCall, estimateMaterialCost } from '../lib/materialSuggest';
 import { isFlagOn } from '../lib/featureFlags';
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 export const CLOSE_TYPES = [
   { key: 'corp', label: 'Корп' },
@@ -27,7 +30,10 @@ export const CLOSE_TYPES = [
 export default function CloseCallModal({
   visible,
   callId,
+<<<<<<< HEAD
   callType,
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   stockItems = [],
   catalogItems = [],
   onClose,
@@ -87,6 +93,7 @@ export default function CloseCallModal({
       .sort((a, b) => a.name.localeCompare(b.name, 'mn'));
   }, [stockItems, catalogItems, itemSearch]);
 
+<<<<<<< HEAD
   /** Call type-д тохирсон барааны санал (additive) */
   const suggestions = useMemo(() => {
     if (!isFlagOn('materialSuggest')) return [];
@@ -114,6 +121,8 @@ export default function CloseCallModal({
     });
   };
 
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const getAvailableQty = (itemId) => {
     const stock = (stockItems || []).find((s) => s.item_id === itemId);
     const base = Number(stock?.quantity) || 0;

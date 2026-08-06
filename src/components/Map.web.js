@@ -2,11 +2,16 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 export const PROVIDER_GOOGLE = 'google';
 
@@ -17,9 +22,13 @@ export function Marker() {
 
 const MapView = React.forwardRef(function MapView({ children, style }, ref) {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   React.useImperativeHandle(ref, () => ({
     animateCamera() {},
     animateToRegion() {},
@@ -39,10 +48,14 @@ const MapView = React.forwardRef(function MapView({ children, style }, ref) {
 export default MapView;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   fallback: {
     alignItems: 'center',
     justifyContent: 'center',

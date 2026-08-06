@@ -7,14 +7,20 @@ let ttsTimer = null;
 let vibeTimer = null;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 // Дуудлагын ringtone — апп дотор багцлагдсан аудио файл (Алс хол нь дэргэд)
 const RINGTONE_ASSET = require('../../assets/sounds/incoming-call.mp3');
 // Нөөц (локал файл ачаалахад алдаа гарвал онлайн)
 const RINGTONE_FALLBACK_URI =
+<<<<<<< HEAD
 =======
 // Онлайн ringtone (локал файл байхгүй үед)
 const RINGTONE_URI =
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8cb7499d42.mp3?filename=phone-ringtone-124474.mp3';
 
 function speakCaller(callerName) {
@@ -49,6 +55,9 @@ export async function startIncomingCallAlert(callerName) {
       shouldDuckAndroid: false,
     });
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     try {
       const { sound: s } = await Audio.Sound.createAsync(RINGTONE_ASSET, {
         isLooping: true,
@@ -66,6 +75,7 @@ export async function startIncomingCallAlert(callerName) {
       sound = s;
       await sound.playAsync();
     }
+<<<<<<< HEAD
 =======
     const { sound: s } = await Audio.Sound.createAsync(
       { uri: RINGTONE_URI },
@@ -74,6 +84,8 @@ export async function startIncomingCallAlert(callerName) {
     sound = s;
     await sound.playAsync();
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   } catch (e) {
     // Ringtone алдаа — TTS + чичиргээ л үлдэнэ
   }

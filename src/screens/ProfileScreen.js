@@ -18,6 +18,9 @@ import { formatEmployeeBadge } from '../lib/employeeBadge';
 import * as vehicleApi from '../services/vehicleService';
 import { roleLabel } from '../lib/roles';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 import { DEVELOPER_LABEL, SUPERADMIN_EMAIL, HAS_DEVELOPER_EMAIL } from '../lib/developerConfig';
 import { useNavigation } from '@react-navigation/native';
 import { spacing, radius } from '../theme';
@@ -28,6 +31,7 @@ const THEME_OPTIONS = [
   { key: 'dark', label: 'Бараан', icon: '☾' },
   { key: 'system', label: 'Систем', icon: '⚙' },
 ];
+<<<<<<< HEAD
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -40,6 +44,14 @@ import { colors, spacing, radius } from '../theme';
 export default function ProfileScreen() {
   const { authProfile, profile, isAdmin, isCloud, signOut, updateMyProfile } = useApp();
 >>>>>>> c08b25b (first commit)
+=======
+
+export default function ProfileScreen() {
+  const navigation = useNavigation();
+  const { colors, mode, setMode } = useTheme();
+  const styles = useStyles(makeStyles);
+  const { authProfile, profile, isAdmin, isSuperAdmin, isCloud, signOut, updateMyProfile } = useApp();
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const canEdit = isAdmin;
   const canEditAvatar = !!authProfile;
   const [editing, setEditing] = useState(false);
@@ -196,12 +208,18 @@ export default function ProfileScreen() {
           <Card style={{ marginTop: spacing.lg, alignItems: 'center'}}>
             <SectionTitle>Миний QR</SectionTitle>
 <<<<<<< HEAD
+<<<<<<< HEAD
             <Text style={styles.qrHint}>
               Жолооч хамт яваа хүн болгох эсвэл ганцаараа аялал эхлүүлэхэд энэ QR-ыг уншуулна
             </Text>
 =======
             <Text style={styles.qrHint}>Жолооч таныг хамт яваа хүн болгохын тулд энэ QR-ыг уншуулна</Text>
 >>>>>>> c08b25b (first commit)
+=======
+            <Text style={styles.qrHint}>
+              Жолооч хамт яваа хүн болгох эсвэл ганцаараа аялал эхлүүлэхэд энэ QR-ыг уншуулна
+            </Text>
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
             <View style={styles.qrBox}>
               <QRCode value={formatEmployeeBadge(authProfile.id)} size={200} />
             </View>
@@ -251,6 +269,9 @@ export default function ProfileScreen() {
         )}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         {authProfile ? (
           <Card style={{ marginTop: spacing.lg }}>
             <SectionTitle>{DEVELOPER_LABEL}тэй холбогдох</SectionTitle>
@@ -292,8 +313,11 @@ export default function ProfileScreen() {
           </View>
         </Card>
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
         <Button title="Системээс гарах" variant="danger" size="lg" style={{ marginTop: spacing.lg }} onPress={confirmSignOut} />
       </ScrollView>
     </View>
@@ -302,9 +326,13 @@ export default function ProfileScreen() {
 
 function InfoRow({ label, value, last }) {
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   return (
     <View style={[styles.infoRow, !last && styles.infoBorder]}>
       <Text style={styles.infoLabel}>{label}</Text>
@@ -314,12 +342,17 @@ function InfoRow({ label, value, last }) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
 =======
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   hero: { alignItems: 'center', paddingVertical: spacing.xl },
   avatar: {
     width: 88,
@@ -378,6 +411,9 @@ const styles = StyleSheet.create({
   withDriverName: { color: colors.text, fontSize: 18, fontWeight: '800', marginTop: 2 },
   withDriverSub: { color: colors.primary, fontSize: 13, marginTop: 4, fontWeight: '600' },
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   themeHint: { color: colors.textMuted, fontSize: 13, marginBottom: spacing.md },
   themeRow: { flexDirection: 'row', gap: spacing.sm },
   themeOption: {
@@ -398,6 +434,9 @@ const styles = StyleSheet.create({
   themeIconActive: { color: colors.primary },
   themeLabel: { fontSize: 12, fontWeight: '600', color: colors.textMuted },
   themeLabelActive: { color: colors.primary },
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 });

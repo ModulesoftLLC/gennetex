@@ -3,11 +3,16 @@ import { View, Text, StyleSheet, Modal, TouchableOpacity } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Button } from './ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 =======
 import { colors, spacing } from '../theme';
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
 // Дэмжих зураасан кодын төрлүүд
 const BARCODE_TYPES = [
@@ -27,9 +32,13 @@ export default function BarcodeScanner({ visible, onClose, onScanned, title, hin
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
 <<<<<<< HEAD
+<<<<<<< HEAD
   const styles = useStyles(makeStyles);
 =======
 >>>>>>> c08b25b (first commit)
+=======
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 
   useEffect(() => {
     if (visible) setScanned(false);
@@ -99,10 +108,14 @@ export default function BarcodeScanner({ visible, onClose, onScanned, title, hin
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors }) => StyleSheet.create({
 =======
 const styles = StyleSheet.create({
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors }) => StyleSheet.create({
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   container: { flex: 1, backgroundColor: '#000'},
   center: {
     flex: 1,

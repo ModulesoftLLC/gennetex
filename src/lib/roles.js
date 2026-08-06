@@ -46,6 +46,9 @@ export function canAssignRoles(viewerRole) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 /**
  * Хэрэглэгч дуудлагаар (service call) явж болох эсэх.
  * Ажилтан, админ, системийн админ бүгд дуудлага авна (нэвтэрсэн байхад л болно).
@@ -54,8 +57,11 @@ export function canTakeServiceCalls(profile) {
   return !!profile;
 }
 
+<<<<<<< HEAD
 =======
 >>>>>>> c08b25b (first commit)
+=======
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 export function allowedAssignRole(viewerRole, newRole) {
   if (isSuperAdmin(viewerRole)) {
     return [ROLES.EMPLOYEE, ROLES.ADMIN, ROLES.SUPERADMIN].includes(newRole);

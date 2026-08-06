@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { Button, Field } from '../components/ui';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { spacing, radius } from '../theme';
 import { useStyles } from '../context/ThemeContext';
 import AmbientBackground from '../components/AmbientBackground';
@@ -23,6 +24,14 @@ import { colors, spacing, radius, shadow } from '../theme';
 
 export default function LoginScreen() {
 >>>>>>> c08b25b (first commit)
+=======
+import { spacing, radius } from '../theme';
+import { useStyles } from '../context/ThemeContext';
+import AmbientBackground from '../components/AmbientBackground';
+
+export default function LoginScreen() {
+  const styles = useStyles(makeStyles);
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   const { signIn, isCloud } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,9 +57,13 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.bg}>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <AmbientBackground />
 =======
 >>>>>>> c08b25b (first commit)
+=======
+      <AmbientBackground />
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -109,12 +122,17 @@ function mapError(msg = '') {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const makeStyles = ({ colors, shadow }) => StyleSheet.create({
   bg: { flex: 1, backgroundColor: colors.background },
 =======
 const styles = StyleSheet.create({
   bg: { flex: 1, backgroundColor: colors.bgAlt },
 >>>>>>> c08b25b (first commit)
+=======
+const makeStyles = ({ colors, shadow }) => StyleSheet.create({
+  bg: { flex: 1, backgroundColor: colors.background },
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
   scroll: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   card: {
     backgroundColor: colors.surface,
@@ -131,10 +149,14 @@ const styles = StyleSheet.create({
   error: {
     color: colors.danger,
 <<<<<<< HEAD
+<<<<<<< HEAD
     backgroundColor: colors.danger + '1f',
 =======
     backgroundColor: '#fef2f2',
 >>>>>>> c08b25b (first commit)
+=======
+    backgroundColor: colors.danger + '1f',
+>>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
     padding: spacing.sm,
     borderRadius: radius.sm,
     marginBottom: spacing.md,
