@@ -1,21 +1,5 @@
 <!DOCTYPE html>
 <html lang="mn">
-<<<<<<< HEAD
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gennetex — Технологийн шийдэл</title>
-    <meta name="description" content="Gennetex — сүлжээ, шилэн кабель, аюулгүй байдал, IT дэд бүтцийн иж бүрэн шийдэл." />
-    <link rel="icon" href="/logo.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  </head>
-  <body class="bg-graphite-950 text-graphite-50 antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-=======
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -221,44 +205,73 @@
     </div>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
+    <script>
     document.getElementById('yr').textContent=new Date().getFullYear();
-    const SUPABASE_URL='https://xhxyrzzgmksjlibfrmlx.supabase.co';
-    const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoeHlyenpnbWtzamxpYmZybWx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4ODEwMjYsImV4cCI6MjA5ODQ1NzAyNn0.nYWs_N09RLHvhmEUCdbS6M8yvthsKJ5TkXjdRv4VMag';
-    const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false}});
     const form=document.getElementById('applyForm');
     const msg=document.getElementById('applyMsg');
     const btn=document.getElementById('applyBtn');
-    form.addEventListener('submit',async(e)=>{
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      msg.className='form-msg';msg.textContent='';
-      const f=new FormData(form);
-      const name=(f.get('name')||'').trim();
-      if(!name){msg.className='form-msg err';msg.textContent='Нэрээ бичнэ үү.';return;}
-      btn.disabled=true;btn.textContent='Илгээж байна...';
-      const row={
-        name,
-        last_name:(f.get('last_name')||'').trim()||null,
-        phone:(f.get('phone')||'').trim()||null,
-        email:(f.get('email')||'').trim()||null,
-        position:(f.get('position')||'').trim()||null,
-        cv_url:(f.get('cv_url')||'').trim()||null,
-        message:(f.get('message')||'').trim()||null,
-        source:'web',status:'new'
+      msg.className = 'form-msg';
+      msg.textContent = '';
+
+      const f = new FormData(form);
+      const name = (f.get('name') || '').trim();
+      if (!name) {
+        msg.className = 'form-msg err';
+        msg.textContent = 'Нэрээ бичнэ үү.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Илгээж байна...';
+
+      const payload = {
+        form: {
+          general: {
+            firstName: name,
+            clanName: (f.get('last_name') || '').trim() || null,
+            phoneMobile: (f.get('phone') || '').trim() || null,
+            email: (f.get('email') || '').trim() || null
+          },
+          jobInterest: {
+            position: (f.get('position') || '').trim() || null
+          },
+          cvUrl: (f.get('cv_url') || '').trim() || null,
+          additional: (f.get('message') || '').trim() || null
+        },
+        signatureSvg: null,
+        signedAt: new Date().toISOString(),
+        photoAttached: false
       };
-      const {error}=await sb.from('job_applications').insert(row);
-      btn.disabled=false;btn.textContent='Анкет илгээх';
-      if(error){
-        msg.className='form-msg err';
-        msg.textContent='Алдаа гарлаа. Дахин оролдоно уу. ('+error.message+')';
-      }else{
-        form.reset();
-        msg.className='form-msg ok';
-        msg.textContent='Таны анкет амжилттай илгээгдлээ. Бид тун удахгүй холбогдоно.';
+
+      try {
+        const res = await fetch('/api/public-site', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json().catch(() => ({}));
+
+        if (res.status === 201) {
+          form.reset();
+          msg.className = 'form-msg ok';
+          msg.textContent = 'Таны анкет амжилттай илгээгдлээ. Бид тун удахгүй холбогдоно.';
+        } else {
+          msg.className = 'form-msg err';
+          msg.textContent = json?.error || json?.debug || 'Алдаа гарлаа. Дахин оролдоно уу.';
+        }
+      } catch (err) {
+        msg.className = 'form-msg err';
+        msg.textContent = 'Сервертэй холболт алдаа гарлаа. Дахин оролдоно уу.';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Анкет илгээх';
       }
     });
   </script>
 </body>
->>>>>>> f012230 (v0.4.8: Public site, careers, contracts, device gate, and custom ringtone)
 </html>
+
+
