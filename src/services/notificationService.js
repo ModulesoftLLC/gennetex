@@ -59,10 +59,20 @@ export async function registerForPushNotificationsAsync() {
 
   const projectId =
     Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
-  const tokenData = await Notifications.getExpoPushTokenAsync(
-    projectId ? { projectId } : undefined
-  );
-  return tokenData.data;
+  // Try to get device token (FCM on Android when google-services.json is configured).
+  // Fallback to Expo push token if device token is not available.
+  let tokenData = null;
+  try {
+    tokenData = await Notifications.getDevicePushTokenAsync();
+  } catch (e) {
+    try {
+      tokenData = await Notifications.getExpoPushTokenAsync(projectId ? { projectId } : undefined);
+    } catch (ee) {
+      tokenData = null;
+    }
+  }
+  // tokenData may be { type: 'fcm'|'apns', data: '...' } or { token: '...' } depending on SDK
+  return tokenData?.data || tokenData?.token || null;
 }
 
 export async function enablePushForUser(userId) {
@@ -73,30 +83,46 @@ export async function enablePushForUser(userId) {
 }
 
 export async function savePushToken(userId, token) {
-  if (!userId || !token) return;
-  await supabase.from('push_tokens').delete().eq('user_id', userId).eq('platform', Platform.OS);
-  const { error } = await supabase.from('push_tokens').insert({
-    user_id: userId,
-    token,
-    platform: Platform.OS,
-    updated_at: new Date().toISOString(),
-  });
-  if (error) throw error;
+  if (!token) return;
+  try {
+    await fetch('/api/register-push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, token, platform: Platform.OS }),
+    });
+  } catch (e) {
+    console.warn('Failed to save push token to server:', e?.message || e);
+  }
 }
 
 export async function removePushToken(userId, token) {
-  if (!userId || !token) return;
-  await supabase.from('push_tokens').delete().eq('user_id', userId).eq('token', token);
+  if (!token) return;
+  try {
+    await fetch('/api/unregister-push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, token }),
+    });
+  } catch (e) {
+    console.warn('Failed to remove push token from server:', e?.message || e);
+  }
 }
 
 async function fetchTokensForUsers(userIds) {
   if (!userIds?.length) return [];
-  const { data, error } = await supabase
-    .from('push_tokens')
-    .select('token')
-    .in('user_id', userIds);
-  if (error) throw error;
-  return [...new Set((data || []).map((r) => r.token).filter(Boolean))];
+  try {
+    const res = await fetch('/api/get-tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userIds }),
+    });
+    if (!res.ok) throw new Error('API error');
+    const json = await res.json();
+    return Array.isArray(json.tokens) ? json.tokens : [];
+  } catch (e) {
+    console.warn('Failed to fetch tokens from server:', e?.message || e);
+    return [];
+  }
 }
 
 async function fetchAdminTokens() {
@@ -111,35 +137,18 @@ async function fetchSuperadminTokens() {
   return fetchTokensForUsers(admins.map((a) => a.id));
 }
 
-async function sendExpoPush(messages) {
-  if (!messages?.length) return;
-  for (let i = 0; i < messages.length; i += 100) {
-    const chunk = messages.slice(i, i + 100);
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Accept-encoding' : 'gzip, deflate',
-        'Content-Type' : 'application/json',
-      },
-      body: JSON.stringify(chunk),
-    });
-  }
-}
-
 async function notifyTokens(tokens, { title, body, data, channelId, priority, sound }) {
   if (!tokens.length) return;
-  await sendExpoPush(
-    tokens.map((to) => ({
-      to,
-      title,
-      body,
-      sound: sound || 'default',
-      priority: priority || 'high',
-      channelId: channelId || 'chat',
-      data: data || {},
-    }))
-  );
+  try {
+    // Use server-side FCM sender which expects { tokens, title, body, data }
+    await fetch('/api/send-push', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokens, title, body, data: data || {} }),
+    });
+  } catch (e) {
+    console.warn('Failed to send push via server:', e?.message || e);
+  }
 }
 
 export async function showLocalNotification({ title, body, data, channelId }) {
