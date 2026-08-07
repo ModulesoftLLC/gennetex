@@ -57,7 +57,12 @@ module.exports = async function handler(req, res) {
     const firebaseAdmin = initializeAdmin();
     
     if (!firebaseAdmin) {
-      console.error('[public-site] Firebase not configured');
+      console.warn('[public-site] Firebase not configured; returning fallback for GET');
+      // If Firebase isn't configured, let GET requests return an empty public-site payload
+      if (req.method === 'GET') {
+        return send(res, 200, { content: null, updatedAt: null, configured: false });
+      }
+      // For POST and other mutating requests, require Firebase and return 503
       return send(res, 503, {
         error: 'Сервер тохируулагдаагүй байна. FIREBASE_SERVICE_ACCOUNT_JSON хэрэгтэй.',
         configured: false,
