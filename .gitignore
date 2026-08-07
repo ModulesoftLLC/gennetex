@@ -23,3 +23,5 @@ public-web/dist/
 .aider*
 .vercel
 .env*
+/secrets/
+/google-services.json
