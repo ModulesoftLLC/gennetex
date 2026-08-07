@@ -174,3 +174,46 @@ export async function firebaseDeleteFile(path) {
     throw error;
   }
 }
+
+// Push token management (store tokens in Firestore for server-side FCM sends)
+export async function firebaseRegisterPushToken(userId, token) {
+  try {
+    const db = ensureDb();
+    if (!userId || !token) return null;
+    const id = `${userId}_${token}`;
+    await setDoc(doc(db, 'pushTokens', id), {
+      userId,
+      token,
+      createdAt: serverTimestamp(),
+    });
+    return { id, userId, token };
+  } catch (error) {
+    console.warn('Register push token failed:', error?.message || error);
+    throw error;
+  }
+}
+
+export async function firebaseUnregisterPushToken(userId, token) {
+  try {
+    const db = ensureDb();
+    if (!userId || !token) return null;
+    const id = `${userId}_${token}`;
+    await deleteDoc(doc(db, 'pushTokens', id));
+    return { id };
+  } catch (error) {
+    console.warn('Unregister push token failed:', error?.message || error);
+    throw error;
+  }
+}
+
+export async function firebaseGetTokensForUser(userId) {
+  try {
+    const db = ensureDb();
+    const q = query(collection(db, 'pushTokens'), where('userId', '==', userId));
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => d.data().token).filter(Boolean);
+  } catch (error) {
+    console.warn('Get tokens for user failed:', error?.message || error);
+    return [];
+  }
+}
